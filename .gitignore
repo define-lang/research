@@ -1,0 +1,9 @@
+/bazel-*
+/.venv/
+/node_modules/
+/.lake/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage*
+htmlcov/

@@ -1,0 +1,40 @@
+[project]
+name = "define-research"
+version = "0.0.1"
+description = "Archived research from the development of Define"
+requires-python = ">=3.14"
+dependencies = ["click>=8.5.0"]
+
+[dependency-groups]
+default = ["define-research"]
+dev = ["define-research", "basedpyright>=1.39.10", "coverage>=7", "pre-commit>=4.6.2", "pytest>=9", "ruff>=0.16.6"]
+
+[tool.ruff]
+extend-exclude = ["bazel-*", ".venv"]
+force-exclude = true
+
+[tool.ruff.lint]
+extend-select = ["W", "I", "N", "D", "UP", "C4", "B", "BLE", "FBT", "A", "S", "LOG", "G", "TCH", "ICN", "SIM", "PT", "YTT", "PIE", "RET", "ARG", "DTZ", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["define", "operation_graph_optimization"]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"**/*_test.py" = ["S101", "D100", "D101", "D102", "D103"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.basedpyright]
+include = ["operation_graph_optimization"]
+exclude = ["bazel-*", ".venv", "**/__pycache__"]
+extraPaths = ["bazel-bin/operation_graph_optimization/algorithm_integration_test.runfiles/define+"]
+
+[tool.pytest.ini_options]
+addopts = "--tb=short --no-header -q"
+junit_logging = "all"
+norecursedirs = ["bazel-*", ".venv"]
+
+[tool.coverage.run]
+branch = true

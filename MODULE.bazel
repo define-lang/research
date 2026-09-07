@@ -1,0 +1,62 @@
+module(
+    name = "define_research",
+    version = "0.0.1",
+)
+
+bazel_dep(name = "define", version = "0.0.1")
+bazel_dep(name = "aspect_rules_py", version = "2.0.0-alpha.6")
+bazel_dep(name = "rules_lean", version = "0.7.0")
+bazel_dep(name = "re2", version = "2025-11-05")
+
+git_override(
+    module_name = "define",
+    commit = "c2b03d0faa9dfc6ac12e6eee41538dcbb4afd583",
+    remote = "https://github.com/define-lang/define.git",
+)
+
+# Define's overrides must also be declared by its consumers.
+git_override(
+    module_name = "aspect_rules_py",
+    commit = "eaee1284c53204b14b008ed5d7d5173958614b94",
+    remote = "https://github.com/aspect-build/rules_py.git",
+)
+
+git_override(
+    module_name = "rules_lean",
+    commit = "e3b343ff799554a1e1a1d158d4a96eac5cdaa3ea",
+    remote = "https://github.com/tomato-bazel/rules_lean.git",
+)
+
+git_override(
+    module_name = "re2",
+    commit = "c2b03d0faa9dfc6ac12e6eee41538dcbb4afd583",
+    remote = "https://github.com/define-lang/define.git",
+    strip_prefix = "vendored/re2",
+)
+
+interpreters = use_extension("@aspect_rules_py//py:extensions.bzl", "python_interpreters")
+interpreters.configure(releases = ["20260901"])
+interpreters.toolchain(python_version = "3.14")
+use_repo(interpreters, "python_interpreters")
+
+register_toolchains("@python_interpreters//:all")
+
+pypi = use_extension("@aspect_rules_py//uv:extensions.bzl", "uv")
+pypi.declare_hub(hub_name = "research_pypi")
+pypi.project(
+    hub_name = "research_pypi",
+    lock = "//:uv.lock",
+    pyproject = "//:pyproject.toml",
+)
+use_repo(pypi, pypi = "research_pypi")
+
+lake = use_extension("@rules_lean//lean:lake.bzl", "lake")
+lake.workspace(
+    name = "research_lean",
+    lake_manifest = "//:lake-manifest.json",
+    lakefile = "//:lakefile.lean",
+    lean_toolchain = "//:lean-toolchain",
+)
+use_repo(lake, "research_lean")
+
+register_toolchains("@research_lean//:lean_toolchain_def")

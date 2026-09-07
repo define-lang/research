@@ -1,0 +1,5 @@
+build --verbose_failures
+test --test_output=errors
+build --@pypi//dep_group=dev
+common --@aspect_rules_py//py:python_version=3.14
+build --@aspect_rules_py//py/private/interpreter:freethreaded=true

@@ -1,0 +1,7 @@
+exports_files([
+    "lake-manifest.json",
+    "lakefile.lean",
+    "lean-toolchain",
+    "pyproject.toml",
+    "uv.lock",
+])

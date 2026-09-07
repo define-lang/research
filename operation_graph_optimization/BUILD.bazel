@@ -1,0 +1,105 @@
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_library", py_test = "py_pytest_test")
+load("@rules_lean//lean:lean.bzl", "lean_axiom_test", "lean_library")
+
+py_library(
+    name = "algorithm",
+    srcs = ["algorithm.py"],
+    deps = [":graph"],
+)
+
+py_test(
+    name = "algorithm_integration_test",
+    size = "small",
+    srcs = ["algorithm_integration_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":algorithm",
+        ":graph",
+        ":reference",
+        ":validation",
+        ":workloads",
+        "@define//define/compiler:driver",
+        "@pypi//pytest",
+    ],
+)
+
+py_binary(
+    name = "benchmark",
+    srcs = ["benchmark.py"],
+    deps = [
+        ":algorithm",
+        ":order_variants",
+        ":state_workloads",
+        ":validation",
+        ":workloads",
+        "@pypi//click",
+    ],
+)
+
+py_library(
+    name = "graph",
+    srcs = ["graph.py"],
+)
+
+py_library(
+    name = "order_variants",
+    srcs = ["order_variants.py"],
+    deps = [":algorithm"],
+)
+
+py_library(
+    name = "reference",
+    srcs = ["reference.py"],
+    deps = [":algorithm"],
+)
+
+lean_library(
+    name = "rule_equivalence",
+    srcs = ["rule_equivalence.lean"],
+)
+
+lean_axiom_test(
+    name = "rule_equivalence_axioms_test",
+    size = "small",
+    allowed_axioms = [],
+    imports = ["rule_equivalence"],
+    theorems = ["Define.OperationGraphOptimization.same_kept_of_covered"],
+    deps = [":rule_equivalence"],
+)
+
+py_library(
+    name = "state_workloads",
+    srcs = ["state_workloads.py"],
+    deps = [":algorithm"],
+)
+
+py_test(
+    name = "state_workloads_integration_test",
+    size = "small",
+    srcs = ["state_workloads_integration_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":algorithm",
+        ":order_variants",
+        ":reference",
+        ":state_workloads",
+        ":validation",
+        "@define//define/compiler:driver",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "validation",
+    srcs = ["validation.py"],
+    deps = [
+        ":algorithm",
+        ":graph",
+    ],
+)
+
+py_library(
+    name = "workloads",
+    srcs = ["workloads.py"],
+    deps = [":algorithm"],
+)
