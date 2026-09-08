@@ -42,6 +42,10 @@ class Reference:
         return occurrence
 
     def _record(self, operation: algorithm.Operation, occurrence: int):
+        # A retained position may have no accesses yet; its defining Create
+        # still supplies the prerequisite for its first use.
+        for position in operation.defines:
+            self.histories[position] = [(occurrence, True)]
         for position in operation.occupied:
             self.histories.setdefault(position, []).append((occurrence, False))
         for position in (operation.fill, operation.empty):

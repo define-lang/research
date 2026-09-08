@@ -1,5 +1,24 @@
 # Operation graph rule investigation
 
+## Vacate/Vanish combination experiment
+
+[Early combination](combination_experiments.md) tests skipping lifetime tracking
+when ordinary occupancy already orders every particle requirement before Vacate.
+It compares that shortcut with combination at finalization and with the explicit
+complete graph. The experimental implementation is `combination_algorithm.py`;
+the previous `complete/` deliverables remain unchanged.
+
+## Vanish follow-up
+
+[Vanish collection](vanish_rules.md) extends the investigation to particle
+lifetimes. The standalone result is [vanish_algorithm.py](vanish_algorithm.py);
+it shares the position graph without changing its dependencies. Competing
+strategies remain in [vanish.py](vanish.py). See
+[the experiments](vanish_experiments.md) for measurements, limitations, and
+reproduction commands. The historical results below do not include Vanish.
+
+## Position dependency investigation
+
 Start with [the rules](rules.md). The standalone implementation is
 [algorithm.py](algorithm.py); [graph.py](graph.py) supplies compact storage and
 bounded reachability indexing. Neither file uses the compiler's graph builder.
@@ -111,6 +130,16 @@ formal verification of the Python implementation.
 Validation outcomes for the current implementation are recorded with the
 follow-up experiments. Benchmark runs are separate from coverage and never time
 source generation, reordering, or execution checking as graph construction.
+
+## Complete graph follow-up
+
+[complete/](complete/) contains the standalone integrated algorithm and complete
+rules for Create, Move, Vacate, and Vanish. It supersedes the separate position
+algorithm plus Vanish collector as the recommended reference implementation.
+The earlier files and measurements remain historical research artifacts.
+
+[The integrated experiment report](integrated_experiments.md) compares complete
+construction time, memory, and graph equality across the alternatives.
 
 ## Meaning of optimality
 
