@@ -1,5 +1,12 @@
 # Operation graph rule investigation
 
+## Transitive destruction experiment
+
+[Destruction without transitive child Vacate nodes](transitive_destruction/README.md)
+investigates graph-node elimination, Destruction Contract representation, and
+construction-time trade-offs against early combination. This is an experimental
+model, not a replacement for the current specification or reference algorithm.
+
 ## Vacate/Vanish combination experiment
 
 [Early combination](combination_experiments.md) tests skipping lifetime tracking

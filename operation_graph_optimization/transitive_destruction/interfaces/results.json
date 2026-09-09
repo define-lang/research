@@ -1,0 +1,1234 @@
+{
+  "measurements": [
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 0,
+        "steps": 64,
+        "width": 32
+      },
+      "results": [
+        {
+          "analysis_nodes": 182,
+          "boundary_records": 88,
+          "boundary_references": 179,
+          "median_seconds": 0.002800574991852045,
+          "peak_bytes": 213171,
+          "runtime_edges": 242,
+          "runtime_nodes": 157,
+          "seconds": [
+            0.0029787591192871332,
+            0.002821205882355571,
+            0.0027914750389754772,
+            0.0027809450402855873,
+            0.0027773550245910883,
+            0.002800574991852045,
+            0.0028008760418742895
+          ],
+          "variant": "lowered"
+        },
+        {
+          "analysis_nodes": 157,
+          "boundary_records": 88,
+          "boundary_references": 179,
+          "median_seconds": 0.0023972890339791775,
+          "peak_bytes": 144288,
+          "runtime_edges": 242,
+          "runtime_nodes": 157,
+          "seconds": [
+            0.0023972890339791775,
+            0.002400588011369109,
+            0.0023904189001768827,
+            0.0023840388748794794,
+            0.002383737824857235,
+            0.002399428980425,
+            0.002420659177005291
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 182,
+          "boundary_records": 88,
+          "boundary_references": 179,
+          "median_seconds": 0.0024652699939906597,
+          "peak_bytes": 145531,
+          "runtime_edges": 297,
+          "runtime_nodes": 182,
+          "seconds": [
+            0.002513220999389887,
+            0.002460960065945983,
+            0.0024566298816353083,
+            0.0024620299227535725,
+            0.0024652699939906597,
+            0.0024834100622683764,
+            0.0024667701218277216
+          ],
+          "variant": "explicit"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 1,
+        "steps": 64,
+        "width": 32
+      },
+      "results": [
+        {
+          "analysis_nodes": 185,
+          "boundary_records": 88,
+          "boundary_references": 170,
+          "median_seconds": 0.0024971598759293556,
+          "peak_bytes": 147582,
+          "runtime_edges": 291,
+          "runtime_nodes": 185,
+          "seconds": [
+            0.0024971598759293556,
+            0.0024899698328226805,
+            0.0025029899552464485,
+            0.002531781094148755,
+            0.0024620098993182182,
+            0.0024693598970770836,
+            0.002527640899643302
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 160,
+          "boundary_records": 88,
+          "boundary_references": 170,
+          "median_seconds": 0.002499090973287821,
+          "peak_bytes": 145939,
+          "runtime_edges": 235,
+          "runtime_nodes": 160,
+          "seconds": [
+            0.002499090973287821,
+            0.00250886008143425,
+            0.0024781099054962397,
+            0.0025380009319633245,
+            0.002467670012265444,
+            0.0024658897891640663,
+            0.0025059308391064405
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 185,
+          "boundary_records": 88,
+          "boundary_references": 170,
+          "median_seconds": 0.0027965360786765814,
+          "peak_bytes": 214245,
+          "runtime_edges": 235,
+          "runtime_nodes": 160,
+          "seconds": [
+            0.0028448859229683876,
+            0.0027969051152467728,
+            0.0028976069297641516,
+            0.0027935549151152372,
+            0.002796255052089691,
+            0.0027884249575436115,
+            0.0027965360786765814
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 2,
+        "steps": 64,
+        "width": 32
+      },
+      "results": [
+        {
+          "analysis_nodes": 179,
+          "boundary_records": 88,
+          "boundary_references": 179,
+          "median_seconds": 0.002145994920283556,
+          "peak_bytes": 145393,
+          "runtime_edges": 299,
+          "runtime_nodes": 179,
+          "seconds": [
+            0.00221581500954926,
+            0.002145994920283556,
+            0.002149394014850259,
+            0.002135063987225294,
+            0.0021415140945464373,
+            0.002125804079696536,
+            0.0021892250515520573
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 154,
+          "boundary_records": 88,
+          "boundary_references": 179,
+          "median_seconds": 0.0021513348910957575,
+          "peak_bytes": 142974,
+          "runtime_edges": 237,
+          "runtime_nodes": 154,
+          "seconds": [
+            0.002158425049856305,
+            0.0021441851276904345,
+            0.0023031970486044884,
+            0.0021300341468304396,
+            0.0021351741161197424,
+            0.0022595759946852922,
+            0.0021513348910957575
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 179,
+          "boundary_records": 88,
+          "boundary_references": 179,
+          "median_seconds": 0.0024764109402894974,
+          "peak_bytes": 210585,
+          "runtime_edges": 237,
+          "runtime_nodes": 154,
+          "seconds": [
+            0.002491219900548458,
+            0.002478220034390688,
+            0.0024764109402894974,
+            0.0024471089709550142,
+            0.002436659997329116,
+            0.0038043209351599216,
+            0.0024580000899732113
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 0,
+        "steps": 64,
+        "width": 32
+      },
+      "results": [
+        {
+          "analysis_nodes": 182,
+          "boundary_records": 808,
+          "boundary_references": 1539,
+          "median_seconds": 0.00326324300840497,
+          "peak_bytes": 229439,
+          "runtime_edges": 242,
+          "runtime_nodes": 157,
+          "seconds": [
+            0.00326324300840497,
+            0.0032609920017421246,
+            0.003249602159485221,
+            0.003268253058195114,
+            0.003309492953121662,
+            0.003360494039952755,
+            0.0032430419232696295
+          ],
+          "variant": "lowered"
+        },
+        {
+          "analysis_nodes": 157,
+          "boundary_records": 808,
+          "boundary_references": 1539,
+          "median_seconds": 0.0028670558240264654,
+          "peak_bytes": 160940,
+          "runtime_edges": 242,
+          "runtime_nodes": 157,
+          "seconds": [
+            0.0028634059708565474,
+            0.002892246935516596,
+            0.002863447181880474,
+            0.0029271570965647697,
+            0.0028754458762705326,
+            0.0028670558240264654,
+            0.0028404758777469397
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 182,
+          "boundary_records": 808,
+          "boundary_references": 1539,
+          "median_seconds": 0.002960528014227748,
+          "peak_bytes": 161799,
+          "runtime_edges": 297,
+          "runtime_nodes": 182,
+          "seconds": [
+            0.003023409051820636,
+            0.0029270669911056757,
+            0.00298317801207304,
+            0.0029366069938987494,
+            0.0032760929316282272,
+            0.002960528014227748,
+            0.002907276852056384
+          ],
+          "variant": "explicit"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 1,
+        "steps": 64,
+        "width": 32
+      },
+      "results": [
+        {
+          "analysis_nodes": 185,
+          "boundary_records": 808,
+          "boundary_references": 1410,
+          "median_seconds": 0.0029820380732417107,
+          "peak_bytes": 164348,
+          "runtime_edges": 291,
+          "runtime_nodes": 185,
+          "seconds": [
+            0.002960297977551818,
+            0.0030017991084605455,
+            0.0030286088585853577,
+            0.002979628974571824,
+            0.0029820380732417107,
+            0.0030107388738542795,
+            0.002947328146547079
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 160,
+          "boundary_records": 808,
+          "boundary_references": 1410,
+          "median_seconds": 0.0029590080957859755,
+          "peak_bytes": 163089,
+          "runtime_edges": 235,
+          "runtime_nodes": 160,
+          "seconds": [
+            0.003051578998565674,
+            0.002956547075882554,
+            0.0031069398391991854,
+            0.0029714980628341436,
+            0.0029590080957859755,
+            0.0029535379726439714,
+            0.0029348968528211117
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 185,
+          "boundary_records": 808,
+          "boundary_references": 1410,
+          "median_seconds": 0.003287222934886813,
+          "peak_bytes": 231011,
+          "runtime_edges": 235,
+          "runtime_nodes": 160,
+          "seconds": [
+            0.0033630039542913437,
+            0.0033034528605639935,
+            0.003362123854458332,
+            0.003283653175458312,
+            0.003287222934886813,
+            0.003277373034507036,
+            0.003261513076722622
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 2,
+        "steps": 64,
+        "width": 32
+      },
+      "results": [
+        {
+          "analysis_nodes": 179,
+          "boundary_records": 808,
+          "boundary_references": 1539,
+          "median_seconds": 0.002630482893437147,
+          "peak_bytes": 160779,
+          "runtime_edges": 299,
+          "runtime_nodes": 179,
+          "seconds": [
+            0.0027266149409115314,
+            0.002762475050985813,
+            0.0026128320023417473,
+            0.0026193929370492697,
+            0.0026297320146113634,
+            0.002732575172558427,
+            0.002630482893437147
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 154,
+          "boundary_records": 808,
+          "boundary_references": 1539,
+          "median_seconds": 0.00265176291577518,
+          "peak_bytes": 158552,
+          "runtime_edges": 237,
+          "runtime_nodes": 154,
+          "seconds": [
+            0.0026576730888336897,
+            0.00265176291577518,
+            0.00263180211186409,
+            0.0027381540276110172,
+            0.0026235729455947876,
+            0.0026535429060459137,
+            0.002612961921840906
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 179,
+          "boundary_records": 808,
+          "boundary_references": 1539,
+          "median_seconds": 0.002966508036479354,
+          "peak_bytes": 225971,
+          "runtime_edges": 237,
+          "runtime_nodes": 154,
+          "seconds": [
+            0.002966508036479354,
+            0.003017578972503543,
+            0.0031068800017237663,
+            0.002958507975563407,
+            0.0029520178213715553,
+            0.0029829179402440786,
+            0.002933997893705964
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 0,
+        "steps": 512,
+        "width": 256
+      },
+      "results": [
+        {
+          "analysis_nodes": 1317,
+          "boundary_records": 648,
+          "boundary_references": 1371,
+          "median_seconds": 0.014815140049904585,
+          "peak_bytes": 1598873,
+          "runtime_edges": 1851,
+          "runtime_nodes": 1124,
+          "seconds": [
+            0.014777980046346784,
+            0.014864641008898616,
+            0.014874181943014264,
+            0.014883131021633744,
+            0.014804570004343987,
+            0.014815140049904585,
+            0.014760978985577822
+          ],
+          "variant": "lowered"
+        },
+        {
+          "analysis_nodes": 1124,
+          "boundary_records": 648,
+          "boundary_references": 1371,
+          "median_seconds": 0.01237370097078383,
+          "peak_bytes": 1081943,
+          "runtime_edges": 1851,
+          "runtime_nodes": 1124,
+          "seconds": [
+            0.012329218909144402,
+            0.012395441066473722,
+            0.012410050956532359,
+            0.012389130890369415,
+            0.01237370097078383,
+            0.012332378886640072,
+            0.01230966905131936
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 1317,
+          "boundary_records": 648,
+          "boundary_references": 1371,
+          "median_seconds": 0.012593383900821209,
+          "peak_bytes": 1107039,
+          "runtime_edges": 2308,
+          "runtime_nodes": 1317,
+          "seconds": [
+            0.012587834848091006,
+            0.012650134973227978,
+            0.012675466015934944,
+            0.0131819739472121,
+            0.012593383900821209,
+            0.012554353103041649,
+            0.012561774114146829
+          ],
+          "variant": "explicit"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 1,
+        "steps": 512,
+        "width": 256
+      },
+      "results": [
+        {
+          "analysis_nodes": 1344,
+          "boundary_records": 648,
+          "boundary_references": 1371,
+          "median_seconds": 0.013077412033453584,
+          "peak_bytes": 1126314,
+          "runtime_edges": 2361,
+          "runtime_nodes": 1344,
+          "seconds": [
+            0.013003000989556313,
+            0.013435576809570193,
+            0.012971199816092849,
+            0.013077412033453584,
+            0.013147532939910889,
+            0.013009320944547653,
+            0.01314923306927085
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 1151,
+          "boundary_records": 648,
+          "boundary_references": 1371,
+          "median_seconds": 0.012901708949357271,
+          "peak_bytes": 1104792,
+          "runtime_edges": 1903,
+          "runtime_nodes": 1151,
+          "seconds": [
+            0.01291509997099638,
+            0.012813996989279985,
+            0.012901708949357271,
+            0.012828458100557327,
+            0.01300015114247799,
+            0.012869458878412843,
+            0.012948099989444017
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 1344,
+          "boundary_records": 648,
+          "boundary_references": 1371,
+          "median_seconds": 0.015398880001157522,
+          "peak_bytes": 1628916,
+          "runtime_edges": 1903,
+          "runtime_nodes": 1151,
+          "seconds": [
+            0.015376169001683593,
+            0.015502620954066515,
+            0.015398880001157522,
+            0.015554092125967145,
+            0.015412080101668835,
+            0.015282036969438195,
+            0.015350909205153584
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 2,
+        "steps": 512,
+        "width": 256
+      },
+      "results": [
+        {
+          "analysis_nodes": 1369,
+          "boundary_records": 648,
+          "boundary_references": 1341,
+          "median_seconds": 0.013350635999813676,
+          "peak_bytes": 1135523,
+          "runtime_edges": 2360,
+          "runtime_nodes": 1369,
+          "seconds": [
+            0.01326844491995871,
+            0.013222443871200085,
+            0.013536110054701567,
+            0.013536369893699884,
+            0.013959256000816822,
+            0.013350635999813676,
+            0.013302264967933297
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 1176,
+          "boundary_records": 648,
+          "boundary_references": 1341,
+          "median_seconds": 0.013313165865838528,
+          "peak_bytes": 1117055,
+          "runtime_edges": 1915,
+          "runtime_nodes": 1176,
+          "seconds": [
+            0.013313165865838528,
+            0.013208864023908973,
+            0.013419998111203313,
+            0.013320466037839651,
+            0.01340605691075325,
+            0.013305715983733535,
+            0.013203084003180265
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 1369,
+          "boundary_records": 648,
+          "boundary_references": 1341,
+          "median_seconds": 0.015813805861398578,
+          "peak_bytes": 1709813,
+          "runtime_edges": 1915,
+          "runtime_nodes": 1176,
+          "seconds": [
+            0.015813805861398578,
+            0.015684914076700807,
+            0.015727245016023517,
+            0.01591741805896163,
+            0.015847146976739168,
+            0.01593621913343668,
+            0.015788625925779343
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 0,
+        "steps": 512,
+        "width": 256
+      },
+      "results": [
+        {
+          "analysis_nodes": 1317,
+          "boundary_records": 5848,
+          "boundary_references": 11531,
+          "median_seconds": 0.018153004115447402,
+          "peak_bytes": 1669701,
+          "runtime_edges": 1851,
+          "runtime_nodes": 1124,
+          "seconds": [
+            0.017945951083675027,
+            0.018022512085735798,
+            0.01871989294886589,
+            0.01809117291122675,
+            0.018153004115447402,
+            0.018206574954092503,
+            0.018170144874602556
+          ],
+          "variant": "lowered"
+        },
+        {
+          "analysis_nodes": 1124,
+          "boundary_records": 5848,
+          "boundary_references": 11531,
+          "median_seconds": 0.015659273834899068,
+          "peak_bytes": 1152771,
+          "runtime_edges": 1851,
+          "runtime_nodes": 1124,
+          "seconds": [
+            0.015551932156085968,
+            0.015545912086963654,
+            0.015679083997383714,
+            0.015659273834899068,
+            0.01567036402411759,
+            0.01571990502998233,
+            0.015624253079295158
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 1317,
+          "boundary_records": 5848,
+          "boundary_references": 11531,
+          "median_seconds": 0.01587045704945922,
+          "peak_bytes": 1177867,
+          "runtime_edges": 2308,
+          "runtime_nodes": 1317,
+          "seconds": [
+            0.015766584780067205,
+            0.016055420972406864,
+            0.015897026984021068,
+            0.01584280701354146,
+            0.01587045704945922,
+            0.016004520002752542,
+            0.015867247013375163
+          ],
+          "variant": "explicit"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 1,
+        "steps": 512,
+        "width": 256
+      },
+      "results": [
+        {
+          "analysis_nodes": 1344,
+          "boundary_records": 5848,
+          "boundary_references": 11531,
+          "median_seconds": 0.016270044026896358,
+          "peak_bytes": 1203352,
+          "runtime_edges": 2361,
+          "runtime_nodes": 1344,
+          "seconds": [
+            0.016308194026350975,
+            0.01621975307352841,
+            0.016362654976546764,
+            0.016270044026896358,
+            0.01621166313998401,
+            0.01624595304019749,
+            0.016612648963928223
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 1151,
+          "boundary_records": 5848,
+          "boundary_references": 11531,
+          "median_seconds": 0.01623610290698707,
+          "peak_bytes": 1181830,
+          "runtime_edges": 1903,
+          "runtime_nodes": 1151,
+          "seconds": [
+            0.01623610290698707,
+            0.016352575039491057,
+            0.016096560982987285,
+            0.01611422118730843,
+            0.01608106098137796,
+            0.016505967127159238,
+            0.016538358060643077
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 1344,
+          "boundary_records": 5848,
+          "boundary_references": 11531,
+          "median_seconds": 0.018605672055855393,
+          "peak_bytes": 1705954,
+          "runtime_edges": 1903,
+          "runtime_nodes": 1151,
+          "seconds": [
+            0.01856508105993271,
+            0.018694323021918535,
+            0.018540331162512302,
+            0.01857637008652091,
+            0.018605672055855393,
+            0.019077068893238902,
+            0.019108480075374246
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 2,
+        "steps": 512,
+        "width": 256
+      },
+      "results": [
+        {
+          "analysis_nodes": 1369,
+          "boundary_records": 5848,
+          "boundary_references": 11101,
+          "median_seconds": 0.01655388786457479,
+          "peak_bytes": 1218311,
+          "runtime_edges": 2360,
+          "runtime_nodes": 1369,
+          "seconds": [
+            0.01656311796978116,
+            0.016577868023887277,
+            0.01648261700756848,
+            0.016452966956421733,
+            0.01655388786457479,
+            0.01646673702634871,
+            0.01660440885461867
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 1176,
+          "boundary_records": 5848,
+          "boundary_references": 11101,
+          "median_seconds": 0.016476687043905258,
+          "peak_bytes": 1199843,
+          "runtime_edges": 1915,
+          "runtime_nodes": 1176,
+          "seconds": [
+            0.01667954004369676,
+            0.01649378682486713,
+            0.01639074506238103,
+            0.01654649805277586,
+            0.016416406026110053,
+            0.016375885112211108,
+            0.016476687043905258
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 1369,
+          "boundary_records": 5848,
+          "boundary_references": 11101,
+          "median_seconds": 0.019038937985897064,
+          "peak_bytes": 1792601,
+          "runtime_edges": 1915,
+          "runtime_nodes": 1176,
+          "seconds": [
+            0.01934770285151899,
+            0.018849684856832027,
+            0.019120729994028807,
+            0.019038937985897064,
+            0.01912613003514707,
+            0.018822744954377413,
+            0.01897972682490945
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 0,
+        "steps": 4096,
+        "width": 2048
+      },
+      "results": [
+        {
+          "analysis_nodes": 10810,
+          "boundary_records": 5128,
+          "boundary_references": 10904,
+          "median_seconds": 0.12386458599939942,
+          "peak_bytes": 13536100,
+          "runtime_edges": 15615,
+          "runtime_nodes": 9273,
+          "seconds": [
+            0.12386458599939942,
+            0.1243214150890708,
+            0.12400523899123073,
+            0.1233301181346178,
+            0.1256263148970902,
+            0.12338425894267857,
+            0.12320375582203269
+          ],
+          "variant": "lowered"
+        },
+        {
+          "analysis_nodes": 9273,
+          "boundary_records": 5128,
+          "boundary_references": 10904,
+          "median_seconds": 0.10396431502886117,
+          "peak_bytes": 9036335,
+          "runtime_edges": 15615,
+          "runtime_nodes": 9273,
+          "seconds": [
+            0.10475453711114824,
+            0.10453914408572018,
+            0.10396431502886117,
+            0.10349362692795694,
+            0.10515524400398135,
+            0.10362236900255084,
+            0.10302847903221846
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 10810,
+          "boundary_records": 5128,
+          "boundary_references": 10904,
+          "median_seconds": 0.10435667098499835,
+          "peak_bytes": 9302363,
+          "runtime_edges": 19269,
+          "runtime_nodes": 10810,
+          "seconds": [
+            0.1066903779283166,
+            0.10608027898706496,
+            0.1037796619348228,
+            0.10404741601087153,
+            0.10590835590846837,
+            0.10435667098499835,
+            0.10357835795730352
+          ],
+          "variant": "explicit"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 1,
+        "steps": 4096,
+        "width": 2048
+      },
+      "results": [
+        {
+          "analysis_nodes": 10831,
+          "boundary_records": 5128,
+          "boundary_references": 10925,
+          "median_seconds": 0.10686046187765896,
+          "peak_bytes": 9313575,
+          "runtime_edges": 19333,
+          "runtime_nodes": 10831,
+          "seconds": [
+            0.10621939110569656,
+            0.10606191796250641,
+            0.10643236408941448,
+            0.10686046187765896,
+            0.10754676186479628,
+            0.10718535701744258,
+            0.10773169598542154
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 9294,
+          "boundary_records": 5128,
+          "boundary_references": 10925,
+          "median_seconds": 0.10632966295816004,
+          "peak_bytes": 9047348,
+          "runtime_edges": 15667,
+          "runtime_nodes": 9294,
+          "seconds": [
+            0.10632966295816004,
+            0.10596173699013889,
+            0.10604907805100083,
+            0.10600413801148534,
+            0.1072398480027914,
+            0.10744783096015453,
+            0.10786248790100217
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 10831,
+          "boundary_records": 5128,
+          "boundary_references": 10925,
+          "median_seconds": 0.12780056078918278,
+          "peak_bytes": 13559246,
+          "runtime_edges": 15667,
+          "runtime_nodes": 9294,
+          "seconds": [
+            0.12780056078918278,
+            0.1270630278158933,
+            0.12666414305567741,
+            0.12890277802944183,
+            0.12814396689645946,
+            0.1268346149008721,
+            0.1291673129890114
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 0,
+        "repeat": 7,
+        "seed": 2,
+        "steps": 4096,
+        "width": 2048
+      },
+      "results": [
+        {
+          "analysis_nodes": 10670,
+          "boundary_records": 5128,
+          "boundary_references": 10982,
+          "median_seconds": 0.10244153998792171,
+          "peak_bytes": 9223797,
+          "runtime_edges": 19051,
+          "runtime_nodes": 10670,
+          "seconds": [
+            0.10328658297657967,
+            0.10322695202194154,
+            0.10235469788312912,
+            0.10244153998792171,
+            0.1043963220436126,
+            0.10173420794308186,
+            0.10183212999254465
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 9133,
+          "boundary_records": 5128,
+          "boundary_references": 10982,
+          "median_seconds": 0.10242479899898171,
+          "peak_bytes": 8957285,
+          "runtime_edges": 15367,
+          "runtime_nodes": 9133,
+          "seconds": [
+            0.10279799601994455,
+            0.10280455485917628,
+            0.10183698078617454,
+            0.10311504011042416,
+            0.10242479899898171,
+            0.10197668196633458,
+            0.10232364782132208
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 10670,
+          "boundary_records": 5128,
+          "boundary_references": 10982,
+          "median_seconds": 0.12118704384192824,
+          "peak_bytes": 13390985,
+          "runtime_edges": 15367,
+          "runtime_nodes": 9133,
+          "seconds": [
+            0.1231821661349386,
+            0.12086613778956234,
+            0.12083680811338127,
+            0.12208226812072098,
+            0.12214306881651282,
+            0.1210206609684974,
+            0.12118704384192824
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 0,
+        "steps": 4096,
+        "width": 2048
+      },
+      "results": [
+        {
+          "analysis_nodes": 10810,
+          "boundary_records": 46168,
+          "boundary_references": 91424,
+          "median_seconds": 0.14977113716304302,
+          "peak_bytes": 14107988,
+          "runtime_edges": 15615,
+          "runtime_nodes": 9273,
+          "seconds": [
+            0.15098699601367116,
+            0.15031752502545714,
+            0.14957376313395798,
+            0.14899841486476362,
+            0.1487660901620984,
+            0.1503572859801352,
+            0.14977113716304302
+          ],
+          "variant": "lowered"
+        },
+        {
+          "analysis_nodes": 9273,
+          "boundary_records": 46168,
+          "boundary_references": 91424,
+          "median_seconds": 0.129355306038633,
+          "peak_bytes": 9641683,
+          "runtime_edges": 15615,
+          "runtime_nodes": 9273,
+          "seconds": [
+            0.13047783402726054,
+            0.12909321207553148,
+            0.1292247441597283,
+            0.12905057100579143,
+            0.129355306038633,
+            0.1311373650096357,
+            0.1303739829454571
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 10810,
+          "boundary_records": 46168,
+          "boundary_references": 91424,
+          "median_seconds": 0.1298097928520292,
+          "peak_bytes": 9907711,
+          "runtime_edges": 19269,
+          "runtime_nodes": 10810,
+          "seconds": [
+            0.13135997904464602,
+            0.12907142098993063,
+            0.1298097928520292,
+            0.12933814502321184,
+            0.1318849769886583,
+            0.12971987295895815,
+            0.1301475279033184
+          ],
+          "variant": "explicit"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 1,
+        "steps": 4096,
+        "width": 2048
+      },
+      "results": [
+        {
+          "analysis_nodes": 10831,
+          "boundary_records": 46168,
+          "boundary_references": 91725,
+          "median_seconds": 0.13417214411310852,
+          "peak_bytes": 9923753,
+          "runtime_edges": 19333,
+          "runtime_nodes": 10831,
+          "seconds": [
+            0.13417214411310852,
+            0.13432243699207902,
+            0.13319249800406396,
+            0.13665773393586278,
+            0.13288998301140964,
+            0.1329578240402043,
+            0.13498396682552993
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 9294,
+          "boundary_records": 46168,
+          "boundary_references": 91725,
+          "median_seconds": 0.13299073511734605,
+          "peak_bytes": 9657526,
+          "runtime_edges": 15667,
+          "runtime_nodes": 9294,
+          "seconds": [
+            0.13296705414541066,
+            0.13299675495363772,
+            0.1331709970254451,
+            0.13339065108448267,
+            0.13276969199068844,
+            0.13274815096519887,
+            0.13299073511734605
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 10831,
+          "boundary_records": 46168,
+          "boundary_references": 91725,
+          "median_seconds": 0.15320167201571167,
+          "peak_bytes": 14169424,
+          "runtime_edges": 15667,
+          "runtime_nodes": 9294,
+          "seconds": [
+            0.1545151739846915,
+            0.15444287192076445,
+            0.15320167201571167,
+            0.152746784966439,
+            0.15302475006319582,
+            0.1536015688907355,
+            0.15299622900784016
+          ],
+          "variant": "lowered"
+        }
+      ]
+    },
+    {
+      "arguments": {
+        "depth": 20,
+        "repeat": 7,
+        "seed": 2,
+        "steps": 4096,
+        "width": 2048
+      },
+      "results": [
+        {
+          "analysis_nodes": 10670,
+          "boundary_records": 46168,
+          "boundary_references": 92542,
+          "median_seconds": 0.12851701211184263,
+          "peak_bytes": 9796945,
+          "runtime_edges": 19051,
+          "runtime_nodes": 10670,
+          "seconds": [
+            0.12851753318682313,
+            0.12851701211184263,
+            0.12852502311579883,
+            0.1284093800932169,
+            0.1286023729480803,
+            0.12849847204051912,
+            0.12847901205532253
+          ],
+          "variant": "explicit"
+        },
+        {
+          "analysis_nodes": 9133,
+          "boundary_records": 46168,
+          "boundary_references": 92542,
+          "median_seconds": 0.12897236901335418,
+          "peak_bytes": 9530433,
+          "runtime_edges": 15367,
+          "runtime_nodes": 9133,
+          "seconds": [
+            0.12897236901335418,
+            0.1285154519136995,
+            0.1290578709449619,
+            0.12901053996756673,
+            0.12880228692665696,
+            0.12917132303118706,
+            0.1285827939864248
+          ],
+          "variant": "records"
+        },
+        {
+          "analysis_nodes": 10670,
+          "boundary_records": 46168,
+          "boundary_references": 92542,
+          "median_seconds": 0.14806245896033943,
+          "peak_bytes": 13964133,
+          "runtime_edges": 15367,
+          "runtime_nodes": 9133,
+          "seconds": [
+            0.1494346719700843,
+            0.14775853394530714,
+            0.14817307004705071,
+            0.14782046480104327,
+            0.14806245896033943,
+            0.1481225600000471,
+            0.147898456081748
+          ],
+          "variant": "lowered"
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "compiler.py": "\"\"\"Derive contract interfaces from action descriptions and resolved position state.\"\"\"\n\nfrom __future__ import annotations\n\nimport dataclasses\nfrom typing import Literal, final\n\nfrom operation_graph_optimization import algorithm as position_algorithm\nfrom operation_graph_optimization import vanish_workloads\nfrom operation_graph_optimization.complete import algorithm, graph\nfrom operation_graph_optimization.transitive_destruction.interfaces import descriptions\n\ntype Variant = Literal[\"explicit\", \"lowered\", \"records\"]\n\n\n@dataclasses.dataclass(frozen=True)\nclass Template:\n    \"\"\"A caller-independent action recipe and mechanically derived interface.\"\"\"\n\n    action: descriptions.Action\n    positions: tuple[int, ...]\n    callees: tuple[Template, ...]\n\n\ndef compile_action(action: descriptions.Action) -> Template:\n    \"\"\"Derive the position interface, never selecting producer operations by hand.\"\"\"\n    compiled: dict[int, Template] = {}\n\n    def visit(current: descriptions.Action) -> Template:\n        identity = id(current)\n        if identity in compiled:\n            return compiled[identity]\n        known = set(current.known)\n        callees: list[Template] = []\n        for statement in current.statements:\n            if isinstance(statement, descriptions.Call):\n                callee = visit(statement.action)\n                callees.append(callee)\n                known.update(callee.positions)\n        template = Template(current, tuple(sorted(known)), tuple(callees))\n        compiled[identity] = template\n        return template\n\n    return visit(action)\n\n\n@dataclasses.dataclass\nclass Position:\n    \"\"\"The state needed by Collection, distinct from any child Vacate.\"\"\"\n\n    setter: int | None\n    parent: int | None = None\n    occupant: int | None = None\n    readers: set[int] = dataclasses.field(default_factory=set)\n\n    def copy(self) -> Position:\n        \"\"\"Keep destruction-time state independent from later ordinary vacancy.\"\"\"\n        return Position(self.setter, self.parent, self.occupant, self.readers.copy())\n\n\n@dataclasses.dataclass\nclass Particle:\n    \"\"\"Known assigned positions and the requirements needed to finish its Vanish.\"\"\"\n\n    children: tuple[int, ...]\n    uses: set[int]\n    moved: int | None\n\n\n@dataclasses.dataclass\nclass Contract:\n    \"\"\"Position-specific state plus optional explicit child Vacate identities.\"\"\"\n\n    positions: dict[int, Position]\n    selected: dict[int, int]\n    particles: dict[int, Particle]\n    vacates: dict[int, int] = dataclasses.field(default_factory=dict)\n    requirements: dict[int, set[int]] = dataclasses.field(default_factory=dict)\n\n    def incorporate(self, callee: Contract):\n        \"\"\"Combine caller-only facts with the direct callee's destruction state.\"\"\"\n        self.positions.update(callee.positions)\n        self.selected.update(callee.selected)\n        self.vacates.update(callee.vacates)\n        self.requirements.update(callee.requirements)\n        for particle, information in callee.particles.items():\n            prior = self.particles.get(particle)\n            if prior is None:\n                self.particles[particle] = information\n            else:\n                children = tuple(\n                    sorted(set(prior.children) | set(information.children))\n                )\n                moved = (\n                    information.moved if information.moved is not None else prior.moved\n                )\n                self.particles[particle] = Particle(\n                    children, prior.uses | information.uses, moved\n                )\n\n\n@dataclasses.dataclass\nclass Result:\n    \"\"\"Measured graphs, interface counts, and independently resolvable oracle input.\"\"\"\n\n    graph: graph.Graph\n    labels: list[str]\n    children: set[int]\n    steps: list[vanish_workloads.Step]\n    step_labels: list[str]\n    retentions: dict[int, dict[int, int]]\n    vacates: dict[int, int]\n    vanishes: dict[int, int]\n    contract: Contract\n    template: Template\n    analysis_nodes: int\n    boundary_records: int\n    boundary_references: int\n\n\n@final\nclass Builder:\n    \"\"\"Bind local recipes to position records and apply Collection and Comparison.\"\"\"\n\n    def __init__(self, variant: Variant):\n        \"\"\"Keep identical semantic processing across the three interface choices.\"\"\"\n        self.variant = variant\n        self.graph = graph.Graph()\n        self.labels: list[str] = []\n        self.positions: dict[int, Position] = {0: Position(None)}\n        self.children: dict[int, tuple[int, ...]] = {}\n        self.uses: dict[int, set[int]] = {}\n        self.moves: dict[int, int] = {}\n        self.vacates: dict[int, int] = {}\n        self.selection_requirements: dict[int, set[int]] = {}\n        self.child_nodes: set[int] = set()\n        self.steps: list[vanish_workloads.Step] = []\n        self.step_labels: list[str] = []\n        self.operation_to_step: dict[int, int] = {}\n        self.retentions: dict[int, dict[int, int]] = {}\n        self.retained: dict[int, int] = {}\n        self.direct_step: int | None = None\n        self.boundary_records = 0\n        self.boundary_references = 0\n\n    def append(self, label: str, candidates: set[int]) -> int:\n        \"\"\"Apply the existing Comparison rule before constructing this node.\"\"\"\n        operation = self.graph.append(algorithm.compare(self.graph, candidates))\n        self.labels.append(label)\n        return operation\n\n    def operation(\n        self,\n        statement: descriptions.Create | descriptions.Move | descriptions.Select,\n        states: dict[int, Position],\n        label: str,\n        *,\n        destructor: bool = False,\n    ) -> int:\n        \"\"\"Derive actual requirements from references, not from supplied edges.\"\"\"\n        source = (\n            None if isinstance(statement, descriptions.Create) else statement.source\n        )\n        target = (\n            None if isinstance(statement, descriptions.Select) else statement.target\n        )\n        references: list[descriptions.Reference] = []\n        if source is not None:\n            references.append(source)\n        if target is not None:\n            references.append(target)\n        intermediates: set[int] = set()\n        parents: set[int] = set()\n        for reference in references:\n            intermediates.update(reference.intermediate)\n            for position in (*reference.intermediate, reference.position):\n                parent = states[position].parent\n                if parent is not None:\n                    parents.add(parent)\n            for position in reference.intermediate:\n                if states[position].occupant is None:\n                    raise ValueError(\n                        \"Reference requires an occupied intermediate position\"\n                    )\n        candidates = set(parents)\n        for position in intermediates:\n            setter = states[position].setter\n            if setter is not None:\n                candidates.add(setter)\n        if target is not None:\n            state = states[target.position]\n            if state.occupant is not None:\n                raise ValueError(\"Target must be empty\")\n            if state.setter is not None:\n                candidates.add(state.setter)\n        moved = None\n        if source is not None:\n            state = states[source.position]\n            if state.occupant is None:\n                raise ValueError(\"Source must be occupied\")\n            moved = state.occupant\n            if state.readers:\n                candidates.update(state.readers)\n            elif state.setter is not None:\n                candidates.add(state.setter)\n        occurrence = self.append(label, candidates)\n        self.operation_to_step[occurrence] = len(self.steps)\n        observed = tuple(states[p].occupant for p in sorted(intermediates))\n        for parent in parents:\n            uses = self.uses.setdefault(parent, set())\n            uses.difference_update(candidates)\n            uses.add(occurrence)\n        for position in intermediates:\n            states[position].readers.difference_update(candidates)\n            states[position].readers.add(occurrence)\n        if source is not None:\n            state = states[source.position]\n            state.occupant = None\n            state.setter = occurrence\n            state.readers.clear()\n        if target is not None:\n            state = states[target.position]\n            state.occupant = occurrence if moved is None else moved\n            state.setter = occurrence\n            state.readers.clear()\n        defines = ()\n        if isinstance(statement, descriptions.Create):\n            defines = statement.children\n            self.children[occurrence] = defines\n            for position in defines:\n                states[position] = Position(occurrence, occurrence)\n        if isinstance(statement, descriptions.Move):\n            assert moved is not None  # noqa: S101 - Move requires a particle.\n            self.moves[moved] = occurrence\n        if isinstance(statement, descriptions.Select):\n            assert moved is not None  # noqa: S101 - Selection requires a particle.\n            self.vacates[moved] = occurrence\n        aliases = self.retained if destructor else {}\n        occupied_steps: list[int] = []\n        for particle in observed:\n            assert particle is not None  # noqa: S101 - References checked above.\n            occupied_steps.append(self.operation_to_step[particle])\n        creators = tuple(self.operation_to_step[parent] for parent in parents)\n        empty = (\n            None if source is None else aliases.get(source.position, source.position)\n        )\n        fill = None if target is None else aliases.get(target.position, target.position)\n        vacated = (\n            self.operation_to_step[moved]\n            if isinstance(statement, descriptions.Select) and moved is not None\n            else None\n        )\n        moved_step = (\n            self.operation_to_step[moved]\n            if isinstance(statement, descriptions.Move) and moved is not None\n            else None\n        )\n        self.steps.append(\n            vanish_workloads.Step(\n                position_algorithm.Operation(\n                    occupied=tuple(aliases.get(p, p) for p in sorted(intermediates)),\n                    fill=fill,\n                    empty=empty,\n                    creators=creators,\n                    defines=defines,\n                ),\n                creators,\n                vacated,\n                moved_step,\n                tuple(occupied_steps),\n            )\n        )\n        self.step_labels.append(label)\n        return occurrence\n\n    def capture(self, template: Template, states: dict[int, Position]) -> Contract:\n        \"\"\"Expose all known position facts rather than guessing future consumers.\"\"\"\n        records: dict[int, Position] = {}\n        required: set[int] = set()\n        for position in template.positions:\n            state = states[position]\n            records[position] = state.copy()\n            if state.parent is not None:\n                required.add(state.parent)\n            if state.occupant is not None:\n                required.add(state.occupant)\n            self.boundary_references += len(state.readers) + (state.setter is not None)\n        particles: dict[int, Particle] = {}\n        for particle in required:\n            children = tuple(p for p in self.children[particle] if p in records)\n            uses = self.uses.get(particle, set()).copy()\n            moved = self.moves.get(particle)\n            particles[particle] = Particle(children, uses, moved)\n            self.boundary_references += len(uses) + (moved is not None)\n        self.boundary_records += len(records) + len(particles)\n        return Contract(records, {}, particles)\n\n    def execute(\n        self,\n        template: Template,\n        states: dict[int, Position],\n        *,\n        destructor: bool = False,\n        path: str = \"\",\n    ) -> Contract | None:\n        \"\"\"Use only the direct callee's returned records at each call boundary.\"\"\"\n        contract = None\n        callees = iter(template.callees)\n        for index, statement in enumerate(template.action.statements):\n            label = f\"{path}{template.action.name}.{index}\"\n            if isinstance(statement, descriptions.Call):\n                callee = next(callees)\n                supplied = {p: states[p] for p in callee.positions}\n                contract = self.execute(\n                    callee, supplied, destructor=destructor, path=label + \"/\"\n                )\n                states.update(supplied)\n                if contract is not None:\n                    expanded = self.capture(template, states)\n                    expanded.incorporate(contract)\n                    contract = expanded\n            elif isinstance(statement, descriptions.Select):\n                contract = self.capture(template, states)\n                self.select(statement, states, label, contract)\n            else:\n                _ = self.operation(statement, states, label, destructor=destructor)\n        return contract\n\n    def select(\n        self,\n        statement: descriptions.Select,\n        states: dict[int, Position],\n        label: str,\n        contract: Contract,\n    ):\n        \"\"\"Keep original occupancy available for destructor contract resolution.\"\"\"\n        position = statement.source.position\n        particle = states[position].occupant\n        assert particle is not None  # noqa: S101 - Valid selection.\n        contract.selected[position] = particle\n        vacate = self.operation(statement, states, label)\n        contract.vacates[particle] = vacate\n        self.direct_step = self.operation_to_step[vacate]\n        self.expand_selection(contract)\n\n    def expand_selection(self, contract: Contract):\n        \"\"\"Resolve precisely the child positions known at this contract boundary.\"\"\"\n        pending = list(contract.selected.values())\n        selected = dict(contract.selected)\n        while pending:\n            particle = pending.pop()\n            for position in contract.particles[particle].children:\n                child = contract.positions[position].occupant\n                if child is not None and position not in selected:\n                    selected[position] = child\n                    pending.append(child)\n        contract.selected = selected\n        for position, particle in selected.items():\n            if particle in contract.vacates or particle in contract.requirements:\n                continue\n            state = contract.positions[position]\n            candidates = state.readers.copy()\n            if not candidates and state.setter is not None:\n                candidates.add(state.setter)\n            if self.variant != \"records\":\n                vacate = self.append(f\"child_vacate.{position}\", candidates)\n                self.child_nodes.add(vacate)\n                contract.vacates[particle] = vacate\n            else:\n                contract.requirements[particle] = candidates\n            self.steps.append(\n                vanish_workloads.Step(\n                    position_algorithm.Operation(empty=position),\n                    (),\n                    self.operation_to_step[particle],\n                )\n            )\n            self.step_labels.append(f\"child_vacate.{position}\")\n\n    def finish_selection(self, contract: Contract):\n        \"\"\"Resume from serialized contract facts, discarding private callee state.\"\"\"\n        self.expand_selection(contract)\n        self.uses = {\n            p: information.uses.copy() for p, information in contract.particles.items()\n        }\n        self.moves = {}\n        for particle, information in contract.particles.items():\n            if information.moved is not None:\n                self.moves[particle] = information.moved\n        self.vacates = contract.vacates.copy()\n        self.selection_requirements = contract.requirements.copy()\n        self.children.clear()\n        self.positions.clear()\n        for position in contract.positions:\n            self.retained[position] = position + 1_000_000\n        # Only the oracle replays the old Vacates against retained position states.\n        assert self.direct_step is not None  # noqa: S101 - Selection already occurred.\n        self.retentions[self.direct_step] = self.retained.copy()\n\n    def finish(self, contract: Contract) -> dict[int, int]:\n        \"\"\"Construct terminal Vanishes using the existing candidate Comparison.\"\"\"\n        vanishes: dict[int, int] = {}\n        for particle in contract.selected.values():\n            candidates = self.uses.get(particle, set()).copy()\n            candidates.add(particle)\n            if particle in self.moves:\n                candidates.add(self.moves[particle])\n            if particle in self.vacates:\n                candidates.add(self.vacates[particle])\n            else:\n                candidates.update(self.selection_requirements[particle])\n            vanishes[particle] = self.append(\n                f\"vanish.{self.operation_to_step[particle]}\", candidates\n            )\n        return vanishes\n\n\ndef construct(\n    program: descriptions.Program, variant: Variant, template: Template | None = None\n) -> Result:\n    \"\"\"Build from local descriptions; the independent oracle is never consulted.\"\"\"\n    builder = Builder(variant)\n    setup = compile_action(program.setup)\n    _ = builder.execute(setup, builder.positions)\n    caller = builder.capture(setup, builder.positions)\n    if template is None:\n        template = compile_action(program.callee)\n    supplied = {p: builder.positions[p] for p in template.positions}\n    contract = builder.execute(template, supplied)\n    assert contract is not None  # noqa: S101 - Programs end in selection.\n    caller.incorporate(contract)\n    contract = caller\n    # No private callee lifetime/occupancy state may substitute for its interface.\n    builder.positions.clear()\n    builder.children.clear()\n    builder.uses.clear()\n    builder.moves.clear()\n    builder.vacates.clear()\n    builder.selection_requirements.clear()\n    builder.finish_selection(contract)\n    for destructor in program.destructors:\n        plan = compile_action(destructor)\n        states = {p: contract.positions[p] for p in plan.positions}\n        _ = builder.execute(plan, states, destructor=True)\n        contract.positions.update(states)\n    vanishes = builder.finish(contract)\n    analysis_nodes = len(builder.labels)\n    calculated = builder.graph\n    labels = builder.labels\n    if variant == \"lowered\":\n        calculated = graph.Graph()\n        labels: list[str] = []\n        replacements: dict[int, set[int]] = {}\n        rewritten: dict[int, int] = {}\n        for operation, label in enumerate(builder.labels):\n            candidates: set[int] = set()\n            for previous in builder.graph.dependencies(operation):\n                candidates.update(replacements[previous])\n            if operation in builder.child_nodes:\n                replacements[operation] = candidates\n                continue\n            # Child Vacates only feed Vanishes in this model. Apply Vanish\n            # Comparison to the substituted candidates before emitting edges.\n            dependencies = (\n                algorithm.compare(calculated, candidates)\n                if label.startswith(\"vanish.\")\n                else list(candidates)\n            )\n            new = calculated.append(dependencies)\n            labels.append(label)\n            replacements[operation] = {new}\n            rewritten[operation] = new\n        vanishes = {\n            particle: rewritten[operation] for particle, operation in vanishes.items()\n        }\n    return Result(\n        calculated,\n        labels,\n        builder.child_nodes,\n        builder.steps,\n        builder.step_labels,\n        builder.retentions,\n        builder.vacates,\n        vanishes,\n        contract,\n        template,\n        analysis_nodes,\n        builder.boundary_records,\n        builder.boundary_references,\n    )\n",
+    "descriptions.py": "\"\"\"Small action descriptions with references but no supplied dependency edges.\"\"\"\n\nfrom __future__ import annotations\n\nimport dataclasses\nimport random\n\n\n@dataclasses.dataclass(frozen=True)\nclass Reference:\n    \"\"\"A resolved position identity and the written intermediate positions.\"\"\"\n\n    position: int\n    intermediate: tuple[int, ...] = ()\n\n\n@dataclasses.dataclass(frozen=True)\nclass Create:\n    \"\"\"Create a particle that assigns the listed child positions.\"\"\"\n\n    target: Reference\n    children: tuple[int, ...] = ()\n\n\n@dataclasses.dataclass(frozen=True)\nclass Move:\n    \"\"\"Move the selected particle between two existing positions.\"\"\"\n\n    source: Reference\n    target: Reference\n\n\n@dataclasses.dataclass(frozen=True)\nclass Select:\n    \"\"\"Issue destruction of an occupied position and its transitive children.\"\"\"\n\n    source: Reference\n\n\n@dataclasses.dataclass(frozen=True)\nclass Action:\n    \"\"\"An independently described action and the positions its contract knows.\"\"\"\n\n    name: str\n    known: tuple[int, ...]\n    statements: tuple[Create | Move | Select | Call, ...]\n\n\n@dataclasses.dataclass(frozen=True)\nclass Call:\n    \"\"\"One direct-callee occurrence, without caller-dependent callee code.\"\"\"\n\n    action: Action\n\n\n@dataclasses.dataclass(frozen=True)\nclass Program:\n    \"\"\"Caller setup, destruction through a callee, and caller-only destructors.\"\"\"\n\n    setup: Action\n    callee: Action\n    destructors: tuple[Action, ...]\n\n\ndef generate(seed: int, width: int, steps: int, depth: int = 0) -> Program:\n    \"\"\"Choose valid operations from current occupancy, independently of graph rules.\"\"\"\n    randomizer = random.Random(seed)  # noqa: S311 - Reproducible descriptions.\n    positions = tuple(range(2, width + 2))\n    known_count = max(2, width // 2)\n    visible = positions[:known_count]\n    setup: list[Create | Move | Select | Call] = [\n        Create(Reference(0), (1,)),\n        Create(Reference(1, (0,)), positions),\n    ]\n    occupied = set(positions[::2])\n    for position in sorted(occupied):\n        setup.append(Create(Reference(position, (0, 1))))\n    body: list[Create | Move | Select | Call] = []\n    for _ in range(steps):\n        filled = sorted(occupied.intersection(visible))\n        empty = sorted(set(visible) - occupied)\n        if not empty:\n            break\n        target = randomizer.choice(empty)\n        if filled and randomizer.randrange(5):\n            source = randomizer.choice(filled)\n            body.append(Move(Reference(source, (0, 1)), Reference(target, (0, 1))))\n            occupied.remove(source)\n        else:\n            body.append(Create(Reference(target, (0, 1))))\n        occupied.add(target)\n    body.append(Select(Reference(0)))\n    callee = Action(\"callee\", (0, 1, *visible), tuple(body))\n    for index in range(depth):\n        callee = Action(f\"forward{index}\", (0, 1, *visible), (Call(callee),))\n    destructors: list[Action] = []\n    for index in range(3):\n        moves: list[Create | Move | Select | Call] = []\n        touched: set[int] = set()\n        for _ in range(max(1, steps // 3)):\n            empty = sorted(set(positions) - occupied)\n            if not empty or not occupied:\n                break\n            source = randomizer.choice(sorted(occupied))\n            target = randomizer.choice(empty)\n            moves.append(Move(Reference(source), Reference(target)))\n            occupied.remove(source)\n            occupied.add(target)\n            touched.update((source, target))\n        destructors.append(\n            Action(f\"destructor{index}\", tuple(sorted(touched)), tuple(moves))\n        )\n    return Program(\n        Action(\"caller\", (0, 1, *positions), tuple(setup)), callee, tuple(destructors)\n    )\n",
+    "benchmark.py": "\"\"\"Measure fixed action-description construction separately from generation.\"\"\"\n\nfrom __future__ import annotations\n\nimport gc\nimport json\nimport random\nimport statistics\nimport time\nimport tracemalloc\n\nimport click\n\nfrom operation_graph_optimization.transitive_destruction.interfaces import (\n    compiler,\n    descriptions,\n)\n\n\n@click.command()\n@click.option(\"--width\", type=int, required=True)\n@click.option(\"--steps\", type=int, required=True)\n@click.option(\"--depth\", type=int, default=0)\n@click.option(\"--seed\", type=int, default=0)\n@click.option(\"--repeat\", type=int, default=5)\ndef main(width: int, steps: int, depth: int, seed: int, repeat: int):\n    \"\"\"Report prototype costs, not production compiler or scheduler performance.\"\"\"\n    program = descriptions.generate(seed, width, steps, depth)\n    template = compiler.compile_action(program.callee)\n    variants: list[compiler.Variant] = [\"explicit\", \"lowered\", \"records\"]\n    samples: dict[str, list[float]] = {variant: [] for variant in variants}\n    randomizer = random.Random(seed)  # noqa: S311 - Balanced measurement order.\n    for variant in variants:\n        _ = compiler.construct(program, variant, template)\n    for _ in range(repeat):\n        randomizer.shuffle(variants)\n        for variant in variants:\n            _ = gc.collect()\n            start = time.perf_counter()\n            result = compiler.construct(program, variant, template)\n            elapsed = time.perf_counter() - start\n            samples[variant].append(elapsed)\n            del result\n    rows: list[dict[str, object]] = []\n    for variant in variants:\n        _ = gc.collect()\n        tracemalloc.start()\n        result = compiler.construct(program, variant, template)\n        _, peak = tracemalloc.get_traced_memory()\n        tracemalloc.stop()\n        rows.append(\n            {\n                \"variant\": variant,\n                \"seconds\": samples[variant],\n                \"median_seconds\": statistics.median(samples[variant]),\n                \"peak_bytes\": peak,\n                \"analysis_nodes\": result.analysis_nodes,\n                \"runtime_nodes\": len(result.labels),\n                \"runtime_edges\": len(result.graph.edges),\n                \"boundary_records\": result.boundary_records,\n                \"boundary_references\": result.boundary_references,\n            }\n        )\n        del result\n    arguments = {\n        \"width\": width,\n        \"steps\": steps,\n        \"depth\": depth,\n        \"seed\": seed,\n        \"repeat\": repeat,\n    }\n    print(json.dumps({\"arguments\": arguments, \"results\": rows}, sort_keys=True))\n\n\nif __name__ == \"__main__\":\n    main()\n"
+  },
+  "method": "Seven rotated-order construction timings per seed; three seeds per shape. Description generation and callee template compilation excluded; peak Python allocations measured in separate untimed runs. Local prototype only; not production runtime measurements."
+}

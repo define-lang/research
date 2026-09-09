@@ -1,0 +1,57 @@
+load("@aspect_rules_py//py:defs.bzl", "py_library", py_test = "py_pytest_test")
+
+py_library(
+    name = "cases",
+    srcs = ["cases.py"],
+    deps = [
+        ":planning",
+        "//operation_graph_optimization:algorithm",
+        "//operation_graph_optimization:vanish_workloads",
+        "//operation_graph_optimization/transitive_destruction:experiment",
+    ],
+)
+
+py_library(
+    name = "composition",
+    srcs = ["composition.py"],
+    deps = [":registration"],
+)
+
+py_test(
+    name = "composition_integration_test",
+    size = "small",
+    srcs = ["composition_integration_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":cases",
+        ":composition",
+        ":registration",
+        "@define//define/compiler:driver",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "planning",
+    srcs = ["planning.py"],
+)
+
+py_library(
+    name = "registration",
+    srcs = ["registration.py"],
+)
+
+py_test(
+    name = "runtime_integration_test",
+    size = "small",
+    srcs = ["runtime_integration_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":cases",
+        ":planning",
+        "@define//define/compiler:driver",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
