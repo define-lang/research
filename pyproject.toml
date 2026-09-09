@@ -17,7 +17,7 @@ force-exclude = true
 extend-select = ["W", "I", "N", "D", "UP", "C4", "B", "BLE", "FBT", "A", "S", "LOG", "G", "TCH", "ICN", "SIM", "PT", "YTT", "PIE", "RET", "ARG", "DTZ", "RUF"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["define", "operation_graph_optimization"]
+known-first-party = ["define", "destruction_contract_benchmarks", "operation_graph_optimization"]
 required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.extend-per-file-ignores]
@@ -27,7 +27,7 @@ required-imports = ["from __future__ import annotations"]
 convention = "pep257"
 
 [tool.basedpyright]
-include = ["operation_graph_optimization"]
+include = ["destruction_contract_benchmarks", "operation_graph_optimization"]
 exclude = ["bazel-*", ".venv", "**/__pycache__"]
 extraPaths = ["bazel-bin/operation_graph_optimization/algorithm_integration_test.runfiles/define+"]
 

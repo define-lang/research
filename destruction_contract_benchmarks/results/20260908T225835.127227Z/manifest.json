@@ -1,0 +1,14 @@
+{
+  "python": "3.14.7 free-threading build (main, Sep  1 2026, 14:17:47) [Clang 22.1.3 ]",
+  "executable": "/home/mkanat/projects/define/.venv/bin/python3",
+  "cpu_affinity": 2,
+  "cases": "small_objects,wide_registry,deep_callers,unchanged_callers,library_fanout,branching_callers,dense_callers,read_heavy,deep_names,full_traversal,contracts_chain,contracts_balanced,contracts_wide,contracts_late_children,contracts_small,history_chain,history_fanout,history_diagnostics",
+  "variants": "current_flat,shared_flat,base_partitions_64,compact_base,current_contracts,linked_history,current_history,shared_tuple_history",
+  "scale": 4,
+  "seed": 74921,
+  "repetitions": 3,
+  "allocation_tracing": false,
+  "timeout_s": 60.0,
+  "memory_limit_mib": 1536,
+  "source_sha256": "0e393db61f4a7ab2f2f24a33d81273581952c418879a54623d0e18baceceb3ef"
+}

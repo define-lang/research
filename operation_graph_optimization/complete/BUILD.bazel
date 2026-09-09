@@ -3,12 +3,12 @@ load("@aspect_rules_py//py:defs.bzl", "py_library")
 py_library(
     name = "algorithm",
     srcs = ["algorithm.py"],
-    visibility = ["//operation_graph_optimization:__pkg__"],
+    visibility = ["//operation_graph_optimization:__subpackages__"],
     deps = [":graph"],
 )
 
 py_library(
     name = "graph",
     srcs = ["graph.py"],
-    visibility = ["//operation_graph_optimization:__pkg__"],
+    visibility = ["//operation_graph_optimization:__subpackages__"],
 )

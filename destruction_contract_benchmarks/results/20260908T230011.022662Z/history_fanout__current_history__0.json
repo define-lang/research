@@ -1,0 +1,9 @@
+{
+  "status": "memory_limit",
+  "sampled_peak_rss_bytes": 1724551168,
+  "case": "history_fanout",
+  "variant": "current_history",
+  "scale": 8,
+  "repetition": 0,
+  "allocation_tracing": false
+}

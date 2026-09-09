@@ -1,0 +1,14 @@
+{
+  "python": "3.14.7 free-threading build (main, Sep  1 2026, 14:17:47) [Clang 22.1.3 ]",
+  "executable": "/home/mkanat/projects/define/.venv/bin/python3",
+  "cpu_affinity": 2,
+  "cases": "small_objects,deep_callers,contracts_chain,history_fanout",
+  "variants": "current_flat,compact_base,current_contracts,current_history,linked_history",
+  "scale": 2,
+  "seed": 74921,
+  "repetitions": 1,
+  "allocation_tracing": true,
+  "timeout_s": 60.0,
+  "memory_limit_mib": 1536,
+  "source_sha256": "800060b56f8df99bc25aa50a8c107f8e03034b00556163a1b98ec42b3fd49870"
+}

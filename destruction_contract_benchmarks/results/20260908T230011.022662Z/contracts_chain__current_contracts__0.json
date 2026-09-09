@@ -1,0 +1,9 @@
+{
+  "status": "memory_limit",
+  "sampled_peak_rss_bytes": 1638760448,
+  "case": "contracts_chain",
+  "variant": "current_contracts",
+  "scale": 8,
+  "repetition": 0,
+  "allocation_tracing": false
+}

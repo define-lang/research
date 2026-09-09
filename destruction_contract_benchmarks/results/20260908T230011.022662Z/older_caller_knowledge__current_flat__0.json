@@ -1,0 +1,9 @@
+{
+  "status": "memory_limit",
+  "sampled_peak_rss_bytes": 1671303168,
+  "case": "older_caller_knowledge",
+  "variant": "current_flat",
+  "scale": 8,
+  "repetition": 0,
+  "allocation_tracing": false
+}

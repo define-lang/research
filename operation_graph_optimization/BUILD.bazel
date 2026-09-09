@@ -4,6 +4,7 @@ load("@rules_lean//lean:lean.bzl", "lean_axiom_test", "lean_library")
 py_library(
     name = "algorithm",
     srcs = ["algorithm.py"],
+    visibility = ["//operation_graph_optimization/transitive_destruction:__pkg__"],
     deps = [":graph"],
 )
 
@@ -40,12 +41,14 @@ py_binary(
 py_library(
     name = "combination_algorithm",
     srcs = ["combination_algorithm.py"],
+    visibility = ["//operation_graph_optimization/transitive_destruction:__pkg__"],
     deps = ["//operation_graph_optimization/complete:graph"],
 )
 
 py_library(
     name = "combination_inputs",
     srcs = ["combination_inputs.py"],
+    visibility = ["//operation_graph_optimization/transitive_destruction:__pkg__"],
     deps = [":combination_algorithm", ":vanish_workloads"],
 )
 
@@ -75,6 +78,7 @@ py_binary(
 py_library(
     name = "complete_inputs",
     srcs = ["complete_inputs.py"],
+    visibility = ["//operation_graph_optimization/transitive_destruction:__pkg__"],
     deps = [":vanish_workloads", "//operation_graph_optimization/complete:algorithm"],
 )
 
@@ -178,6 +182,7 @@ py_library(
 py_library(
     name = "integrated_workloads",
     srcs = ["integrated_workloads.py"],
+    visibility = ["//operation_graph_optimization/transitive_destruction:__pkg__"],
     deps = [":algorithm", ":vanish_workloads"],
 )
 
@@ -287,6 +292,7 @@ py_library(
 py_library(
     name = "vanish_workloads",
     srcs = ["vanish_workloads.py"],
+    visibility = ["//operation_graph_optimization/transitive_destruction:__pkg__"],
     deps = [
         ":algorithm",
         ":order_variants",

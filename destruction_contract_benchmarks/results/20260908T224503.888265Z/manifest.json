@@ -1,0 +1,13 @@
+{
+  "python": "3.14.7 free-threading build (main, Sep  1 2026, 14:17:47) [Clang 22.1.3 ]",
+  "executable": "/home/mkanat/projects/define/.venv/bin/python3",
+  "cpu_affinity": 2,
+  "cases": "small_objects,deep_callers,read_heavy,deep_names",
+  "variants": "current_flat,shared_flat,partitions_64,position_tree,overlay_4",
+  "scale": 1,
+  "seed": 74921,
+  "repetitions": 1,
+  "allocation_tracing": false,
+  "timeout_s": 60.0,
+  "memory_limit_mib": 1536
+}

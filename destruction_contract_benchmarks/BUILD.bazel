@@ -1,0 +1,57 @@
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_library", py_test = "py_pytest_test")
+
+py_library(
+    name = "experiments",
+    srcs = ["experiments.py"],
+    deps = [
+        ":snapshots",
+        ":workloads",
+    ],
+)
+
+py_test(
+    name = "experiments_test",
+    size = "small",
+    srcs = ["experiments_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":experiments",
+        ":snapshots",
+        ":workloads",
+        "@pypi//coverage",  # Required by Bazel's Python coverage launcher.
+        "@pypi//pytest",
+    ],
+)
+
+py_binary(
+    name = "run",
+    srcs = ["run.py"],
+    deps = [
+        ":experiments",
+        "@pypi//click",
+    ],
+)
+
+py_library(
+    name = "snapshots",
+    srcs = ["snapshots.py"],
+)
+
+py_test(
+    name = "snapshots_test",
+    size = "small",
+    srcs = ["snapshots_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":snapshots",
+        ":workloads",
+        "@pypi//coverage",  # Required by Bazel's Python coverage launcher.
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "workloads",
+    srcs = ["workloads.py"],
+    deps = [":snapshots"],
+)
