@@ -35,6 +35,13 @@ class Graph:
         """Read one operation's direct dependencies."""
         return self.edges[self.offsets[operation] : self.offsets[operation + 1]]
 
+    def indexed_dependents(self, operation: int):
+        """Read a nonterminal operation's direct nonterminal dependents."""
+        consumer = self._first_consumer[operation]
+        while consumer != -1:
+            yield self._consumers[consumer]
+            consumer = self._next_consumer[consumer]
+
     def append(self, dependencies: list[int]) -> int:
         """Append an operation before any terminal operations have been appended."""
         operation = len(self)

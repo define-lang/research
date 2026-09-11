@@ -104,8 +104,46 @@ py_library(
 )
 
 py_library(
+    name = "departure_exclusion",
+    srcs = ["departure_exclusion.py"],
+)
+
+py_library(
     name = "graph",
     srcs = ["graph.py"],
+)
+
+py_library(
+    name = "identity_algorithm",
+    srcs = ["identity_algorithm.py"],
+    deps = [
+        ":relationship_periods",
+        "//operation_graph_optimization/complete:algorithm",
+        "//operation_graph_optimization/complete:graph",
+    ],
+)
+
+py_binary(
+    name = "identity_benchmark",
+    srcs = ["identity_benchmark.py"],
+    deps = [
+        ":identity_algorithm",
+        ":relationship_benchmark",
+        ":relationship_periods",
+        ":relationship_state",
+        "//operation_graph_optimization/complete:algorithm",
+        "//operation_graph_optimization/complete:graph",
+    ],
+)
+
+py_binary(
+    name = "identity_choice_benchmark",
+    srcs = ["identity_choice_benchmark.py"],
+    deps = [
+        ":identity_algorithm",
+        ":identity_benchmark",
+        ":relationship_benchmark",
+    ],
 )
 
 py_binary(
@@ -117,6 +155,51 @@ py_binary(
         ":vanish_algorithm",
         ":vanish_workloads",
         "//operation_graph_optimization/integrated:algorithm",
+    ],
+)
+
+py_test(
+    name = "identity_move_choice_test",
+    size = "small",
+    srcs = ["identity_move_choice_test.py"],
+    data = [
+        "identity_move_choice.dfn",
+        "//:pyproject.toml",
+    ],
+    deps = [
+        "@define//define/compiler:driver",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_test(
+    name = "identity_move_conflict_test",
+    size = "small",
+    srcs = ["identity_move_conflict_test.py"],
+    data = [
+        "identity_move_conflict.dfn",
+        "//:pyproject.toml",
+    ],
+    deps = [
+        "@define//define/compiler:driver",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_test(
+    name = "identity_move_cycle_test",
+    size = "small",
+    srcs = ["identity_move_cycle_test.py"],
+    data = [
+        "identity_move_cycle.dfn",
+        "//:pyproject.toml",
+    ],
+    deps = [
+        "@define//define/compiler:driver",
+        "@pypi//coverage",
+        "@pypi//pytest",
     ],
 )
 
@@ -212,9 +295,116 @@ py_library(
 )
 
 py_library(
+    name = "precedence_choice",
+    srcs = ["precedence_choice.py"],
+)
+
+py_test(
+    name = "precedence_choice_test",
+    size = "small",
+    srcs = ["precedence_choice_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":precedence_choice",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
     name = "reference",
     srcs = ["reference.py"],
     deps = [":algorithm"],
+)
+
+py_binary(
+    name = "relationship_benchmark",
+    srcs = ["relationship_benchmark.py"],
+    deps = [
+        ":precedence_choice",
+        ":relationship_periods",
+    ],
+)
+
+py_test(
+    name = "relationship_completion_test",
+    size = "small",
+    srcs = ["relationship_completion_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":departure_exclusion",
+        ":relationship_exclusion",
+        "//operation_graph_optimization/complete:graph",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "relationship_exclusion",
+    srcs = ["relationship_exclusion.py"],
+    deps = [
+        "//operation_graph_optimization/complete:algorithm",
+        "//operation_graph_optimization/complete:graph",
+    ],
+)
+
+py_test(
+    name = "relationship_exclusion_test",
+    size = "small",
+    srcs = ["relationship_exclusion_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":relationship_exclusion",
+        "//operation_graph_optimization/complete:graph",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "relationship_periods",
+    srcs = ["relationship_periods.py"],
+    deps = [":precedence_choice"],
+)
+
+py_library(
+    name = "relationship_state",
+    srcs = ["relationship_state.py"],
+    deps = [
+        ":precedence_choice",
+        ":relationship_periods",
+    ],
+)
+
+py_test(
+    name = "relationship_state_test",
+    size = "small",
+    srcs = ["relationship_state_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":precedence_choice",
+        ":relationship_periods",
+        ":relationship_state",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_test(
+    name = "retained_relationship_test",
+    size = "small",
+    srcs = ["retained_relationship_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":identity_algorithm",
+        ":identity_choice_benchmark",
+        ":precedence_choice",
+        ":relationship_periods",
+        ":relationship_state",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
 )
 
 lean_library(

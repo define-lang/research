@@ -1,0 +1,99 @@
+{
+  "python": "3.14.6 free-threading build (main, Jun 23 2026, 15:18:24) [Clang 22.1.3 ]",
+  "platform": "Linux-7.1.8-200.fc44.x86_64-x86_64-with-glibc2.43",
+  "rows": [
+    {
+      "particles": 1000,
+      "operations": 5000,
+      "seed": 711039,
+      "depth_limit": 6,
+      "generation_seconds": 0.007062343880534172,
+      "identity_construction": {
+        "samples_seconds": [
+          0.007643774151802063,
+          0.007581883110105991,
+          0.007584593025967479
+        ],
+        "median_seconds": 0.007584593025967479
+      },
+      "including_relationship_conditions": {
+        "samples_seconds": [
+          0.00782923586666584,
+          0.00782287702895701,
+          0.007850496796891093
+        ],
+        "median_seconds": 0.00782923586666584
+      },
+      "previous_backend": {
+        "samples_seconds": [
+          0.009340571006760001,
+          0.009288841160014272,
+          0.009248730028048158
+        ],
+        "median_seconds": 0.009288841160014272
+      }
+    },
+    {
+      "particles": 10000,
+      "operations": 50000,
+      "seed": 711039,
+      "depth_limit": 6,
+      "generation_seconds": 0.0737892750184983,
+      "identity_construction": {
+        "samples_seconds": [
+          0.07946152705699205,
+          0.0760376921389252,
+          0.07804865506477654
+        ],
+        "median_seconds": 0.07804865506477654
+      },
+      "including_relationship_conditions": {
+        "samples_seconds": [
+          0.08001698600128293,
+          0.07915966282598674,
+          0.07902129995636642
+        ],
+        "median_seconds": 0.07915966282598674
+      },
+      "previous_backend": {
+        "samples_seconds": [
+          0.09414854482747614,
+          0.09467194392345846,
+          0.09679158893413842
+        ],
+        "median_seconds": 0.09467194392345846
+      }
+    },
+    {
+      "particles": 200000,
+      "operations": 1000000,
+      "seed": 711039,
+      "depth_limit": 6,
+      "generation_seconds": 2.0191498559433967,
+      "identity_construction": {
+        "samples_seconds": [
+          2.660486178006977,
+          2.65360019588843,
+          2.557349127950147
+        ],
+        "median_seconds": 2.65360019588843
+      },
+      "including_relationship_conditions": {
+        "samples_seconds": [
+          2.745612497907132,
+          2.6500999201089144,
+          2.8195560448803008
+        ],
+        "median_seconds": 2.745612497907132
+      },
+      "previous_backend": {
+        "samples_seconds": [
+          2.934563617920503,
+          2.93270980915986,
+          2.9407686388585716
+        ],
+        "median_seconds": 2.934563617920503
+      }
+    }
+  ]
+}
