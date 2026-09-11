@@ -5,6 +5,13 @@ current-style storage with proposed shared Child State, per-particle Destruction
 Contracts, and shared propagation history. No production compiler representation
 has been changed by this experiment.
 
+For the subsequent investigation of the then-partitioned compiler algorithm's flat limit
+and partition count, see [Choosing Child State thresholds](TUNING.md). Its
+measurements are separate from the historical prototype results below.
+
+After partitioning was removed from the compiler, the remaining copy threshold
+was studied separately in [Choosing the unpartitioned threshold](UNPARTITIONED_THRESHOLD.md).
+
 ## Archive provenance
 
 Moved from `tools/destruction_contract_benchmarks/` in the Define working tree

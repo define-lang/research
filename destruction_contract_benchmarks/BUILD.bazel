@@ -50,6 +50,168 @@ py_test(
     ],
 )
 
+py_binary(
+    name = "threshold_run",
+    srcs = ["threshold_run.py"],
+    deps = [
+        ":experiments",
+        ":run",
+        ":snapshots",
+        ":threshold_workloads",
+        ":tuning_mixed",
+        ":tuning_workloads",
+        ":unpartitioned_state",
+        ":workloads",
+        "@pypi//click",
+    ],
+)
+
+py_library(
+    name = "threshold_workloads",
+    srcs = ["threshold_workloads.py"],
+    deps = [
+        ":experiments",
+        ":snapshots",
+        ":tuning_mixed",
+        ":tuning_workloads",
+        ":workloads",
+    ],
+)
+
+py_test(
+    name = "threshold_workloads_test",
+    size = "small",
+    srcs = ["threshold_workloads_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":experiments",
+        ":snapshots",
+        ":threshold_run",
+        ":threshold_workloads",
+        ":unpartitioned_state",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_binary(
+    name = "tuning_analysis",
+    srcs = ["tuning_analysis.py"],
+    deps = [":run"],
+)
+
+py_test(
+    name = "tuning_analysis_test",
+    size = "small",
+    srcs = ["tuning_analysis_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":tuning_analysis",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "tuning_mixed",
+    srcs = ["tuning_mixed.py"],
+    deps = [
+        ":experiments",
+        ":snapshots",
+        ":workloads",
+    ],
+)
+
+py_test(
+    name = "tuning_mixed_test",
+    size = "small",
+    srcs = ["tuning_mixed_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":snapshots",
+        ":tuning_mixed",
+        ":tuning_run",
+        ":tuning_state",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_binary(
+    name = "tuning_run",
+    srcs = ["tuning_run.py"],
+    deps = [
+        ":experiments",
+        ":run",
+        ":snapshots",
+        ":tuning_mixed",
+        ":tuning_state",
+        ":tuning_workloads",
+        ":workloads",
+        "@pypi//click",
+    ],
+)
+
+py_library(
+    name = "tuning_state",
+    srcs = ["tuning_state.py"],
+    deps = [":snapshots"],
+)
+
+py_test(
+    name = "tuning_state_test",
+    size = "small",
+    srcs = ["tuning_state_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":snapshots",
+        ":tuning_state",
+        ":tuning_workloads",
+        ":workloads",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_binary(
+    name = "tuning_storage",
+    srcs = ["tuning_storage.py"],
+    deps = [
+        ":experiments",
+        ":snapshots",
+        ":tuning_run",
+        ":tuning_state",
+        ":tuning_workloads",
+        ":workloads",
+    ],
+)
+
+py_test(
+    name = "tuning_storage_test",
+    size = "small",
+    srcs = ["tuning_storage_test.py"],
+    data = ["//:pyproject.toml"],
+    deps = [
+        ":snapshots",
+        ":tuning_state",
+        ":tuning_storage",
+        "@pypi//coverage",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "tuning_workloads",
+    srcs = ["tuning_workloads.py"],
+    deps = [":workloads"],
+)
+
+py_library(
+    name = "unpartitioned_state",
+    srcs = ["unpartitioned_state.py"],
+    deps = [":snapshots"],
+)
+
 py_library(
     name = "workloads",
     srcs = ["workloads.py"],

@@ -1,0 +1,57 @@
+{
+  "case": "sparse_updates",
+  "scale": 4,
+  "seed": 74921,
+  "results": {
+    "64/64": {
+      "snapshot_references": 4097,
+      "unique_snapshots": 4097,
+      "unique_dictionaries": 8217,
+      "retained_dictionary_entries": 569354,
+      "dictionary_bytes": 22776664,
+      "partition_directory_entries": 260160,
+      "partition_directory_bytes": 2276400,
+      "snapshot_bytes": 229168
+    },
+    "64/256": {
+      "snapshot_references": 4097,
+      "unique_snapshots": 4097,
+      "unique_dictionaries": 8460,
+      "retained_dictionary_entries": 175121,
+      "dictionary_bytes": 7267528,
+      "partition_directory_entries": 1040640,
+      "partition_directory_bytes": 8520240,
+      "snapshot_bytes": 229168
+    },
+    "64/512": {
+      "snapshot_references": 4097,
+      "unique_snapshots": 4097,
+      "unique_dictionaries": 8723,
+      "retained_dictionary_entries": 108742,
+      "dictionary_bytes": 4918184,
+      "partition_directory_entries": 2081280,
+      "partition_directory_bytes": 16845360,
+      "snapshot_bytes": 229168
+    },
+    "64/1024": {
+      "snapshot_references": 4097,
+      "unique_snapshots": 4097,
+      "unique_dictionaries": 9239,
+      "retained_dictionary_entries": 75670,
+      "dictionary_bytes": 3815128,
+      "partition_directory_entries": 4162560,
+      "partition_directory_bytes": 33495600,
+      "snapshot_bytes": 229168
+    },
+    "64/4096": {
+      "snapshot_references": 4097,
+      "unique_snapshots": 4097,
+      "unique_dictionaries": 12318,
+      "retained_dictionary_entries": 50664,
+      "dictionary_bytes": 3471464,
+      "partition_directory_entries": 16650240,
+      "partition_directory_bytes": 133397040,
+      "snapshot_bytes": 229168
+    }
+  }
+}

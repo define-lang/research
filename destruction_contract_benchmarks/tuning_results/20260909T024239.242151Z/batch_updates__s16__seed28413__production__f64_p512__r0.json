@@ -1,0 +1,12 @@
+{
+  "status": "memory_limit",
+  "sampled_peak_rss_bytes": 1663426560,
+  "case": "batch_updates",
+  "scale": 16,
+  "seed": 28413,
+  "repetition": 0,
+  "variant": "production",
+  "flat_limit": 64,
+  "partition_count": 512,
+  "allocation_tracing": false
+}
