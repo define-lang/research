@@ -1,4 +1,5 @@
 .venv
 define-parallel-particle-operations
 literal-c
+operation_graph_proofs
 node_modules
