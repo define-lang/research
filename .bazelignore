@@ -1,3 +1,4 @@
 .venv
 define-parallel-particle-operations
+literal-c
 node_modules

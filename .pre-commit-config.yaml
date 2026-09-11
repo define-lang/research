@@ -1,5 +1,5 @@
-# Preserve this source snapshot byte-for-byte rather than applying research style.
-exclude: ^define-parallel-particle-operations/
+# Preserve source snapshots byte-for-byte rather than applying research style.
+exclude: ^(define-parallel-particle-operations|literal-c)/
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
