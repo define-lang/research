@@ -1,0 +1,89 @@
+load("@aspect_rules_py//py:defs.bzl", "py_library")
+load("//tools/bzl:format.bzl", "format_test")
+load("//tools/bzl:py_test.bzl", "py_test")
+load("//tools/bzl:pyright.bzl", "pyright_test")
+
+py_library(
+    name = "action_call_graph",
+    srcs = ["action_call_graph.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+)
+
+py_library(
+    name = "action_call_graph_renderer",
+    srcs = ["action_call_graph_renderer.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [":action_call_graph"],
+)
+
+py_test(
+    name = "action_call_graph_renderer_test",
+    size = "small",
+    srcs = ["action_call_graph_renderer_test.py"],
+    data = ["//tools:validate_mermaid"],
+    env = {"MERMAID_VALIDATOR": "$(rlocationpath //tools:validate_mermaid)"},
+    deps = [
+        ":action_call_graph",
+        ":action_call_graph_renderer",
+        "//define/compiler/validator:test_helpers",
+        "//define/compiler/validator/reference_graph:reference_graph_validator",
+        "//define/compiler/validator/structural:program_validator",
+        "@pypi//pytest",
+        "@rules_python//python/runfiles",
+    ],
+)
+
+py_library(
+    name = "graphs",
+    srcs = ["__init__.py"],
+)
+
+py_library(
+    name = "reference_graph",
+    srcs = ["reference_graph.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = ["//define/compiler:ast"],
+)
+
+py_library(
+    name = "reference_graph_executor",
+    srcs = ["reference_graph_executor.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":reference_graph",
+        "//define/compiler:ast",
+    ],
+)
+
+py_test(
+    name = "reference_graph_test",
+    size = "small",
+    srcs = ["reference_graph_test.py"],
+    deps = [
+        ":reference_graph",
+        "//define/compiler:ast",
+    ],
+)
+
+# --- Format checking ---
+
+format_test(
+    name = "format_test",
+    srcs = glob(["*.py"]),
+    python = "@multitool//tools/ruff",
+)
+
+# --- Type-checking ---
+
+pyright_test(
+    name = "pyright_test",
+    deps = [
+        ":action_call_graph",
+        ":action_call_graph_renderer",
+        ":action_call_graph_renderer_test",
+        ":graphs",
+        ":reference_graph",
+        ":reference_graph_executor",
+        ":reference_graph_test",
+    ],
+)

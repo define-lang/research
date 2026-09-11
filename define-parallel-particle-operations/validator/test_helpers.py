@@ -1,0 +1,60 @@
+# pyright: reportUnusedCallResult=false
+"""Shared validator test helpers."""
+
+from __future__ import annotations
+
+from pprint import pformat
+from typing import TYPE_CHECKING, Protocol
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from define.compiler import diagnostics
+    from define.compiler.validator import validation_result
+
+
+class _ValidationErrors(Protocol):
+    @property
+    def all_exceptions(self) -> list[validation_result.AnyValidationException]: ...
+
+    @property
+    def all_diagnostics(self) -> list[diagnostics.Diagnostic]: ...
+
+
+def assert_no_errors(result: _ValidationErrors) -> None:
+    """Assert that a validation result has no exceptions or diagnostics."""
+    __tracebackhide__ = True
+    exceptions = result.all_exceptions
+    assert not exceptions, (
+        f"Expected no exceptions, but got {len(exceptions)}:\n"
+        + "\n".join(f"  {type(e).__name__}: {e}" for e in exceptions)
+    )
+    all_diagnostics = result.all_diagnostics
+    assert not all_diagnostics, (
+        f"Expected no diagnostics, but got {len(all_diagnostics)}:\n"
+        + "\n".join(f"  {pformat(d)}" for d in all_diagnostics)
+    )
+
+
+def write_project_config(tmp_path: Path, universe_name: str) -> None:
+    """Write a .define/project/config.defcl file under tmp_path."""
+    config_dir = tmp_path / ".define" / "project"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    (config_dir / "config.defcl").write_text(
+        f'project: {{\n  universe_name: "{universe_name}"\n}}\n',
+        encoding="utf-8",
+    )
+
+
+def write_local_deps_config(tmp_path: Path, deps: dict[str, str]) -> None:
+    """Write a .define/deps/local.defcl file under tmp_path."""
+    deps_dir = tmp_path / ".define" / "deps"
+    deps_dir.mkdir(parents=True, exist_ok=True)
+    entries = ",\n    ".join(
+        f'{{\n      universe_name: "{name}"\n      path: "{path}"\n    }}'
+        for name, path in deps.items()
+    )
+    content = (
+        f"deps: {{\n  local: [\n    {entries}\n  ]\n}}\n" if deps else "deps: {}\n"
+    )
+    (deps_dir / "local.defcl").write_text(content, encoding="utf-8")

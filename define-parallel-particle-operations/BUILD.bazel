@@ -1,0 +1,490 @@
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_library")
+load("//tools/bzl:format.bzl", "format_test")
+load("//tools/bzl:py_test.bzl", "py_test")
+load("//tools/bzl:pyright.bzl", "pyright_test")
+
+exports_files(["grammar.lark"])
+
+py_library(
+    name = "ast",
+    srcs = ["ast.py"],
+    visibility = [
+        "//define/compiler:__subpackages__",
+        "//tools:__subpackages__",
+    ],
+    deps = [
+        ":constants",
+        "//define/compiler/data_structures:define_path",
+        "//define/compiler/lark:lark_standalone",
+    ],
+)
+
+py_test(
+    name = "ast_test",
+    size = "small",
+    srcs = ["ast_test.py"],
+    deps = [
+        ":ast",
+        ":test_helpers",
+        "//define/compiler/data_structures:define_path",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "compiler",
+    srcs = ["__init__.py"],
+    deps = ["//define"],
+)
+
+py_library(
+    name = "conftest",
+    testonly = True,
+    srcs = ["conftest.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":parser",
+        "//define/compiler/graphs:action_call_graph",
+        "//define/compiler/validator:test_helpers",
+        "//define/compiler/validator:validation_result",
+        "//define/compiler/validator/reference_graph:operation_graph",
+        "//define/compiler/validator/reference_graph:reference_graph_validator",
+        "//define/compiler/validator/structural:program_validator",
+        "//define/testdata:path_resolver",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "constants",
+    srcs = ["constants.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = ["//define/compiler/data_structures:define_path"],
+)
+
+py_library(
+    name = "config",
+    srcs = ["config.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":constants",
+        ":exceptions",
+        "//defcl/python:exceptions",
+        "//defcl/python:parser",
+        "//define/compiler/data_structures:define_path",
+        "//define/config/deps:local_proto_py",
+        "//define/config/project:config_proto_py",
+        "@pypi//protobuf",
+        "@pypi//protovalidate",
+    ],
+)
+
+py_test(
+    name = "config_test",
+    size = "small",
+    srcs = ["config_test.py"],
+    deps = [
+        ":config",
+        ":constants",
+        "//defcl/python:exceptions",
+        "//define/compiler/data_structures:define_path",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "diagnostics",
+    srcs = ["diagnostics.py"],
+    visibility = [
+        "//define/compiler:__subpackages__",
+        "//tools:__pkg__",
+    ],
+    deps = [
+        ":ast",
+        ":config",
+        ":constants",
+        "//define/compiler/validator/reference_graph:action_contract",
+    ],
+)
+
+py_test(
+    name = "diagnostics_test",
+    size = "small",
+    srcs = ["diagnostics_test.py"],
+    deps = [
+        ":ast",
+        ":diagnostics",
+        "//define/compiler/validator/reference_graph:action_contract",
+    ],
+)
+
+py_library(
+    name = "exceptions",
+    srcs = ["exceptions.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":constants",
+    ],
+)
+
+py_library(
+    name = "driver",
+    srcs = ["driver.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":ast",
+        ":constants",
+        ":diagnostics",
+        ":exceptions",
+        ":overall_stats",
+        ":parser",
+        "//define/compiler/codegen:generator",
+        "//define/compiler/graphs:reference_graph_executor",
+        "//define/compiler/validator:validation_result",
+        "//define/compiler/validator/reference_graph:operation_graph",
+        "//define/compiler/validator/reference_graph:reference_graph_validator",
+        "//define/compiler/validator/structural:program_validator",
+    ],
+)
+
+py_test(
+    name = "driver_fuzz_test",
+    size = "medium",
+    srcs = ["driver_fuzz_test.py"],
+    shard_count = 8,
+    tags = ["manual"],
+    deps = [
+        ":driver",
+        ":exceptions",
+        ":parser",
+        ":parser_exceptions",
+        "//define/compiler/validator:validation_result",
+        "@pypi//hypothesis",
+        "@pypi//pytest",
+    ],
+)
+
+py_test(
+    name = "driver_run_test",
+    size = "small",
+    srcs = ["driver_run_test.py"],
+    data = ["//define/testdata/driver/driver_run"],
+    deps = [
+        ":conftest",
+        ":constants",
+        ":driver",
+        ":overall_stats",
+        ":parser",
+        "@pypi//pytest",
+    ],
+)
+
+py_test(
+    name = "driver_test",
+    size = "small",
+    srcs = ["driver_test.py"],
+    deps = [
+        ":diagnostics",
+        ":driver",
+        ":exceptions",
+        ":parser",
+        "//define/compiler/data_structures:define_path",
+        "//define/compiler/validator:test_helpers",
+        "//define/compiler/validator:validation_result",
+        "//define/compiler/validator/reference_graph:reference_graph_validator",
+        "//define/compiler/validator/structural:program_validator",
+        "@pypi//pytest",
+    ],
+)
+
+filegroup(
+    name = "driver_test_sources",
+    testonly = True,
+    srcs = ["driver_run_test.py"],
+    visibility = ["//define/testdata:__pkg__"],
+)
+
+py_library(
+    name = "indentation_validator",
+    srcs = ["indentation_validator.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":ast",
+        ":diagnostics",
+    ],
+)
+
+py_test(
+    name = "indentation_validator_test",
+    size = "small",
+    srcs = ["indentation_validator_test.py"],
+    deps = [
+        ":diagnostics",
+        ":indentation_validator",
+        "@pypi//pytest",
+    ],
+)
+
+# Ideally this would specify venv = default. Unfortunately, that breaks
+# pyright_test, which tries to use j2lint and build it with the default
+# venv only to find it doesn't exist.
+py_binary(
+    name = "main",
+    srcs = ["main.py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":constants",
+        ":driver",
+        ":overall_stats",
+        "@pypi//click",
+    ],
+)
+
+py_test(
+    name = "main_integration_test",
+    size = "small",
+    srcs = ["main_integration_test.py"],
+    data = [":main"],
+    env = {"MAIN_BINARY": "$(rlocationpath :main)"},
+    # The compiler runs in a subprocess, so this test's own process executes no
+    # instrumented code and the coverage reporter fails on an empty data set.
+    tags = ["no-coverage"],
+    deps = [
+        ":test_runfiles",
+    ],
+)
+
+py_test(
+    name = "main_test",
+    size = "small",
+    srcs = ["main_test.py"],
+    deps = [
+        ":constants",
+        ":driver",
+        ":main",
+        ":overall_stats",
+        "@pypi//click",
+    ],
+)
+
+py_test(
+    name = "memory_integration_test",
+    size = "small",
+    srcs = ["memory_integration_test.py"],
+    data = [
+        ":main",
+        ":memory_limit_runner",
+        "//define/testdata/compiler_memory",
+        "//define/testdata/compiler_memory:deep_requirements",
+        "//define/testdata/compiler_memory:destruction_fragments",
+        "//define/testdata/compiler_memory:fragment_fanout_joins",
+        "//define/testdata/compiler_memory:guarantee_expansion",
+        "//define/testdata/compiler_memory:large_operation_volume",
+        "//define/testdata/compiler_memory:many_substantial_actions",
+        "//define/testdata/compiler_memory:operation_dependencies",
+        "//define/testdata/compiler_memory:reference_graph_project",
+        "//define/testdata/compiler_memory:reference_graph_project_entry",
+    ],
+    env = {
+        "MAIN_BINARY": "$(rlocationpath :main)",
+        "MEMORY_TEST_DEEP_REQUIREMENTS": "$(rlocationpath //define/testdata/compiler_memory:deep_requirements)",
+        "MEMORY_TEST_DESTRUCTION_FRAGMENTS": "$(rlocationpath //define/testdata/compiler_memory:destruction_fragments)",
+        "MEMORY_TEST_FRAGMENT_FANOUT_JOINS": "$(rlocationpath //define/testdata/compiler_memory:fragment_fanout_joins)",
+        "MEMORY_TEST_GUARANTEE_EXPANSION": "$(rlocationpath //define/testdata/compiler_memory:guarantee_expansion)",
+        "MEMORY_TEST_LARGE_OPERATION_VOLUME": "$(rlocationpath //define/testdata/compiler_memory:large_operation_volume)",
+        "MEMORY_TEST_MANY_SUBSTANTIAL_ACTIONS": "$(rlocationpath //define/testdata/compiler_memory:many_substantial_actions)",
+        "MEMORY_TEST_OPERATION_DEPENDENCIES": "$(rlocationpath //define/testdata/compiler_memory:operation_dependencies)",
+        "MEMORY_TEST_REFERENCE_GRAPH_PROJECT": "$(rlocationpath //define/testdata/compiler_memory:reference_graph_project_entry)",
+        "MEMORY_LIMIT_RUNNER": "$(rlocationpath :memory_limit_runner)",
+    },
+    tags = ["no-coverage"],
+    target_compatible_with = ["@platforms//os:linux"],
+    deps = [
+        ":test_runfiles",
+        "@pypi//pytest",
+    ],
+)
+
+py_binary(
+    name = "memory_limit_runner",
+    testonly = True,
+    srcs = ["memory_limit_runner.py"],
+    target_compatible_with = ["@platforms//os:linux"],
+)
+
+py_library(
+    name = "name_parser",
+    srcs = ["name_parser.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":ast",
+        ":parser_exceptions",
+        "//define/compiler/lark:lark_standalone",
+    ],
+)
+
+py_test(
+    name = "name_parser_test",
+    size = "small",
+    srcs = ["name_parser_test.py"],
+    deps = [
+        ":ast",
+        ":name_parser",
+        ":parser_exceptions",
+        "//define/compiler/lark:lark_standalone",
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "overall_stats",
+    srcs = ["overall_stats.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        "//define/compiler/data_structures:define_path",
+        "//define/compiler/validator:stats",
+        "//define/compiler/validator:validation_result",
+    ],
+)
+
+py_test(
+    name = "overall_stats_test",
+    size = "small",
+    srcs = ["overall_stats_test.py"],
+    deps = [
+        ":overall_stats",
+        "//define/compiler/data_structures:define_path",
+        "//define/compiler/validator:stats",
+        "//define/compiler/validator:validation_result",
+    ],
+)
+
+py_library(
+    name = "parser",
+    srcs = ["parser.py"],
+    visibility = [
+        "//define/compiler:__subpackages__",
+        "//tools:__subpackages__",
+    ],
+    deps = [
+        ":ast",
+        ":diagnostics",
+        ":indentation_validator",
+        ":parser_error_classification",
+        ":parser_exceptions",
+        ":transformer",
+        "//define/compiler/lark:lark_standalone",
+    ],
+)
+
+py_library(
+    name = "parser_error_classification",
+    srcs = ["parser_error_classification.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":parser_exceptions",
+        "//define/compiler/lark:lark_standalone",
+    ],
+)
+
+py_library(
+    name = "parser_exceptions",
+    srcs = ["parser_exceptions.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":exceptions",
+        "//define/compiler/lark:lark_standalone",
+    ],
+)
+
+py_library(
+    name = "test_helpers",
+    testonly = True,
+    srcs = ["test_helpers.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        ":ast",
+        ":parser",
+    ],
+)
+
+py_library(
+    name = "test_runfiles",
+    testonly = True,
+    srcs = ["test_runfiles.py"],
+    deps = ["@rules_python//python/runfiles"],
+)
+
+py_library(
+    name = "transformer",
+    srcs = ["transformer.py"],
+    visibility = [
+        "//define/compiler:__subpackages__",
+        "//tools:__subpackages__",
+    ],
+    deps = [
+        ":ast",
+        ":name_parser",
+        "//define/compiler/lark:lark_standalone",
+    ],
+)
+
+py_test(
+    name = "transformer_test",
+    size = "small",
+    srcs = ["transformer_test.py"],
+    deps = [
+        ":ast",
+        ":test_helpers",
+    ],
+)
+
+# --- Format checking ---
+
+format_test(
+    name = "format_test",
+    srcs = glob(["*.py"]),
+    python = "@multitool//tools/ruff",
+)
+
+# --- Type-checking ---
+
+# IMPORTANT: When adding a new py_library, py_binary, or py_test target to this
+# package, you must also add it to the deps list below.
+pyright_test(
+    name = "pyright_test",
+    deps = [
+        ":ast",
+        ":ast_test",
+        ":compiler",
+        ":config",
+        ":config_test",
+        ":conftest",
+        ":constants",
+        ":diagnostics",
+        ":diagnostics_test",
+        ":driver",
+        ":driver_fuzz_test",
+        ":driver_run_test",
+        ":driver_test",
+        ":exceptions",
+        ":indentation_validator",
+        ":indentation_validator_test",
+        ":main",
+        ":main_integration_test",
+        ":main_test",
+        ":memory_integration_test",
+        ":memory_limit_runner",
+        ":name_parser",
+        ":name_parser_test",
+        ":overall_stats",
+        ":overall_stats_test",
+        ":parser",
+        ":parser_error_classification",
+        ":parser_exceptions",
+        ":test_helpers",
+        ":test_runfiles",
+        ":transformer",
+        ":transformer_test",
+    ],
+)

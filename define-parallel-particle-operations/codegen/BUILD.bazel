@@ -1,0 +1,189 @@
+load("@aspect_rules_py//py:defs.bzl", "py_library")
+load("//tools/bzl:format.bzl", "format_test")
+load("//tools/bzl:py_test.bzl", "py_test")
+load("//tools/bzl:pyright.bzl", "pyright_test")
+
+py_library(
+    name = "action_plan",
+    srcs = ["action_plan.py"],
+    visibility = ["//define/compiler/codegen:__subpackages__"],
+    deps = [
+        "//define/compiler:ast",
+        "//define/compiler/data_structures:typed_name_dict",
+        "//define/compiler/validator/reference_graph:operation_graph",
+        "//define/compiler/validator/reference_graph:operation_graph_action_resolver",
+        "//define/compiler/validator/reference_graph:operation_graph_model",
+    ],
+)
+
+py_test(
+    name = "callee_codegen_independence_integration_test",
+    size = "small",
+    srcs = ["callee_codegen_independence_integration_test.py"],
+    data = glob(["testdata/callee_codegen_independence/**/*.dfn"]) + [
+        "//define/testdata/reference_graph/operation_graph_destructor_integration:codegen_testdata",
+        "//define/testdata/reference_graph/operation_graph_many_actions_integration:codegen_testdata",
+        "//define/testdata/reference_graph/operation_graph_two_actions_integration:codegen_testdata",
+    ],
+    deps = [
+        ":generated_program_runner",
+        ":test_helpers",
+        "//define/compiler:driver",
+        "//define/compiler/validator:test_helpers",
+        "//define/runtime:literal",  # keep
+        "@pypi//pytest",
+    ],
+)
+
+py_library(
+    name = "codegen",
+    srcs = ["__init__.py"],
+)
+
+py_library(
+    name = "generated_program_runner",
+    srcs = ["generated_program_runner.py"],
+    visibility = ["//tools:__pkg__"],
+)
+
+py_library(
+    name = "generator",
+    srcs = ["generator.py"],
+    visibility = ["//define/compiler:__subpackages__"],
+    deps = [
+        "//define/compiler:ast",
+        "//define/compiler/codegen/literal/python:generator",
+        "//define/compiler/graphs:reference_graph_executor",
+        "//define/compiler/validator/reference_graph:operation_graph",
+    ],
+)
+
+py_library(
+    name = "generator_integration_test",
+    testonly = True,
+    srcs = ["generator_integration_test.py"],
+    visibility = ["//define/testdata/codegen:__pkg__"],
+    deps = [
+        ":generated_program_runner",
+        ":test_helpers",
+        "//define/compiler:driver",
+        "//define/compiler/validator:test_helpers",
+        "//define/runtime:literal",  # keep
+        "@pypi//pytest",
+    ],
+)
+
+# Keep the suite here so agents can discover it and //define/compiler/codegen/... includes it.
+test_suite(
+    name = "generator_integration_tests",
+    tests = ["//define/testdata/codegen:generator_integration_tests"],
+)
+
+py_test(
+    name = "generator_test",
+    size = "small",
+    srcs = ["generator_test.py"],
+    data = ["//define/testdata/codegen/generator"],
+    deps = [
+        ":generator",
+        ":test_helpers",
+        "//define/compiler:conftest",
+        "//define/compiler/validator:test_helpers",
+        "//define/compiler/validator:validation_result",
+        "//define/compiler/validator/reference_graph:reference_graph_validator",
+    ],
+)
+
+py_library(
+    name = "operation_dependency_analysis",
+    testonly = True,
+    srcs = ["operation_dependency_analysis.py"],
+    deps = [
+        "//define/compiler:ast",
+        "//define/compiler/validator/reference_graph:operation_graph",
+        "//define/compiler/validator/reference_graph:operation_graph_labeler",
+        "//define/compiler/validator/reference_graph:operation_graph_renderer",
+        "//define/compiler/validator/reference_graph:operation_graph_resolver",
+        "//define/runtime:tracing",
+    ],
+)
+
+py_test(
+    name = "operation_dependency_analysis_test",
+    size = "small",
+    srcs = ["operation_dependency_analysis_test.py"],
+    deps = [
+        ":operation_dependency_analysis",
+        "//define/runtime:tracing",
+    ],
+)
+
+py_library(
+    name = "test_helpers",
+    testonly = True,
+    srcs = ["test_helpers.py"],
+    deps = ["@pypi//pytest"],
+)
+
+py_test(
+    name = "test_helpers_test",
+    size = "small",
+    srcs = ["test_helpers_test.py"],
+    deps = [
+        ":test_helpers",
+        "@pypi//pytest",
+    ],
+)
+
+py_test(
+    name = "tracing_integration_test",
+    size = "small",
+    srcs = ["tracing_integration_test.py"],
+    data = ["//define/testdata/tracing/tracing_integration"],
+    shard_count = 4,
+    deps = [
+        ":generated_program_runner",
+        ":operation_dependency_analysis",
+        ":test_helpers",
+        "//define/compiler:driver",
+        "//define/compiler/validator:test_helpers",
+        "@pypi//pytest",
+    ],
+)
+
+filegroup(
+    name = "generator_test_sources",
+    testonly = True,
+    srcs = ["generator_test.py"],
+    visibility = ["//define/testdata:__pkg__"],
+)
+
+# --- Format checking ---
+
+format_test(
+    name = "format_test",
+    srcs = glob(["*.py"]),
+    python = "@multitool//tools/ruff",
+)
+
+# --- Type-checking ---
+
+# IMPORTANT: When adding a new py_library, py_binary, or py_test target to this
+# package, you must also add it to the deps list below.
+pyright_test(
+    name = "pyright_test",
+    deps = [
+        ":action_plan",
+        ":callee_codegen_independence_integration_test",
+        ":codegen",
+        ":generated_program_runner",
+        ":generator",
+        ":generator_integration_test",
+        ":generator_test",
+        ":operation_dependency_analysis",
+        ":operation_dependency_analysis_test",
+        ":test_helpers",
+        ":test_helpers_test",
+        ":tracing_integration_test",
+    ],
+)

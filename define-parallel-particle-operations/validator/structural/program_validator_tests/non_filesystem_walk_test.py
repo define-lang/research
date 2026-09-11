@@ -1,0 +1,375 @@
+# pyright: reportUnusedCallResult=false
+"""Non-filesystem cross-file walking validation tests.
+
+Follow program validator test authoring rules in program_validator_tests/AGENTS.md.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from define.compiler import config, diagnostics
+from define.compiler.data_structures import define_path
+from define.compiler.validator.test_helpers import assert_no_errors
+
+if TYPE_CHECKING:
+    from define.compiler.conftest import ValidateTestdataStructuralNonFilesystem
+
+
+def test_external_universe_no_project_config(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    results = result.file_results
+    diags = results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(
+        diags[0], diagnostics.NoProjectRootInNonFilesystemContextDiagnostic
+    )
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert diags[0].universe == "other.example.com:other_universe"
+    assert diags[0].config_path == ".define/project/config.defcl"
+
+
+def test_config_failure_still_validates_same_file_cycles(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 1
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 2
+    assert isinstance(diags[0], diagnostics.CircularGlobalReferenceDiagnostic)
+    assert diags[0].location.line == 9
+    assert diags[0].location.column == 20
+    assert diags[0].cycle == [
+        "position<my.domain.com:my_lib:/a>",
+        "position<my.domain.com:my_lib:/b>",
+        "position<my.domain.com:my_lib:/a>",
+    ]
+    assert isinstance(
+        diags[1], diagnostics.NoProjectRootInNonFilesystemContextDiagnostic
+    )
+    assert diags[1].location.line == 3
+    assert diags[1].location.column == 29
+    assert diags[1].universe == "other.example.com:other_universe"
+
+
+def test_external_universe_without_local_deps(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    results = result.file_results
+    diags = results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert diags[0].universe == "other.example.com:other_universe"
+    assert diags[0].current_universe_name == "my.domain.com:my_lib"
+
+
+def test_external_universe_not_in_local_deps(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    results = result.file_results
+    diags = results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert diags[0].universe == "other.example.com:other_universe"
+    assert diags[0].current_universe_name == "my.domain.com:my_lib"
+
+
+def test_external_universe_invalid_local_deps(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    results = result.file_results
+    diags = results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ConfigLoadErrorDiagnostic)
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert isinstance(diags[0].error, config.ConfigValidationError)
+
+
+def test_external_universe_configured_but_no_sub_root_config(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    results = result.file_results
+    diags = results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ConfigLoadErrorDiagnostic)
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert isinstance(diags[0].error, config.NotProjectRootError)
+
+
+def test_partial_local_deps_missing_still_validates_configured_sub_roots_non_filesystem(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    child_b = "mv:define-lang.org:child_b"
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 2
+    assert result.file_results[0].exception is None
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[0].location.line == 4
+    assert diags[0].location.column == 29
+    assert diags[0].universe == child_b
+    assert diags[0].current_universe_name == "my.domain.com:my_lib"
+    assert result.file_results[1].file_path.name == "target_a.dfn"
+    assert result.file_results[1].exception is None
+    assert result.file_results[1].diagnostics == []
+
+
+def test_duplicate_unknown_universe_non_filesystem_does_not_skip_remaining(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    results = result.file_results
+    diags = results[0].diagnostics
+    assert len(diags) == 2
+    assert isinstance(diags[0], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[0].universe == "unknown.com:lib_a"
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert isinstance(diags[1], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[1].universe == "unknown.com:lib_b"
+    assert diags[1].location.line == 5
+    assert diags[1].location.column == 29
+
+
+def test_non_filesystem_reference_walks_into_sub_root(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert len(result.file_results) == 3
+    assert_no_errors(result)
+    assert str(result.file_results[0].file_path) == "<string>"
+    assert result.file_results[1].file_path == define_path.DefinePath("lib/target.dfn")
+    assert result.file_results[1].root_prefix == define_path.DefinePath("lib")
+    assert result.file_results[2].file_path == define_path.DefinePath("lib/leaf.dfn")
+    assert result.file_results[2].root_prefix == define_path.DefinePath("lib")
+
+
+def test_back_reference_to_earlier_definition_does_not_load_file_non_filesystem(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert len(result.file_results) == 2
+    assert_no_errors(result)
+    assert str(result.file_results[0].file_path) == "<string>"
+    assert result.file_results[1].file_path == define_path.DefinePath("lib/target.dfn")
+
+
+def test_same_target_file_referenced_as_two_types_loads_once_non_filesystem(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert len(result.file_results) == 2
+    assert result.all_exceptions == []
+    assert str(result.file_results[0].file_path) == "<string>"
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ReferencedDefinitionNotFoundDiagnostic)
+    assert diags[0].file_path == "lib/target.dfn"
+    assert diags[0].definition_name == (
+        "action<mv:define-lang.org:child_universe:/target>"
+    )
+    assert diags[0].location.line == 4
+    assert diags[0].location.column == 27
+    assert result.file_results[1].file_path == define_path.DefinePath("lib/target.dfn")
+    assert result.file_results[1].diagnostics == []
+
+
+def test_non_filesystem_cross_universe_reference(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 2
+    assert str(result.file_results[0].file_path) == "<string>"
+    assert result.file_results[0].exception is None
+    assert len(result.file_results[0].diagnostics) == 1
+    diag = result.file_results[0].diagnostics[0]
+    assert isinstance(diag, diagnostics.ReferencedFileNotFoundDiagnostic)
+    assert diag.file_path == "lib/missing.dfn"
+    assert diag.location.line == 4
+    assert diag.location.column == 29
+    assert result.file_results[1].file_path == define_path.DefinePath("lib/target.dfn")
+    assert result.file_results[1].root_prefix == define_path.DefinePath("lib")
+    assert result.file_results[1].exception is None
+    assert result.file_results[1].diagnostics == []
+
+
+def test_unknown_universe_does_not_block_known_universe_for_same_path(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 2
+    assert str(result.file_results[0].file_path) == "<string>"
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 1
+    assert isinstance(diags[0], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[0].universe == "unknown.com:other_lib"
+    assert diags[0].current_universe_name == "my.domain.com:my_lib"
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert result.file_results[1].file_path == define_path.DefinePath("lib/target.dfn")
+    assert result.file_results[1].root_prefix == define_path.DefinePath("lib")
+    assert result.file_results[1].diagnostics == []
+
+
+def test_unknown_universe_and_sub_root_config_errors_in_source_order(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 1
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 2
+    assert isinstance(diags[0], diagnostics.ConfigLoadErrorDiagnostic)
+    assert isinstance(diags[0].error, config.NotProjectRootError)
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert isinstance(diags[1], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[1].universe == "unknown.com:other_lib"
+    assert diags[1].current_universe_name == "my.domain.com:my_lib"
+    assert diags[1].location.line == 4
+    assert diags[1].location.column == 29
+
+
+def test_two_unknown_universes_for_same_path_each_diagnosed(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 1
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 2
+    assert isinstance(diags[0], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[0].universe == "unknown.com:lib_a"
+    assert diags[0].current_universe_name == "my.domain.com:my_lib"
+    assert diags[0].location.line == 3
+    assert diags[0].location.column == 29
+    assert isinstance(diags[1], diagnostics.ExternalUniverseNotConfiguredDiagnostic)
+    assert diags[1].universe == "unknown.com:lib_b"
+    assert diags[1].current_universe_name == "my.domain.com:my_lib"
+    assert diags[1].location.line == 4
+    assert diags[1].location.column == 29
+
+
+def test_two_known_universes_for_same_path_each_load_their_file(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    child_x = "mv:define-lang.org:child_x"
+    child_y = "mv:define-lang.org:child_y"
+    result = validate_testdata_structural_non_filesystem(max_workers=1)
+    assert len(result.file_results) == 5
+    assert_no_errors(result)
+    assert str(result.file_results[0].file_path) == "<string>"
+    assert result.file_results[1].file_path == define_path.DefinePath(
+        "lib_x/target.dfn"
+    )
+    assert result.file_results[1].root_prefix == define_path.DefinePath("lib_x")
+    assert (
+        result.file_results[1]
+        .definition_results[0]
+        .definition.typed_name.full_typed_name
+        == f"position<{child_x}:/target>"
+    )
+    assert result.file_results[2].file_path == define_path.DefinePath(
+        "lib_y/target.dfn"
+    )
+    assert result.file_results[2].root_prefix == define_path.DefinePath("lib_y")
+    assert (
+        result.file_results[2]
+        .definition_results[0]
+        .definition.typed_name.full_typed_name
+        == f"position<{child_y}:/target>"
+    )
+    assert result.file_results[3].file_path == define_path.DefinePath(
+        "lib_x/x_child.dfn"
+    )
+    assert result.file_results[4].file_path == define_path.DefinePath(
+        "lib_y/y_child.dfn"
+    )
+
+
+def test_forward_reference_within_non_filesystem_source_reports_missing_file(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 1
+    diags = result.file_results[0].diagnostics
+    assert len(diags) == 1
+    diag = diags[0]
+    assert isinstance(diag, diagnostics.ReferencedFileNotFoundDiagnostic)
+    assert diag.file_path == "b.dfn"
+    assert diag.location.line == 5
+    assert diag.location.column == 29
+
+
+def test_non_filesystem_reference_walks_into_current_universe_file(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert len(result.file_results) == 3
+    assert_no_errors(result)
+    assert str(result.file_results[0].file_path) == "<string>"
+    assert result.file_results[1].file_path == define_path.DefinePath("target.dfn")
+    assert result.file_results[2].file_path == define_path.DefinePath("leaf.dfn")
+
+
+def test_non_filesystem_file_back_reference_reports_cycle(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []
+    assert len(result.file_results) == 2
+    assert result.file_results[0].diagnostics == []
+    assert result.file_results[1].file_path == define_path.DefinePath("target.dfn")
+    diags = result.file_results[1].diagnostics
+    assert len(diags) == 1
+    diag = diags[0]
+    assert isinstance(diag, diagnostics.CircularGlobalReferenceDiagnostic)
+    assert diag.location.line == 3
+    assert diag.location.column == 20
+    assert diag.cycle == [
+        "position<my.domain.com:my_lib:/test>",
+        "position<my.domain.com:my_lib:/target>",
+        "position<my.domain.com:my_lib:/test>",
+    ]
+
+
+def test_filesystem_reference_to_non_filesystem_definition_is_valid(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert len(result.file_results) == 2
+    assert_no_errors(result)
+    assert str(result.file_results[0].file_path) == "<string>"
+    assert result.file_results[1].file_path == define_path.DefinePath("target.dfn")
+
+
+def test_non_filesystem_cross_universe_back_reference(
+    validate_testdata_structural_non_filesystem: ValidateTestdataStructuralNonFilesystem,
+):
+    result = validate_testdata_structural_non_filesystem()
+    assert result.all_exceptions == []

@@ -1,0 +1,148 @@
+"""Validate Particle Operations against tracked Position state."""
+
+from __future__ import annotations
+
+import typing
+
+from define.compiler import diagnostics
+
+if typing.TYPE_CHECKING:
+    from define.compiler import ast
+    from define.compiler.validator.reference_graph import particle_tracker
+
+
+class ParticleOperationValidator:
+    """Check whether Particle Operations are valid."""
+
+    _tracker: particle_tracker.ParticleTracker
+    _enclosing_fqun: ast.Fqun
+
+    def __init__(
+        self, tracker: particle_tracker.ParticleTracker, enclosing_fqun: ast.Fqun
+    ):
+        """Validate against this action's tracked Position state."""
+        self._tracker = tracker
+        self._enclosing_fqun = enclosing_fqun
+
+    def validate_create(
+        self, target: ast.PositionReference
+    ) -> diagnostics.Diagnostic | None:
+        """Validate a Create."""
+        parent_diagnostic = self._check_parents_occupied(target)
+        if parent_diagnostic is not None:
+            self._tracker.mark_error(target)
+            return parent_diagnostic
+        if self._tracker.is_occupied(target):
+            # Target is genuinely occupied — leave its known state intact so
+            # later statements can still reason about the existing particle.
+            return diagnostics.CreateInOccupiedPositionDiagnostic(
+                location=target.location,
+                position_name=target.source_chained_name,
+                populated_at=self._tracker.get_occupant(target).last_position.location,
+            )
+        return None
+
+    def validate_move(
+        self,
+        source: ast.PositionReference,
+        target: ast.PositionReference,
+        target_required_qualities: tuple[ast.GlobalTypedNameReference, ...],
+    ) -> list[diagnostics.Diagnostic]:
+        """Validate a Move."""
+        parent_diags: list[diagnostics.Diagnostic] = []
+        for position in (source, target):
+            parent_diagnostic = self._check_parents_occupied(position)
+            if parent_diagnostic is not None:
+                parent_diags.append(parent_diagnostic)
+        if parent_diags:
+            self._tracker.mark_error(source)
+            self._tracker.mark_error(target)
+            return parent_diags
+        from_occupied = self._tracker.is_occupied(source)
+        to_empty = not self._tracker.is_occupied(target)
+        diags: list[diagnostics.Diagnostic] = []
+        if not from_occupied:
+            from_action = source.get_last_action()
+            is_action_interface_position = from_action is not None
+            emptied_by = (
+                self._tracker.get_emptied_by(source)
+                if is_action_interface_position
+                else None
+            )
+            diags.append(
+                diagnostics.MoveFromEmptyPositionDiagnostic(
+                    location=source.location,
+                    position_name=source.source_chained_name,
+                    is_action_interface_position=is_action_interface_position,
+                    inferred_at=emptied_by.location if emptied_by else None,
+                )
+            )
+        if not to_empty:
+            occupant = self._tracker.get_occupant(target)
+            diags.append(
+                diagnostics.MoveToOccupiedPositionDiagnostic(
+                    location=target.location,
+                    position_name=target.source_chained_name,
+                    occupied_at=occupant.last_position.location,
+                )
+            )
+        if diags:
+            self._tracker.mark_error(source)
+            self._tracker.mark_error(target)
+            return diags
+        have = self._tracker.get_occupant(source).qualities
+        missing = [
+            name.source_form_in_universe(self._enclosing_fqun)
+            for name in target_required_qualities
+            if not have.has_quality(name)
+        ]
+        if missing:
+            self._tracker.mark_error(source)
+            self._tracker.mark_error(target)
+            return [
+                diagnostics.MoveViolatesConstraintsDiagnostic(
+                    location=target.location,
+                    source_position=source.source_chained_name,
+                    target_position=target.source_chained_name,
+                    missing_qualities=missing,
+                )
+            ]
+        return []
+
+    def validate_destroy(
+        self,
+        target: ast.PositionReference,
+    ) -> diagnostics.Diagnostic | None:
+        """Validate a Destroy."""
+        parent_diagnostic = self._check_parents_occupied(target)
+        if parent_diagnostic is not None:
+            self._tracker.mark_error(target)
+            return parent_diagnostic
+        if not self._tracker.is_occupied(target):
+            self._tracker.mark_error(target)
+            from_action = target.get_last_action()
+            if from_action is not None:
+                emptied_by = self._tracker.get_emptied_by(target)
+                return diagnostics.DestroyInEmptyInterfacePositionDiagnostic(
+                    location=target.location,
+                    position_name=target.source_chained_name,
+                    inferred_at=emptied_by.location if emptied_by else None,
+                )
+            return diagnostics.DestroyInEmptyPositionDiagnostic(
+                location=target.location,
+                position_name=target.source_chained_name,
+            )
+        return None
+
+    def _check_parents_occupied(
+        self, target: ast.PositionReference
+    ) -> diagnostics.ParentPositionNotOccupiedDiagnostic | None:
+        """Report the first unoccupied parent position in chained-name order."""
+        parent_position = self._tracker.first_unoccupied_parent(target)
+        if parent_position is None:
+            return None
+        return diagnostics.ParentPositionNotOccupiedDiagnostic(
+            location=target.location,
+            position_name=target.source_chained_name,
+            parent_position_name=parent_position.source_chained_name,
+        )
