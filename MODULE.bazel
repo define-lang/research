@@ -10,7 +10,7 @@ bazel_dep(name = "re2", version = "2025-11-05")
 
 git_override(
     module_name = "define",
-    commit = "c2b03d0faa9dfc6ac12e6eee41538dcbb4afd583",
+    commit = "35a2819fd4b9ee0881947222f6d799769d384265",
     remote = "https://github.com/define-lang/define.git",
 )
 
