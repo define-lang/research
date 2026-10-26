@@ -56,6 +56,17 @@ lake.workspace(
     lake_manifest = "//:lake-manifest.json",
     lakefile = "//:lakefile.lean",
     lean_toolchain = "//:lean-toolchain",
+    # Fetch only the Mathlib modules the proofs import, not all of Mathlib.
+    cache_roots = [
+        "Mathlib.Analysis.Calculus.Deriv.Add",
+        "Mathlib.Analysis.Calculus.Deriv.Inv",
+        "Mathlib.Analysis.Calculus.Deriv.Mul",
+        "Mathlib.Analysis.Calculus.Deriv.Pow",
+        "Mathlib.Tactic.FieldSimp",
+        "Mathlib.Tactic.LinearCombination",
+        "Mathlib.Tactic.Linarith",
+        "Mathlib.Tactic.Positivity",
+    ],
 )
 use_repo(lake, "research_lean")
 
