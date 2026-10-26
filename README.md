@@ -6,3 +6,7 @@ The [complete Particle Operation algorithm simplification experiments](operation
 compare broad Vanish recording, separate Vacates and Vanishes, and the existing
 Collection and Comparison optimizations, with correctness checks and preserved
 benchmark data.
+
+The [single-use expression proofs](single_use_expression_proofs/README.md) prove,
+in English and in Lean, that linear interpolation has no single-use arithmetic
+form.
