@@ -629,7 +629,7 @@
     },
     "@@rules_lean+//lean:lake.bzl%lake": {
       "general": {
-        "bzlTransitiveDigest": "aPkIHVzLdKk7M5dLQvp7CTCytLzOfKrd3uxlAiQhJ0A=",
+        "bzlTransitiveDigest": "gQFTO1x2/XssMD1SGXlpFitXyjIsOixzLcn6XE+Rbq0=",
         "usagesDigest": "JFNaj3Y8zkhp6UiMAdr4bfhFLabSCCX1gWDbg0vGyWA=",
         "recordedInputs": [
           "FILE:@@//lean-toolchain 2bdc48adfa58d0017e538a0ad117c5d73d35deec879978f909406a80c8037273",
