@@ -17,7 +17,7 @@ git_override(
 # Define's overrides must also be declared by its consumers.
 git_override(
     module_name = "aspect_rules_py",
-    commit = "edfd58e83d9828b47783687fd6960c3121a7ba82",
+    commit = "63937f7e5ea07749facb748b0f639637d2ae8db3",
     remote = "https://github.com/aspect-build/rules_py.git",
 )
 
