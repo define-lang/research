@@ -27,6 +27,8 @@ required-imports = ["from __future__ import annotations"]
 convention = "pep257"
 
 [tool.basedpyright]
+venvPath = "."
+venv = ".venv"
 include = ["destruction_contract_benchmarks", "operation_graph_optimization"]
 exclude = ["bazel-*", ".venv", "**/__pycache__"]
 extraPaths = ["bazel-bin/operation_graph_optimization/algorithm_integration_test.runfiles/define+"]

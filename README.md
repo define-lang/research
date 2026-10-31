@@ -2,6 +2,11 @@
 
 This is a record of various research work that I do during the development of [Define](/define-lang/define). This repo is mostly an archive of research that was interesting but not worth preserving permanently as part of the main Define repo.
 
+To run the Python type checks, first run `bazelisk build //...`, then
+`uv run --frozen basedpyright`. Basedpyright uses the project's `.venv` for
+installed dependencies and Bazel's test runfiles for the Define compiler,
+including its generated parser. Rebuild if those runfiles are missing or stale.
+
 The [complete Particle Operation algorithm simplification experiments](operation_graph_optimization/simplification_experiments.md)
 compare broad Vanish recording, separate Vacates and Vanishes, and the existing
 Collection and Comparison optimizations, with correctness checks and preserved
