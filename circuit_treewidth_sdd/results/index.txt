@@ -1,0 +1,3 @@
+m=1 n=3 pw=4 width_final=5 constructed_sdd=12 canonical_sdd_same_vtree=7 obdd_same_order_as_sdd=2 order=[2, 0, 1]
+m=2 n=6 pw=5 width_final=8 constructed_sdd=244 canonical_sdd_same_vtree=168 obdd_same_order_as_sdd=46 order=[1, 0, 2, 4, 3, 5]
+m=3 n=11 pw=6 width_final=9 constructed_sdd=1694 canonical_sdd_same_vtree=16044 obdd_same_order_as_sdd=1246 order=[1, 0, 2, 3, 4, 5, 6, 8, 7, 9, 10]

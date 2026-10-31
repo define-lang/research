@@ -10,3 +10,7 @@ benchmark data.
 The [single-use expression proofs](single_use_expression_proofs/README.md) prove,
 in English and in Lean, that linear interpolation has no single-use arithmetic
 form.
+
+The [circuit treewidth SDD proofs](circuit_treewidth_sdd/README.md) show, in
+English and partly in Lean, that circuits of treewidth k have sentential
+decision diagrams of size n·2^O(k) over their inputs.

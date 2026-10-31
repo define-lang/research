@@ -1,0 +1,10 @@
+n=4 max_width_final=6 mean_sdd_size=35.0 mean_size_per_input=8.8 max_sdd_size=40
+n=5 max_width_final=6 mean_sdd_size=64.2 mean_size_per_input=12.8 max_sdd_size=94
+n=6 max_width_final=6 mean_sdd_size=72.0 mean_size_per_input=12.0 max_sdd_size=129
+n=7 max_width_final=6 mean_sdd_size=116.6 mean_size_per_input=16.7 max_sdd_size=212
+n=8 max_width_final=7 mean_sdd_size=134.8 mean_size_per_input=16.9 max_sdd_size=222
+n=9 max_width_final=7 mean_sdd_size=132.0 mean_size_per_input=14.7 max_sdd_size=198
+n=10 max_width_final=9 mean_sdd_size=171.2 mean_size_per_input=17.1 max_sdd_size=224
+n=11 max_width_final=7 mean_sdd_size=163.4 mean_size_per_input=14.9 max_sdd_size=192
+n=12 max_width_final=6 mean_sdd_size=278.2 mean_size_per_input=23.2 max_sdd_size=320
+n=13 max_width_final=6 mean_sdd_size=275.8 mean_size_per_input=21.2 max_sdd_size=356
