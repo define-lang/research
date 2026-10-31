@@ -1,0 +1,53 @@
+load("@rules_lean//lean:lean.bzl", "lean_axiom_test", "lean_library")
+
+MATHLIB_DEPS = [
+    "@research_lean//:LeanSearchClient",
+    "@research_lean//:Qq",
+    "@research_lean//:aesop",
+    "@research_lean//:batteries",
+    "@research_lean//:importGraph",
+    "@research_lean//:mathlib",
+    "@research_lean//:plausible",
+    "@research_lean//:proofwidgets",
+]
+
+lean_library(
+    name = "hwb_circuit_pathwidth",
+    srcs = ["hwb_circuit_pathwidth.lean"],
+    deps = MATHLIB_DEPS,
+)
+
+lean_axiom_test(
+    name = "hwb_circuit_pathwidth_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["hwb_circuit_pathwidth"],
+    theorems = [
+        "Define.CircuitTreewidthCanonicalSdd.exists_bits",
+        "Define.CircuitTreewidthCanonicalSdd.hwb_circuit",
+    ],
+    deps = [":hwb_circuit_pathwidth"],
+)
+
+lean_library(
+    name = "capelli_counterexample",
+    srcs = ["capelli_counterexample.lean"],
+    deps = MATHLIB_DEPS,
+)
+
+lean_axiom_test(
+    name = "capelli_counterexample_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["capelli_counterexample"],
+    theorems = ["Define.CircuitTreewidthCanonicalSdd.Capelli.capelli_claim_fails"],
+    deps = [":capelli_counterexample"],
+)

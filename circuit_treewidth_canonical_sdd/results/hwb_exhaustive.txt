@@ -1,0 +1,10 @@
+n=2 vtrees=2 min_canonical_size=0 best_vtree=(0 1)
+n=3 vtrees=12 min_canonical_size=2 best_vtree=(2 (0 1))
+n=4 vtrees=120 min_canonical_size=10 best_vtree=(0 (2 (1 3)))
+n=5 vtrees=1680 min_canonical_size=22 best_vtree=(0 (1 (3 (2 4))))
+n=6 vtrees=30240 min_canonical_size=34 best_vtree=(0 (4 (5 (2 (1 3)))))
+n=7 vtrees=665280 min_canonical_size=56 best_vtree=(0 (5 (6 (1 (3 (2 4))))))
+
+real	0m19.048s
+user	0m18.965s
+sys	0m0.052s

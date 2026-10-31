@@ -1,0 +1,13 @@
+check: 200 random automata of depth 3 agree with the canon tool
+states: best random automaton (by decisions at one node at the largest depth)
+  depth d, vtree with 2^d variables: most decision nodes at one vtree node
+m=3 reachable=3 nonconstant_sets=6 by_depth=[2, 3, 5, 6, 6, 6, 6, 6, 6, 6] size_by_depth=[9, 43, 119, 273, 581, 1197, 2429, 4893, 9821, 19677]
+m=4 reachable=4 nonconstant_sets=14 by_depth=[2, 4, 9, 12, 14, 14, 14, 14, 14, 14] size_by_depth=[11, 47, 157, 407, 962, 2121, 4473, 9191, 18631, 37511]
+m=5 reachable=5 nonconstant_sets=30 by_depth=[3, 6, 11, 22, 29, 30, 30, 30, 30, 30] size_by_depth=[11, 69, 260, 820, 2162, 5051, 10937, 22743, 46359, 93591]
+m=6 reachable=6 nonconstant_sets=62 by_depth=[2, 3, 8, 21, 42, 60, 62, 62, 62, 62] size_by_depth=[8, 29, 122, 431, 1361, 3734, 8910, 19468, 40692, 83228]
+m=8 reachable=8 nonconstant_sets=254 by_depth=[3, 5, 14, 33, 68, 163, 232, 242, 242, 242] size_by_depth=[13, 63, 330, 1375, 4530, 13238, 33436, 75109, 158684, 325852]
+m=10 reachable=10 nonconstant_sets=1022 by_depth=[2, 8, 62, 202, 462, 800, 874, 882, 884, 884] size_by_depth=[9, 71, 466, 2495, 10558, 33361, 88992, 213420, 472080, 994303]
+
+real	1m49.253s
+user	1m48.824s
+sys	0m0.204s

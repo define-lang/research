@@ -24,7 +24,9 @@ exponent.**
   can be left-linear (every right child a leaf), with at most n·2^(24k+56)
   elements. In contrast, the best known bound for OBDDs, which are SDDs on
   right-linear vtrees, is doubly exponential in the pathwidth, and whether that
-  is needed is open.
+  is needed is open. (The later study in
+  [circuit_treewidth_canonical_sdd](../circuit_treewidth_canonical_sdd/README.md)
+  settles this: Corollary 4.1 there shows the doubly exponential width is needed.)
 - **Unambiguous OBDDs (Corollary 1.3).** If f and ¬f have complete unambiguous
   OBDDs with the same order and width W, then f has an SDD of size O(n·W⁸) on
   the left-linear vtree for that order, with no auxiliary variables. Bollig and

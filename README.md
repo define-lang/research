@@ -14,3 +14,8 @@ form.
 The [circuit treewidth SDD proofs](circuit_treewidth_sdd/README.md) show, in
 English and partly in Lean, that circuits of treewidth k have sentential
 decision diagrams of size n·2^O(k) over their inputs.
+
+The [circuit treewidth canonical SDD study](circuit_treewidth_canonical_sdd/README.md)
+asks the same question for canonical (compressed) SDDs: it gives the best known
+bounds and the gap between them, and shows, partly in Lean, that OBDDs for
+circuits of pathwidth k need doubly exponential width.

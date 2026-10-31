@@ -1,0 +1,12 @@
+n=8 best_found=82 left_linear=802 right_linear=106 best_vtree=(7 (6 (0 (1 (5 (2 (4 3)))))))
+n=9 best_found=113 left_linear=1743 right_linear=162 best_vtree=(8 (7 (0 (1 (6 ((5 4) (3 2)))))))
+n=10 best_found=152 left_linear=3588 right_linear=234 best_vtree=(8 (9 (0 (1 (7 ((2 6) (3 (4 5))))))))
+n=11 best_found=201 left_linear=7197 right_linear=336 best_vtree=(10 (0 (8 (9 (1 (2 ((6 7) (5 (4 3)))))))))
+n=12 best_found=254 left_linear=14138 right_linear=472 best_vtree=(0 (10 (11 (1 (9 ((2 8) ((3 4) (7 (5 6)))))))))
+n=13 best_found=318 left_linear=27281 right_linear=662 best_vtree=(11 (0 (12 (1 ((10 9) ((3 2) ((8 7) (4 (6 5)))))))))
+n=14 best_found=425 left_linear=51507 right_linear=910 best_vtree=(0 (13 (12 (11 ((3 1) ((10 9) (2 ((4 5) (8 (6 7))))))))))
+n=15 best_found=531 left_linear=95554 right_linear=1252 best_vtree=(13 (14 (12 (0 (1 ((2 3) ((9 10) ((8 11) (7 (6 (4 5)))))))))))
+
+real	0m40.714s
+user	0m40.641s
+sys	0m0.003s
