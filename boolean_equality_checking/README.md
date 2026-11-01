@@ -16,6 +16,8 @@ and how many planted equalities each one finds.
   each shows (Experiments 1–11).
 - [arguments.md](arguments.md): the conclusions that come from reasoning
   instead of measurement.
+- [related_work.md](related_work.md): a literature search on how close
+  existing systems and papers come to DLPs 57–59 and these algorithms.
 - Three follow-up studies:
   - [matching.md](matching.md): whether DLP 57's rule against writing out a
     registered operation could be exact.
