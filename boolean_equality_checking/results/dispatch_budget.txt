@@ -1,0 +1,5 @@
+budget 0: total 12.090 s, operations 0.0615 s, adversarial 12.029 s, worst ratio to the best budget 250.6, paths {'sweep': 111, 'tt': 32}
+budget 4: total 12.180 s, operations 0.0764 s, adversarial 12.104 s, worst ratio to the best budget 250.0, paths {'sweep': 105, 'tt': 32, 'bdd': 6}
+budget 16: total 12.077 s, operations 0.0848 s, adversarial 11.992 s, worst ratio to the best budget 44.2, paths {'sweep': 58, 'tt': 32, 'bdd': 53}
+budget 64: total 12.323 s, operations 0.1414 s, adversarial 12.181 s, worst ratio to the best budget 10.7, paths {'bdd': 87, 'sweep': 24, 'tt': 32}
+143 instances; identical classes with every budget: True

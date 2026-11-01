@@ -1,0 +1,22 @@
+{"group": "program_t200_c1000", "config": "abc_&fraig", "instances": 1, "planted_total": 49, "status": "ok", "time_s": 0.053953349124640226, "peak_rss_kb": 17572, "planted_found": 49}
+{"group": "program_t200_c1000", "config": "abc_&fraig_x", "instances": 1, "planted_total": 49, "status": "ok", "time_s": 0.03833897411823273, "peak_rss_kb": 13464, "planted_found": 49}
+{"group": "program_t200_c1000_r50", "config": "abc_&fraig", "instances": 1, "planted_total": 35, "status": "ok", "time_s": 0.0030294799944385886, "peak_rss_kb": 14784, "planted_found": 35}
+{"group": "program_t200_c1000_r50", "config": "abc_&fraig_x", "instances": 1, "planted_total": 35, "status": "ok", "time_s": 0.01033584598917514, "peak_rss_kb": 12100, "planted_found": 35}
+{"group": "program_t200_c4000_r50", "config": "abc_&fraig", "instances": 1, "planted_total": 112, "status": "ok", "time_s": 0.08704088185913861, "peak_rss_kb": 17736, "planted_found": 112}
+{"group": "program_t200_c4000_r50", "config": "abc_&fraig_x", "instances": 1, "planted_total": 112, "status": "ok", "time_s": 0.03591836988925934, "peak_rss_kb": 14080, "planted_found": 112}
+{"group": "program_t200_c4000", "config": "abc_&fraig", "instances": 1, "planted_total": 118, "status": "ok", "time_s": 0.26445877202786505, "peak_rss_kb": 20224, "planted_found": 118}
+{"group": "program_t200_c4000", "config": "abc_&fraig_x", "instances": 1, "planted_total": 118, "status": "ok", "time_s": 0.09646385605446994, "peak_rss_kb": 16144, "planted_found": 118}
+{"group": "program_t200_c16000_r50", "config": "abc_&fraig", "instances": 1, "planted_total": 421, "status": "ok", "time_s": 0.20109877898357809, "peak_rss_kb": 22788, "planted_found": 421}
+{"group": "program_t200_c16000_r50", "config": "abc_&fraig_x", "instances": 1, "planted_total": 421, "status": "ok", "time_s": 0.07681358803529292, "peak_rss_kb": 18940, "planted_found": 421}
+{"group": "program_t200_c16000", "config": "abc_&fraig", "instances": 1, "planted_total": 489, "status": "ok", "time_s": 8.564688571961597, "peak_rss_kb": 33944, "planted_found": 489}
+{"group": "program_t200_c16000", "config": "abc_&fraig_x", "instances": 1, "planted_total": 489, "status": "ok", "time_s": 2.8468839819543064, "peak_rss_kb": 38196, "planted_found": 489}
+{"group": "program_t200_c64000_r50", "config": "abc_&fraig", "instances": 1, "planted_total": 1743, "status": "ok", "time_s": 1.8296614481369033, "peak_rss_kb": 38372, "planted_found": 1743}
+{"group": "program_t200_c64000_r50", "config": "abc_&fraig_x", "instances": 1, "planted_total": 1743, "status": "ok", "time_s": 0.4081382971489802, "peak_rss_kb": 39168, "planted_found": 1743}
+{"group": "program_t200_c64000", "config": "abc_&fraig", "instances": 1, "planted_total": 2029, "status": "ok", "time_s": 324.22353829594795, "peak_rss_kb": 94772, "planted_found": 2029}
+{"group": "program_t200_c64000", "config": "abc_&fraig_x", "instances": 1, "planted_total": 2029, "status": "ok", "time_s": 40.30847725493368, "peak_rss_kb": 108152, "planted_found": 2029}
+{"group": "program_t200_c256000_r50", "config": "abc_&fraig", "instances": 1, "planted_total": 6875, "status": "ok", "time_s": 10.944417131016962, "peak_rss_kb": 108416, "planted_found": 6875}
+{"group": "program_t200_c256000_r50", "config": "abc_&fraig_x", "instances": 1, "planted_total": 6875, "status": "ok", "time_s": 2.692399404128082, "peak_rss_kb": 107816, "planted_found": 6875}
+{"group": "program_t200_c256000", "config": "abc_&fraig", "instances": 1, "planted_total": 7905, "status": "timeout", "time_s": 1800}
+{"group": "program_t200_c256000", "config": "abc_&fraig_x", "instances": 1, "planted_total": 7905, "status": "ok", "time_s": 660.6838789189933, "peak_rss_kb": 389460, "planted_found": 7905}
+{"group": "program_t200_c1000000_r50", "config": "abc_&fraig", "instances": 1, "planted_total": 25680, "status": "ok", "time_s": 69.74479381600395, "peak_rss_kb": 355348, "planted_found": 25680}
+{"group": "program_t200_c1000000_r50", "config": "abc_&fraig_x", "instances": 1, "planted_total": 25680, "status": "ok", "time_s": 12.134624325903133, "peak_rss_kb": 336268, "planted_found": 25680}

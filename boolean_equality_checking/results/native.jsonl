@@ -1,0 +1,168 @@
+{"instance": "hwb_i12", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.014262857963331044, "status": "equal", "peak_rss_kb": 4328}
+{"instance": "hwb_i12", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.015489692916162312, "status": "equal", "peak_rss_kb": 6128}
+{"instance": "hwb_i16", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.029653289006091654, "status": "equal", "peak_rss_kb": 6352}
+{"instance": "hwb_i16", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.02983517199754715, "status": "equal", "peak_rss_kb": 4516}
+{"instance": "hwb_i20", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.05888147302903235, "status": "equal", "peak_rss_kb": 6584}
+{"instance": "hwb_i24", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.09178530494682491, "status": "equal", "peak_rss_kb": 6904}
+{"instance": "hwb_i20", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.12316219694912434, "status": "equal", "peak_rss_kb": 4836}
+{"instance": "hwb_i24", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.14480566105339676, "status": "equal", "peak_rss_kb": 4772}
+{"instance": "hwb_i28", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.15344672405626625, "status": "equal", "peak_rss_kb": 6984}
+{"instance": "hwb_i28", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.2552609109552577, "status": "equal", "peak_rss_kb": 5512}
+{"instance": "hwb_i32", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.2552477309945971, "status": "equal", "peak_rss_kb": 7428}
+{"instance": "hwb_i8", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.005897797993384302, "status": "equal", "peak_rss_kb": 5932}
+{"instance": "hwb_i8", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.005430171964690089, "status": "equal", "peak_rss_kb": 4060}
+{"instance": "hwb_i32", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.31245439196936786, "status": "equal", "peak_rss_kb": 5508}
+{"instance": "hwb_i40", "pair": 0, "kind": "hwb", "solver": "cadical", "time_s": 0.47988907992839813, "status": "equal", "peak_rss_kb": 7920}
+{"instance": "hwb_i40", "pair": 0, "kind": "hwb", "solver": "kissat", "time_s": 0.6034125410951674, "status": "equal", "peak_rss_kb": 5756}
+{"instance": "mult_commuted_b10", "pair": 9, "kind": "product_bit_9", "solver": "kissat", "time_s": 4.876729128998704, "status": "equal", "peak_rss_kb": 8364}
+{"instance": "mult_commuted_b10", "pair": 9, "kind": "product_bit_9", "solver": "cadical", "time_s": 5.932379645993933, "status": "equal", "peak_rss_kb": 10008}
+{"instance": "mult_commuted_b10", "pair": 10, "kind": "product_bit_10", "solver": "kissat", "time_s": 7.847106161992997, "status": "equal", "peak_rss_kb": 11908}
+{"instance": "mult_commuted_b10", "pair": 10, "kind": "product_bit_10", "solver": "cadical", "time_s": 15.339270034921356, "status": "equal", "peak_rss_kb": 13336}
+{"instance": "mult_commuted_b11", "pair": 10, "kind": "product_bit_10", "solver": "kissat", "time_s": 20.042757338960655, "status": "equal", "peak_rss_kb": 15180}
+{"instance": "mult_commuted_b11", "pair": 10, "kind": "product_bit_10", "solver": "cadical", "time_s": 27.033627790980972, "status": "equal", "peak_rss_kb": 14444}
+{"instance": "mult_commuted_b11", "pair": 11, "kind": "product_bit_11", "solver": "kissat", "time_s": 30.245017378008924, "status": "equal", "peak_rss_kb": 23168}
+{"instance": "mult_commuted_b11", "pair": 11, "kind": "product_bit_11", "solver": "cadical", "time_s": 56.3222385130357, "status": "equal", "peak_rss_kb": 19676}
+{"instance": "mult_commuted_b12", "pair": 11, "kind": "product_bit_11", "solver": "kissat", "time_s": 82.02087182900868, "status": "equal", "peak_rss_kb": 32788}
+{"instance": "mult_commuted_b3", "pair": 2, "kind": "product_bit_2", "solver": "cadical", "time_s": 0.0018527349457144737, "status": "equal", "peak_rss_kb": 5524}
+{"instance": "mult_commuted_b3", "pair": 2, "kind": "product_bit_2", "solver": "kissat", "time_s": 0.001288317027501762, "status": "equal", "peak_rss_kb": 3708}
+{"instance": "mult_commuted_b3", "pair": 3, "kind": "product_bit_3", "solver": "cadical", "time_s": 0.0018180940533056855, "status": "equal", "peak_rss_kb": 5744}
+{"instance": "mult_commuted_b3", "pair": 3, "kind": "product_bit_3", "solver": "kissat", "time_s": 0.00145533902104944, "status": "equal", "peak_rss_kb": 3748}
+{"instance": "mult_commuted_b4", "pair": 3, "kind": "product_bit_3", "solver": "cadical", "time_s": 0.0019903359934687614, "status": "equal", "peak_rss_kb": 5836}
+{"instance": "mult_commuted_b4", "pair": 3, "kind": "product_bit_3", "solver": "kissat", "time_s": 0.0016540320357307792, "status": "equal", "peak_rss_kb": 3748}
+{"instance": "mult_commuted_b4", "pair": 4, "kind": "product_bit_4", "solver": "cadical", "time_s": 0.00280646700412035, "status": "equal", "peak_rss_kb": 5576}
+{"instance": "mult_commuted_b4", "pair": 4, "kind": "product_bit_4", "solver": "kissat", "time_s": 0.002601182903163135, "status": "equal", "peak_rss_kb": 3708}
+{"instance": "mult_commuted_b5", "pair": 4, "kind": "product_bit_4", "solver": "cadical", "time_s": 0.0035766869550570846, "status": "equal", "peak_rss_kb": 5524}
+{"instance": "mult_commuted_b5", "pair": 4, "kind": "product_bit_4", "solver": "kissat", "time_s": 0.003911891020834446, "status": "equal", "peak_rss_kb": 3884}
+{"instance": "mult_commuted_b5", "pair": 5, "kind": "product_bit_5", "solver": "cadical", "time_s": 0.007630769978277385, "status": "equal", "peak_rss_kb": 5528}
+{"instance": "mult_commuted_b5", "pair": 5, "kind": "product_bit_5", "solver": "kissat", "time_s": 0.008042845060117543, "status": "equal", "peak_rss_kb": 3544}
+{"instance": "mult_commuted_b6", "pair": 5, "kind": "product_bit_5", "solver": "cadical", "time_s": 0.011600462021306157, "status": "equal", "peak_rss_kb": 5624}
+{"instance": "mult_commuted_b6", "pair": 5, "kind": "product_bit_5", "solver": "kissat", "time_s": 0.017088124062865973, "status": "equal", "peak_rss_kb": 4060}
+{"instance": "mult_commuted_b6", "pair": 6, "kind": "product_bit_6", "solver": "cadical", "time_s": 0.02267603704240173, "status": "equal", "peak_rss_kb": 6048}
+{"instance": "mult_commuted_b6", "pair": 6, "kind": "product_bit_6", "solver": "kissat", "time_s": 0.03461462398990989, "status": "equal", "peak_rss_kb": 3756}
+{"instance": "mult_commuted_b7", "pair": 6, "kind": "product_bit_6", "solver": "cadical", "time_s": 0.04740168200805783, "status": "equal", "peak_rss_kb": 6176}
+{"instance": "mult_commuted_b7", "pair": 6, "kind": "product_bit_6", "solver": "kissat", "time_s": 0.09665394900366664, "status": "equal", "peak_rss_kb": 4812}
+{"instance": "mult_commuted_b7", "pair": 7, "kind": "product_bit_7", "solver": "cadical", "time_s": 0.13165991799905896, "status": "equal", "peak_rss_kb": 6600}
+{"instance": "mult_commuted_b7", "pair": 7, "kind": "product_bit_7", "solver": "kissat", "time_s": 0.17399081401526928, "status": "equal", "peak_rss_kb": 4908}
+{"instance": "mult_commuted_b8", "pair": 7, "kind": "product_bit_7", "solver": "cadical", "time_s": 0.24768104206304997, "status": "equal", "peak_rss_kb": 6984}
+{"instance": "mult_commuted_b8", "pair": 7, "kind": "product_bit_7", "solver": "kissat", "time_s": 0.35706211696378887, "status": "equal", "peak_rss_kb": 5588}
+{"instance": "mult_commuted_b8", "pair": 8, "kind": "product_bit_8", "solver": "cadical", "time_s": 0.541957534966059, "status": "equal", "peak_rss_kb": 6944}
+{"instance": "mult_commuted_b8", "pair": 8, "kind": "product_bit_8", "solver": "kissat", "time_s": 0.6039013470290229, "status": "equal", "peak_rss_kb": 5372}
+{"instance": "mult_commuted_b9", "pair": 8, "kind": "product_bit_8", "solver": "cadical", "time_s": 1.0929670580662787, "status": "equal", "peak_rss_kb": 8360}
+{"instance": "mult_commuted_b9", "pair": 8, "kind": "product_bit_8", "solver": "kissat", "time_s": 1.2792590729659423, "status": "equal", "peak_rss_kb": 9096}
+{"instance": "mult_commuted_b9", "pair": 9, "kind": "product_bit_9", "solver": "cadical", "time_s": 2.755348130944185, "status": "equal", "peak_rss_kb": 8956}
+{"instance": "mult_commuted_b9", "pair": 9, "kind": "product_bit_9", "solver": "kissat", "time_s": 1.9316363370744511, "status": "equal", "peak_rss_kb": 7272}
+{"instance": "mult_kogge_b10", "pair": 9, "kind": "product_bit_9", "solver": "cadical", "time_s": 6.475542576983571, "status": "equal", "peak_rss_kb": 10060}
+{"instance": "mult_kogge_b10", "pair": 9, "kind": "product_bit_9", "solver": "kissat", "time_s": 5.0677579659968615, "status": "equal", "peak_rss_kb": 8560}
+{"instance": "mult_kogge_b10", "pair": 10, "kind": "product_bit_10", "solver": "cadical", "time_s": 14.322377625037916, "status": "equal", "peak_rss_kb": 12256}
+{"instance": "mult_commuted_b12", "pair": 11, "kind": "product_bit_11", "solver": "cadical", "time_s": 124.01482442999259, "status": "equal", "peak_rss_kb": 23344}
+{"instance": "mult_kogge_b10", "pair": 10, "kind": "product_bit_10", "solver": "kissat", "time_s": 10.118596559972502, "status": "equal", "peak_rss_kb": 14692}
+{"instance": "mult_kogge_b11", "pair": 10, "kind": "product_bit_10", "solver": "cadical", "time_s": 30.45992441906128, "status": "equal", "peak_rss_kb": 15560}
+{"instance": "mult_kogge_b11", "pair": 10, "kind": "product_bit_10", "solver": "kissat", "time_s": 25.257370462990366, "status": "equal", "peak_rss_kb": 20632}
+{"instance": "mult_commuted_b12", "pair": 12, "kind": "product_bit_12", "solver": "kissat", "time_s": 139.2056978669716, "status": "equal", "peak_rss_kb": 33560}
+{"instance": "mult_kogge_b11", "pair": 11, "kind": "product_bit_11", "solver": "kissat", "time_s": 34.91974277503323, "status": "equal", "peak_rss_kb": 22720}
+{"instance": "mult_kogge_b11", "pair": 11, "kind": "product_bit_11", "solver": "cadical", "time_s": 76.58716611890122, "status": "equal", "peak_rss_kb": 17356}
+{"instance": "mult_kogge_b12", "pair": 11, "kind": "product_bit_11", "solver": "kissat", "time_s": 124.72347838291898, "status": "equal", "peak_rss_kb": 27756}
+{"instance": "mult_commuted_b12", "pair": 12, "kind": "product_bit_12", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "mult_kogge_b3", "pair": 2, "kind": "product_bit_2", "solver": "cadical", "time_s": 0.005810076021589339, "status": "equal", "peak_rss_kb": 5708}
+{"instance": "mult_kogge_b3", "pair": 2, "kind": "product_bit_2", "solver": "kissat", "time_s": 0.00145445903763175, "status": "equal", "peak_rss_kb": 3812}
+{"instance": "mult_kogge_b3", "pair": 3, "kind": "product_bit_3", "solver": "cadical", "time_s": 0.002303809975273907, "status": "equal", "peak_rss_kb": 5632}
+{"instance": "mult_kogge_b3", "pair": 3, "kind": "product_bit_3", "solver": "kissat", "time_s": 0.0017840040381997824, "status": "equal", "peak_rss_kb": 3692}
+{"instance": "mult_kogge_b4", "pair": 3, "kind": "product_bit_3", "solver": "cadical", "time_s": 0.0027130459202453494, "status": "equal", "peak_rss_kb": 5624}
+{"instance": "mult_kogge_b4", "pair": 3, "kind": "product_bit_3", "solver": "kissat", "time_s": 0.0018804640276357532, "status": "equal", "peak_rss_kb": 3692}
+{"instance": "mult_kogge_b4", "pair": 4, "kind": "product_bit_4", "solver": "cadical", "time_s": 0.003398644970729947, "status": "equal", "peak_rss_kb": 5336}
+{"instance": "mult_kogge_b4", "pair": 4, "kind": "product_bit_4", "solver": "kissat", "time_s": 0.0029514289926737547, "status": "equal", "peak_rss_kb": 3528}
+{"instance": "mult_kogge_b5", "pair": 4, "kind": "product_bit_4", "solver": "cadical", "time_s": 0.003985711955465376, "status": "equal", "peak_rss_kb": 5680}
+{"instance": "mult_kogge_b5", "pair": 4, "kind": "product_bit_4", "solver": "kissat", "time_s": 0.004028633004054427, "status": "equal", "peak_rss_kb": 3928}
+{"instance": "mult_kogge_b5", "pair": 5, "kind": "product_bit_5", "solver": "cadical", "time_s": 0.007591870031319559, "status": "equal", "peak_rss_kb": 5664}
+{"instance": "mult_kogge_b5", "pair": 5, "kind": "product_bit_5", "solver": "kissat", "time_s": 0.009080438991077244, "status": "equal", "peak_rss_kb": 3820}
+{"instance": "mult_kogge_b6", "pair": 5, "kind": "product_bit_5", "solver": "cadical", "time_s": 0.011870505986735225, "status": "equal", "peak_rss_kb": 5740}
+{"instance": "mult_kogge_b6", "pair": 5, "kind": "product_bit_5", "solver": "kissat", "time_s": 0.01631323399487883, "status": "equal", "peak_rss_kb": 4072}
+{"instance": "mult_kogge_b6", "pair": 6, "kind": "product_bit_6", "solver": "cadical", "time_s": 0.031984879984520376, "status": "equal", "peak_rss_kb": 5920}
+{"instance": "mult_kogge_b6", "pair": 6, "kind": "product_bit_6", "solver": "kissat", "time_s": 0.03507998096756637, "status": "equal", "peak_rss_kb": 4312}
+{"instance": "mult_kogge_b7", "pair": 6, "kind": "product_bit_6", "solver": "cadical", "time_s": 0.04987160500604659, "status": "equal", "peak_rss_kb": 6192}
+{"instance": "mult_kogge_b7", "pair": 6, "kind": "product_bit_6", "solver": "kissat", "time_s": 0.11490223906002939, "status": "equal", "peak_rss_kb": 4752}
+{"instance": "mult_kogge_b7", "pair": 7, "kind": "product_bit_7", "solver": "cadical", "time_s": 0.1503146740142256, "status": "equal", "peak_rss_kb": 6660}
+{"instance": "mult_kogge_b7", "pair": 7, "kind": "product_bit_7", "solver": "kissat", "time_s": 0.24959678598679602, "status": "equal", "peak_rss_kb": 4476}
+{"instance": "mult_kogge_b8", "pair": 7, "kind": "product_bit_7", "solver": "cadical", "time_s": 0.2981993850553408, "status": "equal", "peak_rss_kb": 6916}
+{"instance": "mult_kogge_b8", "pair": 7, "kind": "product_bit_7", "solver": "kissat", "time_s": 0.3965777959674597, "status": "equal", "peak_rss_kb": 5360}
+{"instance": "mult_kogge_b8", "pair": 8, "kind": "product_bit_8", "solver": "cadical", "time_s": 0.6720740420278162, "status": "equal", "peak_rss_kb": 7420}
+{"instance": "mult_kogge_b8", "pair": 8, "kind": "product_bit_8", "solver": "kissat", "time_s": 0.6231229100376368, "status": "equal", "peak_rss_kb": 5244}
+{"instance": "mult_kogge_b9", "pair": 8, "kind": "product_bit_8", "solver": "cadical", "time_s": 1.4354656729847193, "status": "equal", "peak_rss_kb": 8136}
+{"instance": "mult_kogge_b9", "pair": 8, "kind": "product_bit_8", "solver": "kissat", "time_s": 1.218479345086962, "status": "equal", "peak_rss_kb": 7300}
+{"instance": "mult_kogge_b9", "pair": 9, "kind": "product_bit_9", "solver": "cadical", "time_s": 3.5436058380873874, "status": "equal", "peak_rss_kb": 8316}
+{"instance": "mult_kogge_b9", "pair": 9, "kind": "product_bit_9", "solver": "kissat", "time_s": 2.393528620013967, "status": "equal", "peak_rss_kb": 7456}
+{"instance": "parity_i128_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.009898699936456978, "status": "equal", "peak_rss_kb": 6624}
+{"instance": "parity_i128_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.010661720065400004, "status": "equal", "peak_rss_kb": 4184}
+{"instance": "mult_kogge_b12", "pair": 11, "kind": "product_bit_11", "solver": "cadical", "time_s": 199.09596578904893, "status": "equal", "peak_rss_kb": 24800}
+{"instance": "mult_kogge_b12", "pair": 12, "kind": "product_bit_12", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "mult_kogge_b12", "pair": 12, "kind": "product_bit_12", "solver": "kissat", "time_s": 244.39260064496193, "status": "equal", "peak_rss_kb": 46224}
+{"instance": "parity_i128_c3", "pair": 1, "kind": "parity", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i12_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.0028583169914782047, "status": "equal", "peak_rss_kb": 5688}
+{"instance": "parity_i12_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.002026577014476061, "status": "equal", "peak_rss_kb": 3564}
+{"instance": "parity_i12_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.004899214021861553, "status": "equal", "peak_rss_kb": 5624}
+{"instance": "parity_i12_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.002620283979922533, "status": "equal", "peak_rss_kb": 3692}
+{"instance": "parity_i12_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.0030844899592921138, "status": "equal", "peak_rss_kb": 5628}
+{"instance": "parity_i12_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.0023845620453357697, "status": "equal", "peak_rss_kb": 3696}
+{"instance": "parity_i16_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.0025996839394792914, "status": "equal", "peak_rss_kb": 5664}
+{"instance": "parity_i16_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.0022427201038226485, "status": "equal", "peak_rss_kb": 3628}
+{"instance": "parity_i16_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.007207934046164155, "status": "equal", "peak_rss_kb": 5672}
+{"instance": "parity_i16_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.006509255967102945, "status": "equal", "peak_rss_kb": 3884}
+{"instance": "parity_i16_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.00668911705724895, "status": "equal", "peak_rss_kb": 5696}
+{"instance": "parity_i16_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.0069068410666659474, "status": "equal", "peak_rss_kb": 3952}
+{"instance": "parity_i20_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.0030778299551457167, "status": "equal", "peak_rss_kb": 5696}
+{"instance": "parity_i20_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.002595174009911716, "status": "equal", "peak_rss_kb": 3748}
+{"instance": "parity_i20_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.022546025924384594, "status": "equal", "peak_rss_kb": 5996}
+{"instance": "parity_i20_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.03926712495740503, "status": "equal", "peak_rss_kb": 4548}
+{"instance": "parity_i20_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.04789319902192801, "status": "equal", "peak_rss_kb": 5936}
+{"instance": "parity_i20_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.016311854007653892, "status": "equal", "peak_rss_kb": 4140}
+{"instance": "parity_i24_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.0027657359605655074, "status": "equal", "peak_rss_kb": 5888}
+{"instance": "parity_i24_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.0023062200052663684, "status": "equal", "peak_rss_kb": 3964}
+{"instance": "parity_i24_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.2605704909656197, "status": "equal", "peak_rss_kb": 8496}
+{"instance": "parity_i24_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.06950379197951406, "status": "equal", "peak_rss_kb": 5044}
+{"instance": "parity_i24_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.07091679098084569, "status": "equal", "peak_rss_kb": 6688}
+{"instance": "parity_i24_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.051097440999001265, "status": "equal", "peak_rss_kb": 4296}
+{"instance": "parity_i28_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.0032409720588475466, "status": "equal", "peak_rss_kb": 5696}
+{"instance": "parity_i28_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.002447861945256591, "status": "equal", "peak_rss_kb": 3816}
+{"instance": "parity_i28_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.15865043201483786, "status": "equal", "peak_rss_kb": 7152}
+{"instance": "parity_i28_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.08901879901532084, "status": "equal", "peak_rss_kb": 5172}
+{"instance": "parity_i28_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.057104310020804405, "status": "equal", "peak_rss_kb": 6164}
+{"instance": "parity_i28_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.11601486301515251, "status": "equal", "peak_rss_kb": 5720}
+{"instance": "parity_i32_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.004209195962175727, "status": "equal", "peak_rss_kb": 5724}
+{"instance": "parity_i32_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.002994998940266669, "status": "equal", "peak_rss_kb": 3564}
+{"instance": "parity_i32_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.06383677804842591, "status": "equal", "peak_rss_kb": 6192}
+{"instance": "parity_i32_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.05755176593083888, "status": "equal", "peak_rss_kb": 4908}
+{"instance": "parity_i32_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.15328963194042444, "status": "equal", "peak_rss_kb": 7596}
+{"instance": "parity_i32_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.08623396197799593, "status": "equal", "peak_rss_kb": 5352}
+{"instance": "parity_i40_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.004111333983018994, "status": "equal", "peak_rss_kb": 5884}
+{"instance": "parity_i40_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.0033985349582508206, "status": "equal", "peak_rss_kb": 4072}
+{"instance": "parity_i40_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 3.147600778960623, "status": "equal", "peak_rss_kb": 17992}
+{"instance": "parity_i40_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.22303775791078806, "status": "equal", "peak_rss_kb": 5856}
+{"instance": "parity_i40_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 11.422745130956173, "status": "equal", "peak_rss_kb": 29596}
+{"instance": "parity_i40_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.4477912780130282, "status": "equal", "peak_rss_kb": 7168}
+{"instance": "parity_i48_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.004948335001245141, "status": "equal", "peak_rss_kb": 5936}
+{"instance": "parity_i48_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.004682661034166813, "status": "equal", "peak_rss_kb": 3820}
+{"instance": "parity_i128_c3", "pair": 1, "kind": "parity", "solver": "kissat", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i48_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 29.902908627060242, "status": "equal", "peak_rss_kb": 26100}
+{"instance": "parity_i128_c3", "pair": 2, "kind": "parity", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i48_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 10.0447834309889, "status": "equal", "peak_rss_kb": 14228}
+{"instance": "parity_i64_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.005602453951723874, "status": "equal", "peak_rss_kb": 6236}
+{"instance": "parity_i64_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.0051669980166479945, "status": "equal", "peak_rss_kb": 4060}
+{"instance": "parity_i128_c3", "pair": 2, "kind": "parity", "solver": "kissat", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i48_c3", "pair": 1, "kind": "parity", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i48_c3", "pair": 2, "kind": "parity", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i64_c3", "pair": 1, "kind": "parity", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i8_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.003911660984158516, "status": "equal", "peak_rss_kb": 5628}
+{"instance": "parity_i8_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.002874616999179125, "status": "equal", "peak_rss_kb": 4076}
+{"instance": "parity_i8_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 0.0036361580714583397, "status": "equal", "peak_rss_kb": 5696}
+{"instance": "parity_i8_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 0.0031735709635540843, "status": "equal", "peak_rss_kb": 3804}
+{"instance": "parity_i8_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 0.0036547279451042414, "status": "equal", "peak_rss_kb": 5628}
+{"instance": "parity_i8_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 0.0029546390287578106, "status": "equal", "peak_rss_kb": 3708}
+{"instance": "parity_i96_c3", "pair": 0, "kind": "parity", "solver": "cadical", "time_s": 0.010955614037811756, "status": "equal", "peak_rss_kb": 6400}
+{"instance": "parity_i96_c3", "pair": 0, "kind": "parity", "solver": "kissat", "time_s": 0.012267731013707817, "status": "equal", "peak_rss_kb": 4220}
+{"instance": "parity_i64_c3", "pair": 1, "kind": "parity", "solver": "kissat", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i64_c3", "pair": 2, "kind": "parity", "solver": "cadical", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i64_c3", "pair": 2, "kind": "parity", "solver": "kissat", "status": "timeout", "time_s": 300.0}
+{"instance": "parity_i96_c3", "pair": 1, "kind": "parity", "solver": "kissat", "time_s": 300.0, "status": "timeout"}
+{"instance": "parity_i96_c3", "pair": 2, "kind": "parity", "solver": "kissat", "time_s": 300.0, "status": "timeout"}
+{"instance": "parity_i96_c3", "pair": 2, "kind": "parity", "solver": "cadical", "time_s": 300.0, "status": "timeout"}
+{"instance": "parity_i96_c3", "pair": 1, "kind": "parity", "solver": "cadical", "time_s": 300.0, "status": "timeout"}

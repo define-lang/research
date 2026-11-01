@@ -24,3 +24,9 @@ The [circuit treewidth canonical SDD study](circuit_treewidth_canonical_sdd/READ
 asks the same question for canonical (compressed) SDDs: it gives the best known
 bounds and the gap between them, and shows, partly in Lean, that OBDDs for
 circuits of pathwidth k need doubly exponential width.
+
+The [boolean equality checking study](boolean_equality_checking/README.md)
+measures how the Define compiler can find, exactly, which boolean values are
+always equal, constant, or equal to an input, and recommends one combined
+algorithm that checks each value operation once, with executions of other
+value operations as references.

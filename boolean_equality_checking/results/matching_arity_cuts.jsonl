@@ -1,0 +1,9 @@
+{"file": "match_i12_s200_0", "arity": 4, "time_s": 0.00227536994, "cuts": 1625}
+{"file": "match_i12_s200_0", "arity": 5, "time_s": 0.016306814, "cuts": 3435}
+{"file": "match_i12_s200_0", "arity": 6, "time_s": 0.177048874, "cuts": 8164}
+{"file": "match_i16_s256_0", "arity": 4, "time_s": 0.00358292693, "cuts": 3043}
+{"file": "match_i16_s256_0", "arity": 5, "time_s": 0.0288656489, "cuts": 7497}
+{"file": "match_i16_s256_0", "arity": 6, "time_s": 0.523642074, "cuts": 20238}
+{"file": "match_i20_s256_0", "arity": 4, "time_s": 0.00267432502, "cuts": 2138}
+{"file": "match_i20_s256_0", "arity": 5, "time_s": 0.015591254, "cuts": 4480}
+{"file": "match_i20_s256_0", "arity": 6, "time_s": 0.169840339, "cuts": 9874}
