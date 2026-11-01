@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -325,27 +326,51 @@ int main(int argc, char** argv) {
     if (opt.count("extra_arity"))
       add_random_registered(registered, static_cast<uint32_t>(get("extra_arity", 0)),
                             static_cast<uint32_t>(get("extra_count", 4)), 3);
-    Matcher matcher(g, read_statements(base + ".statements"), registered);
-    if (opt.count("anchor")) matcher.set_anchor(opt["anchor"]);
+    const std::vector<Statement> statements = read_statements(base + ".statements", get("file_order", 0) != 0);
     Stats mstats;
     std::string mstatus = "ok";
     std::set<Match> found;
     const std::string how = opt.count("how") ? opt["how"] : "exact";
-    double t = now_seconds();
-    try {
-      if (opt.count("cut_size")) matcher.set_cut_size(static_cast<uint32_t>(get("cut_size", 4)));
-      if (how == "cuts")
-        found = matcher.run_cuts(mstats);
-      else if (how == "cut_values")
-        found = matcher.run_cuts(mstats, true);
-      else if (how == "cuts_negated")
-        found = matcher.run_cuts(mstats, false, true);
-      else
-        found = matcher.run_exact(mstats);
-    } catch (const std::runtime_error& e) {
-      mstatus = std::string("limit:") + e.what();
+    // Fast methods are timed over several fresh runs, keeping the fastest.
+    const int repeat = static_cast<int>(get("repeat", 1));
+    double elapsed = 1e30;
+    std::unique_ptr<Matcher> kept;
+    for (int rep = 0; rep < repeat; ++rep) {
+      auto matcher = std::make_unique<Matcher>(g, statements, registered);
+      if (opt.count("anchor"))
+        matcher->set_anchor(opt["anchor"]);
+      else if (how == "resub")
+        matcher->set_anchor("any");
+      matcher->set_plain(get("plain", 0) != 0);
+      matcher->set_first_only(get("first_only", 0) != 0);
+      matcher->set_spellings(get("spellings", 0) != 0);
+      if (opt.count("precedence")) {
+        std::vector<std::string> order;
+        std::istringstream names(opt["precedence"]);
+        for (std::string name; std::getline(names, name, ',');) order.push_back(name);
+        matcher->set_precedence(order, get("precedence_strict", 0) != 0);
+      }
+      mstats.clear();
+      double t = now_seconds();
+      try {
+        if (opt.count("cut_size")) matcher->set_cut_size(static_cast<uint32_t>(get("cut_size", 4)));
+        if (how == "cuts")
+          found = matcher->run_cuts(mstats);
+        else if (how == "cut_values")
+          found = matcher->run_cuts(mstats, true);
+        else if (how == "cuts_negated")
+          found = matcher->run_cuts(mstats, false, true);
+        else if (how == "resub")
+          found = matcher->run_resub(mstats);
+        else
+          found = matcher->run_exact(mstats);
+      } catch (const std::runtime_error& e) {
+        mstatus = std::string("limit:") + e.what();
+      }
+      elapsed = std::min(elapsed, now_seconds() - t);
+      kept = std::move(matcher);
     }
-    double elapsed = now_seconds() - t;
+    Matcher& matcher = *kept;
     std::set<Match> planted_matches;
     std::vector<std::string> planted_kinds;
     std::ifstream pin(base + ".planted");
@@ -357,6 +382,20 @@ int main(int argc, char** argv) {
       for (Lit a; words >> a;) m.args.push_back(a);
       planted_matches.insert(m);
       planted_kinds.push_back(kind);
+    }
+    // The matches as found, arguments in view order, with their sizes.
+    if (opt.count("dump_raw")) {
+      std::ofstream dump(opt["dump_raw"]);
+      for (const Match& m : found) {
+        dump << m.value << " " << m.op << " " << matcher.match_size(m);
+        for (Lit a : m.args) dump << " " << a;
+        dump << "\n";
+      }
+      for (const Match& m : matcher.spelled()) {
+        dump << m.value << " spell:" << m.op << " 0";
+        for (Lit a : m.args) dump << " " << a;
+        dump << "\n";
+      }
     }
     // Compare by function: an argument written as a different literal with
     // the same function is the same argument.
@@ -566,7 +605,7 @@ int main(int argc, char** argv) {
   out << "},\"options\":{";
   first = true;
   for (auto& [k, v] : opt) {
-    if (k == "planted" || k == "dump" || k == "out" || k == "single" || k == "patterns_in" || k == "patterns_out")
+    if (k == "planted" || k == "dump" || k == "dump_raw" || k == "out" || k == "single" || k == "patterns_in" || k == "patterns_out")
       continue;
     out << (first ? "" : ",") << "\"" << k << "\":\"" << json_escape(v) << "\"";
     first = false;

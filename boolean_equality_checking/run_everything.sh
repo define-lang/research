@@ -27,4 +27,11 @@ $PY matching_experiment.py
 $PY hierarchy_experiment.py
 $PY steady_state_experiment.py
 $PY caller_redundancy_experiment.py
+$PY fixpoint_experiment.py
+$PY fixpoint_experiment.py --plain-arguments
+$PY fixpoint_experiment.py --precedence A
+$PY fixpoint_experiment.py --precedence A --strict
+$PY fixpoint_experiment.py --precedence B --strict
+$PY fixpoint_experiment.py --strict
+$PY resub_experiment.py
 $PY final_program_experiment.py

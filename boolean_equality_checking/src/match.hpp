@@ -25,6 +25,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "aig.hpp"
@@ -96,7 +97,7 @@ struct Match {
   }
 };
 
-inline std::vector<Statement> read_statements(const std::string& path) {
+inline std::vector<Statement> read_statements(const std::string& path, bool file_order = false) {
   std::vector<Statement> out;
   std::ifstream in(path);
   if (!in) throw std::runtime_error("cannot open " + path);
@@ -107,7 +108,9 @@ inline std::vector<Statement> read_statements(const std::string& path) {
     for (Lit a; words >> a;) s.args.push_back(a);
     out.push_back(s);
   }
-  // Statement order is node order in the reordered graph.
+  // Statement order is node order in the reordered graph, unless the file
+  // is already in statement order (a `not` shares its argument's node).
+  if (file_order) return out;
   std::stable_sort(out.begin(), out.end(),
                    [](const Statement& a, const Statement& b) { return node_of(a.lit) < node_of(b.lit); });
   return out;
@@ -137,9 +140,24 @@ class Matcher {
       : g_(g), statements_(std::move(statements)), registered_(std::move(registered)) {
     for (const Registered& r : registered_) max_arity_ = std::max(max_arity_, r.arity);
     for (size_t i = 0; i < statements_.size(); ++i) by_lit_[statements_[i].lit] = i;
+    uses_.assign(statements_.size(), 0);
+    for (const Statement& s : statements_)
+      for (Lit a : s.args) {
+        auto it = by_lit_.find(a);
+        if (it != by_lit_.end()) ++uses_[it->second];
+      }
+    for (Lit o : g_.outputs) {
+      auto it = by_lit_.find(o);
+      if (it != by_lit_.end()) ++uses_[it->second];
+    }
     for (const Statement& s : statements_)
       for (const Registered& r : registered_)
-        if (s.op == r.name) executions_.insert({s.lit, s.op, s.args});
+        if (s.op == r.name) {
+          executions_.insert({s.lit, s.op, s.args});
+          std::vector<Lit> sorted = s.args;
+          std::sort(sorted.begin(), sorted.end());
+          sorted_executions_.insert({s.lit, s.op, sorted});
+        }
   }
 
   // How the arguments of an exact match must relate to the value: "cone"
@@ -317,7 +335,502 @@ class Matcher {
     return found;
   }
 
+  // The exact definition over earlier values, with opposite results, searched
+  // the way Boolean resubstitution finds divisors: every available literal's
+  // sample bits are also kept transposed, as one bitset of literals per
+  // sampled input assignment, so the values a view can take, given the views
+  // already chosen, are found for all candidates at once by and-ing the
+  // bitsets of the assignments that constrain it, stopping as soon as none
+  // are left. A value v matches R(a1..ak) when the ai are available before v,
+  // v = R(ai) or v = not R(ai) (the opposite result, unless an operation
+  // computing not R is registered), every ai matters, the match has at least
+  // two statements, and it isn't an execution of R on those values (or, for
+  // the opposite, an execution and its `not`).
+  std::set<Match> run_resub(Stats& stats) {
+    const uint32_t I = g_.num_inputs;
+    if (I > 20) throw std::runtime_error("exact matching needs at most 20 inputs");
+    ensure_tables();
+    prepare_variants();
+    // Literals become available in statement order; each one's function is
+    // kept once.
+    const size_t capacity = I + 2 * statements_.size() + 2;
+    lwords_ = (capacity + 63) / 64;
+    if (lwords_ > kMaxPoolWords) throw std::runtime_error("too many values for the search");
+    resub_pool_.clear();
+    lit_samples_.clear();
+    positions_.clear();
+    rsamples_.assign(sample_.begin(), sample_.begin() + std::min<size_t>(sample_.size(), 256));
+    positions_.assign(rsamples_.size(), std::vector<uint64_t>(lwords_, 0));
+    std::set<uint64_t> seen;
+    auto add = [&](Lit l) {
+      if (!seen.insert(table_hash(l)).second) return;
+      const size_t index = resub_pool_.size();
+      resub_pool_.push_back(l);
+      std::vector<uint64_t> bits((rsamples_.size() + 63) / 64, 0);
+      for (size_t k = 0; k < rsamples_.size(); ++k)
+        if (lit_bit(l, rsamples_[k])) {
+          bits[k >> 6] |= 1ULL << (k & 63);
+          positions_[k][index >> 6] |= 1ULL << (index & 63);
+        }
+      lit_samples_.push_back(std::move(bits));
+    };
+    for (uint32_t i = 1; i <= I; ++i) add(make_lit(i));
+    std::set<Match> found;
+    for (const Statement& s : statements_) {
+      for (Lit a : s.args) add(a);
+      // With anchor "cone", arguments must be in v's statement-level cone;
+      // with "support", functions of v's inputs only.
+      allowed_.fill(0);
+      std::set<uint64_t> in_cone;
+      if (anchor_ == "cone")
+        for (Lit a : cone_values(s.lit)) in_cone.insert(table_hash(a));
+      for (size_t x = 0; x < resub_pool_.size(); ++x) {
+        const Lit a = resub_pool_[x];
+        if (anchor_ == "cone" && !in_cone.count(table_hash(a))) continue;
+        if (anchor_ == "support" && (support_[node_of(a)] & ~support_[node_of(s.lit)])) continue;
+        allowed_[x >> 6] |= 1ULL << (x & 63);
+      }
+      // A match removes at least two statements, so some statement v reads
+      // must be read by v alone.
+      bool sole_reader = false;
+      for (Lit a : s.args) {
+        auto it = by_lit_.find(a);
+        sole_reader |= it != by_lit_.end() && uses_[it->second] == 1;
+      }
+      // With spellings, every way of writing a value that is an execution
+      // of a registered operation, or a `not` of one, is listed too, for a
+      // precedence rule between them.
+      if (spellings_) {
+        const Statement* exec = &s;
+        if (s.op == "not") {
+          auto it = by_lit_.find(s.args[0]);
+          exec = it == by_lit_.end() ? nullptr : &statements_[it->second];
+        }
+        if (exec && is_registered(exec->op)) {
+          spelling_ = true;
+          // With a declared order, only spellings that could have at least
+          // the precedence of the one the program has are listed: no
+          // operation is searched whose spellings would all come later.
+          if (!order_.empty()) current_key_ = spelling_key(exec->op, exec->args, s.op == "not");
+          for (Lit target : {s.lit, s.lit ^ 1})
+            for (const Variant& r : variants_) {
+              if (target != s.lit && !r.opposite_allowed) continue;
+              if (target != s.lit && precedence_strict_) continue;
+              if (!order_.empty() && spelling_bound(r.r.name, target != s.lit) > current_key_) continue;
+              chosen_.clear();
+              resub_assign(s.lit, target, r, spelled_);
+            }
+          spelling_ = false;
+        }
+      }
+      if (plain_) sole_reader = true;
+      if (!sole_reader) ++skipped_values_;
+      for (Lit target : {s.lit, s.lit ^ 1}) {
+        if (!sole_reader) break;
+        for (const Variant& r : variants_) {
+          if (target != s.lit && !r.opposite_allowed) continue;
+          chosen_.clear();
+          resub_assign(s.lit, target, r, found);
+        }
+      }
+      add(s.lit);
+    }
+    if (first_only_) {
+      // The largest candidates first, then the earliest value; every
+      // candidate that ties with the first that holds is reported too, so
+      // the caller can break the tie by name and rank.
+      std::stable_sort(pending_.begin(), pending_.end(), [](const Pending& a, const Pending& b) {
+        return std::make_pair(b.size, a.statement) < std::make_pair(a.size, b.statement);
+      });
+      for (size_t i = 0; i < pending_.size();) {
+        size_t end = i;
+        while (end < pending_.size() && pending_[end].size == pending_[i].size &&
+               pending_[end].statement == pending_[i].statement)
+          ++end;
+        for (size_t k = i; k < end; ++k) {
+          const Pending& c = pending_[k];
+          if (holds(c.v, c.target, c.var->r, c.args))
+            found.insert(Match{c.v, c.target != c.v ? "not:" + c.var->r.name : c.var->r.name, c.args});
+        }
+        if (!found.empty()) break;
+        i = end;
+      }
+      stats.emplace_back("candidates", static_cast<double>(pending_.size()));
+    }
+    stats.emplace_back("search_nodes", static_cast<double>(search_nodes_));
+    stats.emplace_back("exact_checks", static_cast<double>(exact_checks_));
+    stats.emplace_back("refinements", static_cast<double>(refinements_));
+    stats.emplace_back("inessential", static_cast<double>(inessential_));
+    stats.emplace_back("samples", static_cast<double>(rsamples_.size()));
+    stats.emplace_back("skipped_values", static_cast<double>(skipped_values_));
+    stats.emplace_back("hash_lookups", static_cast<double>(hash_lookups_));
+    stats.emplace_back("position_steps", static_cast<double>(position_steps_));
+    stats.emplace_back("leaf_candidates", static_cast<double>(leaf_candidates_));
+    return found;
+  }
+
+  // The number of statements in a match: those reached from the value
+  // without passing through an argument.
+  // The number of statements in a match of the exact definition: the
+  // statements that fixing it removes, which are the value's own and every
+  // statement nothing reads once the value is computed from the arguments.
+  size_t match_size(const Match& m) const { return removed(m.value, m.args).size(); }
+
  private:
+  bool is_registered(const std::string& op) const {
+    for (const Registered& r : registered_)
+      if (r.name == op) return true;
+    return false;
+  }
+
+  // The statements that become unused when v is computed from args
+  // instead: v's own, then any whose last reader was one of them.
+  std::vector<size_t> removed(Lit v, const std::vector<Lit>& args) const {
+    std::map<size_t, int> delta;
+    auto uses_of = [&](size_t i) { return uses_[i] + delta[i]; };
+    for (Lit a : args) {
+      auto it = by_lit_.find(a);
+      if (it != by_lit_.end()) ++delta[it->second];
+    }
+    std::vector<size_t> out{by_lit_.at(v)}, stack{by_lit_.at(v)};
+    while (!stack.empty()) {
+      const size_t i = stack.back();
+      stack.pop_back();
+      for (Lit a : statements_[i].args) {
+        auto it = by_lit_.find(a);
+        if (it == by_lit_.end()) continue;
+        --delta[it->second];
+        if (uses_of(it->second) == 0) {
+          out.push_back(it->second);
+          stack.push_back(it->second);
+        }
+      }
+    }
+    return out;
+  }
+
+  static constexpr size_t kMaxPoolWords = 32;
+  struct Variant {
+    Registered r;
+    std::vector<int> prev;
+    // allow[j][c][t]: for views 0..j-1 given the bits of c, which values of
+    // view j (bit 0: false, bit 1: true) leave some way to get the target t.
+    std::vector<std::vector<std::array<uint8_t, 2>>> allow;
+    bool opposite_allowed = true;
+    // Majority: wherever R(args) equals the target, at most one argument
+    // differs from it, so the argument that differs least differs on at
+    // most a third of the samples. It's given to view 0.
+    bool majority = false;
+  };
+
+  void prepare_variants() {
+    variants_.clear();
+    for (const Registered& r : registered_) {
+      Variant v{r, previous_interchangeable(r), {}, true};
+      // An operation computing the opposite is registered: the group is a
+      // match for that one instead.
+      for (const Registered& o : registered_) {
+        if (o.arity != r.arity) continue;
+        for (const std::vector<int>& perm : perms(r.arity)) {
+          bool opposite = true;
+          for (uint32_t c = 0; c < (1u << r.arity) && opposite; ++c)
+            opposite = permuted_bit(o, perm, c) == !((r.table >> c) & 1);
+          if (opposite) v.opposite_allowed = false;
+        }
+      }
+      v.allow.resize(r.arity);
+      for (uint32_t j = 0; j < r.arity; ++j) {
+        v.allow[j].assign(1u << j, {0, 0});
+        for (uint32_t c = 0; c < (1u << j); ++c)
+          for (uint32_t t = 0; t < 2; ++t)
+            for (uint32_t b = 0; b < 2; ++b) {
+              const uint32_t fixed = c | (b << j);
+              for (uint32_t rest = 0; rest < (1u << (r.arity - j - 1)); ++rest)
+                if (((r.table >> (fixed | (rest << (j + 1)))) & 1) == t) v.allow[j][c][t] |= 1u << b;
+            }
+      }
+      v.majority = !plain_ && r.arity == 3 && r.table == 0xE8;
+      variants_.push_back(std::move(v));
+    }
+  }
+
+  bool sample_bit(size_t index, size_t k) const { return (lit_samples_[index][k >> 6] >> (k & 63)) & 1; }
+
+  void resub_assign(Lit v, Lit target, const Variant& var, std::set<Match>& found) {
+    ++search_nodes_;
+    const Registered& r = var.r;
+    const uint32_t j = static_cast<uint32_t>(chosen_.size());
+    // Candidates: available literals before v, after the previous
+    // interchangeable view's value, not already chosen.
+    std::array<uint64_t, kMaxPoolWords> cand{};
+    const size_t n = resub_pool_.size();
+    refresh_target(target);
+    size_t lowest = var.prev[j] >= 0 ? static_cast<size_t>(chosen_[var.prev[j]]) + 1 : 0;
+    if (var.majority && j == 0) {
+      // How much each literal differs from the target on the samples as
+      // they are now, which every later step of this search compares.
+      const size_t sw0 = (rsamples_.size() + 63) / 64;
+      const uint64_t flip0 = is_compl(target) ? ~0ULL : 0;
+      differs_.assign(n, 0);
+      for (size_t x = 0; x < n; ++x)
+        for (size_t w = 0; w < sw0; ++w) {
+          const uint64_t valid =
+              (w + 1 == sw0 && rsamples_.size() % 64) ? ((1ULL << (rsamples_.size() % 64)) - 1) : ~0ULL;
+          differs_[x] += static_cast<uint32_t>(
+              __builtin_popcountll((lit_samples_[x][w] ^ target_cache_[w] ^ flip0) & valid));
+        }
+      majority_samples_ = rsamples_.size();
+    }
+    if (var.majority && j == 1) lowest = 0;
+    for (size_t x = lowest; x < n; ++x) {
+      if (var.majority) {
+        if (j == 0 && 3 * differs_[x] > majority_samples_) continue;
+        if (j > 0) {
+          const size_t a = static_cast<size_t>(chosen_[0]);
+          if (std::make_pair(differs_[x], x) < std::make_pair(differs_[a], a)) continue;
+        }
+      }
+      cand[x >> 6] |= 1ULL << (x & 63);
+    }
+    for (size_t w = 0; w < lwords_; ++w) cand[w] &= allowed_[w];
+    for (int x : chosen_) cand[x >> 6] &= ~(1ULL << (x & 63));
+    // Sampled assignments where view j must be false (m0) or true (m1), a
+    // word at a time; one where no value of view j works prunes the node.
+    const size_t sw = (rsamples_.size() + 63) / 64;
+    m0_.assign(sw, 0);
+    m1_.assign(sw, 0);
+    const uint64_t flip = is_compl(target) ? ~0ULL : 0;
+    for (size_t w = 0; w < sw; ++w) {
+      const uint64_t valid = (w + 1 == sw && rsamples_.size() % 64) ? ((1ULL << (rsamples_.size() % 64)) - 1) : ~0ULL;
+      const uint64_t tw = target_cache_[w] ^ flip;
+      uint64_t dead = 0;
+      for (uint32_t c = 0; c < (1u << j); ++c) {
+        uint64_t block = valid;
+        for (uint32_t i = 0; i < j; ++i) {
+          const uint64_t b = lit_samples_[chosen_[i]][w];
+          block &= ((c >> i) & 1) ? b : ~b;
+        }
+        for (uint32_t t = 0; t < 2; ++t) {
+          const uint64_t at = block & (t ? tw : ~tw);
+          switch (var.allow[j][c][t]) {
+            case 0: dead |= at; break;
+            case 1: m0_[w] |= at; break;
+            case 2: m1_[w] |= at; break;
+            default: break;
+          }
+        }
+      }
+      if (dead) return;
+    }
+    // When the last view's value is forced on every sample (as for `xor`),
+    // the candidates are the literals with exactly those sample bits.
+    if (j + 1 == r.arity && !plain_) {
+      bool forced = true;
+      for (size_t w = 0; w < sw && forced; ++w) {
+        const uint64_t valid = (w + 1 == sw && rsamples_.size() % 64) ? ((1ULL << (rsamples_.size() % 64)) - 1) : ~0ULL;
+        forced = (m0_[w] | m1_[w]) == valid;
+      }
+      if (forced) {
+        ++hash_lookups_;
+        refresh_signatures();
+        auto it = signatures_.find(signature(m1_));
+        if (it == signatures_.end()) return;
+        const std::vector<int> bucket = it->second;
+        for (int x : bucket) {
+          if (!((cand[x >> 6] >> (x & 63)) & 1) || lit_samples_[x] != m1_) continue;
+          chosen_.push_back(x);
+          ++leaf_candidates_;
+          resub_verify(v, target, var, found);
+          chosen_.pop_back();
+        }
+        return;
+      }
+    }
+    for (size_t w = 0; w < sw; ++w)
+      for (uint64_t bits = m0_[w] | m1_[w]; bits; bits &= bits - 1) {
+        const size_t k = w * 64 + static_cast<size_t>(__builtin_ctzll(bits));
+        const bool one = (m1_[w] >> (k & 63)) & 1;
+        ++position_steps_;
+        const std::vector<uint64_t>& at = positions_[k];
+        uint64_t any = 0;
+        for (size_t lw = 0; lw < lwords_; ++lw) {
+          cand[lw] &= one ? at[lw] : ~at[lw];
+          any |= cand[lw];
+        }
+        if (!any) return;
+      }
+    for (size_t w = 0; w < lwords_; ++w)
+      for (uint64_t bits = cand[w]; bits; bits &= bits - 1) {
+        const int x = static_cast<int>(w * 64 + static_cast<size_t>(__builtin_ctzll(bits)));
+        if (static_cast<size_t>(x) >= n) break;
+        chosen_.push_back(x);
+        if (j + 1 == r.arity) ++leaf_candidates_;
+        if (j + 1 < r.arity)
+          resub_assign(v, target, var, found);
+        else
+          resub_verify(v, target, var, found);
+        chosen_.pop_back();
+      }
+  }
+
+  // The sample bits of v's node, which isn't in the pool yet, kept up to date
+  // as samples are added.
+  void refresh_target(Lit target) {
+    if (target_cache_lit_ != node_of(target) || target_cache_size_ != rsamples_.size()) {
+      target_cache_.assign((rsamples_.size() + 63) / 64, 0);
+      for (size_t k = 0; k < rsamples_.size(); ++k)
+        if (lit_bit(make_lit(node_of(target)), rsamples_[k])) target_cache_[k >> 6] |= 1ULL << (k & 63);
+      target_cache_lit_ = node_of(target);
+      target_cache_size_ = rsamples_.size();
+    }
+  }
+
+  // Whether target = R(args) on every input assignment, with every argument
+  // mattering. A difference found adds its assignment to the samples.
+  bool holds(Lit v, Lit target, const Registered& r, const std::vector<Lit>& args) {
+    (void)v;
+    ++exact_checks_;
+    const uint64_t* tv = &tables_[size_t{node_of(target)} * words_];
+    const uint64_t fv = is_compl(target) ? ~0ULL : 0;
+    std::array<const uint64_t*, 8> at{};
+    std::array<uint64_t, 8> flip{};
+    for (uint32_t i = 0; i < r.arity; ++i) {
+      at[i] = &tables_[size_t{node_of(args[i])} * words_];
+      flip[i] = is_compl(args[i]) ? ~0ULL : 0;
+    }
+    // The standard operations get their own expressions, which are several
+    // times faster than summing minterms.
+    const uint64_t t2 = r.arity == 2 ? r.table : 0, t3 = r.arity == 3 ? r.table : 0;
+    for (size_t w = 0; w < words_; ++w) {
+      const uint64_t x0 = at[0][w] ^ flip[0], x1 = at[1][w] ^ flip[1];
+      uint64_t rw = 0;
+      if (t2 == 0xE) {
+        rw = x0 | x1;
+      } else if (t2 == 0x6) {
+        rw = x0 ^ x1;
+      } else if (t2 == 0x9) {
+        rw = ~(x0 ^ x1);
+      } else if (t2 == 0xD) {
+        rw = ~x0 | x1;
+      } else if (t3 == 0xD8) {
+        const uint64_t x2 = at[2][w] ^ flip[2];
+        rw = (x0 & x1) | (~x0 & x2);
+      } else if (t3 == 0xE8) {
+        const uint64_t x2 = at[2][w] ^ flip[2];
+        rw = (x0 & x1) | (x2 & (x0 | x1));
+      } else {
+        for (uint32_t m = 0; m < (1u << r.arity); ++m) {
+          if (!((r.table >> m) & 1)) continue;
+          uint64_t term = ~0ULL;
+          for (uint32_t i = 0; i < r.arity; ++i) {
+            const uint64_t x = at[i][w] ^ flip[i];
+            term &= ((m >> i) & 1) ? x : ~x;
+          }
+          rw |= term;
+        }
+      }
+      const uint64_t diff = (rw ^ tv[w] ^ fv) & (w + 1 == words_ ? last_mask_ : ~0ULL);
+      if (diff) {
+        ++refinements_;
+        add_resub_sample(w * 64 + static_cast<uint64_t>(__builtin_ctzll(diff)));
+        return false;
+      }
+    }
+    // Every argument must matter: R's difference with respect to each view,
+    // at these values, is true for some input assignment.
+    for (uint32_t i = 0; i < r.arity; ++i) {
+      bool matters = false;
+      for (size_t w = 0; w < words_ && !matters; ++w) {
+        uint64_t diff = 0;
+        for (uint32_t m = 0; m < (1u << r.arity); ++m) {
+          if ((m >> i) & 1) continue;
+          if (((r.table >> m) & 1) == ((r.table >> (m | (1u << i))) & 1)) continue;
+          uint64_t term = ~0ULL;
+          for (uint32_t h = 0; h < r.arity; ++h)
+            if (h != i) {
+              const uint64_t x = at[h][w] ^ flip[h];
+              term &= ((m >> h) & 1) ? x : ~x;
+            }
+          diff |= term;
+        }
+        matters = (diff & (w + 1 == words_ ? last_mask_ : ~0ULL)) != 0;
+      }
+      if (!matters) {
+        ++inessential_;
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void resub_verify(Lit v, Lit target, const Variant& var, std::set<Match>& found) {
+    const Registered& r = var.r;
+    std::vector<Lit> args;
+    for (int i : chosen_) args.push_back(resub_pool_[i]);
+    const bool opposite = target != v;
+    if (spelling_) {
+      if (!order_.empty() && spelling_key(r.name, args, opposite) > current_key_) return;
+      if (holds(v, target, r, args)) found.insert(Match{v, opposite ? "not:" + r.name : r.name, args});
+      return;
+    }
+    // An execution of R on these values, or for the opposite result, an
+    // execution and a `not` of it, is how the program should be written.
+    std::vector<Lit> sorted = args;
+    std::sort(sorted.begin(), sorted.end());
+    if (sorted_executions_.count(Match{opposite ? v ^ 1 : v, r.name, sorted})) return;
+    // A match has at least two statements, and an execution of a
+    // registered operation and a `not` of it are only a match for an
+    // operation that computes the opposite.
+    const std::vector<size_t> group = removed(v, args);
+    if (group.size() < 2) return;
+    if (opposite && group.size() == 2) {
+      const Statement& s = statements_[by_lit_.at(v)];
+      if (s.op == "not") {
+        auto it = by_lit_.find(s.args[0]);
+        if (it != by_lit_.end() && std::find(group.begin(), group.end(), it->second) != group.end() &&
+            is_registered(statements_[it->second].op))
+          return;
+      }
+    }
+    if (first_only_) {
+      pending_.push_back({group.size(), by_lit_.at(v), v, target, &var, args});
+      return;
+    }
+    if (!holds(v, target, r, args)) return;
+    found.insert(Match{v, opposite ? "not:" + r.name : r.name, args});
+  }
+
+  static uint64_t signature(const std::vector<uint64_t>& bits) {
+    uint64_t h = 0x9E37;
+    for (uint64_t w : bits) h = mix64(h ^ w);
+    return h;
+  }
+
+  // Literals by their sample bits, kept up to date as literals and samples
+  // are added.
+  void refresh_signatures() {
+    if (signature_samples_ != rsamples_.size()) {
+      signatures_.clear();
+      signature_pool_ = 0;
+      signature_samples_ = rsamples_.size();
+    }
+    for (; signature_pool_ < resub_pool_.size(); ++signature_pool_)
+      signatures_[signature(lit_samples_[signature_pool_])].push_back(static_cast<int>(signature_pool_));
+  }
+
+  void add_resub_sample(uint64_t minterm) {
+    const size_t k = rsamples_.size();
+    rsamples_.push_back(minterm);
+    positions_.emplace_back(lwords_, 0);
+    for (size_t index = 0; index < resub_pool_.size(); ++index) {
+      if (k % 64 == 0) lit_samples_[index].push_back(0);
+      if (lit_bit(resub_pool_[index], minterm)) {
+        lit_samples_[index][k >> 6] |= 1ULL << (k & 63);
+        positions_[k][index >> 6] |= 1ULL << (index & 63);
+      }
+    }
+  }
+
   static bool evaluate(const std::string& op, uint32_t combo, uint32_t n) {
     auto bit = [&](int i) { return (combo >> i) & 1; };
     if (op == "not") return !bit(0);
@@ -510,6 +1023,12 @@ class Matcher {
   }
 
   uint64_t table_hash(Lit l) const {
+    if (hash_cache_.size() <= l) hash_cache_.resize(2 * size_t{g_.num_nodes()} + 2, 0);
+    if (hash_cache_[l]) return hash_cache_[l];
+    return hash_cache_[l] = compute_table_hash(l);
+  }
+
+  uint64_t compute_table_hash(Lit l) const {
     const uint64_t* t = &tables_[size_t{node_of(l)} * words_];
     uint64_t flip = is_compl(l) ? ~0ULL : 0, h = 0x2545;
     for (size_t w = 0; w < words_; ++w) h = mix64(h ^ ((t[w] ^ flip) & (w + 1 == words_ ? last_mask_ : ~0ULL)));
@@ -742,11 +1261,73 @@ class Matcher {
   std::vector<Registered> registered_;
   uint32_t max_arity_ = 0;
   std::set<Match> executions_;
+  std::set<Match> sorted_executions_;
+  std::vector<int> uses_;
+  std::vector<uint32_t> differs_;
+  size_t majority_samples_ = 0;
+  uint64_t skipped_values_ = 0, hash_lookups_ = 0;
+  std::unordered_map<uint64_t, std::vector<int>> signatures_;
+  size_t signature_samples_ = 0, signature_pool_ = 0;
+  // Without the shortcuts, to check that they change nothing.
+  bool plain_ = false;
+  // Only the match DLP 57 reports: candidates are verified largest first.
+  bool first_only_ = false;
+  bool spellings_ = false, spelling_ = false;
+  std::set<Match> spelled_;
+  std::vector<std::string> order_;
+  bool precedence_strict_ = false;
+  using Key = std::array<int, 3>;
+  Key current_key_{};
+
+  static int aig_nodes(const std::string& op) {
+    if (op == "or" || op == "implies") return 1;
+    if (op == "maj") return 4;
+    return 3;
+  }
+  int order_of(const std::string& op) const {
+    return static_cast<int>(std::find(order_.begin(), order_.end(), op) - order_.begin());
+  }
+  // Precedence without the tie between values: negations (values given
+  // that are a `not`, and a `not` of the result), AIG nodes, declared order.
+  Key spelling_key(const std::string& op, const std::vector<Lit>& args, bool opposite) const {
+    int negations = opposite ? 1 : 0;
+    for (Lit a : args) {
+      auto it = by_lit_.find(a);
+      negations += it != by_lit_.end() && statements_[it->second].op == "not";
+    }
+    return {negations, aig_nodes(op), order_of(op)};
+  }
+  Key spelling_bound(const std::string& op, bool opposite) const {
+    return {opposite ? 1 : 0, aig_nodes(op), order_of(op)};
+  }
+  struct Pending {
+    size_t size, statement;
+    Lit v, target;
+    const Variant* var;
+    std::vector<Lit> args;
+  };
+  std::vector<Pending> pending_;
+
+ public:
+  void set_plain(bool plain) { plain_ = plain; }
+  void set_first_only(bool first_only) { first_only_ = first_only; }
+  void set_spellings(bool spellings) { spellings_ = spellings; }
+  // The declared order of the registered operations for the precedence
+  // rule, and whether opposite spellings are left out.
+  void set_precedence(const std::vector<std::string>& order, bool strict) {
+    order_ = order;
+    precedence_strict_ = strict;
+  }
+  // Every spelling of each value that is an execution or a `not` of one.
+  const std::set<Match>& spelled() const { return spelled_; }
+
+ private:
   std::map<Lit, size_t> by_lit_;
   std::vector<std::vector<std::vector<int>>> perms_;
   size_t words_ = 1;
   uint64_t last_mask_ = ~0ULL;
   std::vector<uint64_t> tables_;
+  mutable std::vector<uint64_t> hash_cache_;
   std::vector<uint64_t> sample_;
   std::vector<Lit> pool_;
   std::vector<uint32_t> support_;
@@ -756,6 +1337,20 @@ class Matcher {
   std::vector<std::vector<uint64_t>> bits_;
   std::vector<uint64_t> vbits_;
   uint64_t search_nodes_ = 0, exact_checks_ = 0, refinements_ = 0, inessential_ = 0;
+  // The search over earlier values.
+  std::vector<Variant> variants_;
+  std::vector<Lit> resub_pool_;
+  std::vector<std::vector<uint64_t>> lit_samples_;  // by pool index, by sample
+  std::vector<std::vector<uint64_t>> positions_;    // by sample, by pool index
+  std::vector<uint64_t> rsamples_;
+  std::vector<int> chosen_;
+  std::vector<uint64_t> m0_, m1_;
+  uint64_t position_steps_ = 0, leaf_candidates_ = 0;
+  std::array<uint64_t, kMaxPoolWords> allowed_{};
+  size_t lwords_ = 1;
+  std::vector<uint64_t> target_cache_;
+  uint32_t target_cache_lit_ = UINT32_MAX;
+  size_t target_cache_size_ = 0;
 };
 
 }  // namespace beq

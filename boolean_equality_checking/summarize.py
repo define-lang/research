@@ -1012,5 +1012,173 @@ def limits() -> None:
     )
 
 
+@cli.command()
+def resub() -> None:
+    """Tables for exact matching over earlier values."""
+    records = load("resub")
+    groups: dict[tuple[int, int], list[dict]] = collections.defaultdict(list)
+    for r in records:
+        m = re.search(r"match_i(\d+)_s(\d+)_", r["file"])
+        assert m  # noqa: S101 - Every matching workload is named this way.
+        groups[(int(m[2]), int(m[1]))].append(r)
+    rows = []
+    for (statements, inputs), rs in sorted(groups.items()):
+
+        def ok(config: str, rs: list[dict] = rs) -> list[dict]:
+            return [r[config] for r in rs if r[config]["status"] == "ok"]
+
+        resub = ok("resub")
+        rows.append(
+            [
+                f"{inputs} inputs, {statements} statements",
+                fmt_time(statistics.median(r["time_s"] for r in ok("cuts"))),
+                fmt_time(statistics.median(r["time_s"] for r in resub)),
+                fmt_time(max(r["time_s"] for r in resub)),
+                fmt_time(statistics.median(r["time_s"] for r in ok("exact_any"))),
+                f"{statistics.mean(r['matches'] for r in resub):.0f}",
+                f"{statistics.mean(r['opposite'] for r in resub):.0f}",
+                f"{statistics.mean(r['values'] for r in resub):.0f}",
+                f"{statistics.mean(r['stats']['skipped_values'] for r in resub):.0f}",
+            ]
+        )
+    print(
+        table(
+            [
+                "size",
+                "cuts",
+                "resub, median",
+                "resub, slowest",
+                "first exact search",
+                "matches",
+                "opposite results",
+                "values matched",
+                "values skipped",
+            ],
+            rows,
+        )
+    )
+
+
+@cli.command()
+def fixpoint() -> None:
+    """Tables for fixing equivalent programs until they compile."""
+    records = load("fixpoint")
+    steady = [r for r in records if r["part"] == "steady"]
+    print("### Random programs of 256 statements, fixed until they compile\n")
+    rows = [
+        [
+            str(r["inputs"]),
+            r.get("policy", "largest"),
+            r["status"],
+            str(r.get("rounds", "")),
+            str(r.get("redundant_fixes", "")),
+            str(r.get("match_fixes", "")),
+            str(r.get("statements_after", "")),
+            fmt_time(r["slowest_check_s"]) if "slowest_check_s" in r else "",
+            fmt_time(r["final_check_s"]) if "final_check_s" in r else "",
+        ]
+        for r in steady
+    ]
+    print(
+        table(
+            [
+                "inputs",
+                "rules",
+                "status",
+                "rounds",
+                "redundant-value fixes",
+                "match fixes",
+                "statements after",
+                "slowest check",
+                "check of the result",
+            ],
+            rows,
+        )
+    )
+    families = [r for r in records if r["part"] == "families"]
+    by: dict[tuple, list[dict]] = collections.defaultdict(list)
+    for r in families:
+        by[(r["kind"], r["inputs"], r["policy"], r["family"])].append(r)
+    summary: dict[tuple, list[tuple]] = collections.defaultdict(list)
+    for (kind, inputs, policy, _family), rs in by.items():
+        finals = [r.get("final_hash") for r in rs]
+        base = finals[0]
+        summary[(kind, inputs, policy)].append(
+            (
+                len(set(finals)) == 1 and None not in finals,
+                len(set(finals)),
+                sum(f == base for f in finals[1:]),
+                len(finals) - 1,
+                rs,
+            )
+        )
+    print("\n### Families: does every program reach the same one?\n")
+    rows = []
+    for (kind, inputs, policy), fs in sorted(summary.items()):
+        all_rs = [r for f in fs for r in f[4]]
+        statuses = collections.Counter(r["status"] for r in all_rs)
+        rounds = [r["rounds"] for r in all_rs if "rounds" in r]
+        rows.append(
+            [
+                kind,
+                str(inputs),
+                policy,
+                f"{sum(f[0] for f in fs)}/{len(fs)}",
+                f"{statistics.mean(f[1] for f in fs):.1f}",
+                f"{sum(f[2] for f in fs)}/{sum(f[3] for f in fs)}",
+                f"{statistics.median(rounds):.0f} / {max(rounds)}" if rounds else "",
+                ", ".join(f"{k} {v}" for k, v in sorted(statuses.items())),
+            ]
+        )
+    print(
+        table(
+            [
+                "rewrites",
+                "inputs",
+                "policy",
+                "families that converge",
+                "distinct results per family",
+                "variants reaching the base's result",
+                "rounds, median / most",
+                "statuses",
+            ],
+            rows,
+        )
+    )
+    checks = [r for r in families if "final_check_s" in r]
+    print("\n### Checking the fixed programs, which compile\n")
+    rows = []
+    for policy, inputs in sorted({(r["policy"], r["inputs"]) for r in checks}):
+        rs = [r for r in checks if r["inputs"] == inputs and r["policy"] == policy]
+        rows.append(
+            [
+                policy,
+                str(inputs),
+                str(len(rs)),
+                f"{statistics.median(r['statements_after'] for r in rs):.0f}",
+                fmt_time(statistics.median(r["final_check_s"] for r in rs)),
+                fmt_time(max(r["final_check_s"] for r in rs)),
+            ]
+        )
+    print(
+        table(
+            ["rules", "inputs", "programs", "statements, median", "median", "slowest"],
+            rows,
+        )
+    )
+    print("\n### Does the declared order matter?\n")
+    finals: dict[tuple, dict[str, str]] = collections.defaultdict(dict)
+    for r in families:
+        if r["policy"] in ("largest|prec:A|strict", "largest|prec:B|strict"):
+            key = (r["kind"], r["inputs"], r["family"], r["program"])
+            finals[key][r["policy"]] = r.get("final_hash", "")
+    rows = []
+    for kind in sorted({k[0] for k in finals}):
+        pairs = [f for k, f in finals.items() if k[0] == kind and len(f) == 2]
+        same = sum(len(set(f.values())) == 1 for f in pairs)
+        rows.append([kind, f"{same}/{len(pairs)}"])
+    print(table(["rewrites", "programs fixed the same way under orders A and B"], rows))
+
+
 if __name__ == "__main__":
     cli()

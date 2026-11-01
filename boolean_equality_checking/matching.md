@@ -17,7 +17,7 @@ coincidences.
 The cut definition is the defensible one. One cheap extension is worth
 adopting: let a cut's value be given to R as its `not` when the program
 already has that `not`. The four-view limit is justified by the cost of
-enumerating every cut, which grows 6–18 times per added view.
+enumerating every cut, which grows 7–18 times per added view.
 
 The code is `src/match.hpp` (`beq match`), the workloads `gen/matching.py`,
 the driver `matching_experiment.py`, and the results `results/matching.jsonl`
@@ -119,7 +119,7 @@ operation, of its statement values):
 Each cell is the median time, then the mean number of values flagged that
 weren't planted, of the mean number of values per operation. Times are of
 single runs, alongside other runs; the two cut methods, timed against each
-other at the best of five runs, take 43 ms and 65 ms for all 25 operations.
+other at the best of five runs, take 42 ms and 59 ms for all 25 operations.
 
 Planted matches found:
 
@@ -137,7 +137,7 @@ where R needs `not x`, which the program also has (for example `maj(425,
 504, 364)` where 425 is `not 424`, and the written-out logic reads 424). The
 cut's table is then R with one view negated, which isn't R. `cuts_negated`
 finds all six, flags 10 more values in all 25 operations than `cuts` does
-(157 against 147), and takes about 50% longer (65 ms against 43 ms for all 25).
+(157 against 147), and takes about 40% longer (59 ms against 42 ms for all 25).
 `exact_cone` misses seven, most likely because its arguments must be literals
 its cone reads, while the comparison identifies an argument by its function
 and picks the first literal with that function, which can be elsewhere (this
@@ -178,9 +178,9 @@ operations of arity k and cuts of up to k values:
 | k | cuts, time (best of five)       | cuts enumerated      | exact (`exact_cone`)                       |
 | - | ------------------------------- | -------------------- | ------------------------------------------ |
 | 3 |                                 |                      | 0.36–5.9 s (the table above)               |
-| 4 | 2.3 ms, 3.6 ms, 2.7 ms          | 1,625, 3,043, 2,138  | 30 s, 421 s, 298 s                         |
-| 5 | 16 ms, 29 ms, 16 ms             | 3,435, 7,497, 4,480  | more than 30 minutes on the first          |
-| 6 | 177 ms, 524 ms, 170 ms          | 8,164, 20,238, 9,874 | not run                                    |
+| 4 | 1.8 ms, 3.1 ms, 2.1 ms          | 1,625, 3,043, 2,138  | 30 s, 421 s, 298 s                         |
+| 5 | 13 ms, 28 ms, 14 ms             | 3,435, 7,497, 4,480  | more than 30 minutes on the first          |
+| 6 | 168 ms, 511 ms, 161 ms          | 8,164, 20,238, 9,874 | not run                                    |
 
 The cut timings are `results/matching_arity_cuts.jsonl`, measured alone;
 the exact runs are in `results/matching.jsonl`. They ran before the
@@ -188,9 +188,9 @@ the exact runs are in `results/matching.jsonl`. They ran before the
 are only meant to show the growth.
 
 DLP 57 needs every match, so every cut has to be enumerated. The number of
-cuts grows 2–3 times per added view and the time 6–18 times (each cut is
-also compared in every view order, k! of them), so four views costs 2–4 ms
-per operation, five 16–29 ms, and six 0.17–0.52 s. The exact search grows
+cuts grows 2–3 times per added view and the time 7–18 times (each cut is
+also compared in every view order, k! of them), so four views costs 2–3 ms
+per operation, five 13–28 ms, and six 0.16–0.51 s. The exact search grows
 about 100 times per added view and doesn't finish five within 30 minutes.
 So the four-view limit is justified by cost: it keeps finding every match
 at about the cost of the redundant-value check itself, five would still be
@@ -220,7 +220,7 @@ reports the same match.
    that value. It finds the written-out operations that use x where R needs
    `not x` (4% of the planted ones), with few extra matches.
 3. **Keep the limit of four read views** for registered operations: every
-   added view multiplies the cost of finding every match by 6–18.
+   added view multiplies the cost of finding every match by 7–18.
 4. **Order overlapping matches** by size, then by value, then by operation
    name, then by argument rank.
 

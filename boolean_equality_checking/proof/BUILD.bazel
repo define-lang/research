@@ -1,0 +1,36 @@
+load("@rules_lean//lean:lean.bzl", "lean_axiom_test", "lean_library")
+
+MATHLIB_DEPS = [
+    "@research_lean//:LeanSearchClient",
+    "@research_lean//:Qq",
+    "@research_lean//:aesop",
+    "@research_lean//:batteries",
+    "@research_lean//:importGraph",
+    "@research_lean//:mathlib",
+    "@research_lean//:plausible",
+    "@research_lean//:proofwidgets",
+]
+
+lean_library(
+    name = "fixing_termination",
+    srcs = ["fixing_termination.lean"],
+    deps = MATHLIB_DEPS,
+)
+
+lean_axiom_test(
+    name = "fixing_termination_axioms_test",
+    size = "small",
+    allowed_axioms = [
+        "propext",
+        "Classical.choice",
+        "Quot.sound",
+    ],
+    imports = ["fixing_termination"],
+    theorems = [
+        "Define.BooleanEqualityChecking.Termination.opFix_lt",
+        "Define.BooleanEqualityChecking.Termination.progStep_lt",
+        "Define.BooleanEqualityChecking.Termination.prog_no_cycle",
+        "Define.BooleanEqualityChecking.Termination.prog_terminates",
+    ],
+    deps = [":fixing_termination"],
+)

@@ -23,6 +23,15 @@ and how many planted equalities each one finds.
     others by referring to each execution instead of copying it.
   - [steady_state.md](steady_state.md): the cost of checking programs that
     compile, stored patterns, and rechecking after edits.
+  - [earlier_values.md](earlier_values.md): an exact match definition over
+    values computed earlier, its cost, and whether fixing equivalent
+    programs until they compile makes them the same program.
+  - [precedence.md](precedence.md): a precedence rule between equivalent
+    spellings of a value, and whether it makes the fixes converge.
+  - [proof/termination.md](proof/termination.md): a proof, in English and
+    in Lean (`proof/fixing_termination.lean`), that fixing a program under
+    DLP 57's and DLP 59's rules always terminates, including simplifying
+    constants and removing constant written views.
 
 ## Recommendations
 
@@ -132,10 +141,22 @@ The task allowed restrictions on how programs are written:
   One extension is worth adopting: let a cut's value be given to the
   registered operation as its `not` when the program has that `not` (it
   finds the 4% of planted matches cuts miss, with few extra matches, at
-  about 1.5× the time). The four-view limit is justified by cost: every
-  added view multiplies the cost of finding every match by 6–18. Overlapping
+  about 1.4× the time). The four-view limit is justified by cost: every
+  added view multiplies the cost of finding every match by 7–18. Overlapping
   matches can be ordered without a solver: by size, then value, then
   operation name, then argument rank.
+- **An exact definition over earlier values** ([earlier_values.md](earlier_values.md))
+  treats those flagged values as second ways of writing them. Searched the
+  way Boolean resubstitution finds divisors, it checks a value operation
+  that compiles in 1.4–5.7 ms at 12–16 inputs and 8–18 ms at 20, with
+  matches sized by the statements fixing them removes, which also makes
+  fixing terminate. But it doesn't give one way to write a program: fixing
+  equivalent programs until they compile reached one program in at most
+  1 of 8 families when registered operations were written out, and no order
+  of fixes changed that. A precedence rule between spellings
+  ([precedence.md](precedence.md)) needs one restriction to terminate (no
+  fix may grow the program), costs about 50% more checking, and still
+  doesn't make them converge.
 
 No restriction can make exact checking polynomial without making some
 functions need exponentially more code, unless P = coNP: any two AIGs can be
@@ -318,7 +339,8 @@ Argued, not measured:
   - `structural.hpp`: structural hashing, the normalized form, DLP 57's
     cuts. `functional.hpp`: truth tables, OBDD equality.
   - `sweep.hpp`: SAT sweeping with the combined algorithm's ladder.
-  - `match.hpp`: registered-operation matching (cuts and the exact search).
+  - `match.hpp`: registered-operation matching (cuts, the first exact
+    search, and the search over earlier values).
   - `hier.hpp`: libraries of operations that execute each other, with
     references, copying, stored patterns, and rechecking after edits.
   - `main.cpp`: the `beq` command.
@@ -327,12 +349,15 @@ Argued, not measured:
   line; `verify.py` checks a method's classes with CaDiCaL;
   `cadical_miter.py` times CaDiCaL on planted pairs; `sdd_compile.py`
   compiles with SDDs; `caller_redundancy.py` counts executed operations'
-  values that are redundant in their callers; `aiger.py` reads AIGER.
+  values that are redundant in their callers; `fixpoint.py` represents
+  value operations as programs and applies DLP 57's fixes until they
+  compile; `aiger.py` reads AIGER.
 - Drivers: `experiments.py` (Experiments 1, 2, 4, 5, and 10),
   `check_methods.py` (compares all methods), `dispatch_budget.py`,
   `abc_compare.py`, `native_solvers.py`, `sdd_compare.py`,
   `matching_experiment.py`, `hierarchy_experiment.py`,
   `steady_state_experiment.py`, `caller_redundancy_experiment.py`,
+  `resub_experiment.py`, `fixpoint_experiment.py`,
   `final_program_experiment.py`, `cadical_adversarial.sh`, and
   `run_everything.sh`. Every driver runs each check through
   `experiments.run_limited`, which kills it past 30 seconds (only the final
