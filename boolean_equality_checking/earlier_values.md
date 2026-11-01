@@ -169,8 +169,9 @@ rewrite:
 
 Eight families of each kind at 8, 12, and 16 inputs (16, 30, and 50 base
 statements, up to 191 statements in a variant). Each program was fixed until
-it compiled: the first redundant value replaced by the value it equals (a
-constant one simplified away), otherwise the reported match replaced by an
+it compiled: the first redundant value replaced by the value it equals, or
+by the `not` of the value it's always the opposite of (a constant one
+simplified away), otherwise the reported match replaced by an
 execution, then the program put back in DLP 57's statement and argument
 order. The results were compared as text in that order. Three ways of
 picking the match were tried: DLP 57's (largest, then earliest, then by
@@ -203,22 +204,22 @@ With DLP 57's order of fixes (the other orders, which differ little, are in `res
 | distribute | 12 | largest | 5/8 | 1.6 | 23/32 | 4 / 6 | ok 40 |
 | distribute | 16 | largest | 2/8 | 2.4 | 12/32 | 5 / 7 | ok 40 |
 | duplicate | 8 | largest | 8/8 | 1.0 | 32/32 | 2 / 4 | ok 40 |
-| duplicate | 12 | largest | 8/8 | 1.0 | 32/32 | 3 / 7 | ok 40 |
+| duplicate | 12 | largest | 8/8 | 1.0 | 32/32 | 4 / 7 | ok 40 |
 | duplicate | 16 | largest | 8/8 | 1.0 | 32/32 | 6 / 8 | ok 40 |
 | expand | 8 | largest | 1/8 | 3.0 | 15/32 | 6 / 22 | ok 40 |
 | expand | 8 | largest+plain | 1/8 | 2.8 | 15/32 | 7 / 25 | ok 40 |
-| expand | 12 | largest | 0/8 | 4.9 | 1/32 | 15 / 32 | ok 40 |
-| expand | 12 | largest+plain | 0/8 | 4.5 | 3/32 | 16 / 42 | ok 40 |
+| expand | 12 | largest | 0/8 | 4.6 | 2/32 | 16 / 32 | ok 40 |
+| expand | 12 | largest+plain | 0/8 | 4.4 | 3/32 | 16 / 42 | ok 40 |
 | expand | 16 | largest | 0/8 | 5.0 | 0/32 | 28 / 47 | ok 40 |
-| expand | 16 | largest+plain | 0/8 | 4.9 | 1/32 | 32 / 63 | ok 40 |
+| expand | 16 | largest+plain | 0/8 | 4.9 | 1/32 | 33 / 63 | ok 40 |
 | mixed | 8 | largest | 0/8 | 4.6 | 2/32 | 9 / 22 | ok 40 |
 | mixed | 8 | largest+plain | 0/8 | 4.8 | 1/32 | 11 / 23 | ok 40 |
 | mixed | 12 | largest | 0/8 | 5.0 | 0/32 | 19 / 32 | ok 40 |
 | mixed | 12 | largest+plain | 0/8 | 5.0 | 0/32 | 24 / 43 | ok 40 |
 | mixed | 16 | largest | 0/8 | 5.0 | 0/32 | 32 / 56 | ok 40 |
 | mixed | 16 | largest+plain | 0/8 | 5.0 | 0/32 | 42 / 69 | ok 40 |
-| reassociate | 8 | largest | 6/8 | 1.2 | 28/32 | 2 / 3 | ok 40 |
-| reassociate | 12 | largest | 4/8 | 1.5 | 21/32 | 4 / 6 | ok 40 |
+| reassociate | 8 | largest | 6/8 | 1.2 | 28/32 | 2 / 4 | ok 40 |
+| reassociate | 12 | largest | 4/8 | 1.5 | 21/32 | 4 / 7 | ok 40 |
 | reassociate | 16 | largest | 5/8 | 1.5 | 22/32 | 4 / 6 | ok 40 |
 
 - **Values computed twice converge** every time, as the redundant-value rule
@@ -242,8 +243,8 @@ functions, chosen by which values the program happens to have: a written-out
 `or` that reaches `or(i3, not s2)` in one program reaches `implies(s2, i3)`
 in another, because when `not s2` is read elsewhere, neither can be
 rewritten into the other without removing two statements. Across all
-`expand` variants, the results have 112 more `implies`, 56 more `maj`, and
-43 more `mux` than the base's, and 169 fewer `or`.
+`expand` variants, the results have 100 more `implies`, 51 more `maj`, and
+20 more `mux` than the base's, and 167 fewer `or`.
 
 A candidate rule for that, never giving a registered operation `not y` when
 another registered operation computes the same thing from y, didn't help

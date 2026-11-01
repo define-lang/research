@@ -630,7 +630,7 @@
     "@@rules_lean+//lean:lake.bzl%lake": {
       "general": {
         "bzlTransitiveDigest": "gQFTO1x2/XssMD1SGXlpFitXyjIsOixzLcn6XE+Rbq0=",
-        "usagesDigest": "GGVbMEIROXiYDA00AkuOjMGA9lrCMWt4OvUbBJMLbwg=",
+        "usagesDigest": "KALM8gacoZ4sU7oh8KocbEy1/Ahu/KFFvTxWYcFyzXQ=",
         "recordedInputs": [
           "FILE:@@//lean-toolchain 2bdc48adfa58d0017e538a0ad117c5d73d35deec879978f909406a80c8037273",
           "FILE:@@define+//proofs/lean-toolchain 2bdc48adfa58d0017e538a0ad117c5d73d35deec879978f909406a80c8037273"
@@ -658,6 +658,7 @@
                 "Mathlib.Data.Fintype.Card",
                 "Mathlib.Data.Fintype.EquivFin",
                 "Mathlib.Data.Fintype.Pi",
+                "Mathlib.Data.Multiset.DershowitzManna",
                 "Mathlib.Data.Set.Card",
                 "Mathlib.Data.Set.Finite.Range",
                 "Mathlib.Tactic.FieldSimp",

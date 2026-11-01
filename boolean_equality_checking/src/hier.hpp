@@ -96,14 +96,17 @@ inline std::vector<HOp> read_library(const std::string& path) {
   return ops;
 }
 
-// Redundant values among an operation's own values, given each value's
-// table (or any canonical key): a value whose key equals false's, a view's,
-// or an earlier value's, in the same polarity.
+// Redundant values among an operation's own values, given each value's key:
+// a value that's always the same as false, a view, or an earlier value, or
+// always the opposite of one. Every check's key is a class of functions up to
+// complement, and in the low bit which of the two functions the value is, so
+// equal values have equal keys and opposite ones differ in the low bit. A
+// `not` is a complemented literal, never a value, so no value is exempt.
 inline uint32_t count_redundant(const std::vector<uint64_t>& keys, uint32_t views) {
   std::unordered_map<uint64_t, uint32_t> first;
   uint32_t redundant = 0;
   for (uint32_t v = 0; v < keys.size(); ++v) {
-    auto [it, inserted] = first.try_emplace(keys[v], v);
+    auto [it, inserted] = first.try_emplace(keys[v] >> 1, v);
     if (!inserted && v > views) ++redundant;
   }
   return redundant;
@@ -159,9 +162,11 @@ class Hierarchy {
     }
     std::vector<uint64_t> keys(op.num_values);
     for (uint32_t v = 0; v < op.num_values; ++v) {
+      // The class is the table that's false on the first assignment.
+      const uint64_t opposite = t[v][0] & 1;
       uint64_t h = 0x77;
-      for (size_t w = 0; w < words; ++w) h = mix64(h ^ t[v][w]);
-      keys[v] = h;
+      for (size_t w = 0; w < words; ++w) h = mix64(h ^ (t[v][w] ^ (opposite ? mask : 0)));
+      keys[v] = (h & ~1ULL) | opposite;
     }
     return keys;
   }
@@ -225,7 +230,8 @@ class Hierarchy {
 
   // Simulation with lookups, then SAT with abstraction refinement for each
   // candidate pair. Needs the callees' recorded truth tables. Returns each
-  // value's class key (the first value it was proved equal to).
+  // value's class key (twice the first value it was proved equal to or the
+  // opposite of, plus one if it's the opposite).
   // expand: an execution that disagrees with its callee's table gets the
   // callee's own statements as clauses (with the callee's executions as new
   // free results). Otherwise, it gets one clause fixing its results for the
@@ -269,23 +275,29 @@ class Hierarchy {
     std::vector<sat::Lit> value = encode_body(i, views, enc);
     const size_t patterns_before = patterns.size();
     std::vector<std::vector<char>> fresh;  // every value on each new assignment
-    // Candidates by signature, in value order. Each signature keeps every
-    // value proved different from the earlier ones with that signature.
+    // Candidates by signature, in value order, with a value and its opposite
+    // under one signature: the simulation that's false on the first
+    // assignment. Each signature keeps every value proved different from the
+    // earlier ones with that signature, and from their opposites.
     std::map<std::vector<uint64_t>, std::vector<uint32_t>> groups;
     std::vector<uint64_t> keys(n);
     uint64_t equal = 0;
     for (uint32_t v = 0; v < n; ++v) {
-      keys[v] = v;
-      std::vector<uint32_t>& group = groups[sim[v]];
+      keys[v] = 2 * uint64_t{v};
+      std::vector<uint64_t> signature = sim[v];
+      if (signature[0] & 1)
+        for (uint64_t& word : signature) word = ~word;
+      std::vector<uint32_t>& group = groups[signature];
       bool merged = false;
       for (uint32_t r : group) {
+        const bool flip = ((sim[v][0] ^ sim[r][0]) & 1) != 0;
         // An assignment found earlier in this check may already separate them.
         bool separated = false;
-        for (const std::vector<char>& values : fresh) separated |= values[v] != values[r];
+        for (const std::vector<char>& values : fresh) separated |= values[v] != (values[r] ^ flip);
         if (separated) continue;
-        if (decide(enc, value[v], value[r], expand_after)) {
+        if (decide(enc, value[v], value[r] ^ (flip ? 1u : 0u), expand_after)) {
           ++equal;
-          keys[v] = keys[r];
+          keys[v] = keys[r] ^ (flip ? 1u : 0u);
           merged = true;
           break;
         }

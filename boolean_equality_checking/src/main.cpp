@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
       uint64_t partition = 0x51;
       if (hstatus == "ok") {
         for (auto [a, b] : op.planted) {
-          bool same = (keys[node_of(a)] == keys[node_of(b)]) && is_compl(a) == is_compl(b);
+          bool same = (keys[node_of(a)] ^ is_compl(a)) == (keys[node_of(b)] ^ is_compl(b));
           found += same;
         }
         std::unordered_map<uint64_t, uint32_t> first;

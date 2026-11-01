@@ -30,13 +30,14 @@ These matches are 1-for-1: they replace one statement (or a `not` and an
 execution) with an execution, so they don't shrink the program. They're
 checked after the other matches.
 
-**Short answers.** As given, the rule makes fixes cycle (57 of 720 fix
+**Short answers.** As given, the rule makes fixes cycle (125 of 720 fix
 loops). One restriction prevents that, and with it all 2,880 fix loops
 terminated. But the rule hardly changes convergence: `expand` families
-reach one program in 1 of 8 at 8 and 12 inputs (0 and 1 of 8 before), and
+reach one program in 1 of 8 at 8 inputs and 2 of 8 at 12 (1 and 0 of 8
+before), and
 `demorgan` and `mixed` families still almost never do. Which declared
 order is used changes the fixed program in 27–50% of programs, but not how
-often families converge. Checking costs about 50% more: 3.3–8.1 ms for a
+often families converge. Checking costs about 50% more: 3.5–8 ms for a
 compiling value operation at 16 inputs and 8.6–23 ms at 20.
 
 The code is the `--spellings` and `--precedence` options of `beq match
@@ -46,9 +47,18 @@ The code is the `--spellings` and `--precedence` options of `beq match
 `|prec:B|strict`, and `|strict`), summarized in `results/fixpoint_tables.md`.
 Every check ran under 30 s and 4 GB, and every fix loop under 30 s.
 
+These results use DLP 57's current definition of a redundant value, which
+includes a value that's always the opposite of an earlier one unless it's
+that value's `not`. The runs before that change are in
+`results/preliminary/fixpoint_before_opposite_values.jsonl.gz`. With the
+restriction, the change moves one family (`expand` at 12 inputs with order
+A) to convergence, the most rounds from 83 to 80, and the costs below by
+less than their run-to-run spread.
+
 ## Termination
 
-As given, 57 of 720 fix loops cycled, of two kinds:
+As given, 125 of 720 fix loops cycled (57 before opposite values were
+redundant), of three kinds:
 
 - **Against an ordinary match.** The precedence rule prefers a spelling
   with fewer negations, such as `not implies(a, b)` over `mux(s, c, d)` with
@@ -57,10 +67,14 @@ As given, 57 of 720 fix loops cycled, of two kinds:
 - **Through a redundant value.** A value `not u` was respelled as the `not`
   of an `or` that reads u itself, which is a redundant value equal to u;
   replacing it restored the original.
+- **Against an opposite value.** A `not u` respelled as an execution, such
+  as `not s3` as `xor(s1, eq(s1, s3))`, is always the opposite of u, so
+  it's a redundant value, and its fix restores `not u`. 32 of the first 40
+  cycles were of this kind.
 
 Excluding a value's opposite spellings when the program already has the
 value's `not` removes the second kind, but not the first. One restriction,
-which this study calls **strict**, removes both: **no fix may grow the
+which this study calls **strict**, removes all three: **no fix may grow the
 program.** An ordinary match has to remove more statements than its fix
 adds, so a match with an opposite result has to remove at least three; and a
 precedence fix can't add a statement, so spellings that need a `not` of
@@ -68,7 +82,7 @@ their result don't count.
 
 With it, every one of 2,880 fix loops (720 under each of DLP 57's order,
 earliest first, and smallest first with declared order A, and 720 with
-order B) ended with a program that compiles, in at most 83 rounds. There's
+order B) ended with a program that compiles, in at most 80 rounds. There's
 also an argument that it always terminates: redundant-value fixes and
 ordinary matches make the program smaller, and a precedence fix keeps its
 size and lowers the precedence key of one value. Other values' keys can
@@ -83,24 +97,24 @@ Families that reach one program, out of 8, with DLP 57's order of fixes:
 
 | rewrites | inputs | before | strict only | precedence A, as given | precedence A, strict | precedence B, strict |
 | --- | --- | --- | --- | --- | --- | --- |
-| expand | 8 | 1/8 | 1/8 | 2/8 | 1/8 | 1/8 |
-| expand | 12 | 0/8 | 0/8 | 1/8 | 1/8 | 1/8 |
-| expand | 16 | 0/8 | 0/8 | 0/8 (10 cycles) | 0/8 | 0/8 |
-| demorgan | 8 | 1/8 | 1/8 | 1/8 (1 cycles) | 1/8 | 1/8 |
-| demorgan | 12 | 0/8 | 0/8 | 0/8 (6 cycles) | 0/8 | 0/8 |
-| demorgan | 16 | 0/8 | 0/8 | 0/8 (4 cycles) | 0/8 | 0/8 |
-| mixed | 8 | 0/8 | 0/8 | 0/8 (5 cycles) | 0/8 | 0/8 |
-| mixed | 12 | 0/8 | 0/8 | 0/8 (5 cycles) | 0/8 | 0/8 |
-| mixed | 16 | 0/8 | 0/8 | 0/8 (8 cycles) | 0/8 | 0/8 |
-| duplicate | 8 | 8/8 | 8/8 | 8/8 | 8/8 | 8/8 |
+| expand | 8 | 1/8 | 1/8 | 2/8 (3 cycles) | 1/8 | 1/8 |
+| expand | 12 | 0/8 | 0/8 | 2/8 | 2/8 | 1/8 |
+| expand | 16 | 0/8 | 0/8 | 0/8 (21 cycles) | 0/8 | 0/8 |
+| demorgan | 8 | 1/8 | 1/8 | 1/8 (3 cycles) | 1/8 | 1/8 |
+| demorgan | 12 | 0/8 | 0/8 | 0/8 (11 cycles) | 0/8 | 0/8 |
+| demorgan | 16 | 0/8 | 0/8 | 0/8 (11 cycles) | 0/8 | 0/8 |
+| mixed | 8 | 0/8 | 0/8 | 0/8 (8 cycles) | 0/8 | 0/8 |
+| mixed | 12 | 0/8 | 0/8 | 0/8 (8 cycles) | 0/8 | 0/8 |
+| mixed | 16 | 0/8 | 0/8 | 0/8 (16 cycles) | 0/8 | 0/8 |
+| duplicate | 8 | 8/8 | 8/8 | 8/8 (5 cycles) | 8/8 | 8/8 |
 | duplicate | 12 | 8/8 | 8/8 | 8/8 | 8/8 | 8/8 |
 | duplicate | 16 | 8/8 | 8/8 | 8/8 | 8/8 | 8/8 |
-| reassociate | 8 | 6/8 | 6/8 | 5/8 (5 cycles) | 6/8 | 6/8 |
+| reassociate | 8 | 6/8 | 6/8 | 6/8 (5 cycles) | 6/8 | 6/8 |
 | reassociate | 12 | 4/8 | 4/8 | 4/8 (5 cycles) | 4/8 | 4/8 |
-| reassociate | 16 | 5/8 | 4/8 | 4/8 (5 cycles) | 4/8 | 4/8 |
+| reassociate | 16 | 5/8 | 4/8 | 5/8 (16 cycles) | 4/8 | 4/8 |
 | distribute | 8 | 6/8 | 6/8 | 6/8 | 6/8 | 6/8 |
-| distribute | 12 | 5/8 | 5/8 | 5/8 (3 cycles) | 5/8 | 5/8 |
-| distribute | 16 | 2/8 | 2/8 | 3/8 | 3/8 | 3/8 |
+| distribute | 12 | 5/8 | 5/8 | 5/8 (8 cycles) | 5/8 | 5/8 |
+| distribute | 16 | 2/8 | 2/8 | 3/8 (5 cycles) | 3/8 | 3/8 |
 
 "Before" is [earlier_values.md](earlier_values.md)'s rule; "strict only"
 adds the restriction without precedence. Earliest-first and
@@ -116,8 +130,8 @@ smallest-first orders of fixes, with precedence A, converge no more often
   rule has nothing to compare.
 - **The differences are in the `and` and `not` statements.** Across the
   `expand` variants whose results differ from the base's, the results have
-  81 more `not` and 51 more `and`, and 81 fewer `or`, than the base's
-  (against 112 more `implies` and 169 fewer `or` before precedence). Two
+  90 more `not` and 41 more `and`, and 82 fewer `or`, than the base's
+  (against 100 more `implies` and 167 fewer `or` before precedence). Two
   thirds of them still differ in size.
 - **The declared order changes the result, not the convergence.** Orders A
   and B fixed the same program to the same result in 60–88 of 120 programs
@@ -139,22 +153,22 @@ statements after):
 
 | Inputs | Before | Strict only | Precedence A, strict |
 | ------ | ------ | ----------- | -------------------- |
-| 12 | 1.4–5.7 ms | 1.3–5.4 ms | 1.4–7.5 ms |
-| 16 | 2.2–5.1 ms | 2.1–5.8 ms | 3.3–8.1 ms |
-| 20 | 8.3–18 ms | 9.2–19 ms | 8.6–23 ms |
+| 12 | 1.1–5.8 ms | 1.1–5 ms | 1.6–9.5 ms |
+| 16 | 2.1–5.3 ms | 2.2–6.2 ms | 3.5–8 ms |
+| 20 | 8.7–18 ms | 8.8–18 ms | 8.6–23 ms |
 
-The check of the result, best of three. Fixing takes 42–69 rounds instead of
-29–61 (8–33 of them precedence fixes), and 1.4–2.3 s at 16 inputs and
-2.4–9.2 s at 20, checks and bookkeeping included; the slowest single check
-was 0.97 s at 20 inputs. The families' fixed programs (median 10, 18, and
+The check of the result, best of three. Fixing takes 43–78 rounds instead of
+29–70 (7–27 of them precedence fixes), and 1.1–1.9 s at 16 inputs and
+2.6–10 s at 20, checks and bookkeeping included; the slowest single check
+was 0.70 s at 20 inputs. The families' fixed programs (median 10, 18, and
 33 statements at 8, 12, and 16 inputs) check in 50 µs, 140 µs, and 0.6 ms
-in the median, 1.2 ms at most.
+in the median, 1.1 ms at most.
 
 An earlier run fixed ordinary matches with whichever matching operation
 came first rather than the highest-precedence one. Its results, in
 `results/preliminary/fixpoint_precedence_before_match_spelling.jsonl.gz`,
 converge in exactly the same families; choosing the spelling there only
-saves rounds (at most 87 before, 83 now).
+saves rounds (at most 87 before, 83 with it).
 
 ## Recommendations
 

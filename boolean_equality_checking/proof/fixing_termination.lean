@@ -1,6 +1,7 @@
 import Mathlib.Data.List.Sort
 import Mathlib.Data.List.Lex
 import Mathlib.Data.Multiset.AddSub
+import Mathlib.Data.Multiset.DershowitzManna
 import Mathlib.Data.Multiset.Filter
 import Mathlib.Data.Multiset.UnionInter
 import Mathlib.Data.Finset.Max
@@ -21,7 +22,9 @@ infinitely many programs within fixed bounds on their sizes
 (`prog_terminates`).
 
 A value operation's boolean statements are given by their terms (`Term`)
-and how many of their values are constant (`Stmt`). An input is a `leaf`,
+and how many of their values are constant (`Stmt`). Each statement has one
+value, its term, which is exact: DLP 57 makes a boolean value operation
+write exactly one view, so no execution has several values. An input is a `leaf`,
 and a statement is a `node` applying an operation to the terms of the values
 it reads. A term's code (`ser`) writes it out in DLP 58's rank order: `[1, i]`
 for leaf `i`, and for a statement `2`, then the codes of its values (sorted
@@ -30,16 +33,21 @@ Comparing codes lexicographically is the rank order: values first, a
 shorter list first, then the operation.
 
 One value operation's measure (`OpLt`) is C, the number of constant values
-(`constCount`), then the number of statements, then the multiset of the
-executions' (negations, AIG nodes, declared order) (`triples`), then the
-multiset of the statements' codes (`codes`), with multisets in the
-Dershowitz–Manna order (`DMLt`). Its fixes (`OpFix`):
+(`constCount`), then the number of statements, then the number of them that
+aren't a `not` (`others`), then the multiset of the executions' (negations,
+AIG nodes, declared order) (`triples`), then the multiset of the statements'
+codes (`codes`), with multisets in Mathlib's Dershowitz–Manna order
+(`Multiset.IsDershowitzMannaLT`). Its fixes (`OpFix`):
 
 - `simplify`: a constant value v is simplified away. v's statement is gone,
   the statements it reached are replaced by new ones with no constant value,
   and every other statement keeps its functions.
-- `redundant`: a redundant value v. Every statement of the result is one of
-  the others, rewritten, with the same functions.
+- `redundant`: a redundant value v that's the same as another. Every
+  statement of the result is one of the others, rewritten, with the same
+  functions.
+- `opposite`: a redundant value v that's the opposite of another, w, and
+  isn't a `not`. v's statement becomes `not w`, and every other statement's
+  term has v's term replaced by `not w`'s; some may become dead.
 - `ordinary`: an ordinary match. The result is the statements that survive
   and the one or two added, which aren't constant, and more are removed than
   added.
@@ -479,38 +487,28 @@ def codes (P : List Term) : Multiset (List ℕ) := (P.map (ser sig) : Multiset (
 variable (sig) in
 def triples (P : List Term) : Multiset (List ℕ) := (P.filterMap (tripleOf sig) : Multiset (List ℕ))
 
-/-- The Dershowitz–Manna order on multisets. -/
-def DMLt (M N : Multiset (List ℕ)) : Prop :=
-  ∃ X Y Z, Z ≠ 0 ∧ M = X + Y ∧ N = X + Z ∧ ∀ y ∈ Y, ∃ z ∈ Z, y < z
+variable (sig) in
+/-- The number of statements that aren't a `not`. -/
+def others (P : List Term) : ℕ := P.countP (fun t => !isNotTerm sig t)
+
+/-- The Dershowitz–Manna order on multisets of codes. -/
+abbrev DMLt (M N : Multiset (List ℕ)) : Prop := Multiset.IsDershowitzMannaLT M N
 
 variable (sig) in
 /-- The measure of termination.md, compared lexicographically. -/
 def MeasureLt (Q P : List Term) : Prop :=
-  Q.length < P.length ∨ (Q.length = P.length ∧ DMLt (triples sig Q) (triples sig P)) ∨
-    (Q.length = P.length ∧ triples sig Q = triples sig P ∧ DMLt (codes sig Q) (codes sig P))
+  Q.length < P.length ∨ (Q.length = P.length ∧ others sig Q < others sig P) ∨
+    (Q.length = P.length ∧ others sig Q = others sig P ∧
+      DMLt (triples sig Q) (triples sig P)) ∨
+    (Q.length = P.length ∧ others sig Q = others sig P ∧ triples sig Q = triples sig P ∧
+      DMLt (codes sig Q) (codes sig P))
 
-/-! ### The Dershowitz–Manna order -/
+/-! ### The Dershowitz–Manna order
 
-theorem DMLt.trans {M N K : Multiset (List ℕ)} : DMLt M N → DMLt N K → DMLt M K := by
-  classical
-  rintro ⟨X₁, Y₁, Z₁, -, rfl, rfl, hYZ₁⟩ ⟨X₂, Y₂, Z₂, hZ₂, hXZXY, rfl, hYZ₂⟩
-  rw [add_comm X₁, add_comm X₂] at hXZXY
-  refine ⟨X₁ ∩ X₂, Y₁ + (Y₂ - Z₁), Z₂ + (Z₁ - Y₂), ?_, ?_, ?_, ?_⟩
-  · exact fun h => hZ₂ (Multiset.le_zero.1 (h ▸ Multiset.le_add_right _ _))
-  · rwa [← add_assoc, add_right_comm, Multiset.inter_add_sub_of_add_eq_add]
-  · rw [← add_assoc, add_right_comm, add_left_inj, Multiset.inter_comm,
-      Multiset.inter_add_sub_of_add_eq_add]
-    rwa [eq_comm]
-  simp only [Multiset.mem_add, or_imp, forall_and]
-  refine ⟨fun y hy => ?_, fun y hy => ?_⟩
-  · obtain ⟨z, hz, hyz⟩ := hYZ₁ y hy
-    by_cases z_in : z ∈ Y₂
-    · obtain ⟨w, hw, hzw⟩ := hYZ₂ z z_in
-      exact ⟨w, .inl hw, hyz.trans hzw⟩
-    · exact ⟨z, .inr <| by rwa [Multiset.mem_sub, Multiset.count_eq_zero_of_notMem z_in,
-        Multiset.count_pos], hyz⟩
-  · obtain ⟨z, hz, hyz⟩ := hYZ₂ y <| Multiset.mem_of_le (Multiset.sub_le_self ..) hy
-    exact ⟨z, .inl hz, hyz⟩
+Mathlib proves the order transitive. Its proof that the order is
+well-founded needs a well-founded order on the elements, which the rank
+order on all terms isn't (see termination.md), so irreflexivity is proved
+here. -/
 
 theorem DMLt.irrefl (M : Multiset (List ℕ)) : ¬ DMLt M M := by
   rintro ⟨X, Y, Z, hZ, h1, h2, hYZ⟩
@@ -552,17 +550,21 @@ theorem dm_pointwise (M : Multiset Term) (f g : Term → List ℕ) (hfg : ∀ x 
 
 theorem MeasureLt.trans {R Q P : List Term} (h₁ : MeasureLt sig R Q) (h₂ : MeasureLt sig Q P) :
     MeasureLt sig R P := by
-  rcases h₁ with h₁ | ⟨e₁, t₁⟩ | ⟨e₁, t₁, c₁⟩ <;> rcases h₂ with h₂ | ⟨e₂, t₂⟩ | ⟨e₂, t₂, c₂⟩
+  rcases h₁ with h₁ | ⟨e₁, k₁⟩ | ⟨e₁, k₁, t₁⟩ | ⟨e₁, k₁, t₁, c₁⟩ <;>
+    rcases h₂ with h₂ | ⟨e₂, k₂⟩ | ⟨e₂, k₂, t₂⟩ | ⟨e₂, k₂, t₂, c₂⟩
   all_goals first
     | exact .inl (by omega)
+    | exact .inr (.inl ⟨by omega, by omega⟩)
     | skip
-  · exact .inr (.inl ⟨by omega, t₁.trans t₂⟩)
-  · exact .inr (.inl ⟨by omega, t₂ ▸ t₁⟩)
-  · exact .inr (.inl ⟨by omega, t₁ ▸ t₂⟩)
-  · exact .inr (.inr ⟨by omega, t₁.trans t₂, c₁.trans c₂⟩)
+  · exact .inr (.inr (.inl ⟨by omega, by omega, Multiset.IsDershowitzMannaLT.trans t₁ t₂⟩))
+  · exact .inr (.inr (.inl ⟨by omega, by omega, t₂ ▸ t₁⟩))
+  · exact .inr (.inr (.inl ⟨by omega, by omega, t₁ ▸ t₂⟩))
+  · exact .inr (.inr (.inr ⟨by omega, by omega, t₁.trans t₂,
+      Multiset.IsDershowitzMannaLT.trans c₁ c₂⟩))
 
 theorem MeasureLt.irrefl (P : List Term) : ¬ MeasureLt sig P P := by
-  rintro (h | ⟨-, h⟩ | ⟨-, -, h⟩)
+  rintro (h | ⟨-, h⟩ | ⟨-, -, h⟩ | ⟨-, -, -, h⟩)
+  · exact lt_irrefl _ h
   · exact lt_irrefl _ h
   · exact DMLt.irrefl _ h
   · exact DMLt.irrefl _ h
@@ -623,15 +625,25 @@ theorem spelling_measure {P Q E rest : List Term} {v v' : Term} (hP : List.Perm 
     unfold codes
     rw [Multiset.coe_eq_coe.2 (hP'.map _), List.map_cons, Multiset.map_coe]
     rfl
+  have hK : others sig Q = others sig P := by
+    have hE : (E.map (subst sig (ser sig (.node o args)) (.node o' args'))).countP
+        (fun t => !isNotTerm sig t) = E.countP (fun t => !isNotTerm sig t) := by
+      rw [List.countP_map]
+      exact List.countP_congr fun a _ => by simp [isNotTerm_subst hsv hv'n a]
+    unfold others
+    rw [hQ'.countP_eq, hP'.countP_eq, List.countP_cons, List.countP_cons, hE]
+    simp [isNotTerm, hnot, hnot']
   rcases hkey with hk | ⟨hk, hargs⟩
   · right
+    right
     left
-    refine ⟨by omega, ?_⟩
+    refine ⟨by omega, hK, ?_⟩
     rw [hTQ, hTP]
     exact dm_single _ hk
   · right
     right
-    refine ⟨by omega, by rw [hTQ, hTP, hk], ?_⟩
+    right
+    refine ⟨by omega, hK, by rw [hTQ, hTP, hk], ?_⟩
     have hpos : sig.position o' = sig.position o := by
       simp only [tripleL, List.cons.injEq] at hk
       exact hk.2.2.1
@@ -648,6 +660,52 @@ theorem spelling_measure {P Q E rest : List Term} {v v' : Term} (hP : List.Perm 
         exact ser_head sig t
     rw [hcQ, hcP]
     exact dm_pointwise _ _ _ (fun x _ => ser_subst_le hser x) hser
+
+theorem isNotTerm_subst_of_isNot {sv : List ℕ} {v' : Term} (hv' : isNotTerm sig v' = true)
+    {a : Term} (ha : isNotTerm sig a = true) : isNotTerm sig (subst sig sv v' a) = true := by
+  by_cases h : ser sig a = sv
+  · rw [subst_of_ser h]
+    exact hv'
+  · cases a with
+    | leaf i => simp [isNotTerm] at ha
+    | node o args =>
+      rw [subst_node_of_ne h]
+      exact ha
+
+/-- Lemma 9: an opposite value lowers the measure of the statements' terms. P
+is v's statement and the others, E; the result is `not w` (v') and some of
+the others, with v's term replaced by v''s. -/
+theorem opposite_measure {P Q E rest : List Term} {v v' : Term} (hP : List.Perm P (v :: E))
+    (hnot : isNotTerm sig v = false) (hv' : isNotTerm sig v' = true)
+    (hQ : List.Perm Q (v' :: rest)) (hrest : List.Subperm rest (E.map (subst sig (ser sig v) v'))) :
+    MeasureLt sig Q P := by
+  have hlenP : E.length + 1 = P.length := by
+    rw [hP.length_eq]
+    rfl
+  have hlenQ : Q.length = rest.length + 1 := by
+    rw [hQ.length_eq]
+    rfl
+  have hsub : rest.length ≤ E.length := by
+    simpa using hrest.length_le
+  by_cases hlt : rest.length < E.length
+  · left
+    omega
+  have hperm : List.Perm rest (E.map (subst sig (ser sig v) v')) :=
+    hrest.perm_of_length_le (by simp; omega)
+  have hQ' := hQ.trans (hperm.cons v')
+  right
+  left
+  refine ⟨by omega, ?_⟩
+  have hle : E.countP ((fun t => !isNotTerm sig t) ∘ subst sig (ser sig v) v') ≤
+      E.countP (fun t => !isNotTerm sig t) := by
+    refine List.countP_mono_left fun a _ h => ?_
+    cases ha : isNotTerm sig a
+    · rfl
+    · simp [isNotTerm_subst_of_isNot hv' ha] at h
+  unfold others
+  rw [hQ'.countP_eq, hP.countP_eq, List.countP_cons, List.countP_cons, List.countP_map]
+  simp only [hnot, hv', Bool.not_true, Bool.not_false, Bool.false_eq_true, if_false, if_true]
+  omega
 
 /-! ### One value operation -/
 
@@ -701,10 +759,19 @@ inductive OpFix : List Stmt → List Stmt → Prop
       (rw : Term → Term) (hQ : List.Perm Q (added ++ survivors))
       (hs : List.Subperm survivors ((P.erase v).map (keepConst rw)))
       (hadded : ∀ a ∈ added, a.2 = 0) : OpFix P Q
-  /-- A redundant value v: reading w instead makes v's statement dead, and
-  every other statement keeps its functions. -/
+  /-- A redundant value v that's the same as w: reading w instead makes v's
+  statement dead, and every other statement keeps its functions. -/
   | redundant {P Q : List Stmt} (v : Stmt) (hv : v ∈ P) (rw : Term → Term)
       (hQ : List.Subperm Q ((P.erase v).map (keepConst rw))) : OpFix P Q
+  /-- A redundant value v that's the opposite of w, and isn't a `not`: v's
+  statement becomes `not w` (`o` is `not`), with the same functions, and
+  every other statement has v's term replaced by `not w`'s. -/
+  | opposite {P Q : List Stmt} (v w : Term) (o c : ℕ) (rest : List Stmt) (hv : (v, c) ∈ P)
+      (hnot : isNotTerm sig v = false) (ho : sig.isNot o = true)
+      (hQ : List.Perm Q ((.node o [w], c) :: rest))
+      (hrest : List.Subperm rest
+        ((P.erase (v, c)).map (keepConst (subst sig (ser sig v) (.node o [w]))))) :
+      OpFix P Q
   /-- An ordinary match: the statements that survive, and the one or two
   added, none of them constant, with more removed than added. -/
   | ordinary {P Q : List Stmt} (v : Stmt) (hv : v ∈ P) (added survivors : List Stmt)
@@ -751,6 +818,11 @@ theorem opFix_constCount_le {P Q : List Stmt} (h : OpFix sig P Q) : constCount Q
     rw [constCount_erase hv]
     have := (constCount_subperm hQ).trans (constCount_map_keepConst rw _).le
     omega
+  | opposite v w o c rest hv _ _ hQ hrest =>
+    rw [constCount_perm hQ, constCount_cons, constCount_erase hv]
+    have := (constCount_subperm hrest).trans (constCount_map_keepConst _ _).le
+    simp only at this ⊢
+    omega
   | ordinary v hv added survivors rw hQ hs hadded _ =>
     rw [constCount_perm hQ, constCount_append, constCount_zero hadded, constCount_erase hv]
     have := (constCount_subperm hs).trans (constCount_map_keepConst _ _).le
@@ -780,6 +852,13 @@ theorem opFix_lt {P Q : List Stmt} (h : OpFix sig P Q) : OpLt sig Q P := by
     have h3 := List.length_pos_of_mem hv
     simp only [List.length_map] at h1 ⊢
     omega
+  | opposite v w o c rest hv hnot ho hQ hrest =>
+    refine opposite_measure (E := (P.erase (v, c)).map Prod.fst) (rest := rest.map Prod.fst)
+      ?_ hnot (show isNotTerm sig (.node o [w]) = true from ho) (by simpa using hQ.map Prod.fst) ?_
+    · simpa using (List.perm_cons_erase hv).map Prod.fst
+    · obtain ⟨l, hl, hsub⟩ := hrest
+      refine ⟨l.map Prod.fst, hl.map _, ?_⟩
+      simpa [keepConst, List.map_map, Function.comp_def] using hsub.map Prod.fst
   | ordinary v hv added survivors rw hQ hs hadded hrestrict =>
     left
     rw [length_map_fst, length_map_fst, hQ.length_eq, List.length_append]
@@ -797,7 +876,7 @@ theorem opFix_length_le {P Q : List Stmt} (h : OpFix sig P Q)
     (hC : constCount Q = constCount P) : Q.length ≤ P.length := by
   rcases opFix_lt h with hlt | ⟨-, hm⟩
   · omega
-  rcases hm with hl | ⟨hl, -⟩ | ⟨hl, -⟩ <;> simp only [List.length_map] at hl <;> omega
+  rcases hm with hl | ⟨hl, -⟩ | ⟨hl, -⟩ | ⟨hl, -⟩ <;> simp only [List.length_map] at hl <;> omega
 
 /-! ### A program -/
 

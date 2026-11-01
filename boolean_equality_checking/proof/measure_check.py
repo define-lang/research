@@ -3,9 +3,10 @@
 Runs `gen/fixpoint.py`'s fix loop, with DLP 59's rules (precedence with the
 restriction that no fix grows the program), on the families of
 `fixpoint_experiment.py`, and checks after every fix that the measure of
-termination.md went down: the number of statements, then the multiset of
-the executions' (negations, AIG nodes, declared order), then the multiset
-of the values' ranks. Prints how many fixes of each kind there were and how
+termination.md went down: the number of statements, then the number of
+statements that aren't a `not`, then the multiset of the executions'
+(negations, AIG nodes, declared order), then the multiset of the values'
+ranks. Prints how many fixes of each kind there were and how
 many didn't decrease the measure. Run with `uv run --frozen --python 3.14
 python proof/measure_check.py` from the study's directory.
 """
@@ -38,9 +39,10 @@ def multiset_less(smaller: Counter, larger: Counter) -> bool:
     return all(any(x < y for y in lost) for x in gained)
 
 
-def measure(p: fixpoint.Program, order: list[str]) -> tuple[int, Counter, Counter]:
+def measure(p: fixpoint.Program, order: list[str]) -> tuple[int, int, Counter, Counter]:
     """Return the measure of termination.md for a canonical program."""
     keys = fixpoint.rank_keys(p)
+    others = sum(op != "not" for op, _ in p.statements)
     triples: Counter = Counter()
     for op, args in p.statements:
         if op in fixpoint.REGISTERED:
@@ -51,16 +53,17 @@ def measure(p: fixpoint.Program, order: list[str]) -> tuple[int, Counter, Counte
             )
             triples[(negations, fixpoint.AIG_NODES[op], order.index(op))] += 1
     ranks = Counter(keys[p.inputs :])
-    return len(p.statements), triples, ranks
+    return len(p.statements), others, triples, ranks
 
 
 def decreased(before: tuple, after: tuple) -> bool:
     """Return whether the measure went down, comparing in order."""
-    if after[0] != before[0]:
-        return after[0] < before[0]
-    if after[1] != before[1]:
-        return multiset_less(after[1], before[1])
-    return multiset_less(after[2], before[2])
+    for count in range(2):
+        if after[count] != before[count]:
+            return after[count] < before[count]
+    if after[2] != before[2]:
+        return multiset_less(after[2], before[2])
+    return multiset_less(after[3], before[3])
 
 
 def main() -> None:

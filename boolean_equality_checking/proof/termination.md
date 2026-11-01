@@ -3,8 +3,9 @@
 DLP 59 adopts a precedence rule between spellings of a value, with the
 restriction from [precedence.md](../precedence.md) that no fix grows the
 program, and DLP 57 now gives boolean statements no literals: a constant is
-simplified away instead. This proves that fixing a program, one reported
-error at a time, always ends.
+simplified away instead. DLP 57 also makes a value that's always the
+opposite of an earlier one redundant, unless it's that value's `not`. This
+proves that fixing a program, one reported error at a time, always ends.
 
 ## The Model
 
@@ -22,8 +23,8 @@ A value operation's boolean part is a list of **statements** s₁ … sₙ and a
 list of **exits**: its written views, and the values its non-boolean
 statements read. Each statement executes an operation on **values**: inputs
 or earlier statements, never a literal. A statement's value is the
-statement itself (an execution of a value operation with several written
-views has a value for each). It's **canonical** when:
+statement itself: DLP 57 makes a boolean value operation write exactly one
+view, so an execution of one has one value. It's **canonical** when:
 
 - every statement is read, directly or through other statements, by an
   exit (there are no **dead** statements), and
@@ -69,7 +70,14 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
    an earlier statement's, w. The fix replaces every read of v (by
    statements and exits) with w, then canonicalizes. (DLP 57 reports the
    first such v, but any will do here.)
-2. **Ordinary match.** A statement v, a registered operation R, and values
+2. **Opposite value.** A statement v whose function is the opposite of an
+   input's or an earlier statement's, w, when v's statement isn't
+   `not w`. The fix replaces v's statement with `not w`, then
+   canonicalizes; every read of v reads the `not`. After `u = a and b`, it
+   turns `(not a) or (not b)` into `not u`, removing three statements and
+   adding one, and a registered `nand` of a and b into `not u`, one
+   statement for one.
+3. **Ordinary match.** A statement v, a registered operation R, and values
    a₁ … aₖ earlier than v, distinct, with v's function equal to R of
    theirs (**ordinary result**) or its `not` (**opposite result**). The fix
    replaces v's statement with an execution of R on a₁ … aₖ (and, for an
@@ -78,7 +86,7 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
    result doesn't: v's old statement and those that became dead. **The
    restriction:** |D| ≥ 2 for an ordinary result, which adds one statement,
    and |D| ≥ 3 for an opposite result, which adds two.
-3. **Spelling.** A statement v that executes a registered operation R on
+4. **Spelling.** A statement v that executes a registered operation R on
    values a, and a registered operation R′ with values a′ earlier than v,
    with R′ of a′ having v's function, and key(R′, a′) < key(R, a). The fix
    replaces v's statement with an execution of R′ on a′ and canonicalizes.
@@ -90,11 +98,17 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
    statements executing `not`.
 
 DLP 57 reports redundant values, constant ones included, before matches,
-so **the value of a match or a spelling is never constant**; that's the only
-thing the proof needs about the order of fixes. Every fix keeps each
-statement's and each exit's function, and since every new statement reads
-only values earlier than v, the result is a program (no statement reads
-itself).
+so **the value of a match or a spelling is never constant**. DLP 57 also
+reports the first redundant value, so **the value of an opposite-value fix
+isn't a `not`**: if v were `not x`, with x not w, then x and w would have
+the same function, and since both come before v and inputs have different
+functions, the later of x and w would be a redundant value before v. Those
+are the only things the proof needs about the order of fixes. The second
+one matters: if x and w are both read elsewhere, `not x` and `not w` are
+each an opposite value of the other's argument, and fixing either one gives
+the other, forever. Every fix keeps each statement's and each exit's
+function, and since every new statement reads only values earlier than v,
+the result is a program (no statement reads itself).
 
 ### Programs of value operations
 
@@ -103,7 +117,7 @@ another value operation, and the call graph is acyclic (which only matters
 for the semantics). Besides the fixes above inside any one value operation,
 there's one more:
 
-4. **A constant written view.** A written view of a value operation A whose
+5. **A constant written view.** A written view of a value operation A whose
    value is constant. It's removed from A, or A is removed if it was A's only
    written view. In every value operation that executes A, that execution's
    value from the view becomes the constant, which is simplified as in fix
@@ -117,13 +131,13 @@ For the boolean part P of a value operation, let
 
 - C(P) be the number of its values that are constant,
 - S(P) be its number of statements,
+- K(P) be the number of its statements that aren't a `not`,
 - T(P) be the multiset of (neg(a), nodes(R), ord(R)) over its statements
   that execute a registered operation R on values a, and
 - R(P) be the multiset of its statements' terms.
 
-Order measures lexicographically: first C and then S as numbers, then T in
-the
-multiset order over lexicographically ordered triples, then R in the
+Order measures lexicographically: first C, S, and K as numbers, then T in
+the multiset order over lexicographically ordered triples, then R in the
 multiset order over <ᵣ. The multiset order (Dershowitz and Manna) puts M′
 below M when M′ ≠ M and M′ is M with some elements X removed and some
 elements Y added, with every element of Y below some element of X. The
@@ -148,16 +162,16 @@ lowers it, and changes only one value operation, whose measure goes down.
 **Corollary.** Fixing a program terminates. Φ is a number that never goes
 up, so it goes down only finitely often, and it goes down at every
 simplification and every removed written view. After the last time it goes
-down, every fix is a redundant value, an ordinary match, or a spelling in
-one value operation, and none of those adds a statement, so each value
+down, every fix is a redundant value, an opposite value, an ordinary match,
+or a spelling in one value operation, and none of those adds a statement, so each value
 operation has at most as many statements as it had then. There are finitely many programs with
 those bounds, and a sequence that goes down in a strict order never
 repeats a program, so it ends.
 
 ## Proof
 
-**Lemma 1 (canonicalizing).** Re-sorting changes none of C, S, T, and R:
-they're two counts and two multisets, and neither a statement's term, its
+**Lemma 1 (canonicalizing).** Re-sorting changes none of C, S, K, T, and R:
+they're three counts and two multisets, and neither a statement's term, its
 function, nor whether a value is a `not` depends on the order. Removing dead
 statements removes elements from both multisets and lowers C or keeps it,
 and lowers S.
@@ -169,10 +183,10 @@ constant, and every other statement keeps its function. So C(P′) ≤ C(P) − 
 S can go up: see [Simplification Can Add Statements](#simplification-can-add-statements).
 
 Every other fix adds no constant value: a redundant-value fix adds nothing,
-and the new execution of a match or a spelling has v's function, which isn't
-constant, and the `not` of an opposite result has its opposite. Every other
-statement keeps its function. So for Lemmas 2–6, C(P′) ≤ C(P), and if C
-went down, the measure did.
+the new execution of a match or a spelling and the `not` of an opposite
+value have v's function, which isn't constant, and the `not` of an opposite
+result has its opposite. Every other statement keeps its function. So for
+Lemmas 2–6 and 9, C(P′) ≤ C(P), and if C went down, the measure did.
 
 **Lemma 2 (redundant values).** Every read of v reads w instead, so v's
 statement is dead and is removed, and no statement is added. So S(P′) ≤
@@ -187,7 +201,8 @@ contains v's old statement, so S(P′) ≤ S(P). If any other statement
 became dead, S went down.
 
 Otherwise D = {v's old statement}, so S(P′) = S(P), and every other
-statement of P is in P′ with the same operation and the same values. The
+statement of P is in P′ with the same operation and the same values. v
+executes a registered operation before and after, so K(P′) = K(P). The
 only statement whose triple can change is v's: the others execute the same
 operations on the same values, and whether each of those values is a `not`
 is unchanged, because v is an execution before and after. Two cases:
@@ -226,7 +241,18 @@ which are earlier, so by induction over P′'s order every statement's new
 term is its old term with v's term replaced by a smaller one: Lemma 7
 applies.
 
-Lemmas 0 and 2–6 cover every fix, which proves Theorem 1. ∎
+**Lemma 9 (opposite values).** S(P′) = S(P) − |D| + 1, where D is v's old
+statement and those that became dead, so S(P′) ≤ S(P), and if anything else
+became dead, S went down. Otherwise S(P′) = S(P). v's old statement isn't a
+`not` and its new one is, and every other statement executes the same
+operation as before (its values' terms may change), so K(P′) = K(P) − 1.
+
+T can go up here, which is why K comes before it. After `u = a and b`,
+turning `v = nand(a, b)` into `not u` makes `xor(v, c)` an `xor` given a
+`not`, with triple (1, nodes(xor), ord(xor)), above both triples it
+replaces, `nand`'s and `xor`'s old one, whose negation counts are 0.
+
+Lemmas 0, 2–6, and 9 cover every fix, which proves Theorem 1. ∎
 
 **Lemma 8 (removing a constant written view).** A's number of written views
 goes down by one, and C(A) doesn't go up (the view's statements may become
@@ -283,6 +309,17 @@ it does to S, and no other fix raises C.
   can make a spelling unavailable, but the measure doesn't count options.
 - **Redundant-value fixes.** Lemma 2. They never add a statement, so they
   lower S.
+- **Opposite values against matches, spellings, and opposite results.**
+  An opposite-value fix turns an execution into a `not`, which can raise
+  the negation counts of the statements that read it (Lemma 9), and a
+  spelling can then lower them again. Neither undoes the other: the
+  opposite value lowers K, and a spelling keeps S and K. An ordinary match
+  or an opposite result can add an execution that's the opposite of a value
+  the program has, whose fix then removes it again; the match lowered S,
+  and the opposite value keeps or lowers it. The `not` an opposite result
+  adds is the `not` of its own execution, so it's never an opposite value.
+  The measure goes down at every one of these fixes, so no sequence of
+  them repeats a program.
 - **Re-sorting.** The measure is a count and two multisets, which re-sorting
   doesn't change (Lemma 1). "Earlier" only decides which fixes exist.
 - **Other values' keys changing.** A spelling fix can change other values'
@@ -296,14 +333,15 @@ it does to S, and no other fix raises C.
 
 ## What This Covers and What It Doesn't
 
-- **Order of fixes.** The only thing assumed about DLP 57's order of
-  reports is that a constant value is simplified before it could be matched
-  or respelled. Nothing assumes the largest match first, or the
-  highest-precedence spelling for an ordinary fix.
+- **Order of fixes.** The only things assumed about DLP 57's order of
+  reports are that a constant value is simplified before it could be
+  matched or respelled, and that an opposite value is the first redundant
+  value. Nothing assumes the largest match first, or the highest-precedence
+  spelling for an ordinary fix.
 - **Simplification's own steps.** Simplifying one constant is one fix here,
   through all the statements it reaches. The rule that a non-boolean
   statement takes the literal, and that a constant written view is left
-  for fix 4, only matter in that they end the simplification.
+  for fix 5, only matter in that they end the simplification.
 - **The bound** is the number of canonical programs with at most S(P)
   statements, which is finite but huge. It says nothing about how many
   rounds fixing takes in practice (at most 92 in the experiments).
@@ -314,11 +352,14 @@ it does to S, and no other fix raises C.
 handles one value operation at a time and simplifies constants the way fix 0
 does, with DLP 59's rules (`strict` and `precedence`, both declared orders) on all 144
 families of [precedence.md](../precedence.md) and computes the measure after
-every fix, without C (statements, then triples, then terms). Over 13,031
-fixes (3,410 redundant values, 174 simplifications, 6,112 ordinary matches,
-1,091 opposite results, and 2,244 spellings) it went down every time, so
-none of those simplifications added a statement, and all 1,440 fix loops
-ended.
+every fix, without C (statements, then statements that aren't a `not`,
+then triples, then terms). Over 13,116 fixes (3,408 redundant values, 126
+opposite values, 174 simplifications, 6,100 ordinary matches, 1,076
+opposite results, and 2,232 spellings) it went down every time, so none of
+those simplifications added a statement, and all 1,440 fix loops ended.
+
+Without K, 42 of the 126 opposite values don't lower the measure: 70 of
+them keep the number of statements, and in 40 of those, T goes up.
 
 The Python loop also respelled a `not` of an execution as an execution
 until this check; that isn't part of DLP 59, and it was removed.
@@ -348,9 +389,14 @@ it), `tripleOf_subst` is Lemma 4's claim that other statements keep their
 triples, `dm_single` is Lemma 5, `dm_pointwise` is Lemma 6's multiset step,
 `spelling_measure` puts Lemmas 4–6 together, `ser_subst_le` is Lemma 7, with
 `insertionSort_mono` its step about sorting, `dropView_phi_lt` is Lemma 8,
+`opposite_measure` is Lemma 9, with `isNotTerm_subst_of_isNot` its claim
+that no other statement stops being a `not`,
 `progStep_size_le` is the corollary's claim that once Φ stops going down no
 value operation grows, and `DMLt`, `MeasureLt`, `OpLt`, `OptLt`, and
-`ProgLt` are proved to be strict orders.
+`ProgLt` are proved to be strict orders. `DMLt` is Mathlib's
+`Multiset.IsDershowitzMannaLT`, whose transitivity Mathlib proves. Mathlib's
+proof that it's well-founded needs a well-founded order on the elements,
+which the rank order on all terms isn't (point 7 below), so it isn't used.
 
 What the Lean model leaves out, or states differently:
 
@@ -398,4 +444,8 @@ What the Lean model leaves out, or states differently:
 8. **A spelling requires that no other statement has v's term**, and matches
    and spellings add only non-constant statements, both of which hold
    because DLP 57 reports redundant values, constant ones included, before
-   matches.
+   matches. An opposite value requires that v isn't a `not`, which holds
+   because DLP 57 reports the first redundant value.
+9. **A statement has one value**, which is exact: DLP 57 makes writing more
+   than one view an error for a boolean value operation, so no boolean
+   statement is an execution with several values.

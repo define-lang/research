@@ -13,7 +13,8 @@ identical.
 
 `fix` applies the fix that the compiler's report asks for, again and again,
 until the program compiles: for the first redundant value, use the value it
-always equals instead; otherwise, for the reported match (the largest, then
+always equals instead, or the `not` of the value it's always the opposite of;
+otherwise, for the reported match (the largest, then
 the one whose value comes first, then by operation name, then by its values
 in rank order), replace its value with an execution of the registered
 operation (and a `not` of it for an opposite result). The matches come from
@@ -104,8 +105,13 @@ def tables(p: Program) -> list[int]:
     return out
 
 
-def first_redundant(p: Program) -> tuple[int, int | str] | None:
-    """Return the first redundant value and what it always equals."""
+def first_redundant(p: Program) -> tuple[int, int | str, bool] | None:
+    """Return the first redundant value, its other value, and whether opposite.
+
+    The other value is the one it always equals or is always the opposite
+    of. A value that's always the opposite of an earlier one is redundant unless
+    its statement is the `not` of that value.
+    """
     t = tables(p)
     mask = (1 << (1 << p.inputs)) - 1
     first: dict[int, int] = {}
@@ -113,9 +119,12 @@ def first_redundant(p: Program) -> tuple[int, int | str] | None:
         first.setdefault(t[v], v)
     for v in range(p.inputs, len(t)):
         if t[v] in (0, mask):
-            return v, "true" if t[v] else "false"
+            return v, "true" if t[v] else "false", False
         if t[v] in first:
-            return v, first[t[v]]
+            return v, first[t[v]], False
+        opposite = first.get(t[v] ^ mask)
+        if opposite is not None and p.statements[v - p.inputs] != ("not", (opposite,)):
+            return v, opposite, True
         first[t[v]] = v
     return None
 
@@ -555,16 +564,22 @@ def fix(
         kind = ""
         found = first_redundant(p)
         if found is not None:
-            value, equals = found
+            value, equals, opposite = found
             if isinstance(equals, str):
                 q = substitute_constant(p, value, value=equals == "true")
                 if q is None:
                     return outcome("constant output", rounds)
                 p = canonical(q)
+                kind = "constant"
+            elif opposite:
+                q = Program(p.inputs, list(p.statements), list(p.outputs))
+                q.statements[value - p.inputs] = ("not", (equals,))
+                p = canonical(q)
+                kind = "opposite value"
             else:
                 p = canonical(substitute(p, value, equals))
+                kind = "redundant"
             redundant_fixes += 1
-            kind = "constant" if isinstance(equals, str) else "redundant"
         elif plain_arguments and (q := plain_argument(p)) is not None:
             p = canonical(q)
             match_fixes += 1
@@ -619,7 +634,8 @@ def base_program(rng: random.Random, inputs: int, statements: int) -> Program:
     """Return a random program of `and`, `not`, and registered operations.
 
     Statements whose value is constant or one the program already has are
-    rejected, so the base program has no redundant values.
+    rejected. A value can still be the opposite of an earlier one, which is
+    a redundant value that fixing removes.
     """
     p = Program(inputs)
     t = tables(p)
