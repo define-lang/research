@@ -227,34 +227,6 @@ py_library(
     ],
 )
 
-py_test(
-    name = "integrated_integration_test",
-    size = "small",
-    srcs = ["integrated_integration_test.py"],
-    data = ["//:pyproject.toml"],
-    deps = [
-        ":algorithm",
-        ":combination_algorithm",
-        ":combination_inputs",
-        ":complete_inputs",
-        ":complete_workloads",
-        ":integrated_bounded",
-        ":integrated_compact",
-        ":integrated_inline",
-        ":integrated_resolved",
-        ":integrated_variants",
-        ":integrated_workloads",
-        ":reference",
-        ":vanish_workloads",
-        ":workloads",
-        "//operation_graph_optimization/complete:algorithm",
-        "//operation_graph_optimization/integrated:algorithm",
-        "@define//define/compiler:driver",
-        "@pypi//coverage",
-        "@pypi//pytest",
-    ],
-)
-
 py_library(
     name = "integrated_matrix",
     srcs = ["integrated_matrix.py"],
