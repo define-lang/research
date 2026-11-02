@@ -245,6 +245,16 @@ class ProgramChecker {
   // (literals, redundant values, read views that don't matter, matches,
   // spellings), so it skips the searches for kinds after the first found.
   bool first_fix_only = false;
+  // With reuse_search (`--keep_searches 1`), the fix loop keeps each
+  // value's search from one check to the next (Matcher::SearchCache); with
+  // check_search as well, every check also searches again and stops if the
+  // two differ.
+  bool reuse_search = false, check_search = false;
+  // Values whose kept search was used, and searched again, so far (with
+  // the ones in search_cache_).
+  size_t search_hits = 0, search_misses = 0;
+  size_t kept_hits() const { return search_hits + search_cache_.hits; }
+  size_t kept_misses() const { return search_misses + search_cache_.misses; }
   // Seconds spent counting registered operations' `and`s again.
   double ands_s = 0;
 
@@ -259,6 +269,9 @@ class ProgramChecker {
     holds_cache_.clear();
     key_of_value_.clear();
     hash_of_value_.clear();
+    search_hits += search_cache_.hits;
+    search_misses += search_cache_.misses;
+    search_cache_ = Matcher::SearchCache{};
   }
 
   Program& program() { return p_; }
@@ -1182,40 +1195,53 @@ class ProgramChecker {
     bool focused = !changed_.empty();
     for (const PStmt& s : op.stmts)
       if (s.kind == "call" && added_.count(s.name)) focused = false;
-    for (int pass = 0; pass < 2; ++pass) {
-      if (pass == 0 && focused && !edit_matches_) continue;
-      if (pass == 1 && first_fix_only && !matches.empty()) break;
-      double tp = now();
-      Matcher m(g, statements, registered);
-      m.set_hashes(std::move(hashes));
-      m.set_tables(pass == 0 ? t : std::move(t), support);
-      m.set_late_inputs(late);
-      m.set_anchor("any");
-      m.set_nodes(nodes);
-      m.set_min_opposite_removed(3);
-      m.set_spellings(pass == 1);
-      m.set_matches(pass == 0);
-      m.set_precedence(order, true);
-      m.set_dead(dead_flags);
-      if (focused) m.set_only(changed_);
-      if (reuse) m.set_holds_cache(&holds_cache_, node_value);
-      Stats st;
-      std::set<Match> found = m.run_resub(st);
-      for (const Match& x : pass == 0 ? found : m.spelled()) {
-        Report::Found f;
-        f.value = value_of.at(x.value);
-        f.op = x.op;
-        if (pass == 0) {
-          for (size_t i : m.match_statements(x)) f.removed_values.push_back(value_of.at(statements[i].lit));
-          f.removed = f.removed_values.size();
+    // The match search, then the spelling search, with the kept searches
+    // when `use_cache`.
+    const bool cached = reuse && reuse_search && !in_registered_reach(op.name);
+    auto search = [&](bool use_cache, std::vector<uint64_t> tables, std::vector<Report::Found>& found_matches,
+                      std::vector<Report::Found>& found_spellings, bool timed) {
+      for (int pass = 0; pass < 2; ++pass) {
+        if (pass == 0 && focused && !edit_matches_) continue;
+        if (pass == 1 && first_fix_only && !found_matches.empty()) break;
+        double tp = now();
+        Matcher m(g, statements, registered);
+        m.set_hashes(std::move(hashes));
+        m.set_tables(pass == 0 ? tables : std::move(tables), support);
+        m.set_late_inputs(late);
+        m.set_anchor("any");
+        m.set_nodes(nodes);
+        m.set_min_opposite_removed(3);
+        m.set_spellings(pass == 1);
+        m.set_matches(pass == 0);
+        m.set_precedence(order, true);
+        m.set_dead(dead_flags);
+        if (focused) m.set_only(changed_);
+        if (reuse) m.set_holds_cache(&holds_cache_, node_value);
+        if (use_cache) m.set_search_cache(&search_cache_);
+        Stats st;
+        std::set<Match> found = m.run_resub(st);
+        for (const Match& x : pass == 0 ? found : m.spelled()) {
+          Report::Found f;
+          f.value = value_of.at(x.value);
+          f.op = x.op;
+          if (pass == 0) {
+            for (size_t i : m.match_statements(x)) f.removed_values.push_back(value_of.at(statements[i].lit));
+            f.removed = f.removed_values.size();
+          }
+          for (Lit a : x.args) f.args.push_back(value_of.at(a));
+          (pass == 0 ? found_matches : found_spellings).push_back(std::move(f));
         }
-        for (Lit a : x.args) f.args.push_back(value_of.at(a));
-        (pass == 0 ? matches : spellings).push_back(std::move(f));
+        hashes = m.take_hashes();
+        if (!timed) continue;
+        for (auto& [k, v] : st) rep.stats.emplace_back((pass == 0 ? "match_" : "spell_") + k, v);
+        (pass == 0 ? rep.times.matches : rep.times.spellings) = now() - tp;
       }
-      hashes = m.take_hashes();
-      for (auto& [k, v] : st) rep.stats.emplace_back((pass == 0 ? "match_" : "spell_") + k, v);
-      (pass == 0 ? rep.times.matches : rep.times.spellings) = now() - tp;
-    }
+    };
+    std::vector<uint64_t> tables_copy;
+    if (cached && check_search) tables_copy = t;
+    search(cached, std::move(t), matches, spellings, true);
+    std::vector<Report::Found> full_matches, full_spellings;
+    if (cached && check_search) search(false, std::move(tables_copy), full_matches, full_spellings, false);
     if (reuse)
       for (uint32_t n = 1; n < info.num_nodes; ++n)
         for (uint32_t c = 0; c < 2; ++c)
@@ -1243,6 +1269,27 @@ class ProgramChecker {
     };
     for (Report::Found& f : matches) canonical_args(f);
     for (Report::Found& f : spellings) canonical_args(f);
+    if (cached && check_search) {
+      // The kept searches have to find exactly what searching again does.
+      for (Report::Found& f : full_matches) canonical_args(f);
+      for (Report::Found& f : full_spellings) canonical_args(f);
+      auto same = [](std::vector<Report::Found> a, std::vector<Report::Found> b) {
+        auto key = [](const Report::Found& f) {
+          std::vector<int> removed = f.removed_values;
+          std::sort(removed.begin(), removed.end());
+          return std::make_tuple(f.value, f.op, f.args, removed);
+        };
+        auto less = [&](const Report::Found& x, const Report::Found& y) { return key(x) < key(y); };
+        std::sort(a.begin(), a.end(), less);
+        std::sort(b.begin(), b.end(), less);
+        if (a.size() != b.size()) return false;
+        for (size_t i = 0; i < a.size(); ++i)
+          if (key(a[i]) != key(b[i])) return false;
+        return true;
+      };
+      if (!same(matches, full_matches) || !same(spellings, full_spellings))
+        throw std::runtime_error("kept search differs in " + op.name);
+    }
     if (!matches.empty()) {
       auto name = [](const Report::Found& f) { return f.op.rfind("not:", 0) == 0 ? f.op.substr(4) : f.op; };
       auto better = [&](const Report::Found& a, const Report::Found& b) {
@@ -1356,6 +1403,7 @@ class ProgramChecker {
   std::string reuse_name_;
   mutable std::unordered_map<int, std::vector<uint64_t>> call_rows_;
   Matcher::HoldsCache holds_cache_;
+  Matcher::SearchCache search_cache_;
   // Each value's tt_keys key, and the matcher's table hash of each value
   // (doubled) and of its `not` (doubled plus one).
   std::unordered_map<int, uint64_t> key_of_value_;

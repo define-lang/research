@@ -136,6 +136,29 @@ inline std::vector<std::vector<int>> permutations(uint32_t k) {
 
 class Matcher {
  public:
+  // Search results kept from one check of an operation to the next while
+  // the fix loop works on it, by value (doubled, plus whether it's
+  // negated). The candidates a value's search reaches depend only on its
+  // function, the operations searched, and the values available before it
+  // (with whether each is a `not`, which a spelling's key counts), and for
+  // spellings on the key of the value's own spelling: with those the
+  // same, the candidates are replayed, and everything else (what a match
+  // removes, existing executions, the exact check) is decided again.
+  struct SearchCache {
+    struct Leaf {
+      uint32_t variant = 0;
+      bool opposite = false;
+      std::vector<int64_t> args;
+    };
+    struct Entry {
+      std::vector<int64_t> pool;
+      bool matched = false, spelled = false;
+      std::array<int, 3> key{};
+      std::vector<Leaf> match_leaves, spell_leaves;
+    };
+    std::unordered_map<int, Entry> entries;
+    size_t hits = 0, misses = 0;
+  };
   Matcher(const Aig& g, std::vector<Statement> statements, std::vector<Registered> registered)
       : g_(g), statements_(std::move(statements)), registered_(std::move(registered)) {
     for (const Registered& r : registered_) max_arity_ = std::max(max_arity_, r.arity);
@@ -357,6 +380,7 @@ class Matcher {
     lwords_ = (capacity + 63) / 64;
     if (lwords_ > kMaxPoolWords) throw std::runtime_error("too many values for the search");
     resub_pool_.clear();
+    pool_codes_.clear();
     lit_samples_.clear();
     positions_.clear();
     rsamples_.assign(sample_.begin(), sample_.begin() + std::min<size_t>(sample_.size(), 256));
@@ -368,6 +392,10 @@ class Matcher {
       if (!seen.insert(table_hash(l)).second) return;
       const size_t index = resub_pool_.size();
       resub_pool_.push_back(l);
+      if (search_cache_) {
+        const int64_t code = pool_code(l);
+        pool_codes_.insert(std::lower_bound(pool_codes_.begin(), pool_codes_.end(), code), code);
+      }
       std::vector<uint64_t> bits((rsamples_.size() + 63) / 64, 0);
       for (size_t k = 0; k < rsamples_.size(); ++k)
         if (lit_bit(l, rsamples_[k])) {
@@ -408,6 +436,16 @@ class Matcher {
         sole_reader |= it != by_lit_.end() &&
                        uses_[it->second] == static_cast<int>(std::count(s.args.begin(), s.args.end(), a));
       }
+      // The value's kept search, if the values before it are the same.
+      SearchCache::Entry* entry = nullptr;
+      if (search_cache_) {
+        SearchCache::Entry& e = search_cache_->entries[2 * node_value_[node_of(s.lit)] + static_cast<int>(is_compl(s.lit))];
+        if (e.pool != pool_codes_) {
+          e = SearchCache::Entry{};
+          e.pool = pool_codes_;
+        }
+        entry = &e;
+      }
       // With spellings, every way of writing a value that is an execution
       // of a registered operation, or a `not` of one, is listed too, for a
       // precedence rule between them.
@@ -423,28 +461,53 @@ class Matcher {
           // the precedence of the one the program has are listed: no
           // operation is searched whose spellings would all come later.
           if (!order_.empty()) current_key_ = spelling_key(exec->op, exec->args, s.op == "not");
-          for (Lit target : {s.lit, s.lit ^ 1})
-            for (const Variant& r : variants_) {
-              if (!only_.empty() && !only_.count(r.r.name)) continue;
-              if (target != s.lit && !r.opposite_allowed) continue;
-              if (target != s.lit && precedence_strict_) continue;
-              if (!order_.empty() && spelling_bound(r.r.name, target != s.lit) > current_key_) continue;
-              chosen_.clear();
-              resub_assign(s.lit, target, r, spelled_);
+          if (entry && entry->spelled && entry->key == current_key_) {
+            ++search_cache_->hits;
+            replay(entry->spell_leaves, s.lit, spelled_);
+          } else {
+            if (entry) {
+              ++search_cache_->misses;
+              entry->spell_leaves.clear();
+              recording_ = &entry->spell_leaves;
             }
+            for (Lit target : {s.lit, s.lit ^ 1})
+              for (const Variant& r : variants_) {
+                if (!only_.empty() && !only_.count(r.r.name)) continue;
+                if (target != s.lit && !r.opposite_allowed) continue;
+                if (target != s.lit && precedence_strict_) continue;
+                if (!order_.empty() && spelling_bound(r.r.name, target != s.lit) > current_key_) continue;
+                chosen_.clear();
+                resub_assign(s.lit, target, r, spelled_);
+              }
+            recording_ = nullptr;
+            if (entry) {
+              entry->spelled = true;
+              entry->key = current_key_;
+            }
+          }
           spelling_ = false;
         }
       }
       if (plain_) sole_reader = true;
       if (!sole_reader) ++skipped_values_;
-      for (Lit target : {s.lit, s.lit ^ 1}) {
-        if (!sole_reader || !matches_) break;
-        for (const Variant& r : variants_) {
-          if (!only_.empty() && !only_.count(r.r.name)) continue;
-          if (target != s.lit && !r.opposite_allowed) continue;
-          chosen_.clear();
-          resub_assign(s.lit, target, r, found);
+      if (sole_reader && matches_ && entry && entry->matched) {
+        ++search_cache_->hits;
+        replay(entry->match_leaves, s.lit, found);
+      } else if (sole_reader && matches_) {
+        if (entry) {
+          ++search_cache_->misses;
+          entry->match_leaves.clear();
+          recording_ = &entry->match_leaves;
         }
+        for (Lit target : {s.lit, s.lit ^ 1})
+          for (const Variant& r : variants_) {
+            if (!only_.empty() && !only_.count(r.r.name)) continue;
+            if (target != s.lit && !r.opposite_allowed) continue;
+            chosen_.clear();
+            resub_assign(s.lit, target, r, found);
+          }
+        recording_ = nullptr;
+        if (entry) entry->matched = true;
       }
       add(s.lit);
     }
@@ -531,6 +594,11 @@ class Matcher {
     return out;
   }
   std::map<std::pair<std::string, std::vector<int>>, bool>* holds_cache_ = nullptr;
+  SearchCache* search_cache_ = nullptr;
+  std::unordered_map<int64_t, int> pool_index_;
+  // The pool's values by pool_code, sorted, while there's a search cache.
+  std::vector<int64_t> pool_codes_;
+  std::vector<SearchCache::Leaf>* recording_ = nullptr;
   std::vector<int> node_value_;
   mutable std::vector<int> delta_;
   mutable std::vector<size_t> touched_;
@@ -840,10 +908,37 @@ class Matcher {
     return true;
   }
 
+  // A value in the pool, by its value: doubled plus whether it's negated,
+  // doubled plus whether it's a `not` statement.
+  int64_t pool_code(Lit a) const {
+    auto it = by_lit_.find(a);
+    const bool is_not = it != by_lit_.end() && statements_[it->second].op == "not";
+    return (static_cast<int64_t>(node_value_[node_of(a)]) * 2 + static_cast<int64_t>(is_compl(a))) * 2 + is_not;
+  }
+
+  // The candidates of a kept search, against the values as they are now.
+  void replay(const std::vector<SearchCache::Leaf>& leaves, Lit v, std::set<Match>& found) {
+    if (pool_index_.empty())
+      for (size_t x = 0; x < resub_pool_.size(); ++x) pool_index_[pool_code(resub_pool_[x])] = static_cast<int>(x);
+    for (const SearchCache::Leaf& leaf : leaves) {
+      chosen_.clear();
+      for (int64_t code : leaf.args) chosen_.push_back(pool_index_.at(code));
+      resub_verify(v, leaf.opposite ? v ^ 1 : v, variants_[leaf.variant], found);
+    }
+    pool_index_.clear();
+  }
+
   void resub_verify(Lit v, Lit target, const Variant& var, std::set<Match>& found) {
     const Registered& r = var.r;
     std::vector<Lit> args;
     for (int i : chosen_) args.push_back(resub_pool_[i]);
+    if (recording_) {
+      SearchCache::Leaf leaf;
+      leaf.variant = static_cast<uint32_t>(&var - variants_.data());
+      leaf.opposite = target != v;
+      for (Lit a : args) leaf.args.push_back(pool_code(a));
+      recording_->push_back(std::move(leaf));
+    }
     const bool opposite = target != v;
     if (spelling_) {
       if (!order_.empty() && spelling_key(r.name, args, opposite) > current_key_) return;
@@ -1467,6 +1562,7 @@ class Matcher {
   // and the target's and arguments' values, each doubled plus whether
   // it's negated.
   using HoldsCache = std::map<std::pair<std::string, std::vector<int>>, bool>;
+  void set_search_cache(SearchCache* cache) { search_cache_ = cache; }
   void set_holds_cache(HoldsCache* cache, std::vector<int> node_value) {
     holds_cache_ = cache;
     node_value_ = std::move(node_value);

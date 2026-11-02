@@ -216,6 +216,8 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
   if (mode == "fix") {
     const size_t ops_before = p.ops.size();
     ProgramFixer fixer(c);
+    if (opt.count("keep_searches")) c.reuse_search = true;
+    if (opt.count("check_search")) c.check_search = true;
     std::ofstream progress;
     if (opt.count("progress")) {
       progress.open(opt["progress"]);
@@ -277,7 +279,8 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
       o << (first ? "" : ",") << "\"" << k << "\":" << sec;
       first = false;
     }
-    o << "},\"check_t\":" << times_json(fixer.check_times);
+    o << "},\"check_t\":" << times_json(fixer.check_times) << ",\"kept_searches\":" << c.kept_hits()
+      << ",\"searches\":" << c.kept_misses();
     std::cout << o.str() << "}" << std::endl;
     if (opt.count("replacements")) {
       std::ofstream f(opt["replacements"]);

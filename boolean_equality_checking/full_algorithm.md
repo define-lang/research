@@ -215,9 +215,43 @@ the 15k fix in a profile (`perf`). SAT or OBDDs would only replace those confirm
 16 words compared at up to 10 inputs, with much slower ones, and for the
 wide program SAT was measured slower than truth tables (above). What would
 cut the time is fewer or smaller searches: a search after a fix that
-reuses the previous round's matches for the values the fix didn't touch,
-which needs care, since a fix changes which values come before others and
-what a match removes.
+reuses the previous round's matches for the values the fix didn't touch.
+
+**Reusing the previous round's search** is an optimization of this
+research fix loop, measured here and not part of the recommended
+algorithm (`beq program --mode fix --keep_searches 1`,
+`Matcher::SearchCache`). A value's search reaches the same candidates
+whenever its function, the operations searched, and the values available
+before it are the same, with whether each of those is a `not`, which a
+spelling's key counts; for a spelling, the key of the value's own spelling
+has to be the same too. Values keep their functions while the fix loop
+works on one operation, so when those are unchanged from the previous
+check, it replays the candidates that search reached, and decides
+everything else again: what a match removes (which depends on the
+statements that read the value, which a fix can change), whether the
+execution already exists, and the exact check. So the removal never stops
+a reuse; it's decided again on every replay. It's off for the registered
+operations and what they execute, whose rewriting changes what writing a
+registered operation out costs, and emptied when a read view is dropped.
+With `--check_search 1` as well, every check also searches again and
+stops if the two differ; slices of all three programs (2,000, 3,000, and
+700 operations) pass, and on the whole programs the fixed programs are
+byte for byte the same and compile. On a quiet machine, without and with
+it:
+
+| program | values reused | match search | spelling search | fixing |
+| ------- | ------------- | ------------ | --------------- | ------ |
+| ops_15k | 34% | 9.77 → 9.50 s | 1.45 → 1.18 s | 15.9 → 15.4 s |
+| ops_150k | 35% | 96.7 → 95.3 s | 15.0 → 12.2 s | 159.0 → 156.0 s |
+| ops_2k_wide | 76% | 17.8 → 11.5 s | 11.4 → 6.5 s | 54.5 → 42.5 s |
+
+It saves time where an operation takes many checks: the wide program's
+operations take about nine, and its fix is 22% faster. The 15k and 150k
+programs' take about four, and what's reused there is mostly the cheap
+searches, of the values early in an operation, so the fix is 3% faster
+at 15k and 2% at 150k (two clean pairs: 159.0 → 156.0 s and
+160.3 → 157.8 s), against what it costs to compare each value's values
+before it.
 
 ## What Changed to Match Define
 
