@@ -189,6 +189,11 @@ class Hierarchy {
   uint64_t lookups() const { return lookups_; }
 
   HOp& mutable_op(size_t i) { return ops_[i]; }
+  // Appends an operation, which can execute any earlier one.
+  size_t add(HOp op) {
+    ops_.push_back(std::move(op));
+    return ops_.size() - 1;
+  }
 
   // A hash of the truth tables an operation records for the views it writes.
   uint64_t recorded_hash(size_t i) const {

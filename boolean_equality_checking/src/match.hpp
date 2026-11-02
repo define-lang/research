@@ -363,6 +363,8 @@ class Matcher {
     positions_.assign(rsamples_.size(), std::vector<uint64_t>(lwords_, 0));
     std::set<uint64_t> seen;
     auto add = [&](Lit l) {
+      // A literal given to a statement isn't a value.
+      if (node_of(l) == 0) return;
       if (!seen.insert(table_hash(l)).second) return;
       const size_t index = resub_pool_.size();
       resub_pool_.push_back(l);
@@ -374,9 +376,16 @@ class Matcher {
         }
       lit_samples_.push_back(std::move(bits));
     };
-    for (uint32_t i = 1; i <= I; ++i) add(make_lit(i));
+    std::vector<char> late(I + 1, 0);
+    for (const auto& [index, lit] : late_inputs_) late[node_of(lit)] = 1;
+    for (uint32_t i = 1; i <= I; ++i)
+      if (!late[i]) add(make_lit(i));
     std::set<Match> found;
-    for (const Statement& s : statements_) {
+    size_t next_late = 0;
+    for (size_t k = 0; k < statements_.size(); ++k) {
+      const Statement& s = statements_[k];
+      while (next_late < late_inputs_.size() && late_inputs_[next_late].first <= k)
+        add(late_inputs_[next_late++].second);
       for (Lit a : s.args) add(a);
       // With anchor "cone", arguments must be in v's statement-level cone;
       // with "support", functions of v's inputs only.
@@ -395,7 +404,9 @@ class Matcher {
       bool sole_reader = false;
       for (Lit a : s.args) {
         auto it = by_lit_.find(a);
-        sole_reader |= it != by_lit_.end() && uses_[it->second] == 1;
+        // A value given twice (through a copy) is still read by v alone.
+        sole_reader |= it != by_lit_.end() &&
+                       uses_[it->second] == static_cast<int>(std::count(s.args.begin(), s.args.end(), a));
       }
       // With spellings, every way of writing a value that is an execution
       // of a registered operation, or a `not` of one, is listed too, for a
@@ -414,6 +425,7 @@ class Matcher {
           if (!order_.empty()) current_key_ = spelling_key(exec->op, exec->args, s.op == "not");
           for (Lit target : {s.lit, s.lit ^ 1})
             for (const Variant& r : variants_) {
+              if (!only_.empty() && !only_.count(r.r.name)) continue;
               if (target != s.lit && !r.opposite_allowed) continue;
               if (target != s.lit && precedence_strict_) continue;
               if (!order_.empty() && spelling_bound(r.r.name, target != s.lit) > current_key_) continue;
@@ -426,8 +438,9 @@ class Matcher {
       if (plain_) sole_reader = true;
       if (!sole_reader) ++skipped_values_;
       for (Lit target : {s.lit, s.lit ^ 1}) {
-        if (!sole_reader) break;
+        if (!sole_reader || !matches_) break;
         for (const Variant& r : variants_) {
+          if (!only_.empty() && !only_.count(r.r.name)) continue;
           if (target != s.lit && !r.opposite_allowed) continue;
           chosen_.clear();
           resub_assign(s.lit, target, r, found);
@@ -475,6 +488,8 @@ class Matcher {
   // statements that fixing it removes, which are the value's own and every
   // statement nothing reads once the value is computed from the arguments.
   size_t match_size(const Match& m) const { return removed(m.value, m.args).size(); }
+  // Those statements, by index among the statements given.
+  std::vector<size_t> match_statements(const Match& m) const { return removed(m.value, m.args); }
 
  private:
   bool is_registered(const std::string& op) const {
@@ -486,11 +501,17 @@ class Matcher {
   // The statements that become unused when v is computed from args
   // instead: v's own, then any whose last reader was one of them.
   std::vector<size_t> removed(Lit v, const std::vector<Lit>& args) const {
-    std::map<size_t, int> delta;
-    auto uses_of = [&](size_t i) { return uses_[i] + delta[i]; };
+    // Each statement's change in uses, cleared again before returning.
+    if (delta_.size() < statements_.size()) delta_.assign(statements_.size(), 0);
+    touched_.clear();
+    auto change = [&](size_t i, int d) {
+      if (delta_[i] == 0) touched_.push_back(i);
+      delta_[i] += d;
+    };
+    auto uses_of = [&](size_t i) { return uses_[i] + delta_[i]; };
     for (Lit a : args) {
       auto it = by_lit_.find(a);
-      if (it != by_lit_.end()) ++delta[it->second];
+      if (it != by_lit_.end()) change(it->second, 1);
     }
     std::vector<size_t> out{by_lit_.at(v)}, stack{by_lit_.at(v)};
     while (!stack.empty()) {
@@ -499,15 +520,20 @@ class Matcher {
       for (Lit a : statements_[i].args) {
         auto it = by_lit_.find(a);
         if (it == by_lit_.end()) continue;
-        --delta[it->second];
+        change(it->second, -1);
         if (uses_of(it->second) == 0) {
           out.push_back(it->second);
           stack.push_back(it->second);
         }
       }
     }
+    for (size_t i : touched_) delta_[i] = 0;
     return out;
   }
+  std::map<std::pair<std::string, std::vector<int>>, bool>* holds_cache_ = nullptr;
+  std::vector<int> node_value_;
+  mutable std::vector<int> delta_;
+  mutable std::vector<size_t> touched_;
 
   static constexpr size_t kMaxPoolWords = 32;
   struct Variant {
@@ -582,15 +608,23 @@ class Matcher {
       majority_samples_ = rsamples_.size();
     }
     if (var.majority && j == 1) lowest = 0;
-    for (size_t x = lowest; x < n; ++x) {
-      if (var.majority) {
+    if (var.majority) {
+      for (size_t x = lowest; x < n; ++x) {
         if (j == 0 && 3 * differs_[x] > majority_samples_) continue;
         if (j > 0) {
           const size_t a = static_cast<size_t>(chosen_[0]);
           if (std::make_pair(differs_[x], x) < std::make_pair(differs_[a], a)) continue;
         }
+        cand[x >> 6] |= 1ULL << (x & 63);
       }
-      cand[x >> 6] |= 1ULL << (x & 63);
+    } else {
+      // Every literal from `lowest` up to n, a word at a time.
+      for (size_t w = lowest >> 6; w < (n + 63) / 64; ++w) {
+        uint64_t word = ~0ULL;
+        if (w == lowest >> 6) word &= ~0ULL << (lowest & 63);
+        if (w == n >> 6) word &= (1ULL << (n & 63)) - 1;
+        cand[w] = word;
+      }
     }
     for (size_t w = 0; w < lwords_; ++w) cand[w] &= allowed_[w];
     for (int x : chosen_) cand[x >> 6] &= ~(1ULL << (x & 63));
@@ -636,8 +670,18 @@ class Matcher {
         auto it = signatures_.find(signature(m1_));
         if (it == signatures_.end()) return;
         const std::vector<int> bucket = it->second;
+        // A candidate that fails adds a sample, which the others' bits then
+        // have and m1_ doesn't: compare only the samples m1_ was built from.
+        const size_t samples = rsamples_.size();
+        auto same_bits = [&](int x) {
+          for (size_t w = 0; w < sw; ++w) {
+            const uint64_t valid = (w + 1 == sw && samples % 64) ? ((1ULL << (samples % 64)) - 1) : ~0ULL;
+            if ((lit_samples_[x][w] & valid) != (m1_[w] & valid)) return false;
+          }
+          return true;
+        };
         for (int x : bucket) {
-          if (!((cand[x >> 6] >> (x & 63)) & 1) || lit_samples_[x] != m1_) continue;
+          if (!((cand[x >> 6] >> (x & 63)) & 1) || !same_bits(x)) continue;
           chosen_.push_back(x);
           ++leaf_candidates_;
           resub_verify(v, target, var, found);
@@ -646,19 +690,43 @@ class Matcher {
         return;
       }
     }
-    for (size_t w = 0; w < sw; ++w)
-      for (uint64_t bits = m0_[w] | m1_[w]; bits; bits &= bits - 1) {
-        const size_t k = w * 64 + static_cast<size_t>(__builtin_ctzll(bits));
-        const bool one = (m1_[w] >> (k & 63)) & 1;
-        ++position_steps_;
-        const std::vector<uint64_t>& at = positions_[k];
-        uint64_t any = 0;
-        for (size_t lw = 0; lw < lwords_; ++lw) {
-          cand[lw] &= one ? at[lw] : ~at[lw];
-          any |= cand[lw];
+    // Keep the candidates whose sample bits are m1_'s wherever a view's
+    // value is forced: a position at a time over every candidate, or a
+    // candidate at a time over every position, whichever is fewer words.
+    size_t forced_bits = 0, candidates = 0;
+    for (size_t w = 0; w < sw; ++w) forced_bits += static_cast<size_t>(__builtin_popcountll(m0_[w] | m1_[w]));
+    for (size_t w = 0; w < lwords_; ++w) candidates += static_cast<size_t>(__builtin_popcountll(cand[w]));
+    if (candidates * sw < forced_bits * lwords_) {
+      uint64_t any = 0;
+      for (size_t lw = 0; lw < lwords_; ++lw) {
+        for (uint64_t bits = cand[lw]; bits; bits &= bits - 1) {
+          const size_t x = lw * 64 + static_cast<size_t>(__builtin_ctzll(bits));
+          if (x >= n) break;
+          ++position_steps_;
+          for (size_t w = 0; w < sw; ++w)
+            if ((lit_samples_[x][w] ^ m1_[w]) & (m0_[w] | m1_[w])) {
+              cand[lw] &= ~(1ULL << (x & 63));
+              break;
+            }
         }
-        if (!any) return;
+        any |= cand[lw];
       }
+      if (!any) return;
+    } else {
+      for (size_t w = 0; w < sw; ++w)
+        for (uint64_t bits = m0_[w] | m1_[w]; bits; bits &= bits - 1) {
+          const size_t k = w * 64 + static_cast<size_t>(__builtin_ctzll(bits));
+          const bool one = (m1_[w] >> (k & 63)) & 1;
+          ++position_steps_;
+          const std::vector<uint64_t>& at = positions_[k];
+          uint64_t any = 0;
+          for (size_t lw = 0; lw < lwords_; ++lw) {
+            cand[lw] &= one ? at[lw] : ~at[lw];
+            any |= cand[lw];
+          }
+          if (!any) return;
+        }
+    }
     for (size_t w = 0; w < lwords_; ++w)
       for (uint64_t bits = cand[w]; bits; bits &= bits - 1) {
         const int x = static_cast<int>(w * 64 + static_cast<size_t>(__builtin_ctzll(bits)));
@@ -688,6 +756,15 @@ class Matcher {
   // Whether target = R(args) on every input assignment, with every argument
   // mattering. A difference found adds its assignment to the samples.
   bool holds(Lit v, Lit target, const Registered& r, const std::vector<Lit>& args) {
+    if (!holds_cache_) return check_holds(v, target, r, args);
+    std::vector<int> key{2 * node_value_[node_of(target)] + static_cast<int>(is_compl(target))};
+    for (Lit a : args) key.push_back(2 * node_value_[node_of(a)] + static_cast<int>(is_compl(a)));
+    auto [it, added] = holds_cache_->try_emplace({r.name, std::move(key)}, false);
+    if (added) it->second = check_holds(v, target, r, args);
+    return it->second;
+  }
+
+  bool check_holds(Lit v, Lit target, const Registered& r, const std::vector<Lit>& args) {
     (void)v;
     ++exact_checks_;
     const uint64_t* tv = &tables_[size_t{node_of(target)} * words_];
@@ -702,7 +779,7 @@ class Matcher {
     // times faster than summing minterms.
     const uint64_t t2 = r.arity == 2 ? r.table : 0, t3 = r.arity == 3 ? r.table : 0;
     for (size_t w = 0; w < words_; ++w) {
-      const uint64_t x0 = at[0][w] ^ flip[0], x1 = at[1][w] ^ flip[1];
+      const uint64_t x0 = at[0][w] ^ flip[0], x1 = r.arity >= 2 ? at[1][w] ^ flip[1] : 0;
       uint64_t rw = 0;
       if (t2 == 0xE) {
         rw = x0 | x1;
@@ -782,7 +859,7 @@ class Matcher {
     // registered operation and a `not` of it are only a match for an
     // operation that computes the opposite.
     const std::vector<size_t> group = removed(v, args);
-    if (group.size() < 2) return;
+    if (group.size() < 2 || (opposite && group.size() < min_opposite_removed_)) return;
     if (opposite && group.size() == 2) {
       const Statement& s = statements_[by_lit_.at(v)];
       if (s.op == "not") {
@@ -984,6 +1061,17 @@ class Matcher {
 
   void ensure_tables() {
     if (!tables_.empty()) return;
+    if (!given_tables_.empty()) {
+      const uint32_t I = g_.num_inputs;
+      words_ = I <= 6 ? 1 : (size_t{1} << (I - 6));
+      last_mask_ = I >= 6 ? ~0ULL : ((1ULL << (1u << I)) - 1);
+      tables_ = std::move(given_tables_);
+      support_ = std::move(given_support_);
+      Rng rng(7);
+      const uint64_t space = uint64_t{1} << I;
+      for (int k = 0; k < 1024; ++k) sample_.push_back(rng.next() % space);
+      return;
+    }
     const uint32_t I = g_.num_inputs;
     words_ = I <= 6 ? 1 : (size_t{1} << (I - 6));
     last_mask_ = I >= 6 ? ~0ULL : ((1ULL << (1u << I)) - 1);
@@ -1276,10 +1364,19 @@ class Matcher {
   std::set<Match> spelled_;
   std::vector<std::string> order_;
   bool precedence_strict_ = false;
+  std::vector<uint64_t> given_tables_;
+  std::vector<uint32_t> given_support_;
+  std::vector<std::pair<size_t, Lit>> late_inputs_;
+  std::map<std::string, int> nodes_;
+  size_t min_opposite_removed_ = 2;
+  bool matches_ = true;
+  std::set<std::string> only_;
   using Key = std::array<int, 3>;
   Key current_key_{};
 
-  static int aig_nodes(const std::string& op) {
+  int aig_nodes(const std::string& op) const {
+    auto it = nodes_.find(op);
+    if (it != nodes_.end()) return it->second;
     if (op == "or" || op == "implies") return 1;
     if (op == "maj") return 4;
     return 3;
@@ -1320,6 +1417,60 @@ class Matcher {
   }
   // Every spelling of each value that is an execution or a `not` of one.
   const std::set<Match>& spelled() const { return spelled_; }
+  // Truth tables over every input for each node, and each node's inputs as
+  // a bit set, instead of computing them from the graph: for statements
+  // that are executions referring to recorded tables, whose nodes have no
+  // fanins.
+  void set_tables(std::vector<uint64_t> tables, std::vector<uint32_t> support) {
+    given_tables_ = std::move(tables);
+    given_support_ = std::move(support);
+  }
+  // Inputs that only become available just before a statement (by index),
+  // in statement order: results of statements that aren't boolean.
+  void set_late_inputs(std::vector<std::pair<size_t, Lit>> late) { late_inputs_ = std::move(late); }
+  // Each registered operation's number of different `and`s, for the
+  // precedence between spellings.
+  void set_nodes(std::map<std::string, int> nodes) { nodes_ = std::move(nodes); }
+  // DLP 59's restriction that an opposite result removes at least three
+  // statements.
+  void set_min_opposite_removed(size_t n) { min_opposite_removed_ = n; }
+  // Whether to search for matches; off, only spellings are listed.
+  void set_matches(bool matches) { matches_ = matches; }
+  // Table hashes of literals, to carry over to another search on the same
+  // tables.
+  std::vector<uint64_t> take_hashes() { return std::move(hash_cache_); }
+  void set_hashes(std::vector<uint64_t> hashes) { hash_cache_ = std::move(hashes); }
+  // Dead statements (by index) don't read anything: a match's statements are
+  // the ones nothing else that's live reads (DLP 57 makes the dead ones an
+  // error of their own).
+  void set_dead(const std::vector<char>& dead) {
+    uses_.assign(statements_.size(), 0);
+    for (size_t i = 0; i < statements_.size(); ++i) {
+      if (dead[i]) continue;
+      for (Lit a : statements_[i].args) {
+        auto it = by_lit_.find(a);
+        if (it != by_lit_.end()) ++uses_[it->second];
+      }
+    }
+    for (Lit o : g_.outputs) {
+      auto it = by_lit_.find(o);
+      if (it != by_lit_.end()) ++uses_[it->second];
+    }
+  }
+  // Only these registered operations are searched for (all when empty); the
+  // others still decide which opposite results count.
+  void set_only(std::set<std::string> names) { only_ = std::move(names); }
+  // Exact checks already done, by the values involved: a value keeps its
+  // function while a fix loop works on one operation, so a check of the
+  // same values against the same operation has the same result.
+  // `node_value` gives each node's value; a key is the operation's name
+  // and the target's and arguments' values, each doubled plus whether
+  // it's negated.
+  using HoldsCache = std::map<std::pair<std::string, std::vector<int>>, bool>;
+  void set_holds_cache(HoldsCache* cache, std::vector<int> node_value) {
+    holds_cache_ = cache;
+    node_value_ = std::move(node_value);
+  }
 
  private:
   std::map<Lit, size_t> by_lit_;

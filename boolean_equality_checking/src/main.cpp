@@ -3,7 +3,8 @@
 //
 //   beq METHOD FILE.aag [--planted FILE] [--key value ...]
 //
-// Methods: info, strash, norm_single, norm_all, cuts4, tt, bdd, sweep, auto.
+// Methods: info, strash, norm_single, norm_all, cuts4, tt, bdd, sweep, auto;
+// and on other inputs: match, hier, hier_edit, and program.
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -16,6 +17,7 @@
 #include "functional.hpp"
 #include "hier.hpp"
 #include "match.hpp"
+#include "program_main.hpp"
 #include "structural.hpp"
 #include "sweep.hpp"
 
@@ -68,6 +70,7 @@ int main(int argc, char** argv) {
   }
   auto get = [&](const std::string& k, double def) { return opt.count(k) ? std::stod(opt[k]) : def; };
 
+  if (method == "program") return run_program(path, opt);
   if (method == "hier_edit") {
     // Random edits to a library, and the operations each one makes the
     // compiler check again: the edited one, and every operation that

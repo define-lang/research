@@ -18,7 +18,7 @@ and how many planted equalities each one finds.
   instead of measurement.
 - [related_work.md](related_work.md): a literature search on how close
   existing systems and papers come to DLPs 57–59 and these algorithms.
-- Three follow-up studies:
+- Follow-up studies:
   - [matching.md](matching.md): whether DLP 57's rule against writing out a
     registered operation could be exact.
   - [references.md](references.md): checking value operations that execute
@@ -30,10 +30,18 @@ and how many planted equalities each one finds.
     programs until they compile makes them the same program.
   - [precedence.md](precedence.md): a precedence rule between equivalent
     spellings of a value, and whether it makes the fixes converge.
+  - [full_algorithm.md](full_algorithm.md): every check of DLPs 57–59 at
+    once on whole generated programs that follow the rules, with the fix
+    loop that makes them compile. Both are linear: 18.6 s to check 150,000
+    operations and 232 s to fix them. Writing out an execution given a
+    constant can cascade past DLP 57's statement limit, which the fix loop
+    can't undo.
   - [proof/termination.md](proof/termination.md): a proof, in English and
     in Lean (`proof/fixing_termination.lean`), that fixing a program under
     DLP 57's and DLP 59's rules always terminates, including simplifying
-    constants and removing constant written views.
+    constants, removing constant written views and read views that don't
+    matter, and writing out the executions that would make a match's fix
+    an execution cycle.
 
 ## Recommendations
 
@@ -41,27 +49,31 @@ and how many planted equalities each one finds.
 
 This is what DLP 57's rules need, and it's the case to optimize.
 
-**Decide equality exactly, over the whole value operation, with one combined
-algorithm** ([algorithm.md](algorithm.md)):
+**Decide equality exactly, over the whole value operation, with truth
+tables** ([algorithm.md](algorithm.md)):
 
 1. Structural hashing as statements are read.
-2. With at most 12 inputs, truth tables of every value. Done.
-3. Otherwise, SAT sweeping: random simulation, then each candidate pair in
-   statement order is decided by a ladder whose every rung is exact or
-   passes the pair on: exhaustive simulation when the two cones read at most
-   12 inputs; SAT up to 1,000 conflicts; OBDDs of the two cones in first-use
-   order; with at most 20 inputs, truth tables for the whole graph; and
-   otherwise SAT with no limit (Kissat).
+2. With at most 20 inputs (DLP 57's limit), truth tables of every value,
+   executions looked up in the executed operation's recorded table or
+   written out when that's small. Done.
 
-With Decision 2's limit of 20 inputs, the last rung is never reached: the
-truth-table switch always applies first, so no value operation's check
-depends on an unbounded solver call. The dispatch reads only the number of
-inputs, which is free, and the ladder
-makes sweeping faster rather than slower (32 µs against 46 µs median).
-Because every rung is exact and a class's representative is its smallest
-value, the classes are a property of the graph: thresholds, seeds, and which
-engine decided a pair change only the time. Eleven exact configurations gave
-identical classes on 300 random instances.
+DLP 59's matches need every value's truth table anyway, so at 13–20 inputs
+the SAT sweeping the earlier studies recommended there saves at most the
+time of grouping tables by function, and costs much more on a first check
+with no stored patterns: on whole programs of 16–20-input operations, 44 s
+against 1.5 s ([full_algorithm.md](full_algorithm.md)). The truth tables
+take at most 52 ms for 256 statements at 20 inputs, and up to 106 ms for
+an operation that executes several 16–20-view operations; the whole
+2,000-operation program of them checks in 19.9 s. Truth tables are
+exact and deterministic, so the classes are a property of the graph.
+
+What the earlier studies measured beyond that, for value operations past
+20 inputs or programs checked as one graph: SAT sweeping, with a ladder of
+exhaustive simulation, SAT up to 1,000 conflicts, OBDDs, and SAT with no
+limit (Kissat). Every rung is exact and a class's representative is its
+smallest value, so thresholds, seeds, and which engine decided a pair
+change only the time (eleven exact configurations gave identical classes on
+300 random instances).
 
 This is essentially the combination of Kuehlmann, Paruthi, Krohm, and Ganai,
 "Robust Boolean Reasoning for Equivalence Checking and Functional Property

@@ -1180,5 +1180,230 @@ def fixpoint() -> None:
     print(table(["rewrites", "programs fixed the same way under orders A and B"], rows))
 
 
+@cli.command("full-algorithm")
+def full_algorithm() -> None:
+    """Tables for the full algorithm on whole programs."""
+    records = load("full_algorithm")
+    by: dict[str, dict[str, list[dict]]] = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    for r in records:
+        by[r["program"]][r["run"]].append(r)
+    # Each step's latest run, and for booleans.defcl each edit's: a step run
+    # again replaces what it measured before. A step that ran out of time
+    # has no measurements.
+    timeouts = []
+    for name, runs in by.items():
+        for run, rs in runs.items():
+            if run == "registry":
+                latest = {r["edit"]: r for r in rs if r["status"] == "ok"}
+                runs[run] = list(latest.values())
+                continue
+            if rs[-1].get("status", "ok") != "ok":
+                timeouts.append((name, run, rs[-1]["status"]))
+                runs[run] = []
+            else:
+                runs[run] = rs[-1:]
+    # Programs whose runs finished.
+    programs = [name for name in by if by[name]["fix"] and by[name]["first"]]
+    print("### The programs, fixed until they compile\n")
+    rows = []
+    for name in programs:
+        fix = by[name]["fix"][-1]
+        first = by[name]["first"][-1]
+        rows.append(
+            [
+                name,
+                f"{first['ops']:,}",
+                f"{first['boolean_ops']:,}",
+                f"{first['boolean_statements']:,}",
+                f"{first['user_executions']:,}",
+                f"{first['copies']:,}",
+                f"{fix['ops_before']:,}",
+                f"{fix['rounds_median']} / {fix['rounds_max']}",
+                fmt_time(fix["wall_s"]),
+                fmt_bytes(fix["peak_rss_kb"]),
+                ", ".join(f"{k} {v:,}" for k, v in sorted(fix["fixes"].items())),
+                ", ".join(f"{k} {v:,}" for k, v in sorted(fix["statuses"].items())),
+            ]
+        )
+    print(
+        table(
+            [
+                "program",
+                "operations",
+                "boolean",
+                "boolean statements",
+                "executions of user operations",
+                "copies",
+                "operations before fixing",
+                "rounds, median / most",
+                "fixing",
+                "memory",
+                "fixes",
+                "statuses",
+            ],
+            rows,
+        )
+    )
+    print("\n### Checking every operation\n")
+    rows = []
+    checks = [
+        "structure",
+        "tables",
+        "groups",
+        "order",
+        "redundant",
+        "matches",
+        "spellings",
+    ]
+    for name in programs:
+        for run in ("first",):
+            if not by[name][run]:
+                continue
+            r = by[name][run][-1]
+            t = r["time_s"]
+            rows.append(
+                [
+                    name,
+                    run,
+                    fmt_time(r["wall_s"]),
+                    *(fmt_time(t[c]) for c in checks),
+                    fmt_time(r["op_time_median_s"]),
+                    fmt_time(r["op_time_p99_s"]),
+                    fmt_time(r["op_time_max_s"]),
+                    f"{r['tt']:,} / {r['sat']:,}",
+                    fmt_bytes(r["peak_rss_kb"]),
+                    str(r["ops_with_errors"]),
+                ]
+            )
+    print(
+        table(
+            [
+                "program",
+                "run",
+                "wall",
+                *checks,
+                "per operation, median",
+                "99th percentile",
+                "slowest",
+                "truth tables / SAT",
+                "memory",
+                "operations with errors",
+            ],
+            rows,
+        )
+    )
+    print("\n### Checking again\n")
+    rows = []
+    for name in programs:
+        inc = by[name]["unchanged_incremental"]
+        edits = by[name]["edits"]
+        if inc:
+            r = inc[-1]
+            rows.append(
+                [name, "unchanged, by hashes", fmt_time(r["hash_s"]), "0", "", ""]
+            )
+        if edits:
+            r = edits[-1]
+            rows.append(
+                [
+                    name,
+                    f"{r['edits']} random edits",
+                    f"{fmt_time(r['edit_time_median_s'])} median",
+                    f"{r['rechecked_median']} median",
+                    fmt_time(r["edit_time_max_s"]),
+                    str(r["rechecked_max"]),
+                ]
+            )
+        for r in by[name]["registry"]:
+            rows.append(
+                [
+                    name,
+                    "booleans.defcl: " + r["edit"],
+                    fmt_time(r["recheck_s"]),
+                    f"{r['ops']:,}",
+                    "",
+                    f"{r['ops_with_errors']:,} with errors",
+                ]
+            )
+    print(
+        table(
+            [
+                "program",
+                "change",
+                "time",
+                "operations checked",
+                "slowest edit",
+                "most checked",
+            ],
+            rows,
+        )
+    )
+    print("\n### Time per operation by boolean inputs (first check)\n")
+    rows = []
+    for name in programs:
+        r = by[name]["first"][-1]
+        for inputs, (count, total, slowest) in sorted(
+            r["by_inputs"].items(), key=lambda x: int(x[0])
+        ):
+            rows.append(
+                [
+                    name,
+                    inputs,
+                    f"{count:,.0f}",
+                    fmt_time(total / count),
+                    fmt_time(slowest),
+                ]
+            )
+    print(table(["program", "inputs", "operations", "mean", "slowest"], rows))
+    print("\n### The slowest operations (first check)\n")
+    rows = []
+    for name in programs:
+        for op in by[name]["first"][-1]["slowest"][:5]:
+            t = op["t"]
+            rows.append(
+                [
+                    name,
+                    op["op"],
+                    str(op["inputs"]),
+                    str(op["statements"]),
+                    op["how"],
+                    fmt_time(t["total"]),
+                    ", ".join(
+                        f"{c} {fmt_time(t[c])}"
+                        for c in checks
+                        if t[c] >= 0.1 * t["total"]
+                    ),
+                    f"{op['stats'].get('match_search_nodes', 0):,.0f}",
+                ]
+            )
+    print(
+        table(
+            [
+                "program",
+                "operation",
+                "inputs",
+                "statements",
+                "redundant values by",
+                "total",
+                "checks taking 10% or more",
+                "match search nodes",
+            ],
+            rows,
+        )
+    )
+    for name in programs:
+        for r in by[name]["verify"]:
+            print(
+                f"\n{name}: the independent checker checked {r['checked_with_dependencies']:,} "
+                f"operations ({r['sampled']:,} sampled and what they execute) in "
+                f"{fmt_time(r['independent_s'])}; {r['independent_failing']} fail it, "
+                f"{r['beq_failing']} fail `beq`."
+            )
+    for name, run, status in timeouts:
+        print(f"\n{name}: `{run}` stopped: {status}.")
+
+
 if __name__ == "__main__":
     cli()

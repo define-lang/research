@@ -1,6 +1,6 @@
 """Libraries of boolean value operations that execute each other.
 
-Each operation reads up to `views` views and writes one to two views. It has
+Each operation reads up to `views` views and writes one view (DLP 57). It has
 `and` statements (with `not` as negated literals) and executions of
 operations from the level below, so copying every execution into its caller
 multiplies the size by the number of executions at each level. Every value is
@@ -267,13 +267,7 @@ def library(
                     available.append(lit)
             if len(op.tables) <= views + 1:
                 continue
-            op.outputs = [2 * (len(op.tables) - 1)] + (
-                [2 * (len(op.tables) - 2)] if rng.random() < 0.5 else []
-            )
-            if len(set(op.outputs)) < len(op.outputs) or any(
-                o >> 1 <= views for o in op.outputs
-            ):
-                op.outputs = op.outputs[:1]
+            op.outputs = [2 * (len(op.tables) - 1)]
             current.append(op)
             ops.append(op)
             if checked and rng.random() < 0.5:

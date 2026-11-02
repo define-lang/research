@@ -1,9 +1,25 @@
 # The Combined Algorithm
 
-This is the one algorithm the measurements recommend, written so it could be
-implemented in the compiler. It's `beq auto` in `src/main.cpp` and
-`src/sweep.hpp`. Its measured performance is in
-[experiments.md](experiments.md), Experiment 10.
+This is the algorithm the measurements recommend, written so it could be
+implemented in the compiler.
+
+**Within DLP 57's limit of 20 inputs, the compiler should use truth tables
+for every value operation** (step 2's first case, with I ≤ 20). DLP 59's
+matches need every value's truth table anyway, so SAT sweeping at 13–20
+inputs saves at most the time of grouping the tables by function, and on a
+first check with no stored patterns it costs far more: 44 s against 1.5 s
+on a whole program of 16–20-input operations, where the tables themselves
+took 11 s. That's `auto` in `beq program` now: truth tables up to 20
+inputs, SAT only past them, and the whole check of that program takes
+19.9 s, 13.1 s of it tables ([full_algorithm.md](full_algorithm.md)). Executions are looked
+up in the executed operation's recorded table, or evaluated as its
+written-out and-inverter graph when that has at most 16 nodes per view.
+
+The rest of this page, SAT sweeping and its ladder, is what the earlier
+studies measured for I > 12, before matching was part of the check; it
+still applies to value operations past 20 inputs and to programs checked as
+one graph. It's `beq auto` in `src/main.cpp` and `src/sweep.hpp`, and its
+measured performance is in [experiments.md](experiments.md), Experiment 10.
 
 ## Input and Output
 
@@ -36,7 +52,8 @@ Let I be the number of inputs and n the number of nodes.
      normalized so that the first bit is 0, with an exact comparison inside
      each hash bucket. Done. Cost: O(n · 2^I / 64) word operations, at most
      64 per node.
-   - **I > 12: SAT sweeping**, the rest of the steps.
+   - **I > 12: SAT sweeping**, the rest of the steps. (For the compiler,
+     with matching, truth tables up to I ≤ 20 instead: see above.)
 3. **Simulate.** 1,024 random input patterns (16 words), from a fixed seed.
    Each node gets a signature, normalized for complement. Only nodes with
    equal signatures can be equal. Cost: O(16 n).
