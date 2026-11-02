@@ -4,6 +4,8 @@
 // executes.
 #pragma once
 
+#include <optional>
+
 #include "program.hpp"
 
 namespace beq {
@@ -21,10 +23,15 @@ class ProgramFixer {
   // One line per operation fixed, as it's fixed: NAME PASS ROUNDS SECONDS
   // STATUS, then FIX=COUNT for each kind of fix.
   std::ostream* progress = nullptr;
+  // Seconds spent in each part of fixing, over every operation, and the
+  // checks' own parts.
+  std::map<std::string, double> phase_s;
+  CheckTimes check_times;
 
   explicit ProgramFixer(ProgramChecker& checker) : c_(checker), p_(checker.program()) {
     c_.statement_limit = false;
     c_.reuse_values = true;
+    c_.first_fix_only = true;
   }
 
   std::vector<OpResult> fix_all(int max_rounds) {
@@ -45,6 +52,7 @@ class ProgramFixer {
     // every operation, and nothing they execute is fixed later.
     fix_until_stable(first, true, max_rounds, out, result_of);
     fix_until_stable(rest, false, max_rounds, out, result_of);
+    Phase p{phase_s, "finish"};
     finish();
     return out;
   }
@@ -87,6 +95,14 @@ class ProgramFixer {
     PStmt statement;  // its arguments' ids are view numbers
   };
 
+  // Adds the time from its making to its end to phase_s[name].
+  struct Phase {
+    std::map<std::string, double>& seconds;
+    const char* name;
+    double start = ProgramChecker::now();
+    ~Phase() { seconds[name] += ProgramChecker::now() - start; }
+  };
+
   OpResult fix_op(size_t index, int max_rounds) {
     OpResult res;
     res.name = p_.ops[index].name;
@@ -97,14 +113,26 @@ class ProgramFixer {
     const double t0 = ProgramChecker::now();
     c_.forget_values();
     forget_specialized(res.name);
-    apply_replacements(index);
+    {
+      Phase p{phase_s, "replacements"};
+      apply_replacements(index);
+    }
     bool done = false;
     for (int round = 0; round < max_rounds && !done; ++round) {
       // Statements a fix leaves dead are part of that fix; the ones dead
       // before any fix are errors of their own.
-      const int dead = canonicalize(index);
+      int dead = 0;
+      {
+        Phase p{phase_s, "canonicalize"};
+        dead = canonicalize(index);
+      }
       if (round == 0) res.fixes["dead"] += dead;
-      Report rep = c_.check(index, true, "tt");
+      Report rep;
+      {
+        Phase p{phase_s, "check"};
+        rep = c_.check(index, true, "tt");
+      }
+      check_times.add(rep.times);
       res.rounds = round;
       POp& op = p_.ops[index];
       if (rep.errors.count("limits")) {
@@ -117,6 +145,7 @@ class ProgramFixer {
         break;
       }
       if (rep.literal_stmt >= 0) {
+        Phase p{phase_s, "literals"};
         simplify_literals(index);
         ++res.fixes["literal"];
         continue;
@@ -126,6 +155,7 @@ class ProgramFixer {
         // `not`, at once: each is still a fix after the others, which keep
         // every function, and doing them together saves a check of the
         // whole operation for each.
+        Phase p{phase_s, "redundant values"};
         bool literals = false;
         for (const Report::Merge& m : rep.merges) {
           if (m.opposite) {
@@ -144,6 +174,7 @@ class ProgramFixer {
         continue;
       }
       if (!rep.unused_views.empty()) {
+        Phase p{phase_s, "unused views"};
         drop_views(index, rep.unused_views);
         // The values that read a dropped view now compute something else.
         c_.forget_values();
@@ -166,13 +197,15 @@ class ProgramFixer {
         // don't overlap a match already chosen: each is then still a match
         // after the others, which keep every function, and doing them
         // together saves a check of the whole operation for each.
+        Phase p{phase_s, "matches"};
         std::vector<const Report::Found*> chosen;
         std::set<int> values, gone, read;
+        const OpInfo info = c_.analyze(op);
         for (const Report::Found& f : rep.matches) {
           if (!values.insert(f.value).second) continue;
           const Report::Found* best = &f;
           for (const Report::Found& g : rep.matches)
-            if (g.value == f.value && g.removed == f.removed && spelling_before(index, g, *best)) best = &g;
+            if (g.value == f.value && g.removed == f.removed && spelling_before(index, info, g, *best)) best = &g;
           bool overlaps = false;
           for (int x : best->removed_values) overlaps |= gone.count(x) > 0 || read.count(x) > 0;
           for (int a : best->args) overlaps |= gone.count(a) > 0;
@@ -199,6 +232,7 @@ class ProgramFixer {
         continue;
       }
       if (rep.has_spelling) {
+        Phase p{phase_s, "spellings"};
         const int written = write_out_leading_back(rep.spelling.op, index);
         if (written < 0) {
           res.status = "cycle";
@@ -216,7 +250,10 @@ class ProgramFixer {
       done = true;
     }
     if (!done && res.status == "ok") res.status = "rounds";
-    if (done) settle(index);
+    if (done) {
+      Phase p{phase_s, "settle"};
+      settle(index);
+    }
     res.seconds = ProgramChecker::now() - t0;
     return res;
   }
@@ -277,9 +314,8 @@ class ProgramFixer {
     return false;
   }
 
-  bool spelling_before(size_t index, const Report::Found& a, const Report::Found& b) {
+  bool spelling_before(size_t index, const OpInfo& info, const Report::Found& a, const Report::Found& b) {
     const POp& op = p_.ops[index];
-    const OpInfo info = c_.analyze(op);
     auto negations = [&](const Report::Found& f) {
       int n = f.op.rfind("not:", 0) == 0;
       for (int x : f.args) {
@@ -645,6 +681,14 @@ class ProgramFixer {
     // one with the literals given to its views, which simplifying then
     // removes; the program keeps its value operations, as the termination
     // proof models it.
+    // Only the outermost write-out is timed: simplifying its copy writes
+    // out more.
+    struct Depth {
+      int& depth;
+      ~Depth() { --depth; }
+    } depth{++write_out_depth_};
+    std::optional<Phase> p;
+    if (write_out_depth_ == 1) p.emplace(phase_s, "literal write-outs");
     if (!specialize) {
       inline_call(op, k);
       return;
@@ -812,6 +856,7 @@ class ProgramFixer {
       std::vector<size_t> again;
       for (size_t i : ops) {
         if (removed_.count(p_.ops[i].name) || out[result_of.at(i)].status != "ok") continue;
+        Phase p{phase_s, "recheck"};
         if (rewritten_.count(i) || stale(p_.ops[i]) || (recheck && !c_.check(i, true, "tt").errors.empty()))
           again.push_back(i);
       }
@@ -961,6 +1006,7 @@ class ProgramFixer {
   // Each operation's statements simplified with literals given to some of
   // its views, by NAME then T, F or * for each view.
   std::map<std::string, POp> specialized_;
+  int write_out_depth_ = 0;
   // Operations written with more than 256 boolean statements.
   std::set<std::string> over_limit_;
 };

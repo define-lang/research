@@ -2,9 +2,9 @@
 
 | program | operations | boolean | boolean statements | executions of user operations | copies | operations before fixing | rounds, median / most | fixing | memory | fixes | statuses |
 | ------- | ---------- | ------- | ------------------ | ----------------------------- | ------ | ------------------------ | --------------------- | ------ | ------ | ----- | -------- |
-| ops_15k | 14,770 | 11,770 | 150,507 | 18,281 | 7,066 | 15,006 | 2 / 17 | 22.6 s | 165 MB | constant 199, dead 158, match 33,449, opposite match 7,673, opposite value 474, redundant 5,496, spelling 11,547, unused view 190, wrapper 111 | ok 15,006 |
-| ops_150k | 147,685 | 117,685 | 1,519,207 | 186,564 | 70,248 | 150,006 | 2 / 21 | 232 s | 1.59 GB | constant 2,227, dead 2,129, literal 2, match 335,647, opposite match 76,498, opposite value 4,748, redundant 56,932, spelling 119,472, unused view 1,774, wrapper 1,140 | ok 150,006 |
-| ops_2k_wide | 1,978 | 1,578 | 81,781 | 11,454 | 3,101 | 2,006 | 7 / 42 | 59.2 s | 423 MB | constant 22, dead 3, match 4,799, opposite match 625, opposite value 16, redundant 1,033, spelling 12,406, unused view 28, wrapper 7 | ok 2,006 |
+| ops_15k | 14,770 | 11,770 | 150,507 | 18,281 | 7,066 | 15,006 | 2 / 17 | 15.5 s | 165 MB | constant 199, dead 158, match 33,449, opposite match 7,673, opposite value 474, redundant 5,496, spelling 11,547, unused view 190, wrapper 111 | ok 15,006 |
+| ops_150k | 147,685 | 117,685 | 1,519,207 | 186,564 | 70,248 | 150,006 | 2 / 21 | 159 s | 1.59 GB | constant 2,227, dead 2,129, literal 2, match 335,647, opposite match 76,498, opposite value 4,748, redundant 56,932, spelling 119,472, unused view 1,774, wrapper 1,140 | ok 150,006 |
+| ops_2k_wide | 1,978 | 1,578 | 81,781 | 11,454 | 3,101 | 2,006 | 7 / 42 | 54.9 s | 428 MB | constant 22, dead 3, match 4,799, opposite match 625, opposite value 16, redundant 1,033, spelling 12,406, unused view 28, wrapper 7 | ok 2,006 |
 
 ### Checking every operation
 

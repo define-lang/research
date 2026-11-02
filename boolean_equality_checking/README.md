@@ -33,7 +33,7 @@ and how many planted equalities each one finds.
   - [full_algorithm.md](full_algorithm.md): every check of DLPs 57–59 at
     once on whole generated programs that follow the rules, with the fix
     loop that makes them compile. Both are linear: 18.6 s to check 150,000
-    operations and 232 s to fix them. Writing out an execution given a
+    operations and 159 s to fix them. Writing out an execution given a
     constant can cascade past DLP 57's statement limit, which the fix loop
     can't undo.
   - [proof/termination.md](proof/termination.md): a proof, in English and

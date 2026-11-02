@@ -34,9 +34,9 @@ uses the current `beq`, and the check is truth tables up to 20 inputs
 
 | program | operations | boolean | boolean statements | executions of user operations | copies | operations before fixing | rounds, median / most | fixing | memory | fixes | statuses |
 | ------- | ---------- | ------- | ------------------ | ----------------------------- | ------ | ------------------------ | --------------------- | ------ | ------ | ----- | -------- |
-| ops_15k | 14,770 | 11,770 | 150,507 | 18,281 | 7,066 | 15,006 | 2 / 17 | 22.6 s | 165 MB | constant 199, dead 158, match 33,449, opposite match 7,673, opposite value 474, redundant 5,496, spelling 11,547, unused view 190, wrapper 111 | ok 15,006 |
-| ops_150k | 147,685 | 117,685 | 1,519,207 | 186,564 | 70,248 | 150,006 | 2 / 21 | 232 s | 1.59 GB | constant 2,227, dead 2,129, literal 2, match 335,647, opposite match 76,498, opposite value 4,748, redundant 56,932, spelling 119,472, unused view 1,774, wrapper 1,140 | ok 150,006 |
-| ops_2k_wide | 1,978 | 1,578 | 81,781 | 11,454 | 3,101 | 2,006 | 7 / 42 | 59.2 s | 423 MB | constant 22, dead 3, match 4,799, opposite match 625, opposite value 16, redundant 1,033, spelling 12,406, unused view 28, wrapper 7 | ok 2,006 |
+| ops_15k | 14,770 | 11,770 | 150,507 | 18,281 | 7,066 | 15,006 | 2 / 17 | 15.5 s | 165 MB | constant 199, dead 158, match 33,449, opposite match 7,673, opposite value 474, redundant 5,496, spelling 11,547, unused view 190, wrapper 111 | ok 15,006 |
+| ops_150k | 147,685 | 117,685 | 1,519,207 | 186,564 | 70,248 | 150,006 | 2 / 21 | 159 s | 1.59 GB | constant 2,227, dead 2,129, literal 2, match 335,647, opposite match 76,498, opposite value 4,748, redundant 56,932, spelling 119,472, unused view 1,774, wrapper 1,140 | ok 150,006 |
+| ops_2k_wide | 1,978 | 1,578 | 81,781 | 11,454 | 3,101 | 2,006 | 7 / 42 | 54.9 s | 428 MB | constant 22, dead 3, match 4,799, opposite match 625, opposite value 16, redundant 1,033, spelling 12,406, unused view 28, wrapper 7 | ok 2,006 |
 
 #### Checking every operation
 
@@ -129,8 +129,8 @@ ops_150k: the independent checker checked 1,200 operations (300 sampled and what
   per operation in the median at both sizes, with the same 99th percentile
   (about 395 µs). Matches take 46% and spellings 30%. The few operations
   at 4–8 ms at 150k are single outliers, not a heavier tail.
-- **The fix loop is linear too:** 1.5 ms per operation at 15k (22.6 s for
-  15,006) and 1.55 ms at 150k (232 s for 150,006), in a median of 2 rounds
+- **The fix loop is linear too:** 1.03 ms per operation at 15k (15.5 s for
+  15,006) and 1.06 ms at 150k (159 s for 150,006), in a median of 2 rounds
   and at most 21, and every fixed program compiles when read back (0
   operations with errors; the check of the written program takes 1.9 s,
   18.9 s, and 19.9 s, inside the fix step's cap). It adds no value
@@ -157,7 +157,7 @@ executions that are written out (at most 16 nodes per view). Matches take
 2.7 s, spellings 2.2 s, and redundant values 1.6 s. An execution of a
 k-view operation in a caller with I inputs costs 2^I lookups of k bits
 each, about 20 million bit operations at 20 inputs. The fix loop takes
-59 s for 2,006 operations (median 7 rounds, at most 42) and the check of
+54.9 s for 2,006 operations (median 7 rounds, at most 42) and the check of
 what it writes 20 s.
 
 Earlier runs checked redundant values with SAT above 12 inputs. With no
@@ -168,6 +168,56 @@ tables up to 20 inputs, and SAT only past them, where DLP 57's limit
 makes an operation an error anyway. The truth tables of every value
 aren't stored for a recheck (about 9 MB per operation here); each
 operation's recorded table is, and an unchanged operation isn't checked.
+
+## Where Fixing Spends Its Time
+
+`beq program --mode fix` reports the seconds spent in each part of fixing
+(`phase_s`, `check_t`, `write_s`, and `ands_s` in its summary). On a quiet
+machine:
+
+| part | ops_15k | ops_150k | ops_2k_wide |
+| ---- | ------- | -------- | ----------- |
+| fixing, in all | 15.5 s | 159 s | 54.9 s |
+| checks | 14.2 s (91%) | 144 s (91%) | 53.6 s (98%) |
+| of which the match search | 9.5 s | 96.3 s | 18.0 s |
+| of which the spelling search | 1.4 s | 14.8 s | 11.4 s |
+| of which truth tables | 0.28 s | 3.2 s | 17.9 s (10.9 s lookups, 3.5 s written out) |
+| of which redundant values, order, structure, groups | 0.57 s | 5.7 s | 4.9 s |
+| of which the rest of a check (reading the operation, recording it) | 2.4 s | 24 s | 1.4 s |
+| canonicalizing | 0.64 s (4%) | 6.8 s (4%) | 1.1 s (2%) |
+| choosing and applying matches | 0.30 s (2%) | 3.0 s (2%) | 0.05 s |
+| replacements, write-outs, settling, finishing | 0.13 s | 2.0 s | 0.05 s |
+| counting registered operations' `and`s | 0 | 0 | 0 |
+| checks, and checks per operation | 57,944, 3.9 | 584,157, 3.9 | 18,339, 9.1 |
+| reading / writing the program | 0.13 / 0.04 s | 1.1 / 0.42 s | 0.04 / 0.02 s |
+| checking the written program | 1.8 s | 18.4 s | 20.0 s |
+
+Choosing each match's spelling analyzes the operation once per round, not
+once per comparison, and a check in the fix loop skips the searches whose
+results that round can't use: spellings when there's a match, and both
+when there's a literal or a read view that doesn't matter.
+
+**The checks are the time, and within them the match and spelling
+searches**, not equality: a check in the fix loop costs about 250 µs at
+15k and 150k, three times a check of the fixed program (84 µs), because
+an operation with errors has many more matches to find and verify (every
+one, so that the non-overlapping ones can be applied together), and an
+operation takes about four checks. The slowest operations are the same:
+b2_56 in the wide program takes 0.46 s, all of it checks (tables 0.11 s,
+matches 0.12 s, spellings 0.19 s); the slowest in the 150k program, m6_223,
+takes 10 ms, 8 ms of it the match search.
+
+**Other ways of deciding equality wouldn't help.** The search enumerates
+candidate arguments for each value and filters them by their values on
+random input combinations (simulation, already), then confirms the few
+left against the truth tables; the exact confirmations were about 2% of
+the 15k fix in a profile (`perf`). SAT or OBDDs would only replace those confirmations, a word or
+16 words compared at up to 10 inputs, with much slower ones, and for the
+wide program SAT was measured slower than truth tables (above). What would
+cut the time is fewer or smaller searches: a search after a fix that
+reuses the previous round's matches for the values the fix didn't touch,
+which needs care, since a fix changes which values come before others and
+what a match removes.
 
 ## What Changed to Match Define
 
@@ -240,10 +290,9 @@ operation's recorded table is, and an unchanged operation isn't checked.
    another read view the operation keeps: the written view doesn't depend
    on it, so any value will do, and a constant would make every execution
    that reads it an execution given a constant, written out with
-   everything it executes. Giving them `false`, the first design, turned
-   one view in a 60-statement operation of the wide program into 914
-   statements and about 100 more rounds, and kept the wide program's fix
-   past its 300 s cap.
+   everything it executes. Giving them `false` turns one view in a
+   60-statement operation of the wide program into 914 statements and
+   about 100 more rounds, and the wide program's fix past its 300 s cap.
 10. **`and` and `not` are registered** for every value operation, before
     the others, so matches can be `and`s and `not`s and every `and` is a
     spelling; and a registered operation's own definition follows only
@@ -262,15 +311,16 @@ operation's recorded table is, and an unchanged operation isn't checked.
     covers this order (fix 8 in `proof/termination.md`).
 12. **The generator.** Random statements often leave a read view that
     doesn't matter (`(x and y) or y`): 1,042 of the wide program's 2,006
-    operations had one, where a real program would rarely. The generator
-    now makes the written view the `xor` of itself with each such view
-    (`gen/program.py`, `unused_views`), which leaves 28. Past 12 inputs it
+    operations have one when nothing prevents it, where a real program
+    would rarely. The generator makes the written view the `xor` of
+    itself with each such view (`gen/program.py`, `unused_views`), which
+    leaves 28. Past 12 inputs it
     tracks each value's function on 4,096 fixed random input combinations
     instead of all 2^20, since every statement is bitwise and equal
-    functions are equal on the samples; that took generating the wide
-    program from over 120 s to 10 s, and 74 s with the views check. And a
-    mixed operation's boolean written view is made constant on purpose at
-    the boolean rate (1%), no longer five times it.
+    functions are equal on the samples: generating the wide program takes
+    74 s, against over 120 s with whole truth tables. And a mixed
+    operation's boolean written view is made constant on purpose at the
+    boolean rate (1%).
 13. **Fewer checks per fix.** After one check, the fix loop fixes every
     redundant value, up to an opposite value that's already a `not`, and
     every match, largest first, whose statements and arguments don't
@@ -278,11 +328,10 @@ operation's recorded table is, and an unchanged operation isn't checked.
     fix after the others, which keep every function), and, while it works on one
     operation, keeps each execution's table, the matcher's exact checks,
     and table hashes by value, since a value keeps its function from one
-    fix to the next, and two exact changes to the matcher's candidate
-    filtering make it faster. On the 15k program the caches and the
-    matcher changes took fixing from 28.3 s to 22.9 s with the output byte
-    for byte the same, and fixing several at once took the most rounds
-    from 163 to 17.
+    fix to the next, and the matcher filters candidates a candidate at a
+    time or a sample position at a time, whichever is fewer words. All of
+    these leave the fixed programs byte for byte the same; fixing several
+    at once is what keeps the most rounds at 17 on the 15k program.
 
 ## Verification
 
@@ -412,6 +461,6 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
   executes it when its function changes (up to 138 operations here); that's
   what incremental checking has to do, since their functions change too.
 - **Memory** is no constraint: 782 MB to check 150k operations, 1.59 GB to
-  fix them, 229 MB to check the wide program and 423 MB to fix it.
+  fix them, 229 MB to check the wide program and 428 MB to fix it.
 - Everything else (the structural rules, order, ranks, interchangeable
   views, redundant values by truth tables, and hashing) is linear and small.

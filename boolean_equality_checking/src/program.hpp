@@ -241,6 +241,12 @@ class ProgramChecker {
   // writing out an execution given a constant can pass it on the way to a
   // smaller operation.
   bool statement_limit = true;
+  // The fix loop fixes one kind of error at a time, in a fixed order
+  // (literals, redundant values, read views that don't matter, matches,
+  // spellings), so it skips the searches for kinds after the first found.
+  bool first_fix_only = false;
+  // Seconds spent counting registered operations' `and`s again.
+  double ands_s = 0;
 
   // While the fix loop works on one operation, every value keeps its
   // function from one fix to the next (until a read view is dropped), so
@@ -706,7 +712,8 @@ class ProgramChecker {
       find_redundant(op, info, keys, rep);
       rep.errors.erase("redundant");
     }
-    if (rep.redundant_kind.empty()) {
+    const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
+    if (rep.redundant_kind.empty() && !fixed_first) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
       find_matches(op, info, std::move(t), dead, rep);
     }
@@ -870,6 +877,12 @@ class ProgramChecker {
   int ands_of(const std::string& name) {
     Recorded& r = recorded_.at(name);
     if (r.ands >= 0) return r.ands;
+    const double start = now();
+    struct Add {
+      double& total;
+      double start;
+      ~Add() { total += now() - start; }
+    } add{ands_s, start};
     std::map<std::pair<Lit, Lit>, Lit> strash;
     uint32_t next = 1;
     std::function<Lit(const std::string&, const std::vector<Lit>&)> inline_op = [&](const std::string& opname,
@@ -1171,6 +1184,7 @@ class ProgramChecker {
       if (s.kind == "call" && added_.count(s.name)) focused = false;
     for (int pass = 0; pass < 2; ++pass) {
       if (pass == 0 && focused && !edit_matches_) continue;
+      if (pass == 1 && first_fix_only && !matches.empty()) break;
       double tp = now();
       Matcher m(g, statements, registered);
       m.set_hashes(std::move(hashes));

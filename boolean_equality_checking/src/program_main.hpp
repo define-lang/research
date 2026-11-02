@@ -226,9 +226,11 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
     const double wall = ProgramChecker::now() - t0;
     // The program as written, read back and checked: what a compiler sees.
     int remaining = -1;
-    double after_s = 0;
+    double after_s = 0, write_s = 0;
     if (opt.count("out")) {
+      const double tw = ProgramChecker::now();
       write_program(p, opt["out"]);
+      write_s = ProgramChecker::now() - tw;
       const double ta = ProgramChecker::now();
       Program q = read_program(opt["out"]);
       ProgramChecker qc(q);
@@ -269,7 +271,13 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
       o << (first ? "" : ",") << "\"" << k << "\":" << n;
       first = false;
     }
-    o << "}";
+    o << "},\"write_s\":" << write_s << ",\"ands_s\":" << c.ands_s << ",\"phase_s\":{";
+    first = true;
+    for (const auto& [k, sec] : fixer.phase_s) {
+      o << (first ? "" : ",") << "\"" << k << "\":" << sec;
+      first = false;
+    }
+    o << "},\"check_t\":" << times_json(fixer.check_times);
     std::cout << o.str() << "}" << std::endl;
     if (opt.count("replacements")) {
       std::ofstream f(opt["replacements"]);
