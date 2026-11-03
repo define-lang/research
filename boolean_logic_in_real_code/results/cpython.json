@@ -1,0 +1,503 @@
+{
+ "name": "cpython",
+ "functions": 17878,
+ "functions_with_logic": 3793,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 6493,
+   "median": 2,
+   "p90": 2,
+   "p99": 4,
+   "p999": 9,
+   "max": 19
+  },
+  "stmts": {
+   "n": 6493,
+   "median": 1,
+   "p90": 2,
+   "p99": 4,
+   "p999": 9,
+   "max": 21
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 3793,
+   "median": 2,
+   "p90": 5,
+   "p99": 13,
+   "p999": 21,
+   "max": 33
+  },
+  "stmts": {
+   "n": 3793,
+   "median": 1,
+   "p90": 4,
+   "p99": 12,
+   "p999": 24,
+   "max": 32
+  },
+  "max_stmts_within_input_limit": 30,
+  "over_inputs": 5,
+  "over_stmts": 0,
+  "over_either": 5,
+  "share_over_either": 0.001318217769575534,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    33,
+    19,
+    "profiling/sampling/live_collector/collector.py:915 _handle_input"
+   ],
+   [
+    25,
+    17,
+    "_strptime.py:536 _strptime"
+   ],
+   [
+    23,
+    24,
+    "subprocess.py:2016 _execute_child"
+   ],
+   [
+    21,
+    32,
+    "_pyio.py:75 open"
+   ],
+   [
+    21,
+    18,
+    "unittest/mock.py:1484 __enter__"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    21,
+    32,
+    "_pyio.py:75 open"
+   ],
+   [
+    23,
+    24,
+    "subprocess.py:2016 _execute_child"
+   ],
+   [
+    33,
+    19,
+    "profiling/sampling/live_collector/collector.py:915 _handle_input"
+   ],
+   [
+    21,
+    18,
+    "unittest/mock.py:1484 __enter__"
+   ],
+   [
+    25,
+    17,
+    "_strptime.py:536 _strptime"
+   ]
+  ],
+  "all_over": [
+   [
+    33,
+    19,
+    "profiling/sampling/live_collector/collector.py:915 _handle_input"
+   ],
+   [
+    25,
+    17,
+    "_strptime.py:536 _strptime"
+   ],
+   [
+    23,
+    24,
+    "subprocess.py:2016 _execute_child"
+   ],
+   [
+    21,
+    32,
+    "_pyio.py:75 open"
+   ],
+   [
+    21,
+    18,
+    "unittest/mock.py:1484 __enter__"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 6651,
+   "median": 2,
+   "p90": 3,
+   "p99": 7,
+   "p999": 15,
+   "max": 28
+  },
+  "stmts": {
+   "n": 6651,
+   "median": 1,
+   "p90": 2,
+   "p99": 8,
+   "p999": 20,
+   "max": 32
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 3,
+  "over_stmts": 0,
+  "over_either": 3,
+  "share_over_either": 0.0004510599909788002,
+  "depth_capped": 0,
+  "recursion_capped": 4,
+  "size_capped": 0,
+  "depth": {
+   "n": 6651,
+   "median": 0,
+   "p90": 0,
+   "p99": 2,
+   "p999": 3,
+   "max": 4
+  },
+  "top_by_inputs": [
+   [
+    28,
+    32,
+    "doctest.py:1066 _find"
+   ],
+   [
+    27,
+    31,
+    "doctest.py:1036 _find"
+   ],
+   [
+    21,
+    16,
+    "_py_warnings.py:579 warn_explicit"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    28,
+    32,
+    "doctest.py:1066 _find"
+   ],
+   [
+    27,
+    31,
+    "doctest.py:1036 _find"
+   ],
+   [
+    21,
+    16,
+    "_py_warnings.py:579 warn_explicit"
+   ]
+  ],
+  "all_over": [
+   [
+    28,
+    32,
+    "doctest.py:1066 _find"
+   ],
+   [
+    27,
+    31,
+    "doctest.py:1036 _find"
+   ],
+   [
+    21,
+    16,
+    "_py_warnings.py:579 warn_explicit"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 3854,
+   "median": 2,
+   "p90": 6,
+   "p99": 16,
+   "p999": 33,
+   "max": 42
+  },
+  "stmts": {
+   "n": 3854,
+   "median": 1,
+   "p90": 5,
+   "p99": 18,
+   "p999": 35,
+   "max": 58
+  },
+  "max_stmts_within_input_limit": 31,
+  "over_inputs": 21,
+  "over_stmts": 0,
+  "over_either": 21,
+  "share_over_either": 0.005448884276076803,
+  "depth_capped": 0,
+  "recursion_capped": 6,
+  "size_capped": 0,
+  "depth": {
+   "n": 3854,
+   "median": 0,
+   "p90": 1,
+   "p99": 2,
+   "p999": 3,
+   "max": 4
+  },
+  "top_by_inputs": [
+   [
+    42,
+    54,
+    "doctest.py:1012 _find"
+   ],
+   [
+    38,
+    35,
+    "unittest/mock.py:1484 __enter__"
+   ],
+   [
+    37,
+    58,
+    "http/cookiejar.py:1023 set_ok_domain"
+   ],
+   [
+    33,
+    19,
+    "profiling/sampling/live_collector/collector.py:915 _handle_input"
+   ],
+   [
+    31,
+    32,
+    "pydoc.py:1078 docroutine"
+   ],
+   [
+    31,
+    32,
+    "pydoc.py:1540 docroutine"
+   ],
+   [
+    31,
+    28,
+    "inspect.py:2455 _signature_from_callable"
+   ],
+   [
+    28,
+    19,
+    "_strptime.py:536 _strptime"
+   ],
+   [
+    24,
+    23,
+    "unittest/mock.py:2743 create_autospec"
+   ],
+   [
+    23,
+    35,
+    "_pyio.py:75 open"
+   ],
+   [
+    23,
+    24,
+    "subprocess.py:2016 _execute_child"
+   ],
+   [
+    23,
+    23,
+    "pydoc.py:1734 render_doc"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    37,
+    58,
+    "http/cookiejar.py:1023 set_ok_domain"
+   ],
+   [
+    42,
+    54,
+    "doctest.py:1012 _find"
+   ],
+   [
+    38,
+    35,
+    "unittest/mock.py:1484 __enter__"
+   ],
+   [
+    23,
+    35,
+    "_pyio.py:75 open"
+   ],
+   [
+    31,
+    32,
+    "pydoc.py:1078 docroutine"
+   ],
+   [
+    31,
+    32,
+    "pydoc.py:1540 docroutine"
+   ],
+   [
+    31,
+    28,
+    "inspect.py:2455 _signature_from_callable"
+   ],
+   [
+    21,
+    27,
+    "idlelib/autocomplete.py:101 open_completions"
+   ],
+   [
+    21,
+    25,
+    "re/_parser.py:745 _parse"
+   ],
+   [
+    23,
+    24,
+    "subprocess.py:2016 _execute_child"
+   ],
+   [
+    24,
+    23,
+    "unittest/mock.py:2743 create_autospec"
+   ],
+   [
+    23,
+    23,
+    "pydoc.py:1734 render_doc"
+   ]
+  ],
+  "all_over": [
+   [
+    42,
+    54,
+    "doctest.py:1012 _find"
+   ],
+   [
+    38,
+    35,
+    "unittest/mock.py:1484 __enter__"
+   ],
+   [
+    37,
+    58,
+    "http/cookiejar.py:1023 set_ok_domain"
+   ],
+   [
+    33,
+    19,
+    "profiling/sampling/live_collector/collector.py:915 _handle_input"
+   ],
+   [
+    31,
+    32,
+    "pydoc.py:1078 docroutine"
+   ],
+   [
+    31,
+    32,
+    "pydoc.py:1540 docroutine"
+   ],
+   [
+    31,
+    28,
+    "inspect.py:2455 _signature_from_callable"
+   ],
+   [
+    28,
+    19,
+    "_strptime.py:536 _strptime"
+   ],
+   [
+    24,
+    23,
+    "unittest/mock.py:2743 create_autospec"
+   ],
+   [
+    23,
+    35,
+    "_pyio.py:75 open"
+   ],
+   [
+    23,
+    24,
+    "subprocess.py:2016 _execute_child"
+   ],
+   [
+    23,
+    23,
+    "pydoc.py:1734 render_doc"
+   ],
+   [
+    23,
+    20,
+    "enum.py:352 __setitem__"
+   ],
+   [
+    23,
+    19,
+    "inspect.py:718 _finddoc"
+   ],
+   [
+    23,
+    18,
+    "doctest.py:1111 _find_lineno"
+   ],
+   [
+    22,
+    22,
+    "enum.py:1794 convert_class"
+   ],
+   [
+    21,
+    27,
+    "idlelib/autocomplete.py:101 open_completions"
+   ],
+   [
+    21,
+    25,
+    "re/_parser.py:745 _parse"
+   ],
+   [
+    21,
+    21,
+    "asyncio/base_events.py:1390 create_datagram_endpoint"
+   ],
+   [
+    21,
+    18,
+    "pprint.py:818 _safe_repr"
+   ],
+   [
+    21,
+    16,
+    "_py_warnings.py:556 warn_explicit"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 717,
+ "calls_in_logic_resolved": 968,
+ "calls_in_logic_unresolved": 2456,
+ "load_seconds": 0.1,
+ "analyze_seconds": 0.1
+}

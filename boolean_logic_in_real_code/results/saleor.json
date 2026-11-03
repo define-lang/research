@@ -1,0 +1,167 @@
+{
+ "name": "saleor",
+ "functions": 10438,
+ "functions_with_logic": 2046,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 2889,
+   "median": 1,
+   "p90": 2,
+   "p99": 4,
+   "p999": 6,
+   "max": 16
+  },
+  "stmts": {
+   "n": 2889,
+   "median": 1,
+   "p90": 2,
+   "p99": 4,
+   "p999": 9,
+   "max": 21
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 2046,
+   "median": 2,
+   "p90": 4,
+   "p99": 8,
+   "p999": 15,
+   "max": 19
+  },
+  "stmts": {
+   "n": 2046,
+   "median": 1,
+   "p90": 3,
+   "p99": 9,
+   "p999": 14,
+   "max": 21
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 2976,
+   "median": 1,
+   "p90": 3,
+   "p99": 6,
+   "p999": 8,
+   "max": 16
+  },
+  "stmts": {
+   "n": 2976,
+   "median": 1,
+   "p90": 3,
+   "p99": 9,
+   "p999": 16,
+   "max": 21
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 1,
+  "size_capped": 0,
+  "depth": {
+   "n": 2976,
+   "median": 0,
+   "p90": 0,
+   "p99": 2,
+   "p999": 3,
+   "max": 3
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 2094,
+   "median": 2,
+   "p90": 4,
+   "p99": 10,
+   "p999": 17,
+   "max": 21
+  },
+  "stmts": {
+   "n": 2094,
+   "median": 1,
+   "p90": 4,
+   "p99": 11,
+   "p999": 21,
+   "max": 26
+  },
+  "max_stmts_within_input_limit": 26,
+  "over_inputs": 1,
+  "over_stmts": 0,
+  "over_either": 1,
+  "share_over_either": 0.0004775549188156638,
+  "depth_capped": 0,
+  "recursion_capped": 2,
+  "size_capped": 0,
+  "depth": {
+   "n": 2094,
+   "median": 0,
+   "p90": 1,
+   "p99": 2,
+   "p999": 3,
+   "max": 3
+  },
+  "top_by_inputs": [
+   [
+    21,
+    21,
+    "saleor/graphql/payment/mutations/transaction/transaction_event_report.py:299 perform_mutation"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    21,
+    21,
+    "saleor/graphql/payment/mutations/transaction/transaction_event_report.py:299 perform_mutation"
+   ]
+  ],
+  "all_over": [
+   [
+    21,
+    21,
+    "saleor/graphql/payment/mutations/transaction/transaction_event_report.py:299 perform_mutation"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 269,
+ "calls_in_logic_resolved": 333,
+ "calls_in_logic_unresolved": 467,
+ "load_seconds": 0.0,
+ "analyze_seconds": 0.0
+}

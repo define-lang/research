@@ -1,0 +1,5286 @@
+{
+ "name": "go",
+ "functions": 38522,
+ "functions_with_logic": 9721,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 21402,
+   "median": 2,
+   "p90": 3,
+   "p99": 6,
+   "p999": 10,
+   "max": 32
+  },
+  "stmts": {
+   "n": 21402,
+   "median": 1,
+   "p90": 3,
+   "p99": 6,
+   "p999": 13,
+   "max": 57
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 5,
+  "over_stmts": 0,
+  "over_either": 5,
+  "share_over_either": 0.00023362302588543127,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    32,
+    31,
+    "reflect/value.go:1778 isZero"
+   ],
+   [
+    29,
+    57,
+    "debug/pe/file.go:531 readOptionalHeader"
+   ],
+   [
+    28,
+    55,
+    "debug/pe/file.go:585 readOptionalHeader"
+   ],
+   [
+    28,
+    31,
+    "cmd/internal/obj/x86/asm6.go:1912 fusedJump"
+   ],
+   [
+    26,
+    25,
+    "crypto/x509/verify.go:354 parseRFC2821Mailbox"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    29,
+    57,
+    "debug/pe/file.go:531 readOptionalHeader"
+   ],
+   [
+    28,
+    55,
+    "debug/pe/file.go:585 readOptionalHeader"
+   ],
+   [
+    32,
+    31,
+    "reflect/value.go:1778 isZero"
+   ],
+   [
+    28,
+    31,
+    "cmd/internal/obj/x86/asm6.go:1912 fusedJump"
+   ],
+   [
+    26,
+    25,
+    "crypto/x509/verify.go:354 parseRFC2821Mailbox"
+   ]
+  ],
+  "all_over": [
+   [
+    32,
+    31,
+    "reflect/value.go:1778 isZero"
+   ],
+   [
+    29,
+    57,
+    "debug/pe/file.go:531 readOptionalHeader"
+   ],
+   [
+    28,
+    55,
+    "debug/pe/file.go:585 readOptionalHeader"
+   ],
+   [
+    28,
+    31,
+    "cmd/internal/obj/x86/asm6.go:1912 fusedJump"
+   ],
+   [
+    26,
+    25,
+    "crypto/x509/verify.go:354 parseRFC2821Mailbox"
+   ]
+  ]
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 9721,
+   "median": 2,
+   "p90": 8,
+   "p99": 24,
+   "p999": 57,
+   "max": 174
+  },
+  "stmts": {
+   "n": 9721,
+   "median": 2,
+   "p90": 7,
+   "p99": 25,
+   "p999": 60,
+   "max": 190
+  },
+  "max_stmts_within_input_limit": 44,
+  "over_inputs": 138,
+  "over_stmts": 0,
+  "over_either": 138,
+  "share_over_either": 0.014196070363131365,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    174,
+    190,
+    "cmd/internal/obj/arm64/asm7.go:3689 asmout"
+   ],
+   [
+    84,
+    99,
+    "cmd/compile/internal/ssacompile/regalloc.go:955 regalloc"
+   ],
+   [
+    70,
+    62,
+    "cmd/internal/obj/ppc64/asm9.go:2529 asmout"
+   ],
+   [
+    63,
+    64,
+    "cmd/link/internal/ld/lib.go:1451 hostlink"
+   ],
+   [
+    61,
+    39,
+    "time/format.go:1051 parse"
+   ],
+   [
+    60,
+    41,
+    "cmd/internal/obj/s390x/asmz.go:2749 asmout"
+   ],
+   [
+    58,
+    113,
+    "debug/pe/file.go:485 readOptionalHeader"
+   ],
+   [
+    58,
+    62,
+    "cmd/compile/internal/ssacompile/check.go:19 checkFunc"
+   ],
+   [
+    57,
+    60,
+    "cmd/compile/internal/ssacompile/decomposeaddr.go:134 decomposeAddr"
+   ],
+   [
+    57,
+    43,
+    "cmd/link/internal/loadelf/ldelf.go:244 Load"
+   ],
+   [
+    56,
+    79,
+    "crypto/tls/handshake_messages.go:420 unmarshal"
+   ],
+   [
+    51,
+    46,
+    "crypto/x509/verify.go:267 parseRFC2821Mailbox"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    174,
+    190,
+    "cmd/internal/obj/arm64/asm7.go:3689 asmout"
+   ],
+   [
+    58,
+    113,
+    "debug/pe/file.go:485 readOptionalHeader"
+   ],
+   [
+    84,
+    99,
+    "cmd/compile/internal/ssacompile/regalloc.go:955 regalloc"
+   ],
+   [
+    29,
+    89,
+    "cmd/internal/obj/riscv/obj.go:3695 compress"
+   ],
+   [
+    56,
+    79,
+    "crypto/tls/handshake_messages.go:420 unmarshal"
+   ],
+   [
+    49,
+    76,
+    "cmd/link/internal/ld/data.go:194 relocsym"
+   ],
+   [
+    63,
+    64,
+    "cmd/link/internal/ld/lib.go:1451 hostlink"
+   ],
+   [
+    70,
+    62,
+    "cmd/internal/obj/ppc64/asm9.go:2529 asmout"
+   ],
+   [
+    58,
+    62,
+    "cmd/compile/internal/ssacompile/check.go:19 checkFunc"
+   ],
+   [
+    57,
+    60,
+    "cmd/compile/internal/ssacompile/decomposeaddr.go:134 decomposeAddr"
+   ],
+   [
+    40,
+    58,
+    "cmd/go/internal/load/pkg.go:1803 load"
+   ],
+   [
+    45,
+    57,
+    "go/build/build.go:576 Import"
+   ]
+  ],
+  "all_over": [
+   [
+    174,
+    190,
+    "cmd/internal/obj/arm64/asm7.go:3689 asmout"
+   ],
+   [
+    84,
+    99,
+    "cmd/compile/internal/ssacompile/regalloc.go:955 regalloc"
+   ],
+   [
+    70,
+    62,
+    "cmd/internal/obj/ppc64/asm9.go:2529 asmout"
+   ],
+   [
+    63,
+    64,
+    "cmd/link/internal/ld/lib.go:1451 hostlink"
+   ],
+   [
+    61,
+    39,
+    "time/format.go:1051 parse"
+   ],
+   [
+    60,
+    41,
+    "cmd/internal/obj/s390x/asmz.go:2749 asmout"
+   ],
+   [
+    58,
+    113,
+    "debug/pe/file.go:485 readOptionalHeader"
+   ],
+   [
+    58,
+    62,
+    "cmd/compile/internal/ssacompile/check.go:19 checkFunc"
+   ],
+   [
+    57,
+    60,
+    "cmd/compile/internal/ssacompile/decomposeaddr.go:134 decomposeAddr"
+   ],
+   [
+    57,
+    43,
+    "cmd/link/internal/loadelf/ldelf.go:244 Load"
+   ],
+   [
+    56,
+    79,
+    "crypto/tls/handshake_messages.go:420 unmarshal"
+   ],
+   [
+    51,
+    46,
+    "crypto/x509/verify.go:267 parseRFC2821Mailbox"
+   ],
+   [
+    49,
+    76,
+    "cmd/link/internal/ld/data.go:194 relocsym"
+   ],
+   [
+    49,
+    38,
+    "cmd/compile/internal/ssagen/ssa.go:1678 stmt"
+   ],
+   [
+    46,
+    46,
+    "cmd/internal/obj/x86/asm6.go:1889 fusedJump"
+   ],
+   [
+    46,
+    45,
+    "cmd/compile/internal/types2/unify.go:281 nify"
+   ],
+   [
+    45,
+    57,
+    "go/build/build.go:576 Import"
+   ],
+   [
+    42,
+    37,
+    "cmd/internal/obj/loong64/asm.go:1174 cmp"
+   ],
+   [
+    41,
+    41,
+    "cmd/compile/internal/amd64/ssa.go:257 ssaGenValue"
+   ],
+   [
+    41,
+    41,
+    "cmd/compile/internal/ssacompile/prove.go:503 update"
+   ],
+   [
+    41,
+    36,
+    "cmd/compile/internal/ssagen/ssa.go:7045 genssa"
+   ],
+   [
+    40,
+    58,
+    "cmd/go/internal/load/pkg.go:1803 load"
+   ],
+   [
+    40,
+    29,
+    "cmd/internal/obj/x86/asm6.go:4221 doasm"
+   ],
+   [
+    40,
+    20,
+    "cmd/internal/obj/arm64/list7.go:104 rconv"
+   ],
+   [
+    39,
+    38,
+    "simd/archsimd/_gen/midway/intersect_simd_ops.go:98 main"
+   ],
+   [
+    38,
+    56,
+    "net/http/server.go:1401 writeHeader"
+   ],
+   [
+    38,
+    30,
+    "cmd/compile/internal/ssacompile/prove.go:2372 simplifyValue"
+   ],
+   [
+    37,
+    42,
+    "cmd/internal/obj/x86/asm6.go:3561 asmandsz"
+   ],
+   [
+    37,
+    31,
+    "time/format.go:203 nextStdChunk"
+   ],
+   [
+    36,
+    37,
+    "crypto/x509/x509.go:1318 buildCertExtensions"
+   ],
+   [
+    36,
+    26,
+    "simd/archsimd/_gen/simdgen/gen_simdrules.go:447 writeSIMDRules"
+   ],
+   [
+    35,
+    44,
+    "cmd/go/internal/list/list.go:429 runList"
+   ],
+   [
+    35,
+    26,
+    "cmd/internal/obj/arm/asm5.go:1043 oplook"
+   ],
+   [
+    34,
+    52,
+    "cmd/internal/obj/x86/obj6.go:72 progedit"
+   ],
+   [
+    34,
+    35,
+    "cmd/compile/internal/arm64/ssa.go:592 ssaGenValue"
+   ],
+   [
+    34,
+    30,
+    "cmd/compile/internal/walk/compare.go:42 walkCompare"
+   ],
+   [
+    34,
+    28,
+    "cmd/go/internal/test/test.go:697 runTest"
+   ],
+   [
+    33,
+    23,
+    "cmd/internal/obj/arm64/asm7.go:2077 loadStoreClass"
+   ],
+   [
+    32,
+    32,
+    "cmd/compile/internal/types/identity.go:38 identical"
+   ],
+   [
+    32,
+    31,
+    "encoding/json/v2/fields.go:97 makeStructFields"
+   ],
+   [
+    32,
+    31,
+    "reflect/value.go:1746 isZero"
+   ],
+   [
+    31,
+    42,
+    "crypto/tls/handshake_messages.go:873 unmarshal"
+   ],
+   [
+    31,
+    33,
+    "cmd/compile/internal/typecheck/subr.go:378 convertOp"
+   ],
+   [
+    31,
+    27,
+    "cmd/compile/internal/ssagen/ssa.go:302 buildssa"
+   ],
+   [
+    31,
+    26,
+    "cmd/link/internal/ld/main.go:166 Main"
+   ],
+   [
+    30,
+    34,
+    "crypto/x509/parser.go:801 processExtensions"
+   ],
+   [
+    30,
+    30,
+    "cmd/go/internal/modload/edit.go:46 editRequirements"
+   ],
+   [
+    30,
+    27,
+    "cmd/compile/internal/noder/reader.go:2293 expr"
+   ],
+   [
+    30,
+    25,
+    "cmd/go/internal/load/pkg.go:2357 setBuildInfo"
+   ],
+   [
+    29,
+    89,
+    "cmd/internal/obj/riscv/obj.go:3695 compress"
+   ],
+   [
+    29,
+    36,
+    "cmd/internal/obj/x86/obj6.go:347 rewriteToUseGot"
+   ],
+   [
+    29,
+    29,
+    "internal/trace/testtrace/validation.go:70 Event"
+   ],
+   [
+    29,
+    27,
+    "cmd/internal/obj/arm64/asm7.go:2320 oplook"
+   ],
+   [
+    29,
+    27,
+    "runtime/signal_unix.go:655 sighandler"
+   ],
+   [
+    29,
+    25,
+    "cmd/compile/internal/types2/infer.go:32 infer"
+   ],
+   [
+    29,
+    25,
+    "cmd/go/internal/test/test.go:1456 Act"
+   ],
+   [
+    29,
+    24,
+    "cmd/compile/internal/ssagen/ssa.go:3064 exprCheckPtr"
+   ],
+   [
+    29,
+    24,
+    "cmd/compile/internal/types2/conversions.go:163 convertibleTo"
+   ],
+   [
+    29,
+    24,
+    "net/conf.go:241 lookupOrder"
+   ],
+   [
+    29,
+    16,
+    "cmd/compile/internal/ssacompile/phiopt.go:34 phiopt"
+   ],
+   [
+    29,
+    15,
+    "cmd/internal/obj/x86/asm6.go:2249 instinit"
+   ],
+   [
+    28,
+    44,
+    "cmd/dist/test.go:644 registerTests"
+   ],
+   [
+    28,
+    28,
+    "cmd/internal/obj/arm/obj5.go:252 preprocess"
+   ],
+   [
+    28,
+    25,
+    "cmd/compile/internal/ssagen/ssa.go:2858 conv"
+   ],
+   [
+    28,
+    21,
+    "simd/archsimd/_gen/cmd/specstats/metrics.go:133 measure"
+   ],
+   [
+    27,
+    31,
+    "cmd/internal/obj/ppc64/obj9.go:117 progedit"
+   ],
+   [
+    27,
+    21,
+    "net/http/server.go:2021 serve"
+   ],
+   [
+    27,
+    19,
+    "cmd/internal/obj/x86/asm6.go:2039 span6"
+   ],
+   [
+    27,
+    18,
+    "image/jpeg/scan.go:60 processSOS"
+   ],
+   [
+    27,
+    16,
+    "cmd/internal/obj/loong64/asm.go:2308 asmout"
+   ],
+   [
+    26,
+    31,
+    "cmd/compile/internal/loong64/ssa.go:109 ssaGenValue"
+   ],
+   [
+    26,
+    31,
+    "cmd/internal/obj/arm64/asm7.go:2431 cmp"
+   ],
+   [
+    26,
+    30,
+    "crypto/tls/conn.go:626 readRecordOrCCS"
+   ],
+   [
+    26,
+    29,
+    "runtime/mgcsweep.go:525 sweep"
+   ],
+   [
+    26,
+    29,
+    "runtime/proc.go:3408 findRunnable"
+   ],
+   [
+    26,
+    27,
+    "crypto/x509/parser.go:1241 ParseRevocationList"
+   ],
+   [
+    26,
+    27,
+    "encoding/asn1/asn1.go:710 parseField"
+   ],
+   [
+    26,
+    27,
+    "encoding/xml/xml.go:996 text"
+   ],
+   [
+    26,
+    20,
+    "cmd/compile/internal/ssacompile/branchelim.go:183 elimIf"
+   ],
+   [
+    26,
+    19,
+    "cmd/compile/internal/inline/inl.go:490 doNode"
+   ],
+   [
+    26,
+    17,
+    "cmd/compile/internal/ssacompile/schedule.go:100 schedule"
+   ],
+   [
+    25,
+    32,
+    "cmd/internal/obj/x86/obj6.go:642 preprocess"
+   ],
+   [
+    25,
+    26,
+    "cmd/go/internal/modindex/read.go:382 Import"
+   ],
+   [
+    25,
+    25,
+    "net/http/transport.go:1187 dialConn"
+   ],
+   [
+    25,
+    23,
+    "cmd/compile/internal/base/flag.go:160 ParseFlags"
+   ],
+   [
+    25,
+    23,
+    "cmd/go/internal/toolchain/select.go:99 Select"
+   ],
+   [
+    25,
+    20,
+    "cmd/internal/obj/riscv/obj.go:4452 instructionsForProg"
+   ],
+   [
+    25,
+    19,
+    "cmd/link/internal/ld/pe.go:963 writeSymbols"
+   ],
+   [
+    25,
+    19,
+    "runtime/proc.go:5805 sigprof"
+   ],
+   [
+    24,
+    32,
+    "archive/tar/common.go:344 allowedFormats"
+   ],
+   [
+    24,
+    26,
+    "cmd/asm/internal/asm/parse.go:374 operand"
+   ],
+   [
+    24,
+    24,
+    "crypto/x509/parser.go:1015 parseCertificate"
+   ],
+   [
+    24,
+    24,
+    "go/types/stmt.go:415 stmt"
+   ],
+   [
+    24,
+    21,
+    "go/printer/nodes.go:125 exprList"
+   ],
+   [
+    24,
+    20,
+    "cmd/compile/internal/ir/fmt.go:507 exprFmt"
+   ],
+   [
+    24,
+    20,
+    "cmd/compile/internal/ssagen/ssa.go:5010 call"
+   ],
+   [
+    24,
+    19,
+    "cmd/go/internal/search/search.go:286 MatchDirs"
+   ],
+   [
+    24,
+    19,
+    "crypto/x509/verify.go:1193 policiesValid"
+   ],
+   [
+    24,
+    18,
+    "encoding/xml/marshal.go:425 marshalValue"
+   ],
+   [
+    23,
+    35,
+    "cmd/compile/internal/typecheck/expr.go:50 tcArith"
+   ],
+   [
+    23,
+    31,
+    "crypto/tls/ticket.go:187 ParseSessionState"
+   ],
+   [
+    23,
+    30,
+    "encoding/json/v2/arshal_time.go:556 parseDurationISO8601"
+   ],
+   [
+    23,
+    29,
+    "cmd/compile/internal/arm/ssa.go:154 ssaGenValue"
+   ],
+   [
+    23,
+    28,
+    "encoding/json/v2/arshal_default.go:1231 makeStructMarshaler"
+   ],
+   [
+    23,
+    26,
+    "cmd/go/internal/modfetch/coderepo.go:353 convert"
+   ],
+   [
+    23,
+    24,
+    "cmd/compile/internal/types2/predicates.go:249 identical"
+   ],
+   [
+    23,
+    24,
+    "cmd/link/internal/ld/symtab.go:84 putelfsym"
+   ],
+   [
+    23,
+    21,
+    "encoding/xml/read.go:326 unmarshal"
+   ],
+   [
+    23,
+    19,
+    "cmd/go/internal/modload/search.go:44 matchPackages"
+   ],
+   [
+    23,
+    19,
+    "cmd/internal/obj/ppc64/obj9.go:615 preprocess"
+   ],
+   [
+    23,
+    17,
+    "cmd/link/internal/loadmacho/ldmacho.go:426 Load"
+   ],
+   [
+    23,
+    17,
+    "encoding/asn1/marshal.go:579 makeField"
+   ],
+   [
+    23,
+    17,
+    "internal/trace/gc.go:55 MutatorUtilizationV2"
+   ],
+   [
+    22,
+    35,
+    "cmd/compile/internal/ssacompile/deadstore.go:246 elimDeadAutosGeneric"
+   ],
+   [
+    22,
+    29,
+    "cmd/compile/internal/walk/order.go:1225 expr1"
+   ],
+   [
+    22,
+    24,
+    "cmd/compile/internal/ssacompile/memcombine.go:286 combineLoads"
+   ],
+   [
+    22,
+    20,
+    "cmd/internal/obj/x86/obj6.go:560 rewriteToPcrel"
+   ],
+   [
+    22,
+    19,
+    "cmd/compile/internal/ssacompile/nilcheck.go:203 nilcheckelim2"
+   ],
+   [
+    22,
+    17,
+    "cmd/internal/obj/mips/obj0.go:130 preprocess"
+   ],
+   [
+    22,
+    16,
+    "internal/strconv/atof.go:182 readFloat"
+   ],
+   [
+    22,
+    11,
+    "cmd/internal/obj/objfile.go:714 nAuxSym"
+   ],
+   [
+    21,
+    28,
+    "cmd/compile/internal/mips/ssa.go:78 ssaGenValue"
+   ],
+   [
+    21,
+    26,
+    "cmd/compile/internal/ssa/_gen/main.go:305 genOp"
+   ],
+   [
+    21,
+    25,
+    "cmd/compile/internal/x86/ssa.go:126 ssaGenValue"
+   ],
+   [
+    21,
+    25,
+    "encoding/json/v2/arshal_default.go:879 makeMapMarshaler"
+   ],
+   [
+    21,
+    24,
+    "cmd/compile/internal/mips64/ssa.go:86 ssaGenValue"
+   ],
+   [
+    21,
+    21,
+    "cmd/link/internal/ld/symtab.go:426 symtab"
+   ],
+   [
+    21,
+    19,
+    "cmd/compile/internal/ssagen/pgen.go:125 AllocFrame"
+   ],
+   [
+    21,
+    19,
+    "cmd/go/internal/search/search.go:103 MatchPackages"
+   ],
+   [
+    21,
+    18,
+    "cmd/internal/obj/fips140.go:213 setFIPSType"
+   ],
+   [
+    21,
+    17,
+    "cmd/internal/obj/riscv/obj.go:479 preprocess"
+   ],
+   [
+    21,
+    17,
+    "go/printer/printer.go:737 intersperseComments"
+   ],
+   [
+    21,
+    17,
+    "math/big/prime.go:26 ProbablyPrime"
+   ],
+   [
+    21,
+    15,
+    "runtime/preempt.go:398 isAsyncSafePoint"
+   ],
+   [
+    21,
+    15,
+    "runtime/stkframe.go:157 getStackMap"
+   ],
+   [
+    21,
+    14,
+    "cmd/asm/internal/asm/asm.go:611 asmInstruction"
+   ],
+   [
+    21,
+    14,
+    "cmd/compile/internal/types2/resolver.go:202 collectObjects"
+   ],
+   [
+    21,
+    11,
+    "cmd/internal/obj/arm64/inst.go:92 aclass"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 23777,
+   "median": 2,
+   "p90": 5,
+   "p99": 39,
+   "p999": 164,
+   "max": 334
+  },
+  "stmts": {
+   "n": 23777,
+   "median": 1,
+   "p90": 6,
+   "p99": 48,
+   "p999": 303,
+   "max": 769
+  },
+  "max_stmts_within_input_limit": 34,
+  "over_inputs": 585,
+  "over_stmts": 25,
+  "over_either": 585,
+  "share_over_either": 0.024603608529250958,
+  "depth_capped": 0,
+  "recursion_capped": 639,
+  "size_capped": 0,
+  "depth": {
+   "n": 23777,
+   "median": 0,
+   "p90": 2,
+   "p99": 4,
+   "p999": 5,
+   "max": 7
+  },
+  "top_by_inputs": [
+   [
+    334,
+    355,
+    "cmd/compile/internal/walk/order.go:684 stmt (lone call)"
+   ],
+   [
+    334,
+    355,
+    "cmd/compile/internal/walk/range.go:41 walkRange (lone call)"
+   ],
+   [
+    302,
+    318,
+    "cmd/compile/internal/walk/order.go:464 orderMakeSliceCopy"
+   ],
+   [
+    300,
+    303,
+    "cmd/compile/internal/ssacompile/sccp.go:264 buildDefUses"
+   ],
+   [
+    298,
+    315,
+    "cmd/compile/internal/walk/range.go:454 isMapClear"
+   ],
+   [
+    295,
+    769,
+    "cmd/internal/obj/arm64/asm7.go:2358 oplook"
+   ],
+   [
+    295,
+    769,
+    "cmd/internal/obj/arm64/asm7.go:2388 oplook"
+   ],
+   [
+    294,
+    768,
+    "cmd/internal/obj/arm64/asm7.go:2354 oplook"
+   ],
+   [
+    294,
+    768,
+    "cmd/internal/obj/arm64/asm7.go:2384 oplook"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2082 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2093 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2100 loadStoreClass"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    295,
+    769,
+    "cmd/internal/obj/arm64/asm7.go:2358 oplook"
+   ],
+   [
+    295,
+    769,
+    "cmd/internal/obj/arm64/asm7.go:2388 oplook"
+   ],
+   [
+    294,
+    768,
+    "cmd/internal/obj/arm64/asm7.go:2354 oplook"
+   ],
+   [
+    294,
+    768,
+    "cmd/internal/obj/arm64/asm7.go:2384 oplook"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2082 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2093 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2100 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2107 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2114 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2121 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2144 loadStorePairClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2147 loadStorePairClass"
+   ]
+  ],
+  "all_over": [
+   [
+    334,
+    355,
+    "cmd/compile/internal/walk/order.go:684 stmt (lone call)"
+   ],
+   [
+    334,
+    355,
+    "cmd/compile/internal/walk/range.go:41 walkRange (lone call)"
+   ],
+   [
+    302,
+    318,
+    "cmd/compile/internal/walk/order.go:464 orderMakeSliceCopy"
+   ],
+   [
+    300,
+    303,
+    "cmd/compile/internal/ssacompile/sccp.go:264 buildDefUses"
+   ],
+   [
+    298,
+    315,
+    "cmd/compile/internal/walk/range.go:454 isMapClear"
+   ],
+   [
+    295,
+    769,
+    "cmd/internal/obj/arm64/asm7.go:2358 oplook"
+   ],
+   [
+    295,
+    769,
+    "cmd/internal/obj/arm64/asm7.go:2388 oplook"
+   ],
+   [
+    294,
+    768,
+    "cmd/internal/obj/arm64/asm7.go:2354 oplook"
+   ],
+   [
+    294,
+    768,
+    "cmd/internal/obj/arm64/asm7.go:2384 oplook"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2082 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2093 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2100 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2107 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2114 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2121 loadStoreClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2144 loadStorePairClass"
+   ],
+   [
+    284,
+    757,
+    "cmd/internal/obj/arm64/asm7.go:2147 loadStorePairClass"
+   ],
+   [
+    277,
+    278,
+    "net/http/internal/http2/server.go:388 serveConn"
+   ],
+   [
+    240,
+    234,
+    "cmd/compile/internal/escape/assign.go:95 assignList"
+   ],
+   [
+    182,
+    178,
+    "cmd/compile/internal/walk/range.go:565 arrayRangeClear"
+   ],
+   [
+    166,
+    160,
+    "cmd/compile/internal/ssagen/ssa.go:1933 stmt"
+   ],
+   [
+    164,
+    159,
+    "cmd/compile/internal/walk/order.go:1426 expr1"
+   ],
+   [
+    164,
+    159,
+    "cmd/compile/internal/walk/order.go:1437 expr1"
+   ],
+   [
+    164,
+    158,
+    "cmd/compile/internal/walk/order.go:716 stmt"
+   ],
+   [
+    163,
+    158,
+    "cmd/compile/internal/ssagen/ssa.go:1880 stmt"
+   ],
+   [
+    163,
+    157,
+    "cmd/compile/internal/walk/assign.go:332 ascompatee"
+   ],
+   [
+    163,
+    157,
+    "cmd/compile/internal/walk/order.go:496 orderMakeSliceCopy"
+   ],
+   [
+    162,
+    157,
+    "cmd/compile/internal/walk/assign.go:39 walkAssign"
+   ],
+   [
+    162,
+    157,
+    "cmd/compile/internal/walk/builtin.go:45 walkAppend"
+   ],
+   [
+    162,
+    157,
+    "cmd/compile/internal/walk/range.go:560 arrayRangeClear"
+   ],
+   [
+    162,
+    157,
+    "cmd/compile/internal/walk/range.go:597 arrayRangeClear"
+   ],
+   [
+    150,
+    152,
+    "cmd/compile/internal/ssacompile/sccp.go:233 getLatticeCell"
+   ],
+   [
+    150,
+    152,
+    "cmd/compile/internal/ssacompile/sccp.go:385 visitValue"
+   ],
+   [
+    150,
+    151,
+    "cmd/compile/internal/ssacompile/sccp.go:259 buildDefUses (lone call)"
+   ],
+   [
+    143,
+    379,
+    "cmd/internal/obj/arm64/asm7.go:2128 loadStoreClass"
+   ],
+   [
+    143,
+    379,
+    "cmd/internal/obj/arm64/asm7.go:2131 loadStoreClass"
+   ],
+   [
+    143,
+    379,
+    "cmd/internal/obj/arm64/asm7.go:2155 loadStorePairClass"
+   ],
+   [
+    143,
+    379,
+    "cmd/internal/obj/arm64/asm7.go:2158 loadStorePairClass"
+   ],
+   [
+    142,
+    379,
+    "cmd/internal/obj/arm64/asm7.go:3909 asmout"
+   ],
+   [
+    142,
+    379,
+    "cmd/internal/obj/arm64/asm7.go:4174 asmout"
+   ],
+   [
+    142,
+    378,
+    "cmd/internal/obj/arm64/asm7.go:2831 buildop (lone call)"
+   ],
+   [
+    130,
+    229,
+    "cmd/compile/internal/ssacompile/branchelim.go:72 branchelim"
+   ],
+   [
+    128,
+    159,
+    "cmd/compile/internal/walk/assign.go:121 walkAssignDotType (lone call)"
+   ],
+   [
+    128,
+    159,
+    "cmd/compile/internal/walk/switch.go:725 walkSwitchType (lone call)"
+   ],
+   [
+    126,
+    157,
+    "cmd/compile/internal/walk/expr.go:777 shapeTypeAssertImpossible"
+   ],
+   [
+    111,
+    170,
+    "cmd/compile/internal/staticinit/sched.go:66 StaticInit"
+   ],
+   [
+    93,
+    76,
+    "cmd/internal/obj/loong64/asm.go:1302 buildop (lone call)"
+   ],
+   [
+    88,
+    103,
+    "cmd/compile/internal/noder/reader.go:4249 methodWrapper"
+   ],
+   [
+    86,
+    101,
+    "cmd/compile/internal/walk/assign.go:20 walkAssign (lone call)"
+   ],
+   [
+    82,
+    190,
+    "cmd/compile/internal/ssacompile/fuse.go:46 fuse"
+   ],
+   [
+    76,
+    137,
+    "cmd/go/internal/imports/scan.go:37 ScanDir"
+   ],
+   [
+    75,
+    136,
+    "cmd/go/internal/modindex/read.go:737 ScanDir"
+   ],
+   [
+    73,
+    93,
+    "cmd/compile/internal/devirtualize/devirtualize.go:57 StaticCall"
+   ],
+   [
+    73,
+    93,
+    "cmd/compile/internal/devirtualize/pgo.go:774 findHotConcreteInterfaceCallee"
+   ],
+   [
+    73,
+    92,
+    "cmd/compile/internal/typecheck/subr.go:267 assignOp (lone call)"
+   ],
+   [
+    73,
+    92,
+    "cmd/compile/internal/typecheck/subr.go:629 ImplementsExplain (lone call)"
+   ],
+   [
+    73,
+    92,
+    "cmd/compile/internal/walk/switch.go:725 walkSwitchType (lone call)"
+   ],
+   [
+    72,
+    86,
+    "cmd/compile/internal/typecheck/expr.go:60 tcArith"
+   ],
+   [
+    70,
+    54,
+    "cmd/compile/internal/walk/switch.go:284 search (lone call)"
+   ],
+   [
+    69,
+    83,
+    "cmd/compile/internal/rewriteresults/rewriteresults.go:74 rewrite"
+   ],
+   [
+    69,
+    82,
+    "cmd/compile/internal/rewriteresults/rewriteresults.go:155 isCandidateLocal"
+   ],
+   [
+    69,
+    52,
+    "cmd/compile/internal/staticinit/sched.go:982 truncate"
+   ],
+   [
+    68,
+    82,
+    "cmd/compile/internal/typecheck/typecheck.go:881 Lookdot"
+   ],
+   [
+    67,
+    85,
+    "bytes/bytes.go:819 Title (lone call)"
+   ],
+   [
+    67,
+    85,
+    "strings/strings.go:849 Title (lone call)"
+   ],
+   [
+    67,
+    82,
+    "cmd/compile/internal/walk/assign.go:273 ascompatet"
+   ],
+   [
+    67,
+    79,
+    "cmd/compile/internal/typecheck/subr.go:345 assignOp"
+   ],
+   [
+    67,
+    79,
+    "cmd/compile/internal/typecheck/subr.go:492 convertOp"
+   ],
+   [
+    67,
+    79,
+    "cmd/compile/internal/typecheck/typecheck.go:885 Lookdot"
+   ],
+   [
+    66,
+    80,
+    "cmd/compile/internal/devirtualize/devirtualize.go:240 concreteType1"
+   ],
+   [
+    66,
+    80,
+    "cmd/compile/internal/ssagen/ssa.go:853 setHeapaddr"
+   ],
+   [
+    66,
+    80,
+    "cmd/compile/internal/typecheck/func.go:803 tcUnsafeString"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/inline/inl.go:942 inlCallee"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/ir/expr.go:1072 SameSafeExpr"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/pgoir/irgraph.go:488 DirectCallee"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/staticinit/sched.go:207 staticcopy"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/staticinit/sched.go:223 staticcopy"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/typecheck/expr.go:107 tcArith"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/typecheck/func.go:237 tcCall"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/typecheck/stmt.go:148 assign"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/typecheck/subr.go:706 implements"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/types/size.go:87 expandiface"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/walk/temp.go:17 initStackTemp"
+   ],
+   [
+    66,
+    78,
+    "cmd/compile/internal/noder/reader.go:4272 methodWrapper"
+   ],
+   [
+    66,
+    78,
+    "cmd/compile/internal/typecheck/subr.go:489 convertOp"
+   ],
+   [
+    66,
+    78,
+    "cmd/compile/internal/typecheck/typecheck.go:876 Lookdot"
+   ],
+   [
+    66,
+    78,
+    "cmd/compile/internal/walk/range.go:411 rangeConvert"
+   ],
+   [
+    65,
+    89,
+    "go/doc/comment/parse.go:482 parseSpans"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/compare/compare.go:316 EqInterface"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/devirtualize/pgo.go:819 findHotConcreteFunctionCallee"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/noder/reader.go:2371 expr"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/noder/reader.go:2432 expr"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/noder/reader.go:3096 methodExpr"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/noder/reader.go:4201 wrapType"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/const.go:163 convlit1"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/func.go:413 tcComplex"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/func.go:473 tcCopy"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/func.go:705 tcMinMax"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/subr.go:677 implements"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/typecheck.go:875 Lookdot"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/builtin.go:62 walkAppend"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/closure.go:136 walkClosure"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/closure.go:199 walkMethodValue"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/complit.go:307 slicelit"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/complit.go:581 oaslit"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/convert.go:538 byteindex"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/expr.go:657 walkCall1"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/order.go:74 newTemp"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/walk.go:117 convas"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/noder/reader.go:2293 expr (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/func.go:440 tcCopy (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/subr.go:228 assignconvfn (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/subr.go:267 assignOp (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/subr.go:267 assignOp (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/subr.go:378 convertOp (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/subr.go:378 convertOp (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/typecheck.go:1240 Conv (lone call)"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/typecheck.go:1252 ConvNop (lone call)"
+   ],
+   [
+    65,
+    72,
+    "go/types/stmt.go:48 funcBody"
+   ],
+   [
+    65,
+    48,
+    "cmd/compile/internal/walk/builtin.go:334 walkMakeMap"
+   ],
+   [
+    65,
+    47,
+    "cmd/compile/internal/inline/inlheur/analyze_func_returns.go:214 analyzeResult"
+   ],
+   [
+    65,
+    47,
+    "cmd/compile/internal/walk/builtin.go:374 walkMakeMap"
+   ],
+   [
+    64,
+    46,
+    "cmd/compile/internal/escape/escape.go:700 rewriteWithLiterals (lone call)"
+   ],
+   [
+    64,
+    46,
+    "cmd/compile/internal/noder/writer.go:1720 switchStmt (lone call)"
+   ],
+   [
+    64,
+    46,
+    "cmd/compile/internal/types2/builtins.go:624 _MaxMin (lone call)"
+   ],
+   [
+    64,
+    46,
+    "cmd/compile/internal/walk/switch.go:301 tryJumpTable (lone call)"
+   ],
+   [
+    64,
+    46,
+    "cmd/compile/internal/walk/switch.go:301 tryJumpTable (lone call)"
+   ],
+   [
+    62,
+    119,
+    "cmd/go/internal/imports/build.go:300 MatchFile"
+   ],
+   [
+    62,
+    63,
+    "cmd/compile/internal/staticinit/sched.go:891 canRepeat (lone call)"
+   ],
+   [
+    61,
+    87,
+    "cmd/compile/internal/types2/conversions.go:59 conversion"
+   ],
+   [
+    61,
+    72,
+    "cmd/go/internal/imports/scan.go:77 scanFiles"
+   ],
+   [
+    61,
+    72,
+    "cmd/go/internal/modindex/read.go:759 ScanDir"
+   ],
+   [
+    61,
+    71,
+    "cmd/go/internal/modcmd/vendor.go:456 matchPotentialSourceFile"
+   ],
+   [
+    59,
+    73,
+    "cmd/compile/internal/ssagen/ssa.go:1618 moveWhichMayOverlap"
+   ],
+   [
+    58,
+    99,
+    "cmd/dist/test.go:1314 registerCgoTests"
+   ],
+   [
+    58,
+    99,
+    "cmd/dist/test.go:1389 registerCgoTests"
+   ],
+   [
+    58,
+    86,
+    "cmd/compile/internal/types2/conversions.go:42 conversion"
+   ],
+   [
+    58,
+    67,
+    "cmd/go/internal/imports/build.go:109 ShouldBuild"
+   ],
+   [
+    58,
+    67,
+    "cmd/go/internal/modindex/read.go:799 shouldBuild"
+   ],
+   [
+    58,
+    63,
+    "archive/tar/common.go:456 allowedFormats"
+   ],
+   [
+    58,
+    63,
+    "cmd/cgo/internal/test/callback_windows.go:107 testCallbackCallersSEH"
+   ],
+   [
+    58,
+    63,
+    "cmd/cgo/internal/test/test.go:1057 testHelpers"
+   ],
+   [
+    58,
+    63,
+    "cmd/cgo/main.go:570 Record"
+   ],
+   [
+    58,
+    63,
+    "testing/quick/quick.go:333 CheckEqual"
+   ],
+   [
+    58,
+    63,
+    "testing/slogtest/slogtest.go:344 hasAttr"
+   ],
+   [
+    58,
+    62,
+    "cmd/cgo/main.go:545 Record (lone call)"
+   ],
+   [
+    58,
+    62,
+    "encoding/asn1/marshal.go:579 makeField (lone call)"
+   ],
+   [
+    58,
+    62,
+    "encoding/asn1/marshal.go:579 makeField (lone call)"
+   ],
+   [
+    58,
+    62,
+    "simd/archsimd/_gen/simdgen/gen_utility.go:699 dedup (lone call)"
+   ],
+   [
+    58,
+    59,
+    "cmd/internal/obj/ppc64/asm9.go:1293 buildop"
+   ],
+   [
+    58,
+    57,
+    "cmd/compile/internal/escape/utils.go:115 isSelfAssign"
+   ],
+   [
+    56,
+    62,
+    "reflect/type.go:1497 AssignableTo"
+   ],
+   [
+    55,
+    133,
+    "log/slog/handler.go:569 appendTwoStrings"
+   ],
+   [
+    55,
+    84,
+    "cmd/compile/internal/types2/builtins.go:847 _Add"
+   ],
+   [
+    55,
+    84,
+    "cmd/compile/internal/types2/builtins.go:1003 _Slice"
+   ],
+   [
+    55,
+    84,
+    "cmd/compile/internal/types2/builtins.go:1051 _String"
+   ],
+   [
+    55,
+    84,
+    "cmd/compile/internal/types2/index.go:426 index"
+   ],
+   [
+    55,
+    43,
+    "cmd/compile/internal/types2/infer.go:173 infer"
+   ],
+   [
+    54,
+    95,
+    "cmd/link/internal/ld/lib.go:584 loadlib"
+   ],
+   [
+    54,
+    56,
+    "cmd/compile/internal/types2/stmt.go:47 funcBody"
+   ],
+   [
+    54,
+    47,
+    "net/ip.go:199 IsGlobalUnicast"
+   ],
+   [
+    53,
+    95,
+    "cmd/go/internal/work/init.go:316 buildModeInit"
+   ],
+   [
+    53,
+    65,
+    "log/slog/handler.go:578 appendString (lone call)"
+   ],
+   [
+    53,
+    35,
+    "cmd/internal/obj/ppc64/asm9.go:1235 buildop (lone call)"
+   ],
+   [
+    52,
+    94,
+    "cmd/go/internal/work/action.go:376 CheckGOOSARCHPair"
+   ],
+   [
+    52,
+    94,
+    "cmd/go/internal/work/init.go:321 buildModeInit"
+   ],
+   [
+    52,
+    94,
+    "cmd/link/internal/ld/config.go:54 Set"
+   ],
+   [
+    52,
+    94,
+    "internal/testenv/testenv.go:400 MustHaveBuildMode"
+   ],
+   [
+    51,
+    66,
+    "cmd/gofmt/rewrite.go:59 rewriteFile (lone call)"
+   ],
+   [
+    51,
+    66,
+    "cmd/gofmt/simplify.go:106 simplifyLiteral (lone call)"
+   ],
+   [
+    51,
+    66,
+    "cmd/gofmt/simplify.go:106 simplifyLiteral (lone call)"
+   ],
+   [
+    50,
+    49,
+    "cmd/compile/internal/ssacompile/fuse_comparisons.go:184 isUnsignedInequality"
+   ],
+   [
+    49,
+    70,
+    "cmd/compile/internal/types2/const.go:272 representation"
+   ],
+   [
+    49,
+    70,
+    "cmd/compile/internal/types2/conversions.go:126 constConvertibleTo"
+   ],
+   [
+    49,
+    70,
+    "cmd/compile/internal/types2/index.go:478 isValidIndex"
+   ],
+   [
+    49,
+    69,
+    "cmd/compile/internal/types2/typexpr.go:466 arrayLength (lone call)"
+   ],
+   [
+    48,
+    59,
+    "net/http/internal/http2/server.go:830 serve"
+   ],
+   [
+    48,
+    59,
+    "net/http/internal/http2/server.go:911 resumeServe"
+   ],
+   [
+    48,
+    55,
+    "internal/reflectlite/type.go:406 AssignableTo"
+   ],
+   [
+    48,
+    44,
+    "encoding/gob/decode.go:1111 compileSingle"
+   ],
+   [
+    48,
+    44,
+    "encoding/gob/decode.go:1179 compileDec"
+   ],
+   [
+    47,
+    73,
+    "crypto/tls/ticket.go:193 ParseSessionState"
+   ],
+   [
+    47,
+    58,
+    "cmd/go/internal/envcmd/env.go:583 batchEscape (lone call)"
+   ],
+   [
+    47,
+    58,
+    "cmd/go/internal/modindex/build_read.go:329 readGoInfo"
+   ],
+   [
+    47,
+    58,
+    "go/build/read.go:336 readGoInfo"
+   ],
+   [
+    47,
+    57,
+    "encoding/json/internal/jsonwire/wire.go:150 Error"
+   ],
+   [
+    47,
+    46,
+    "runtime/type.go:438 typelinksinit (lone call)"
+   ],
+   [
+    46,
+    61,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1145 genMatch0"
+   ],
+   [
+    46,
+    56,
+    "cmd/compile/internal/types2/resolver.go:83 validatedImportPath"
+   ],
+   [
+    46,
+    56,
+    "cmd/go/internal/load/pkg.go:647 makeImportValid"
+   ],
+   [
+    46,
+    56,
+    "cmd/go/internal/modindex/build_read.go:400 isValidImport"
+   ],
+   [
+    46,
+    56,
+    "go/build/read.go:407 isValidImport"
+   ],
+   [
+    46,
+    56,
+    "go/printer/nodes.go:1686 sanitizeImportPath"
+   ],
+   [
+    46,
+    56,
+    "go/types/resolver.go:96 validatedImportPath"
+   ],
+   [
+    46,
+    56,
+    "log/slog/text_handler.go:167 needsQuoting"
+   ],
+   [
+    46,
+    49,
+    "reflect/value.go:3158 assignTo (lone call)"
+   ],
+   [
+    45,
+    58,
+    "reflect/type.go:2300 StructOf"
+   ],
+   [
+    45,
+    56,
+    "cmd/go/internal/envcmd/env.go:560 isWindowsUnquotableRune"
+   ],
+   [
+    45,
+    56,
+    "cmd/go/internal/modload/modfile.go:288 ShortMessage"
+   ],
+   [
+    45,
+    56,
+    "cmd/go/internal/web/api.go:143 formatErrorDetail"
+   ],
+   [
+    45,
+    55,
+    "cmd/cgo/out.go:448 checkImportSymName"
+   ],
+   [
+    45,
+    55,
+    "go/doc/reader.go:991 assumedPackageName"
+   ],
+   [
+    45,
+    46,
+    "reflect/abi.go:149 addArg"
+   ],
+   [
+    44,
+    58,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:955 genBlockRewrite"
+   ],
+   [
+    44,
+    58,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1100 genMatch0"
+   ],
+   [
+    44,
+    53,
+    "go/scanner/scanner.go:369 scanIdentifier"
+   ],
+   [
+    43,
+    53,
+    "reflect/type.go:2221 isValidFieldName"
+   ],
+   [
+    43,
+    50,
+    "cmd/cgo/gcc.go:1237 checkIndex"
+   ],
+   [
+    43,
+    50,
+    "cmd/cgo/gcc.go:1294 checkAddr"
+   ],
+   [
+    43,
+    50,
+    "cmd/cgo/gcc.go:1338 checkSlice"
+   ],
+   [
+    42,
+    205,
+    "cmd/compile/internal/ssacompile/prove.go:546 update"
+   ],
+   [
+    42,
+    55,
+    "cmd/cover/cover.go:146 parseFlags"
+   ],
+   [
+    42,
+    50,
+    "text/scanner/scanner.go:353 scanIdentifier (lone call)"
+   ],
+   [
+    42,
+    50,
+    "text/scanner/scanner.go:646 Scan (lone call)"
+   ],
+   [
+    42,
+    32,
+    "cmd/internal/obj/arm/asm5.go:1228 buildop (lone call)"
+   ],
+   [
+    41,
+    74,
+    "cmd/compile/internal/types2/conversions.go:17 conversion (lone call)"
+   ],
+   [
+    41,
+    60,
+    "crypto/tls/handshake_messages.go:1559 unmarshal"
+   ],
+   [
+    41,
+    53,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1658 varCount1 (lone call)"
+   ],
+   [
+    41,
+    53,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1714 normalizeMatch (lone call)"
+   ],
+   [
+    40,
+    55,
+    "text/template/funcs.go:76 addValueFuncs"
+   ],
+   [
+    40,
+    53,
+    "net/http/pattern.go:173 parsePattern"
+   ],
+   [
+    40,
+    52,
+    "cmd/compile/internal/ssa/rewrite.go:357 isInlinableMemmove"
+   ],
+   [
+    40,
+    52,
+    "cmd/compile/internal/ssa/rewrite.go:359 isInlinableMemmove"
+   ],
+   [
+    40,
+    52,
+    "cmd/compile/internal/ssa/rewrite.go:361 isInlinableMemmove"
+   ],
+   [
+    40,
+    52,
+    "cmd/compile/internal/types2/call.go:745 selector"
+   ],
+   [
+    40,
+    52,
+    "go/build/constraint/expr.go:421 parsePlusBuildExpr (lone call)"
+   ],
+   [
+    40,
+    39,
+    "crypto/dsa/dsa.go:113 GenerateParameters"
+   ],
+   [
+    40,
+    39,
+    "crypto/dsa/dsa.go:133 GenerateParameters"
+   ],
+   [
+    40,
+    38,
+    "crypto/rand/util.go:21 Prime (lone call)"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:372 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:424 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:711 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:725 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:734 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:783 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:793 mem2reg"
+   ],
+   [
+    40,
+    37,
+    "cmd/compile/internal/ssacompile/mem2reg.go:806 mem2reg"
+   ],
+   [
+    39,
+    52,
+    "encoding/json/encode.go:1137 typeFields"
+   ],
+   [
+    39,
+    51,
+    "cmd/compile/internal/ssa/rewrite.go:365 isInlinableMemmove"
+   ],
+   [
+    39,
+    51,
+    "cmd/compile/internal/ssacompile/memcombine.go:33 memcombineLoads (lone call)"
+   ],
+   [
+    39,
+    50,
+    "cmd/compile/internal/types2/call.go:695 selector (lone call)"
+   ],
+   [
+    39,
+    50,
+    "cmd/compile/internal/types2/typexpr.go:20 ident (lone call)"
+   ],
+   [
+    39,
+    50,
+    "cmd/go/internal/imports/build.go:192 matchTag"
+   ],
+   [
+    39,
+    50,
+    "go/build/constraint/expr.go:362 lex"
+   ],
+   [
+    39,
+    50,
+    "go/build/constraint/expr.go:482 isValidTag"
+   ],
+   [
+    39,
+    50,
+    "go/token/token.go:336 IsIdentifier"
+   ],
+   [
+    39,
+    50,
+    "net/http/pattern.go:192 isValidWildcardName"
+   ],
+   [
+    39,
+    49,
+    "cmd/compile/internal/syntax/scanner.go:352 ident (lone call)"
+   ],
+   [
+    39,
+    49,
+    "cmd/compile/internal/types2/predicates.go:571 isValidName"
+   ],
+   [
+    39,
+    48,
+    "text/scanner/scanner.go:350 isIdentRune"
+   ],
+   [
+    39,
+    41,
+    "go/build/build.go:1467 matchFile"
+   ],
+   [
+    39,
+    40,
+    "cmd/cgo/gcc.go:1374 checkUnsafeStringData"
+   ],
+   [
+    39,
+    38,
+    "cmd/compile/internal/typecheck/subr.go:446 convertOp"
+   ],
+   [
+    39,
+    36,
+    "cmd/compile/internal/ssa/rewrite/generic/generic_helpers.go:253 isFixedLoad"
+   ],
+   [
+    39,
+    36,
+    "cmd/compile/internal/ssa/rewrite/generic/generic_helpers.go:557 rewriteFixedLoad"
+   ],
+   [
+    38,
+    57,
+    "encoding/xml/marshal.go:368 createAttrPrefix"
+   ],
+   [
+    38,
+    50,
+    "cmd/compile/internal/ssacompile/cse.go:537 skipDisjointMemDefs (lone call)"
+   ],
+   [
+    38,
+    49,
+    "regexp/regexp.go:1238 extract"
+   ],
+   [
+    38,
+    48,
+    "go/doc/synopsis.go:22 firstSentence"
+   ],
+   [
+    38,
+    48,
+    "text/template/parse/lex.go:536 lexFieldOrVariable"
+   ],
+   [
+    38,
+    47,
+    "text/template/parse/lex.go:389 lexInsideAction (lone call)"
+   ],
+   [
+    38,
+    47,
+    "text/template/parse/lex.go:480 lexIdentifier (lone call)"
+   ],
+   [
+    38,
+    47,
+    "text/template/parse/lex.go:601 scanNumber (lone call)"
+   ],
+   [
+    38,
+    47,
+    "text/template/parse/lex.go:678 isAlphaNumeric"
+   ],
+   [
+    38,
+    44,
+    "cmd/cgo/gcc.go:989 rewriteCall"
+   ],
+   [
+    38,
+    44,
+    "cmd/compile/internal/ssagen/ssa.go:3548 exprCheckPtr"
+   ],
+   [
+    38,
+    42,
+    "internal/reflectlite/value.go:414 assignTo (lone call)"
+   ],
+   [
+    38,
+    41,
+    "encoding/csv/writer.go:64 Write"
+   ],
+   [
+    37,
+    48,
+    "encoding/json/encode.go:951 isValidTag"
+   ],
+   [
+    37,
+    48,
+    "go/doc/comment/parse.go:583 isOldHeading"
+   ],
+   [
+    37,
+    48,
+    "text/template/funcs.go:123 goodName"
+   ],
+   [
+    37,
+    46,
+    "bytes/bytes.go:807 isSeparator"
+   ],
+   [
+    37,
+    46,
+    "encoding/json/v2/fields.go:660 isLetterOrDigit"
+   ],
+   [
+    37,
+    46,
+    "strings/strings.go:837 isSeparator"
+   ],
+   [
+    37,
+    46,
+    "testing/testing.go:1562 removeSymbolsExcept"
+   ],
+   [
+    37,
+    40,
+    "cmd/compile/internal/ssacompile/branchelim.go:216 elimIf"
+   ],
+   [
+    37,
+    40,
+    "cmd/compile/internal/ssacompile/branchelim.go:400 elimIfElse"
+   ],
+   [
+    37,
+    40,
+    "reflect/value.go:3420 convertOp"
+   ],
+   [
+    36,
+    55,
+    "encoding/xml/marshal.go:244 EncodeToken"
+   ],
+   [
+    36,
+    55,
+    "encoding/xml/xml.go:1202 name"
+   ],
+   [
+    36,
+    54,
+    "encoding/xml/xml.go:996 text (lone call)"
+   ],
+   [
+    36,
+    47,
+    "go/doc/comment/parse.go:577 isOldHeading"
+   ],
+   [
+    36,
+    42,
+    "cmd/compile/internal/ssacompile/branchelim.go:381 elimIfElse"
+   ],
+   [
+    36,
+    42,
+    "cmd/compile/internal/ssacompile/branchelim.go:384 elimIfElse"
+   ],
+   [
+    36,
+    39,
+    "cmd/compile/internal/ssacompile/prove.go:2516 simplifyValue"
+   ],
+   [
+    36,
+    38,
+    "cmd/compile/internal/ssacompile/branchelim.go:153 canSelectPhi (lone call)"
+   ],
+   [
+    35,
+    41,
+    "cmd/compile/internal/ssacompile/merge_conditional_branches.go:237 detectCyclePattern"
+   ],
+   [
+    35,
+    35,
+    "cmd/compile/internal/walk/assign.go:310 ascompatee"
+   ],
+   [
+    34,
+    39,
+    "cmd/compile/internal/ssacompile/branchelim.go:231 elimIf"
+   ],
+   [
+    34,
+    38,
+    "cmd/compile/internal/ssacompile/merge_conditional_branches.go:167 detectNestedIfPattern"
+   ],
+   [
+    34,
+    38,
+    "cmd/compile/internal/ssacompile/merge_conditional_branches.go:172 detectNestedIfPattern"
+   ],
+   [
+    34,
+    34,
+    "cmd/asm/internal/asm/asm.go:629 asmInstruction"
+   ],
+   [
+    34,
+    33,
+    "cmd/compile/internal/gc/obj.go:193 dumpGlobalConst (lone call)"
+   ],
+   [
+    33,
+    39,
+    "go/types/return.go:71 isTerminating"
+   ],
+   [
+    33,
+    38,
+    "cmd/compile/internal/ssacompile/fuse_comparisons.go:100 fuseComparisons"
+   ],
+   [
+    33,
+    36,
+    "reflect/type.go:1939 FuncOf (lone call)"
+   ],
+   [
+    33,
+    36,
+    "reflect/type.go:1939 FuncOf (lone call)"
+   ],
+   [
+    33,
+    36,
+    "reflect/type.go:1939 FuncOf (lone call)"
+   ],
+   [
+    33,
+    36,
+    "reflect/type.go:2280 StructOf (lone call)"
+   ],
+   [
+    33,
+    36,
+    "reflect/type.go:2280 StructOf (lone call)"
+   ],
+   [
+    33,
+    36,
+    "reflect/type.go:2280 StructOf (lone call)"
+   ],
+   [
+    33,
+    36,
+    "reflect/value.go:3340 convertOp (lone call)"
+   ],
+   [
+    33,
+    34,
+    "cmd/compile/internal/syntax/printer.go:925 printParameterList"
+   ],
+   [
+    33,
+    32,
+    "cmd/cgo/gcc.go:857 rewriteCall (lone call)"
+   ],
+   [
+    32,
+    45,
+    "encoding/xml/xml.go:1260 isName"
+   ],
+   [
+    32,
+    45,
+    "encoding/xml/xml.go:1284 isNameString"
+   ],
+   [
+    32,
+    37,
+    "cmd/compile/internal/walk/complit.go:21 walkCompLit"
+   ],
+   [
+    32,
+    31,
+    "cmd/compile/internal/typecheck/subr.go:428 convertOp"
+   ],
+   [
+    32,
+    31,
+    "cmd/go/internal/modindex/build.go:745 goodOSArchFile"
+   ],
+   [
+    32,
+    31,
+    "go/build/build.go:2021 goodOSArchFile"
+   ],
+   [
+    32,
+    31,
+    "reflect/value.go:1778 isZero"
+   ],
+   [
+    32,
+    24,
+    "cmd/compile/internal/types2/infer.go:435 infer"
+   ],
+   [
+    32,
+    23,
+    "cmd/compile/internal/types2/call.go:354 callExpr"
+   ],
+   [
+    31,
+    45,
+    "cmd/compile/internal/ssacompile/writebarrier.go:156 writebarrier (lone call)"
+   ],
+   [
+    31,
+    34,
+    "cmd/compile/internal/ssacompile/branchelim.go:496 canSpeculativelyExecute"
+   ],
+   [
+    31,
+    31,
+    "cmd/cgo/out.go:1192 writeExports"
+   ],
+   [
+    31,
+    23,
+    "cmd/compile/internal/types2/infer.go:290 infer"
+   ],
+   [
+    31,
+    22,
+    "cmd/compile/internal/types2/infer.go:451 infer"
+   ],
+   [
+    30,
+    83,
+    "go/doc/example.go:67 Examples"
+   ],
+   [
+    30,
+    33,
+    "cmd/cgo/gcc.go:90 ProcessCgoDirectives"
+   ],
+   [
+    30,
+    29,
+    "go/printer/nodes.go:382 parameters"
+   ],
+   [
+    30,
+    27,
+    "cmd/compile/internal/walk/convert.go:162 dataWord"
+   ],
+   [
+    30,
+    24,
+    "cmd/compile/internal/escape/escape.go:775 rewriteWithLiterals"
+   ],
+   [
+    29,
+    57,
+    "debug/pe/file.go:531 readOptionalHeader"
+   ],
+   [
+    29,
+    39,
+    "cmd/compile/internal/types2/call.go:413 genericExprList"
+   ],
+   [
+    29,
+    39,
+    "cmd/compile/internal/types2/call.go:448 genericExprList"
+   ],
+   [
+    29,
+    32,
+    "cmd/compile/internal/noder/import.go:325 checkImportPath"
+   ],
+   [
+    29,
+    31,
+    "go/doc/exports.go:269 filterSpecList (lone call)"
+   ],
+   [
+    29,
+    31,
+    "internal/trace/raw/textreader.go:195 readToken"
+   ],
+   [
+    29,
+    29,
+    "cmd/compile/internal/typecheck/typecheck.go:636 RewriteNonNameCall"
+   ],
+   [
+    29,
+    29,
+    "crypto/rsa/rsa.go:239 Validate (lone call)"
+   ],
+   [
+    29,
+    29,
+    "crypto/rsa/rsa.go:563 Precompute (lone call)"
+   ],
+   [
+    29,
+    25,
+    "cmd/compile/internal/escape/escape.go:333 rewriteClosureVarsWithLiterals"
+   ],
+   [
+    29,
+    25,
+    "cmd/compile/internal/escape/escape.go:345 rewriteClosureVarsWithLiterals"
+   ],
+   [
+    28,
+    55,
+    "debug/pe/file.go:585 readOptionalHeader"
+   ],
+   [
+    28,
+    40,
+    "go/doc/comment/parse.go:246 lookupPkg (lone call)"
+   ],
+   [
+    28,
+    38,
+    "cmd/compile/internal/types2/call.go:172 callExpr (lone call)"
+   ],
+   [
+    28,
+    38,
+    "cmd/compile/internal/types2/expr.go:1070 exprInternal (lone call)"
+   ],
+   [
+    28,
+    31,
+    "cmd/compile/internal/noder/noder.go:441 parseGoEmbed"
+   ],
+   [
+    28,
+    31,
+    "cmd/internal/obj/x86/asm6.go:1912 fusedJump"
+   ],
+   [
+    28,
+    31,
+    "encoding/csv/reader.go:334 readRecord"
+   ],
+   [
+    28,
+    31,
+    "go/ast/directive.go:139 ParseArgs"
+   ],
+   [
+    28,
+    31,
+    "internal/trace/raw/textreader.go:55 NewTextReader"
+   ],
+   [
+    28,
+    31,
+    "internal/trace/raw/textreader.go:155 readArgs"
+   ],
+   [
+    28,
+    31,
+    "internal/trace/raw/textreader.go:185 readToken"
+   ],
+   [
+    28,
+    30,
+    "cmd/cgo/gcc.go:142 splitQuoted (lone call)"
+   ],
+   [
+    28,
+    30,
+    "cmd/compile/internal/noder/noder.go:392 parseGoEmbed (lone call)"
+   ],
+   [
+    28,
+    30,
+    "cmd/go/internal/modindex/build.go:592 splitQuoted (lone call)"
+   ],
+   [
+    28,
+    30,
+    "cmd/link/internal/benchmark/bench.go:176 makeBenchString (lone call)"
+   ],
+   [
+    28,
+    30,
+    "go/build/build.go:1866 splitQuoted (lone call)"
+   ],
+   [
+    28,
+    30,
+    "reflect/type.go:2217 isValidFieldName"
+   ],
+   [
+    28,
+    29,
+    "cmd/compile/internal/wasm/ssa.go:514 getValue32"
+   ],
+   [
+    28,
+    26,
+    "encoding/json/encode.go:729 encode"
+   ],
+   [
+    28,
+    23,
+    "cmd/compile/internal/ir/val.go:38 AssertValidTypeForConst"
+   ],
+   [
+    28,
+    22,
+    "encoding/json/v2/arshal_default.go:1296 makeStructMarshaler"
+   ],
+   [
+    27,
+    38,
+    "go/types/call.go:414 genericExprList"
+   ],
+   [
+    27,
+    38,
+    "go/types/call.go:449 genericExprList"
+   ],
+   [
+    27,
+    36,
+    "cmd/internal/obj/mips/asm0.go:898 buildop (lone call)"
+   ],
+   [
+    27,
+    31,
+    "cmd/compile/internal/ssagen/ssa.go:302 buildssa (lone call)"
+   ],
+   [
+    27,
+    31,
+    "cmd/compile/internal/ssagen/ssa.go:1678 stmt (lone call)"
+   ],
+   [
+    27,
+    31,
+    "cmd/compile/internal/ssagen/ssa.go:2399 exit (lone call)"
+   ],
+   [
+    27,
+    31,
+    "cmd/compile/internal/ssagen/ssa.go:3064 exprCheckPtr (lone call)"
+   ],
+   [
+    27,
+    31,
+    "cmd/compile/internal/ssagen/ssa.go:4502 assignWhichMayOverlap (lone call)"
+   ],
+   [
+    27,
+    31,
+    "cmd/compile/internal/ssagen/ssa.go:5302 addr (lone call)"
+   ],
+   [
+    27,
+    30,
+    "cmd/compile/internal/syntax/scanner.go:629 rune"
+   ],
+   [
+    27,
+    30,
+    "cmd/compile/internal/syntax/scanner.go:665 stdString"
+   ],
+   [
+    27,
+    30,
+    "internal/filepathlite/path_windows.go:23 isLocal (lone call)"
+   ],
+   [
+    27,
+    30,
+    "internal/filepathlite/path_windows.go:56 localize (lone call)"
+   ],
+   [
+    27,
+    29,
+    "cmd/internal/obj/x86/obj6.go:1326 errorCheck (lone call)"
+   ],
+   [
+    27,
+    28,
+    "cmd/compile/internal/types2/return.go:70 isTerminating"
+   ],
+   [
+    27,
+    28,
+    "reflect/type.go:2206 isLetter"
+   ],
+   [
+    27,
+    27,
+    "cmd/compile/internal/noder/reader.go:3799 pkgObjs"
+   ],
+   [
+    27,
+    27,
+    "cmd/compile/internal/typecheck/expr.go:535 tcDot"
+   ],
+   [
+    27,
+    27,
+    "cmd/compile/internal/types/fmt.go:583 fldconv"
+   ],
+   [
+    27,
+    27,
+    "reflect/type.go:2280 StructOf (lone call)"
+   ],
+   [
+    27,
+    25,
+    "text/template/exec.go:357 walkRange (lone call)"
+   ],
+   [
+    26,
+    51,
+    "cmd/go/internal/doc/pkg.go:750 findTypes"
+   ],
+   [
+    26,
+    41,
+    "cmd/compile/internal/walk/complit.go:389 maplit"
+   ],
+   [
+    26,
+    41,
+    "cmd/compile/internal/walk/order.go:1529 expr1"
+   ],
+   [
+    26,
+    41,
+    "cmd/compile/internal/walk/order.go:1537 expr1"
+   ],
+   [
+    26,
+    37,
+    "go/types/call.go:172 callExpr (lone call)"
+   ],
+   [
+    26,
+    37,
+    "go/types/expr.go:1045 exprInternal (lone call)"
+   ],
+   [
+    26,
+    33,
+    "crypto/tls/handshake_server_tls13.go:525 doHelloRetryRequest (lone call)"
+   ],
+   [
+    26,
+    29,
+    "go/doc/reader.go:446 readFunc"
+   ],
+   [
+    26,
+    29,
+    "net/http/internal/http2/server.go:986 serveLoop"
+   ],
+   [
+    26,
+    28,
+    "cmd/compile/internal/types2/scope.go:110 lookupIgnoringCase"
+   ],
+   [
+    26,
+    27,
+    "cmd/compile/internal/typecheck/expr.go:243 tcCompLit"
+   ],
+   [
+    26,
+    27,
+    "cmd/compile/internal/typecheck/expr.go:331 tcStructLitKey"
+   ],
+   [
+    26,
+    27,
+    "cmd/go/internal/modload/list.go:204 listModules"
+   ],
+   [
+    26,
+    27,
+    "go/doc/reader.go:786 cleanupTypes"
+   ],
+   [
+    26,
+    26,
+    "cmd/compile/internal/typecheck/expr.go:297 tcStructLitKey (lone call)"
+   ],
+   [
+    26,
+    26,
+    "cmd/compile/internal/typecheck/typecheck.go:1131 visible"
+   ],
+   [
+    26,
+    26,
+    "cmd/compile/internal/types2/named.go:714 lookupMethod"
+   ],
+   [
+    26,
+    25,
+    "cmd/compile/internal/ssagen/ssa.go:2863 conv"
+   ],
+   [
+    26,
+    25,
+    "cmd/compile/internal/staticinit/sched.go:978 truncate"
+   ],
+   [
+    26,
+    25,
+    "cmd/compile/internal/walk/convert.go:238 dataWord"
+   ],
+   [
+    26,
+    25,
+    "cmd/compile/internal/walk/order.go:323 mapKeyTemp"
+   ],
+   [
+    26,
+    25,
+    "crypto/x509/verify.go:354 parseRFC2821Mailbox"
+   ],
+   [
+    25,
+    29,
+    "cmd/compile/internal/ssagen/ssa.go:5448 canSSA"
+   ],
+   [
+    25,
+    28,
+    "go/doc/example.go:555 playExampleFile"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 10304,
+   "median": 3,
+   "p90": 16,
+   "p99": 69,
+   "p999": 355,
+   "max": 2005
+  },
+  "stmts": {
+   "n": 10304,
+   "median": 2,
+   "p90": 16,
+   "p99": 85,
+   "p999": 378,
+   "max": 5314
+  },
+  "max_stmts_within_input_limit": 68,
+  "over_inputs": 795,
+  "over_stmts": 23,
+  "over_either": 795,
+  "share_over_either": 0.07715450310559006,
+  "depth_capped": 0,
+  "recursion_capped": 403,
+  "size_capped": 1,
+  "depth": {
+   "n": 10304,
+   "median": 0,
+   "p90": 2,
+   "p99": 4,
+   "p999": 6,
+   "max": 7
+  },
+  "top_by_inputs": [
+   [
+    2005,
+    5314,
+    "cmd/internal/obj/arm64/asm7.go:2077 loadStoreClass (size cap)"
+   ],
+   [
+    857,
+    2274,
+    "cmd/internal/obj/arm64/asm7.go:2138 loadStorePairClass"
+   ],
+   [
+    638,
+    1590,
+    "cmd/internal/obj/arm64/asm7.go:2320 oplook"
+   ],
+   [
+    500,
+    537,
+    "cmd/compile/internal/walk/order.go:684 stmt"
+   ],
+   [
+    489,
+    523,
+    "cmd/compile/internal/walk/range.go:534 arrayRangeClear"
+   ],
+   [
+    453,
+    488,
+    "cmd/compile/internal/walk/order.go:454 orderMakeSliceCopy"
+   ],
+   [
+    451,
+    455,
+    "cmd/compile/internal/ssacompile/sccp.go:259 buildDefUses"
+   ],
+   [
+    417,
+    437,
+    "cmd/compile/internal/ssagen/ssa.go:1678 stmt"
+   ],
+   [
+    367,
+    416,
+    "cmd/compile/internal/walk/order.go:1225 expr1"
+   ],
+   [
+    356,
+    371,
+    "cmd/compile/internal/walk/range.go:41 walkRange"
+   ],
+   [
+    355,
+    611,
+    "cmd/internal/obj/arm64/asm7.go:3689 asmout"
+   ],
+   [
+    333,
+    348,
+    "cmd/compile/internal/walk/range.go:428 isMapClear"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    2005,
+    5314,
+    "cmd/internal/obj/arm64/asm7.go:2077 loadStoreClass (size cap)"
+   ],
+   [
+    857,
+    2274,
+    "cmd/internal/obj/arm64/asm7.go:2138 loadStorePairClass"
+   ],
+   [
+    638,
+    1590,
+    "cmd/internal/obj/arm64/asm7.go:2320 oplook"
+   ],
+   [
+    355,
+    611,
+    "cmd/internal/obj/arm64/asm7.go:3689 asmout"
+   ],
+   [
+    500,
+    537,
+    "cmd/compile/internal/walk/order.go:684 stmt"
+   ],
+   [
+    489,
+    523,
+    "cmd/compile/internal/walk/range.go:534 arrayRangeClear"
+   ],
+   [
+    453,
+    488,
+    "cmd/compile/internal/walk/order.go:454 orderMakeSliceCopy"
+   ],
+   [
+    451,
+    455,
+    "cmd/compile/internal/ssacompile/sccp.go:259 buildDefUses"
+   ],
+   [
+    417,
+    437,
+    "cmd/compile/internal/ssagen/ssa.go:1678 stmt"
+   ],
+   [
+    367,
+    416,
+    "cmd/compile/internal/walk/order.go:1225 expr1"
+   ],
+   [
+    142,
+    378,
+    "cmd/internal/obj/arm64/asm7.go:2831 buildop"
+   ],
+   [
+    309,
+    373,
+    "cmd/compile/internal/typecheck/subr.go:378 convertOp"
+   ]
+  ],
+  "all_over": [
+   [
+    2005,
+    5314,
+    "cmd/internal/obj/arm64/asm7.go:2077 loadStoreClass (size cap)"
+   ],
+   [
+    857,
+    2274,
+    "cmd/internal/obj/arm64/asm7.go:2138 loadStorePairClass"
+   ],
+   [
+    638,
+    1590,
+    "cmd/internal/obj/arm64/asm7.go:2320 oplook"
+   ],
+   [
+    500,
+    537,
+    "cmd/compile/internal/walk/order.go:684 stmt"
+   ],
+   [
+    489,
+    523,
+    "cmd/compile/internal/walk/range.go:534 arrayRangeClear"
+   ],
+   [
+    453,
+    488,
+    "cmd/compile/internal/walk/order.go:454 orderMakeSliceCopy"
+   ],
+   [
+    451,
+    455,
+    "cmd/compile/internal/ssacompile/sccp.go:259 buildDefUses"
+   ],
+   [
+    417,
+    437,
+    "cmd/compile/internal/ssagen/ssa.go:1678 stmt"
+   ],
+   [
+    367,
+    416,
+    "cmd/compile/internal/walk/order.go:1225 expr1"
+   ],
+   [
+    356,
+    371,
+    "cmd/compile/internal/walk/range.go:41 walkRange"
+   ],
+   [
+    355,
+    611,
+    "cmd/internal/obj/arm64/asm7.go:3689 asmout"
+   ],
+   [
+    333,
+    348,
+    "cmd/compile/internal/walk/range.go:428 isMapClear"
+   ],
+   [
+    327,
+    309,
+    "cmd/compile/internal/ssacompile/mem2reg.go:297 mem2reg"
+   ],
+   [
+    309,
+    373,
+    "cmd/compile/internal/typecheck/subr.go:378 convertOp"
+   ],
+   [
+    281,
+    280,
+    "net/http/internal/http2/server.go:257 serveConn"
+   ],
+   [
+    279,
+    344,
+    "cmd/compile/internal/typecheck/subr.go:267 assignOp"
+   ],
+   [
+    272,
+    286,
+    "cmd/compile/internal/walk/assign.go:20 walkAssign"
+   ],
+   [
+    261,
+    323,
+    "cmd/compile/internal/typecheck/typecheck.go:822 Lookdot"
+   ],
+   [
+    249,
+    242,
+    "cmd/compile/internal/escape/assign.go:78 assignList"
+   ],
+   [
+    225,
+    237,
+    "cmd/compile/internal/walk/builtin.go:44 walkAppend"
+   ],
+   [
+    220,
+    261,
+    "cmd/compile/internal/noder/reader.go:2293 expr"
+   ],
+   [
+    214,
+    260,
+    "cmd/compile/internal/walk/switch.go:725 walkSwitchType"
+   ],
+   [
+    213,
+    203,
+    "cmd/compile/internal/walk/assign.go:291 ascompatee"
+   ],
+   [
+    164,
+    162,
+    "cmd/asm/internal/asm/asm.go:611 asmInstruction"
+   ],
+   [
+    162,
+    141,
+    "cmd/compile/internal/types2/infer.go:32 infer"
+   ],
+   [
+    161,
+    185,
+    "cmd/compile/internal/staticinit/sched.go:165 staticcopy"
+   ],
+   [
+    159,
+    160,
+    "cmd/compile/internal/ssacompile/sccp.go:383 visitValue"
+   ],
+   [
+    153,
+    272,
+    "cmd/compile/internal/types2/conversions.go:17 conversion"
+   ],
+   [
+    151,
+    181,
+    "cmd/compile/internal/noder/reader.go:4242 methodWrapper"
+   ],
+   [
+    151,
+    153,
+    "cmd/compile/internal/ssacompile/sccp.go:232 getLatticeCell"
+   ],
+   [
+    147,
+    245,
+    "cmd/compile/internal/ssacompile/branchelim.go:27 branchelim"
+   ],
+   [
+    142,
+    378,
+    "cmd/internal/obj/arm64/asm7.go:2831 buildop"
+   ],
+   [
+    138,
+    307,
+    "cmd/compile/internal/ssacompile/prove.go:503 update"
+   ],
+   [
+    131,
+    164,
+    "cmd/compile/internal/typecheck/func.go:440 tcCopy"
+   ],
+   [
+    131,
+    162,
+    "cmd/compile/internal/walk/assign.go:121 walkAssignDotType"
+   ],
+   [
+    131,
+    136,
+    "cmd/compile/internal/ssagen/ssa.go:3064 exprCheckPtr"
+   ],
+   [
+    127,
+    157,
+    "cmd/compile/internal/walk/expr.go:769 shapeTypeAssertImpossible"
+   ],
+   [
+    121,
+    131,
+    "reflect/type.go:2280 StructOf"
+   ],
+   [
+    120,
+    122,
+    "cmd/compile/internal/ssacompile/branchelim.go:183 elimIf"
+   ],
+   [
+    118,
+    183,
+    "encoding/asn1/marshal.go:579 makeField"
+   ],
+   [
+    117,
+    97,
+    "cmd/internal/obj/ppc64/asm9.go:1235 buildop"
+   ],
+   [
+    112,
+    138,
+    "cmd/compile/internal/ssacompile/check.go:19 checkFunc"
+   ],
+   [
+    111,
+    170,
+    "cmd/compile/internal/staticinit/sched.go:65 StaticInit"
+   ],
+   [
+    111,
+    96,
+    "cmd/compile/internal/walk/switch.go:301 tryJumpTable"
+   ],
+   [
+    109,
+    117,
+    "cmd/compile/internal/ssacompile/regalloc.go:955 regalloc"
+   ],
+   [
+    109,
+    85,
+    "cmd/compile/internal/escape/escape.go:700 rewriteWithLiterals"
+   ],
+   [
+    106,
+    119,
+    "cmd/compile/internal/typecheck/const.go:70 convlit1"
+   ],
+   [
+    105,
+    120,
+    "archive/tar/common.go:344 allowedFormats"
+   ],
+   [
+    101,
+    213,
+    "cmd/go/internal/modindex/read.go:720 ScanDir"
+   ],
+   [
+    101,
+    111,
+    "net/conf.go:241 lookupOrder"
+   ],
+   [
+    95,
+    149,
+    "cmd/dist/test.go:1250 registerCgoTests"
+   ],
+   [
+    95,
+    122,
+    "cmd/compile/internal/typecheck/expr.go:50 tcArith"
+   ],
+   [
+    95,
+    77,
+    "cmd/compile/internal/staticinit/sched.go:965 truncate"
+   ],
+   [
+    93,
+    76,
+    "cmd/internal/obj/loong64/asm.go:1302 buildop"
+   ],
+   [
+    92,
+    209,
+    "cmd/go/internal/work/init.go:215 buildModeInit"
+   ],
+   [
+    89,
+    118,
+    "go/doc/comment/parse.go:360 parseSpans"
+   ],
+   [
+    88,
+    130,
+    "cmd/link/internal/ld/lib.go:1451 hostlink"
+   ],
+   [
+    88,
+    91,
+    "simd/archsimd/_gen/midway/intersect_simd_ops.go:98 main"
+   ],
+   [
+    86,
+    133,
+    "cmd/dist/test.go:644 registerTests"
+   ],
+   [
+    83,
+    129,
+    "cmd/compile/internal/ssacompile/branchelim.go:373 elimIfElse"
+   ],
+   [
+    82,
+    190,
+    "cmd/compile/internal/ssacompile/fuse.go:37 fuse"
+   ],
+   [
+    82,
+    102,
+    "cmd/compile/internal/ssacompile/merge_conditional_branches.go:140 detectNestedIfPattern"
+   ],
+   [
+    82,
+    97,
+    "cmd/compile/internal/typecheck/func.go:795 tcUnsafeString"
+   ],
+   [
+    82,
+    91,
+    "cmd/compile/internal/walk/complit.go:567 oaslit"
+   ],
+   [
+    82,
+    76,
+    "cmd/compile/internal/ssacompile/prove.go:2372 simplifyValue"
+   ],
+   [
+    81,
+    105,
+    "encoding/xml/xml.go:996 text"
+   ],
+   [
+    81,
+    89,
+    "cmd/compile/internal/typecheck/stmt.go:53 assign"
+   ],
+   [
+    81,
+    77,
+    "cmd/compile/internal/walk/compare.go:42 walkCompare"
+   ],
+   [
+    80,
+    90,
+    "cmd/compile/internal/rewriteresults/rewriteresults.go:28 rewrite"
+   ],
+   [
+    80,
+    83,
+    "cmd/compile/internal/ssagen/ssa.go:302 buildssa"
+   ],
+   [
+    79,
+    100,
+    "cmd/compile/internal/typecheck/subr.go:629 ImplementsExplain"
+   ],
+   [
+    79,
+    81,
+    "cmd/internal/obj/x86/obj6.go:1326 errorCheck"
+   ],
+   [
+    79,
+    79,
+    "cmd/compile/internal/types2/call.go:172 callExpr"
+   ],
+   [
+    77,
+    93,
+    "cmd/compile/internal/devirtualize/devirtualize.go:25 StaticCall"
+   ],
+   [
+    77,
+    60,
+    "cmd/compile/internal/types2/builtins.go:624 _MaxMin"
+   ],
+   [
+    76,
+    137,
+    "cmd/go/internal/imports/scan.go:18 ScanDir"
+   ],
+   [
+    76,
+    90,
+    "cmd/compile/internal/noder/reader.go:4198 wrapType"
+   ],
+   [
+    76,
+    60,
+    "cmd/link/internal/loadelf/ldelf.go:244 Load"
+   ],
+   [
+    75,
+    95,
+    "cmd/compile/internal/devirtualize/pgo.go:758 findHotConcreteInterfaceCallee"
+   ],
+   [
+    75,
+    88,
+    "cmd/compile/internal/walk/complit.go:265 slicelit"
+   ],
+   [
+    75,
+    86,
+    "cmd/compile/internal/typecheck/func.go:147 tcCall"
+   ],
+   [
+    74,
+    88,
+    "cmd/compile/internal/typecheck/subr.go:657 implements"
+   ],
+   [
+    74,
+    84,
+    "cmd/compile/internal/typecheck/subr.go:228 assignconvfn"
+   ],
+   [
+    74,
+    74,
+    "cmd/compile/internal/ssagen/ssa.go:2858 conv"
+   ],
+   [
+    74,
+    71,
+    "cmd/compile/internal/escape/utils.go:86 isSelfAssign"
+   ],
+   [
+    74,
+    69,
+    "cmd/compile/internal/amd64/ssa.go:257 ssaGenValue"
+   ],
+   [
+    74,
+    67,
+    "cmd/compile/internal/walk/convert.go:129 dataWord"
+   ],
+   [
+    73,
+    85,
+    "cmd/compile/internal/ir/expr.go:1065 SameSafeExpr"
+   ],
+   [
+    73,
+    66,
+    "cmd/go/internal/load/pkg.go:845 loadPackageData"
+   ],
+   [
+    72,
+    82,
+    "cmd/compile/internal/walk/expr.go:638 walkCall1"
+   ],
+   [
+    72,
+    70,
+    "encoding/gob/decode.go:1139 compileDec"
+   ],
+   [
+    72,
+    51,
+    "cmd/compile/internal/inline/inlheur/analyze_func_returns.go:154 analyzeResult"
+   ],
+   [
+    71,
+    82,
+    "cmd/compile/internal/types/size.go:79 expandiface"
+   ],
+   [
+    71,
+    81,
+    "cmd/compile/internal/walk/walk.go:96 convas"
+   ],
+   [
+    70,
+    132,
+    "cmd/cgo/main.go:545 Record"
+   ],
+   [
+    70,
+    82,
+    "cmd/compile/internal/devirtualize/devirtualize.go:212 concreteType1"
+   ],
+   [
+    70,
+    62,
+    "cmd/internal/obj/ppc64/asm9.go:2529 asmout"
+   ],
+   [
+    70,
+    54,
+    "cmd/compile/internal/walk/switch.go:284 search"
+   ],
+   [
+    69,
+    124,
+    "cmd/go/internal/imports/build.go:273 MatchFile"
+   ],
+   [
+    69,
+    115,
+    "cmd/cgo/gcc.go:2479 loadType"
+   ],
+   [
+    69,
+    107,
+    "cmd/link/internal/ld/lib.go:529 loadlib"
+   ],
+   [
+    69,
+    99,
+    "reflect/value.go:3340 convertOp"
+   ],
+   [
+    69,
+    84,
+    "cmd/compile/internal/noder/reader.go:3038 methodExpr"
+   ],
+   [
+    69,
+    83,
+    "cmd/compile/internal/walk/assign.go:259 ascompatet"
+   ],
+   [
+    69,
+    82,
+    "cmd/compile/internal/rewriteresults/rewriteresults.go:154 isCandidateLocal"
+   ],
+   [
+    69,
+    81,
+    "cmd/compile/internal/inline/inl.go:933 inlCallee"
+   ],
+   [
+    69,
+    73,
+    "cmd/compile/internal/ssacompile/decomposeaddr.go:134 decomposeAddr"
+   ],
+   [
+    69,
+    58,
+    "encoding/xml/marshal.go:425 marshalValue"
+   ],
+   [
+    69,
+    51,
+    "cmd/compile/internal/noder/writer.go:1720 switchStmt"
+   ],
+   [
+    68,
+    87,
+    "go/build/build.go:576 Import"
+   ],
+   [
+    68,
+    81,
+    "cmd/compile/internal/walk/closure.go:94 walkClosure"
+   ],
+   [
+    68,
+    73,
+    "cmd/compile/internal/walk/order.go:223 addrTemp"
+   ],
+   [
+    68,
+    58,
+    "cmd/go/internal/load/pkg.go:2357 setBuildInfo"
+   ],
+   [
+    68,
+    51,
+    "cmd/compile/internal/walk/builtin.go:315 walkMakeMap"
+   ],
+   [
+    67,
+    85,
+    "bytes/bytes.go:819 Title"
+   ],
+   [
+    67,
+    85,
+    "strings/strings.go:849 Title"
+   ],
+   [
+    67,
+    80,
+    "cmd/compile/internal/typecheck/func.go:398 tcComplex"
+   ],
+   [
+    67,
+    79,
+    "cmd/compile/internal/compare/compare.go:315 EqInterface"
+   ],
+   [
+    67,
+    76,
+    "cmd/compile/internal/ssacompile/prove.go:1997 addValueFact"
+   ],
+   [
+    67,
+    74,
+    "cmd/go/internal/modcmd/vendor.go:435 matchPotentialSourceFile"
+   ],
+   [
+    67,
+    71,
+    "net/http/server.go:2021 serve"
+   ],
+   [
+    66,
+    133,
+    "cmd/gofmt/simplify.go:106 simplifyLiteral"
+   ],
+   [
+    66,
+    86,
+    "cmd/compile/internal/reflectdata/reflect.go:670 writeType"
+   ],
+   [
+    66,
+    80,
+    "cmd/compile/internal/ssagen/ssa.go:852 setHeapaddr"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/pgoir/irgraph.go:479 DirectCallee"
+   ],
+   [
+    66,
+    79,
+    "cmd/compile/internal/walk/temp.go:16 initStackTemp"
+   ],
+   [
+    66,
+    78,
+    "cmd/compile/internal/walk/closure.go:166 walkMethodValue"
+   ],
+   [
+    66,
+    78,
+    "cmd/compile/internal/walk/range.go:409 rangeConvert"
+   ],
+   [
+    66,
+    78,
+    "text/template/parse/lex.go:389 lexInsideAction"
+   ],
+   [
+    66,
+    77,
+    "cmd/go/internal/imports/scan.go:48 scanFiles"
+   ],
+   [
+    66,
+    69,
+    "reflect/value.go:3158 assignTo"
+   ],
+   [
+    66,
+    58,
+    "cmd/compile/internal/escape/escape.go:316 rewriteClosureVarsWithLiterals"
+   ],
+   [
+    65,
+    84,
+    "go/doc/comment/parse.go:568 isOldHeading"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/devirtualize/pgo.go:806 findHotConcreteFunctionCallee"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/typecheck/func.go:701 tcMinMax"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/convert.go:533 byteindex"
+   ],
+   [
+    65,
+    78,
+    "cmd/compile/internal/walk/order.go:69 newTemp"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/typecheck.go:1240 Conv"
+   ],
+   [
+    65,
+    77,
+    "cmd/compile/internal/typecheck/typecheck.go:1252 ConvNop"
+   ],
+   [
+    65,
+    72,
+    "go/types/stmt.go:18 funcBody"
+   ],
+   [
+    65,
+    46,
+    "time/format.go:1051 parse"
+   ],
+   [
+    64,
+    133,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1060 genMatch0"
+   ],
+   [
+    64,
+    65,
+    "cmd/compile/internal/staticinit/sched.go:891 canRepeat"
+   ],
+   [
+    63,
+    89,
+    "net/http/server.go:1401 writeHeader"
+   ],
+   [
+    63,
+    64,
+    "cmd/compile/internal/ssagen/ssa.go:4502 assignWhichMayOverlap"
+   ],
+   [
+    63,
+    64,
+    "encoding/json/v2/arshal_default.go:1231 makeStructMarshaler"
+   ],
+   [
+    62,
+    87,
+    "cmd/compile/internal/types2/conversions.go:99 constConvertibleTo"
+   ],
+   [
+    62,
+    72,
+    "cmd/go/internal/imports/build.go:70 ShouldBuild"
+   ],
+   [
+    61,
+    70,
+    "cmd/compile/internal/types2/call.go:695 selector"
+   ],
+   [
+    61,
+    63,
+    "cmd/go/internal/toolchain/select.go:559 maybeSwitchForGoInstallVersion"
+   ],
+   [
+    61,
+    59,
+    "cmd/go/internal/load/pkg.go:3388 PackagesAndErrorsOutsideModule"
+   ],
+   [
+    61,
+    54,
+    "cmd/compile/internal/ssacompile/schedule.go:100 schedule"
+   ],
+   [
+    61,
+    42,
+    "cmd/internal/obj/s390x/asmz.go:2749 asmout"
+   ],
+   [
+    60,
+    86,
+    "crypto/tls/ticket.go:187 ParseSessionState"
+   ],
+   [
+    60,
+    73,
+    "cmd/compile/internal/ssagen/ssa.go:1616 moveWhichMayOverlap"
+   ],
+   [
+    60,
+    65,
+    "cmd/cgo/internal/test/callback_windows.go:58 testCallbackCallersSEH"
+   ],
+   [
+    60,
+    65,
+    "cmd/go/internal/modload/query.go:200 queryProxy"
+   ],
+   [
+    60,
+    55,
+    "crypto/x509/verify.go:267 parseRFC2821Mailbox"
+   ],
+   [
+    59,
+    65,
+    "testing/quick/quick.go:302 CheckEqual"
+   ],
+   [
+    59,
+    63,
+    "simd/archsimd/_gen/simdgen/gen_utility.go:699 dedup"
+   ],
+   [
+    58,
+    113,
+    "debug/pe/file.go:485 readOptionalHeader"
+   ],
+   [
+    58,
+    82,
+    "cmd/link/internal/ld/data.go:194 relocsym"
+   ],
+   [
+    58,
+    80,
+    "crypto/tls/handshake_messages.go:420 unmarshal"
+   ],
+   [
+    58,
+    76,
+    "cmd/go/internal/web/api.go:130 formatErrorDetail"
+   ],
+   [
+    58,
+    67,
+    "cmd/go/internal/modindex/build_read.go:266 readGoInfo"
+   ],
+   [
+    58,
+    67,
+    "cmd/go/internal/modindex/read.go:787 shouldBuild"
+   ],
+   [
+    58,
+    67,
+    "go/build/read.go:273 readGoInfo"
+   ],
+   [
+    58,
+    63,
+    "cmd/cgo/internal/test/test.go:1055 testHelpers"
+   ],
+   [
+    58,
+    63,
+    "testing/slogtest/slogtest.go:338 hasAttr"
+   ],
+   [
+    58,
+    62,
+    "internal/reflectlite/value.go:414 assignTo"
+   ],
+   [
+    58,
+    60,
+    "cmd/compile/internal/base/flag.go:160 ParseFlags"
+   ],
+   [
+    58,
+    58,
+    "simd/archsimd/_gen/cmd/specstats/metrics.go:133 measure"
+   ],
+   [
+    58,
+    48,
+    "cmd/internal/obj/x86/asm6.go:4221 doasm"
+   ],
+   [
+    58,
+    43,
+    "cmd/go/internal/load/pkg.go:1480 disallowInternal"
+   ],
+   [
+    57,
+    86,
+    "cmd/compile/internal/types2/builtins.go:834 _Add"
+   ],
+   [
+    57,
+    86,
+    "cmd/compile/internal/types2/builtins.go:1038 _String"
+   ],
+   [
+    57,
+    85,
+    "cmd/compile/internal/types2/index.go:420 index"
+   ],
+   [
+    56,
+    85,
+    "cmd/compile/internal/types2/builtins.go:988 _Slice"
+   ],
+   [
+    56,
+    69,
+    "cmd/compile/internal/gc/symidx.go:23 preassignSymIdxs"
+   ],
+   [
+    56,
+    62,
+    "reflect/type.go:1492 AssignableTo"
+   ],
+   [
+    56,
+    61,
+    "encoding/csv/reader.go:297 readRecord"
+   ],
+   [
+    56,
+    58,
+    "cmd/compile/internal/types2/stmt.go:17 funcBody"
+   ],
+   [
+    55,
+    133,
+    "log/slog/handler.go:561 appendTwoStrings"
+   ],
+   [
+    55,
+    92,
+    "cmd/go/internal/load/pkg.go:1803 load"
+   ],
+   [
+    55,
+    77,
+    "cmd/compile/internal/types2/index.go:453 isValidIndex"
+   ],
+   [
+    55,
+    67,
+    "encoding/json/encode.go:1087 typeFields"
+   ],
+   [
+    55,
+    65,
+    "text/template/parse/lex.go:480 lexIdentifier"
+   ],
+   [
+    55,
+    52,
+    "cmd/go/internal/modindex/read.go:382 Import"
+   ],
+   [
+    54,
+    75,
+    "cmd/compile/internal/types2/typexpr.go:466 arrayLength"
+   ],
+   [
+    54,
+    48,
+    "cmd/compile/internal/ssa/rewrite/generic/generic_helpers.go:234 isFixedLoad"
+   ],
+   [
+    54,
+    47,
+    "cmd/compile/internal/ssa/rewrite/generic/generic_helpers.go:515 rewriteFixedLoad"
+   ],
+   [
+    54,
+    47,
+    "net/ip.go:198 IsGlobalUnicast"
+   ],
+   [
+    53,
+    80,
+    "crypto/dsa/dsa.go:66 GenerateParameters"
+   ],
+   [
+    53,
+    77,
+    "cmd/compile/internal/types2/const.go:269 representation"
+   ],
+   [
+    53,
+    66,
+    "cmd/compile/internal/ssacompile/writebarrier.go:156 writebarrier"
+   ],
+   [
+    53,
+    65,
+    "log/slog/handler.go:578 appendString"
+   ],
+   [
+    53,
+    60,
+    "go/scanner/scanner.go:337 scanIdentifier"
+   ],
+   [
+    52,
+    94,
+    "cmd/go/internal/work/action.go:375 CheckGOOSARCHPair"
+   ],
+   [
+    52,
+    94,
+    "cmd/link/internal/ld/config.go:31 Set"
+   ],
+   [
+    52,
+    94,
+    "internal/testenv/testenv.go:399 MustHaveBuildMode"
+   ],
+   [
+    52,
+    67,
+    "cmd/gofmt/rewrite.go:59 rewriteFile"
+   ],
+   [
+    52,
+    51,
+    "cmd/compile/internal/gc/obj.go:193 dumpGlobalConst"
+   ],
+   [
+    52,
+    51,
+    "go/build/build.go:1450 matchFile"
+   ],
+   [
+    52,
+    47,
+    "cmd/go/internal/search/search.go:286 MatchDirs"
+   ],
+   [
+    52,
+    46,
+    "cmd/go/internal/modload/import.go:270 importFromModules"
+   ],
+   [
+    51,
+    62,
+    "net/http/internal/http2/server.go:825 serve"
+   ],
+   [
+    51,
+    61,
+    "text/template/parse/lex.go:526 lexFieldOrVariable"
+   ],
+   [
+    51,
+    59,
+    "cmd/compile/internal/ssacompile/memcombine.go:33 memcombineLoads"
+   ],
+   [
+    51,
+    51,
+    "cmd/compile/internal/types2/unify.go:281 nify"
+   ],
+   [
+    50,
+    104,
+    "cmd/compile/internal/types2/operand.go:332 assignableTo"
+   ],
+   [
+    50,
+    68,
+    "encoding/xml/marshal.go:212 EncodeToken"
+   ],
+   [
+    50,
+    61,
+    "cmd/compile/internal/noder/noder.go:392 parseGoEmbed"
+   ],
+   [
+    50,
+    61,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:904 genBlockRewrite"
+   ],
+   [
+    50,
+    60,
+    "log/slog/text_handler.go:151 needsQuoting"
+   ],
+   [
+    50,
+    60,
+    "net/http/internal/http2/server.go:895 resumeServe"
+   ],
+   [
+    50,
+    58,
+    "cmd/cgo/gcc.go:1229 checkIndex"
+   ],
+   [
+    50,
+    55,
+    "cmd/compile/internal/syntax/scanner.go:88 next"
+   ],
+   [
+    50,
+    52,
+    "cmd/go/internal/modload/list.go:126 listModules"
+   ],
+   [
+    50,
+    50,
+    "cmd/compile/internal/arm64/ssa.go:592 ssaGenValue"
+   ],
+   [
+    50,
+    49,
+    "cmd/compile/internal/ssacompile/fuse_comparisons.go:176 isUnsignedInequality"
+   ],
+   [
+    50,
+    45,
+    "encoding/gob/decode.go:1106 compileSingle"
+   ],
+   [
+    49,
+    58,
+    "cmd/cgo/gcc.go:857 rewriteCall"
+   ],
+   [
+    49,
+    44,
+    "cmd/go/internal/test/test.go:697 runTest"
+   ],
+   [
+    49,
+    43,
+    "cmd/go/internal/test/test.go:1456 Act"
+   ],
+   [
+    48,
+    72,
+    "encoding/xml/xml.go:1194 name"
+   ],
+   [
+    48,
+    63,
+    "cmd/compile/internal/types2/typexpr.go:20 ident"
+   ],
+   [
+    48,
+    57,
+    "go/types/call.go:172 callExpr"
+   ],
+   [
+    48,
+    55,
+    "internal/reflectlite/type.go:400 AssignableTo"
+   ],
+   [
+    48,
+    54,
+    "text/scanner/scanner.go:646 Scan"
+   ],
+   [
+    48,
+    52,
+    "encoding/csv/writer.go:50 Write"
+   ],
+   [
+    48,
+    47,
+    "cmd/compile/internal/walk/order.go:294 mapKeyTemp"
+   ],
+   [
+    48,
+    41,
+    "simd/archsimd/_gen/simdgen/gen_simdrules.go:447 writeSIMDRules"
+   ],
+   [
+    47,
+    59,
+    "net/http/pattern.go:84 parsePattern"
+   ],
+   [
+    47,
+    58,
+    "cmd/go/internal/envcmd/env.go:583 batchEscape"
+   ],
+   [
+    47,
+    57,
+    "cmd/go/internal/envcmd/env.go:556 isWindowsUnquotableRune"
+   ],
+   [
+    47,
+    57,
+    "cmd/go/internal/list/list.go:429 runList"
+   ],
+   [
+    47,
+    57,
+    "encoding/json/internal/jsonwire/wire.go:147 Error"
+   ],
+   [
+    47,
+    56,
+    "cmd/cgo/out.go:446 checkImportSymName"
+   ],
+   [
+    47,
+    56,
+    "go/doc/reader.go:989 assumedPackageName"
+   ],
+   [
+    47,
+    56,
+    "text/template/parse/lex.go:601 scanNumber"
+   ],
+   [
+    47,
+    52,
+    "encoding/json/v2/arshal_default.go:879 makeMapMarshaler"
+   ],
+   [
+    47,
+    50,
+    "net/http/internal/httpcommon/request.go:64 EncodeHeaders"
+   ],
+   [
+    47,
+    46,
+    "runtime/type.go:438 typelinksinit"
+   ],
+   [
+    46,
+    56,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1658 varCount1"
+   ],
+   [
+    46,
+    56,
+    "cmd/compile/internal/types2/resolver.go:73 validatedImportPath"
+   ],
+   [
+    46,
+    56,
+    "cmd/go/internal/load/pkg.go:644 makeImportValid"
+   ],
+   [
+    46,
+    56,
+    "cmd/go/internal/modindex/build_read.go:397 isValidImport"
+   ],
+   [
+    46,
+    56,
+    "go/build/read.go:404 isValidImport"
+   ],
+   [
+    46,
+    56,
+    "go/printer/nodes.go:1656 sanitizeImportPath"
+   ],
+   [
+    46,
+    56,
+    "go/types/resolver.go:86 validatedImportPath"
+   ],
+   [
+    46,
+    54,
+    "cmd/cgo/gcc.go:1286 checkAddr"
+   ],
+   [
+    46,
+    54,
+    "cmd/compile/internal/syntax/scanner.go:352 ident"
+   ],
+   [
+    46,
+    47,
+    "cmd/go/internal/doc/doc.go:372 parseArgs"
+   ],
+   [
+    46,
+    46,
+    "cmd/compile/internal/ssacompile/numberlines.go:34 nextGoodStatementIndex"
+   ],
+   [
+    46,
+    46,
+    "cmd/internal/obj/x86/asm6.go:1889 fusedJump"
+   ],
+   [
+    46,
+    41,
+    "cmd/compile/internal/inline/inl.go:490 doNode"
+   ],
+   [
+    45,
+    74,
+    "reflect/type.go:1939 FuncOf"
+   ],
+   [
+    45,
+    56,
+    "cmd/go/internal/modload/modfile.go:275 ShortMessage"
+   ],
+   [
+    45,
+    55,
+    "go/build/constraint/expr.go:421 parsePlusBuildExpr"
+   ],
+   [
+    45,
+    53,
+    "cmd/cgo/gcc.go:1330 checkSlice"
+   ],
+   [
+    45,
+    53,
+    "regexp/regexp.go:1226 extract"
+   ],
+   [
+    45,
+    50,
+    "cmd/cgo/gcc.go:1364 checkUnsafeStringData"
+   ],
+   [
+    45,
+    46,
+    "reflect/abi.go:124 addArg"
+   ],
+   [
+    45,
+    38,
+    "cmd/compile/internal/ssacompile/phiopt.go:34 phiopt"
+   ],
+   [
+    44,
+    58,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1714 normalizeMatch"
+   ],
+   [
+    44,
+    56,
+    "cmd/cover/cover.go:132 parseFlags"
+   ],
+   [
+    44,
+    55,
+    "reflect/type.go:2215 isValidFieldName"
+   ],
+   [
+    44,
+    54,
+    "crypto/x509/parser.go:653 parseNameConstraintsExtension"
+   ],
+   [
+    44,
+    53,
+    "go/build/constraint/expr.go:333 lex"
+   ],
+   [
+    44,
+    53,
+    "net/http/internal/http2/server.go:958 serveLoop"
+   ],
+   [
+    44,
+    50,
+    "cmd/go/internal/modload/query.go:428 newQueryMatcher"
+   ],
+   [
+    44,
+    48,
+    "cmd/asm/internal/asm/parse.go:374 operand"
+   ],
+   [
+    44,
+    48,
+    "cmd/compile/internal/loong64/ssa.go:109 ssaGenValue"
+   ],
+   [
+    44,
+    47,
+    "net/dnsclient_unix.go:657 goLookupIPCNAMEOrder"
+   ],
+   [
+    44,
+    44,
+    "cmd/compile/internal/types2/resolver.go:202 collectObjects"
+   ],
+   [
+    44,
+    43,
+    "os/env.go:72 getShellName"
+   ],
+   [
+    44,
+    40,
+    "cmd/go/internal/modload/search.go:44 matchPackages"
+   ],
+   [
+    44,
+    37,
+    "cmd/go/internal/fsys/fsys.go:248 children"
+   ],
+   [
+    43,
+    119,
+    "go/doc/example.go:50 Examples"
+   ],
+   [
+    43,
+    61,
+    "cmd/compile/internal/types2/expr.go:1070 exprInternal"
+   ],
+   [
+    43,
+    61,
+    "encoding/xml/marshal.go:343 createAttrPrefix"
+   ],
+   [
+    43,
+    57,
+    "cmd/compile/internal/ssa/rewrite.go:350 isInlinableMemmove"
+   ],
+   [
+    43,
+    54,
+    "cmd/go/internal/load/pkg.go:2151 resolveEmbed"
+   ],
+   [
+    43,
+    51,
+    "go/doc/synopsis.go:16 firstSentence"
+   ],
+   [
+    43,
+    49,
+    "bytes/bytes.go:791 isSeparator"
+   ],
+   [
+    43,
+    49,
+    "strings/strings.go:821 isSeparator"
+   ],
+   [
+    43,
+    44,
+    "cmd/compile/internal/liveness/arg.go:84 ArgLiveness"
+   ],
+   [
+    42,
+    102,
+    "cmd/internal/obj/riscv/obj.go:3695 compress"
+   ],
+   [
+    42,
+    63,
+    "cmd/internal/obj/x86/obj6.go:72 progedit"
+   ],
+   [
+    42,
+    52,
+    "cmd/go/internal/imports/build.go:188 matchTag"
+   ],
+   [
+    42,
+    50,
+    "text/scanner/scanner.go:353 scanIdentifier"
+   ],
+   [
+    42,
+    46,
+    "cmd/compile/internal/ssa/ssadebug/debug.go:498 locatePrologEnd"
+   ],
+   [
+    42,
+    46,
+    "go/types/return.go:17 isTerminating"
+   ],
+   [
+    42,
+    42,
+    "cmd/compile/internal/midway/analysis.go:138 markIfDependent"
+   ],
+   [
+    42,
+    41,
+    "cmd/go/internal/modload/init.go:2060 commitRequirements"
+   ],
+   [
+    42,
+    40,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1767 checkEllipsisRuleCandidate"
+   ],
+   [
+    42,
+    40,
+    "crypto/rand/util.go:21 Prime"
+   ],
+   [
+    42,
+    39,
+    "cmd/cgo/out.go:955 writeExports"
+   ],
+   [
+    42,
+    38,
+    "cmd/compile/internal/ssagen/ssa.go:7045 genssa"
+   ],
+   [
+    42,
+    37,
+    "cmd/internal/obj/loong64/asm.go:1174 cmp"
+   ],
+   [
+    42,
+    37,
+    "cmd/internal/obj/x86/asm6.go:2039 span6"
+   ],
+   [
+    42,
+    36,
+    "cmd/compile/internal/staticinit/sched.go:298 StaticAssign"
+   ],
+   [
+    42,
+    32,
+    "cmd/internal/obj/arm/asm5.go:1228 buildop"
+   ],
+   [
+    41,
+    95,
+    "cmd/go/internal/load/test.go:781 load"
+   ],
+   [
+    41,
+    60,
+    "crypto/tls/handshake_messages.go:1554 unmarshal"
+   ],
+   [
+    41,
+    52,
+    "internal/filepathlite/path_windows.go:206 volumeNameLen"
+   ],
+   [
+    41,
+    51,
+    "go/token/token.go:331 IsIdentifier"
+   ],
+   [
+    41,
+    49,
+    "text/scanner/scanner.go:346 isIdentRune"
+   ],
+   [
+    41,
+    46,
+    "cmd/internal/obj/x86/asm6.go:3561 asmandsz"
+   ],
+   [
+    41,
+    46,
+    "crypto/x509/parser.go:62 parseASN1String"
+   ],
+   [
+    41,
+    44,
+    "text/template/exec.go:357 walkRange"
+   ],
+   [
+    41,
+    43,
+    "cmd/compile/internal/ssacompile/fuse_comparisons.go:63 fuseComparisons"
+   ],
+   [
+    41,
+    43,
+    "cmd/compile/internal/ssagen/ssa.go:2399 exit"
+   ],
+   [
+    41,
+    41,
+    "cmd/compile/internal/ssa/_gen/rulegen.go:1417 parseValue"
+   ],
+   [
+    41,
+    40,
+    "cmd/go/internal/search/search.go:103 MatchPackages"
+   ],
+   [
+    41,
+    35,
+    "time/format.go:203 nextStdChunk"
+   ],
+   [
+    41,
+    31,
+    "cmd/go/internal/fsys/fsys.go:183 stat"
+   ],
+   [
+    40,
+    74,
+    "encoding/json/internal/jsonwire/decode.go:123 ConsumeStringResumable"
+   ],
+   [
+    40,
+    55,
+    "text/template/funcs.go:74 addValueFuncs"
+   ],
+   [
+    40,
+    51,
+    "strconv/makeisprint.go:61 scan"
+   ],
+   [
+    40,
+    35,
+    "cmd/internal/obj/fips140.go:213 setFIPSType"
+   ],
+   [
+    40,
+    20,
+    "cmd/internal/obj/arm64/list7.go:104 rconv"
+   ],
+   [
+    39,
+    59,
+    "go/types/expr.go:1045 exprInternal"
+   ],
+   [
+    39,
+    50,
+    "go/build/constraint/expr.go:477 isValidTag"
+   ],
+   [
+    39,
+    50,
+    "net/http/pattern.go:186 isValidWildcardName"
+   ],
+   [
+    39,
+    49,
+    "cmd/compile/internal/types2/predicates.go:569 isValidName"
+   ],
+   [
+    39,
+    44,
+    "cmd/compile/internal/arm/ssa.go:154 ssaGenValue"
+   ],
+   [
+    39,
+    44,
+    "cmd/compile/internal/x86/ssa.go:126 ssaGenValue"
+   ],
+   [
+    39,
+    41,
+    "cmd/compile/internal/ssacompile/nilcheck.go:203 nilcheckelim2"
+   ],
+   [
+    39,
+    41,
+    "cmd/go/internal/modfetch/coderepo.go:353 convert"
+   ],
+   [
+    39,
+    38,
+    "cmd/compile/internal/ssacompile/prove.go:2779 compareConstDelta"
+   ],
+   [
+    39,
+    37,
+    "simd/archsimd/_gen/simdgen/gen_simdTypes.go:1207 writeSIMDStubs"
+   ],
+   [
+    39,
+    36,
+    "cmd/compile/internal/noder/noder.go:225 pragma"
+   ],
+   [
+    39,
+    36,
+    "cmd/go/internal/modindex/build.go:719 goodOSArchFile"
+   ],
+   [
+    39,
+    36,
+    "cmd/go/internal/toolchain/select.go:99 Select"
+   ],
+   [
+    39,
+    36,
+    "go/build/build.go:1995 goodOSArchFile"
+   ],
+   [
+    38,
+    50,
+    "cmd/compile/internal/ssacompile/cse.go:537 skipDisjointMemDefs"
+   ],
+   [
+    38,
+    50,
+    "text/template/funcs.go:114 goodName"
+   ],
+   [
+    38,
+    48,
+    "encoding/json/encode.go:941 isValidTag"
+   ],
+   [
+    38,
+    47,
+    "cmd/go/internal/doc/pkg.go:1217 match"
+   ],
+   [
+    38,
+    47,
+    "text/template/parse/lex.go:677 isAlphaNumeric"
+   ],
+   [
+    38,
+    46,
+    "cmd/asm/internal/lex/tokenizer.go:54 isIdentRune"
+   ],
+   [
+    38,
+    46,
+    "cmd/compile/internal/syntax/scanner.go:384 atIdentChar"
+   ],
+   [
+    38,
+    44,
+    "cmd/compile/internal/mips/ssa.go:78 ssaGenValue"
+   ],
+   [
+    38,
+    40,
+    "cmd/compile/internal/mips64/ssa.go:86 ssaGenValue"
+   ],
+   [
+    38,
+    39,
+    "cmd/compile/internal/ssacompile/nilcheck.go:19 nilcheckelim"
+   ],
+   [
+    38,
+    36,
+    "cmd/go/internal/work/exec.go:584 buildExport"
+   ],
+   [
+    38,
+    34,
+    "go/scanner/scanner.go:822 Scan"
+   ],
+   [
+    38,
+    34,
+    "math/big/prime.go:26 ProbablyPrime"
+   ],
+   [
+    38,
+    33,
+    "cmd/compile/internal/types/fmt.go:257 tconv2"
+   ],
+   [
+    38,
+    27,
+    "cmd/compile/internal/ssagen/ssa.go:4637 zeroVal"
+   ],
+   [
+    37,
+    79,
+    "cmd/go/internal/work/gccgo.go:67 gc"
+   ],
+   [
+    37,
+    72,
+    "encoding/json/internal/jsonwire/decode.go:257 AppendUnquote"
+   ],
+   [
+    37,
+    52,
+    "cmd/compile/internal/types2/conversions.go:163 convertibleTo"
+   ],
+   [
+    37,
+    46,
+    "cmd/gofmt/rewrite.go:160 match"
+   ],
+   [
+    37,
+    46,
+    "encoding/json/v2/fields.go:659 isLetterOrDigit"
+   ],
+   [
+    37,
+    46,
+    "testing/testing.go:1560 removeSymbolsExcept"
+   ],
+   [
+    37,
+    31,
+    "cmd/link/internal/ld/main.go:166 Main"
+   ],
+   [
+    36,
+    47,
+    "crypto/x509/x509.go:1318 buildCertExtensions"
+   ],
+   [
+    36,
+    45,
+    "cmd/compile/internal/ssacompile/merge_conditional_branches.go:234 detectCyclePattern"
+   ],
+   [
+    36,
+    41,
+    "cmd/compile/internal/ssacompile/rewrite.go:17 applyRewrite"
+   ],
+   [
+    36,
+    39,
+    "cmd/go/internal/load/pkg.go:2718 externalLinkingReason"
+   ],
+   [
+    36,
+    38,
+    "cmd/compile/internal/ssacompile/branchelim.go:153 canSelectPhi"
+   ],
+   [
+    36,
+    38,
+    "html/template/escape.go:471 join"
+   ],
+   [
+    36,
+    37,
+    "cmd/go/internal/doc/pkg.go:968 trimUnexportedFields"
+   ],
+   [
+    36,
+    35,
+    "cmd/compile/internal/types2/return.go:16 isTerminating"
+   ],
+   [
+    36,
+    29,
+    "cmd/compile/internal/ssagen/ssa.go:5726 storeTypeScalars"
+   ],
+   [
+    35,
+    58,
+    "cmd/compile/internal/typecheck/expr.go:297 tcStructLitKey"
+   ],
+   [
+    35,
+    40,
+    "cmd/link/internal/ld/config.go:118 mustLinkExternal"
+   ],
+   [
+    35,
+    37,
+    "cmd/compile/internal/typecheck/expr.go:161 tcCompLit"
+   ],
+   [
+    35,
+    37,
+    "cmd/go/internal/modload/edit.go:46 editRequirements"
+   ],
+   [
+    35,
+    36,
+    "cmd/compile/internal/ssagen/ssa.go:4288 minMax"
+   ],
+   [
+    35,
+    35,
+    "cmd/compile/internal/syntax/printer.go:899 printParameterList"
+   ],
+   [
+    35,
+    34,
+    "cmd/compile/internal/typecheck/typecheck.go:627 RewriteNonNameCall"
+   ],
+   [
+    35,
+    33,
+    "cmd/compile/internal/ssagen/pgen.go:125 AllocFrame"
+   ],
+   [
+    35,
+    31,
+    "cmd/link/internal/ld/symtab.go:426 symtab"
+   ],
+   [
+    35,
+    31,
+    "html/template/escape.go:759 escapeText"
+   ],
+   [
+    35,
+    26,
+    "cmd/internal/obj/arm/asm5.go:1043 oplook"
+   ],
+   [
+    34,
+    56,
+    "cmd/compile/internal/types2/typestring.go:112 typ"
+   ],
+   [
+    34,
+    48,
+    "encoding/xml/xml.go:1243 isName"
+   ],
+   [
+    34,
+    48,
+    "encoding/xml/xml.go:1267 isNameString"
+   ],
+   [
+    34,
+    44,
+    "cmd/compile/internal/dwarfgen/dwarf.go:178 createDwarfVars"
+   ],
+   [
+    34,
+    44,
+    "cmd/compile/internal/types2/call.go:386 genericExprList"
+   ],
+   [
+    34,
+    42,
+    "cmd/compile/internal/ssacompile/loopbce.go:122 findIndVar"
+   ],
+   [
+    34,
+    39,
+    "cmd/compile/internal/types2/instantiate.go:240 implements"
+   ],
+   [
+    34,
+    38,
+    "cmd/internal/obj/ppc64/obj9.go:117 progedit"
+   ],
+   [
+    34,
+    37,
+    "cmd/compile/internal/riscv64/ssa.go:193 ssaGenValue"
+   ],
+   [
+    34,
+    37,
+    "go/types/resolver.go:216 collectObjects"
+   ],
+   [
+    34,
+    36,
+    "runtime/traceback.go:1028 traceback2"
+   ],
+   [
+    34,
+    35,
+    "cmd/compile/internal/ssacompile/tighten.go:18 tighten"
+   ],
+   [
+    34,
+    33,
+    "cmd/compile/internal/typecheck/expr.go:480 tcDot"
+   ],
+   [
+    34,
+    33,
+    "go/printer/nodes.go:327 parameters"
+   ],
+   [
+    34,
+    32,
+    "cmd/compile/internal/noder/reader.go:3769 pkgObjs"
+   ],
+   [
+    34,
+    32,
+    "runtime/signal_unix.go:655 sighandler"
+   ],
+   [
+    34,
+    31,
+    "cmd/compile/internal/ssacompile/branchelim.go:77 canCondSelect"
+   ],
+   [
+    34,
+    27,
+    "cmd/compile/internal/devirtualize/devirtualize.go:444 analyze"
+   ],
+   [
+    33,
+    64,
+    "cmd/compile/internal/typecheck/expr.go:751 tcSlice"
+   ],
+   [
+    33,
+    56,
+    "cmd/compile/internal/types/fmt.go:543 fldconv"
+   ],
+   [
+    33,
+    40,
+    "crypto/tls/handshake_server_tls13.go:525 doHelloRetryRequest"
+   ],
+   [
+    33,
+    35,
+    "cmd/compile/internal/ssacompile/branchelim.go:492 canSpeculativelyExecute"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 5963,
+ "calls_in_logic_resolved": 10851,
+ "calls_in_logic_unresolved": 3111,
+ "load_seconds": 0.3,
+ "analyze_seconds": 0.3
+}

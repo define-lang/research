@@ -1,0 +1,648 @@
+{
+ "name": "gitea",
+ "functions": 12188,
+ "functions_with_logic": 3230,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 5715,
+   "median": 2,
+   "p90": 3,
+   "p99": 5,
+   "p999": 9,
+   "max": 17
+  },
+  "stmts": {
+   "n": 5715,
+   "median": 1,
+   "p90": 2,
+   "p99": 5,
+   "p999": 11,
+   "max": 18
+  },
+  "max_stmts_within_input_limit": 18,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 3230,
+   "median": 2,
+   "p90": 6,
+   "p99": 14,
+   "p999": 25,
+   "max": 41
+  },
+  "stmts": {
+   "n": 3230,
+   "median": 2,
+   "p90": 5,
+   "p99": 14,
+   "p999": 35,
+   "max": 46
+  },
+  "max_stmts_within_input_limit": 24,
+  "over_inputs": 7,
+  "over_stmts": 0,
+  "over_either": 7,
+  "share_over_either": 0.0021671826625387,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    41,
+    46,
+    "routers/api/v1/repo/repo.go:721 updateRepoUnits"
+   ],
+   [
+    30,
+    36,
+    "routers/web/repo/issue_view.go:847 prepareMergeBox"
+   ],
+   [
+    26,
+    38,
+    "routers/web/repo/setting/setting.go:553 handleSettingsPostAdvanced"
+   ],
+   [
+    25,
+    35,
+    "routers/web/repo/githttp.go:62 httpBase"
+   ],
+   [
+    23,
+    13,
+    "cmd/dump.go:103 runDump"
+   ],
+   [
+    22,
+    19,
+    "services/auth/source/ldap/source_sync.go:26 Sync"
+   ],
+   [
+    22,
+    13,
+    "routers/web/repo/issue_view.go:638 prepareIssueViewCommentsAndSidebarParticipants"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    41,
+    46,
+    "routers/api/v1/repo/repo.go:721 updateRepoUnits"
+   ],
+   [
+    26,
+    38,
+    "routers/web/repo/setting/setting.go:553 handleSettingsPostAdvanced"
+   ],
+   [
+    30,
+    36,
+    "routers/web/repo/issue_view.go:847 prepareMergeBox"
+   ],
+   [
+    25,
+    35,
+    "routers/web/repo/githttp.go:62 httpBase"
+   ],
+   [
+    22,
+    19,
+    "services/auth/source/ldap/source_sync.go:26 Sync"
+   ],
+   [
+    23,
+    13,
+    "cmd/dump.go:103 runDump"
+   ],
+   [
+    22,
+    13,
+    "routers/web/repo/issue_view.go:638 prepareIssueViewCommentsAndSidebarParticipants"
+   ]
+  ],
+  "all_over": [
+   [
+    41,
+    46,
+    "routers/api/v1/repo/repo.go:721 updateRepoUnits"
+   ],
+   [
+    30,
+    36,
+    "routers/web/repo/issue_view.go:847 prepareMergeBox"
+   ],
+   [
+    26,
+    38,
+    "routers/web/repo/setting/setting.go:553 handleSettingsPostAdvanced"
+   ],
+   [
+    25,
+    35,
+    "routers/web/repo/githttp.go:62 httpBase"
+   ],
+   [
+    23,
+    13,
+    "cmd/dump.go:103 runDump"
+   ],
+   [
+    22,
+    19,
+    "services/auth/source/ldap/source_sync.go:26 Sync"
+   ],
+   [
+    22,
+    13,
+    "routers/web/repo/issue_view.go:638 prepareIssueViewCommentsAndSidebarParticipants"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 6067,
+   "median": 2,
+   "p90": 4,
+   "p99": 10,
+   "p999": 19,
+   "max": 36
+  },
+  "stmts": {
+   "n": 6067,
+   "median": 1,
+   "p90": 4,
+   "p99": 13,
+   "p999": 21,
+   "max": 47
+  },
+  "max_stmts_within_input_limit": 27,
+  "over_inputs": 4,
+  "over_stmts": 0,
+  "over_either": 4,
+  "share_over_either": 0.0006593044338223175,
+  "depth_capped": 0,
+  "recursion_capped": 13,
+  "size_capped": 0,
+  "depth": {
+   "n": 6067,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 4,
+   "max": 5
+  },
+  "top_by_inputs": [
+   [
+    36,
+    47,
+    "models/unittest/fixtures.go:98 BeforeProcess"
+   ],
+   [
+    27,
+    40,
+    "services/context/user.go:19 ReqContextUserVisibleToDoer"
+   ],
+   [
+    27,
+    23,
+    "modules/actions/workflows.go:289 detectWorkflowMatch"
+   ],
+   [
+    24,
+    31,
+    "routers/api/v1/repo/pull.go:1098 parseCompareInfo"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    36,
+    47,
+    "models/unittest/fixtures.go:98 BeforeProcess"
+   ],
+   [
+    27,
+    40,
+    "services/context/user.go:19 ReqContextUserVisibleToDoer"
+   ],
+   [
+    24,
+    31,
+    "routers/api/v1/repo/pull.go:1098 parseCompareInfo"
+   ],
+   [
+    27,
+    23,
+    "modules/actions/workflows.go:289 detectWorkflowMatch"
+   ]
+  ],
+  "all_over": [
+   [
+    36,
+    47,
+    "models/unittest/fixtures.go:98 BeforeProcess"
+   ],
+   [
+    27,
+    40,
+    "services/context/user.go:19 ReqContextUserVisibleToDoer"
+   ],
+   [
+    27,
+    23,
+    "modules/actions/workflows.go:289 detectWorkflowMatch"
+   ],
+   [
+    24,
+    31,
+    "routers/api/v1/repo/pull.go:1098 parseCompareInfo"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 3355,
+   "median": 3,
+   "p90": 8,
+   "p99": 23,
+   "p999": 43,
+   "max": 61
+  },
+  "stmts": {
+   "n": 3355,
+   "median": 2,
+   "p90": 9,
+   "p99": 25,
+   "p999": 65,
+   "max": 73
+  },
+  "max_stmts_within_input_limit": 33,
+  "over_inputs": 41,
+  "over_stmts": 0,
+  "over_either": 41,
+  "share_over_either": 0.012220566318926976,
+  "depth_capped": 0,
+  "recursion_capped": 11,
+  "size_capped": 0,
+  "depth": {
+   "n": 3355,
+   "median": 0,
+   "p90": 2,
+   "p99": 4,
+   "p999": 5,
+   "max": 5
+  },
+  "top_by_inputs": [
+   [
+    61,
+    72,
+    "models/unittest/fixtures.go:87 BeforeProcess"
+   ],
+   [
+    51,
+    69,
+    "routers/private/hook_pre_receive.go:123 preReceiveBranch"
+   ],
+   [
+    47,
+    73,
+    "routers/api/v1/repo/repo.go:721 updateRepoUnits"
+   ],
+   [
+    43,
+    56,
+    "routers/web/auth/linkaccount.go:179 LinkAccountPostRegister"
+   ],
+   [
+    41,
+    54,
+    "services/migrations/common.go:54 CheckAndEnsureSafePR"
+   ],
+   [
+    41,
+    30,
+    "modules/actions/workflows.go:288 detectWorkflowMatch"
+   ],
+   [
+    39,
+    57,
+    "routers/web/auth/auth.go:556 SignUpPost"
+   ],
+   [
+    36,
+    33,
+    "modules/markup/markdown/math/inline_parser.go:62 Parse"
+   ],
+   [
+    35,
+    44,
+    "routers/web/repo/view_file.go:156 prepareFileView"
+   ],
+   [
+    33,
+    37,
+    "services/pull/patch.go:130 attemptMerge"
+   ],
+   [
+    32,
+    65,
+    "routers/web/repo/setting/setting.go:553 handleSettingsPostAdvanced"
+   ],
+   [
+    30,
+    44,
+    "services/context/package.go:112 determineAccessMode"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    47,
+    73,
+    "routers/api/v1/repo/repo.go:721 updateRepoUnits"
+   ],
+   [
+    61,
+    72,
+    "models/unittest/fixtures.go:87 BeforeProcess"
+   ],
+   [
+    51,
+    69,
+    "routers/private/hook_pre_receive.go:123 preReceiveBranch"
+   ],
+   [
+    32,
+    65,
+    "routers/web/repo/setting/setting.go:553 handleSettingsPostAdvanced"
+   ],
+   [
+    39,
+    57,
+    "routers/web/auth/auth.go:556 SignUpPost"
+   ],
+   [
+    43,
+    56,
+    "routers/web/auth/linkaccount.go:179 LinkAccountPostRegister"
+   ],
+   [
+    41,
+    54,
+    "services/migrations/common.go:54 CheckAndEnsureSafePR"
+   ],
+   [
+    35,
+    44,
+    "routers/web/repo/view_file.go:156 prepareFileView"
+   ],
+   [
+    30,
+    44,
+    "services/context/package.go:112 determineAccessMode"
+   ],
+   [
+    27,
+    40,
+    "services/context/user.go:16 ReqContextUserVisibleToDoer"
+   ],
+   [
+    33,
+    37,
+    "services/pull/patch.go:130 attemptMerge"
+   ],
+   [
+    30,
+    36,
+    "routers/web/repo/issue_view.go:847 prepareMergeBox"
+   ]
+  ],
+  "all_over": [
+   [
+    61,
+    72,
+    "models/unittest/fixtures.go:87 BeforeProcess"
+   ],
+   [
+    51,
+    69,
+    "routers/private/hook_pre_receive.go:123 preReceiveBranch"
+   ],
+   [
+    47,
+    73,
+    "routers/api/v1/repo/repo.go:721 updateRepoUnits"
+   ],
+   [
+    43,
+    56,
+    "routers/web/auth/linkaccount.go:179 LinkAccountPostRegister"
+   ],
+   [
+    41,
+    54,
+    "services/migrations/common.go:54 CheckAndEnsureSafePR"
+   ],
+   [
+    41,
+    30,
+    "modules/actions/workflows.go:288 detectWorkflowMatch"
+   ],
+   [
+    39,
+    57,
+    "routers/web/auth/auth.go:556 SignUpPost"
+   ],
+   [
+    36,
+    33,
+    "modules/markup/markdown/math/inline_parser.go:62 Parse"
+   ],
+   [
+    35,
+    44,
+    "routers/web/repo/view_file.go:156 prepareFileView"
+   ],
+   [
+    33,
+    37,
+    "services/pull/patch.go:130 attemptMerge"
+   ],
+   [
+    32,
+    65,
+    "routers/web/repo/setting/setting.go:553 handleSettingsPostAdvanced"
+   ],
+   [
+    30,
+    44,
+    "services/context/package.go:112 determineAccessMode"
+   ],
+   [
+    30,
+    36,
+    "routers/web/repo/issue_view.go:847 prepareMergeBox"
+   ],
+   [
+    29,
+    26,
+    "services/actions/notifier_helper.go:132 notify"
+   ],
+   [
+    28,
+    35,
+    "routers/api/v1/repo/pull.go:1023 parseCompareInfo"
+   ],
+   [
+    28,
+    33,
+    "services/repository/branch.go:172 loadOneBranch"
+   ],
+   [
+    28,
+    30,
+    "routers/web/repo/pull_merge_form.go:22 prepareMergeBoxFormProps"
+   ],
+   [
+    28,
+    24,
+    "routers/api/v1/repo/branch.go:828 EditBranchProtection"
+   ],
+   [
+    27,
+    40,
+    "services/context/user.go:16 ReqContextUserVisibleToDoer"
+   ],
+   [
+    27,
+    36,
+    "routers/web/repo/githttp.go:62 httpBase"
+   ],
+   [
+    27,
+    25,
+    "services/auth/source/ldap/source_sync.go:26 Sync"
+   ],
+   [
+    26,
+    33,
+    "models/perm/access/repo_permission.go:426 GetIndividualUserRepoPermission"
+   ],
+   [
+    26,
+    33,
+    "services/repository/archiver/archiver.go:355 ServeRepoArchive"
+   ],
+   [
+    26,
+    24,
+    "routers/web/repo/attachment.go:135 ServeAttachment"
+   ],
+   [
+    26,
+    17,
+    "routers/web/repo/issue_view.go:638 prepareIssueViewCommentsAndSidebarParticipants"
+   ],
+   [
+    24,
+    36,
+    "modules/validation/binding.go:40 AddBindingRules"
+   ],
+   [
+    24,
+    32,
+    "routers/web/auth/openid.go:363 RegisterOpenIDPost"
+   ],
+   [
+    24,
+    22,
+    "routers/private/serv.go:68 ServCommand"
+   ],
+   [
+    24,
+    19,
+    "services/context/repo.go:952 RepoRefByType"
+   ],
+   [
+    23,
+    29,
+    "routers/api/v1/repo/file.go:91 GetRawFileOrLFS"
+   ],
+   [
+    23,
+    28,
+    "routers/install/install.go:190 SubmitInstall"
+   ],
+   [
+    23,
+    27,
+    "routers/web/repo/pull.go:702 viewPullFiles"
+   ],
+   [
+    23,
+    23,
+    "services/issue/commit.go:126 UpdateIssuesCommit"
+   ],
+   [
+    23,
+    13,
+    "cmd/dump.go:103 runDump"
+   ],
+   [
+    22,
+    28,
+    "routers/web/repo/download.go:28 ServeBlobOrLFS"
+   ],
+   [
+    22,
+    23,
+    "modules/git/languagestats/language_stats_get.go:21 GetLanguageStats"
+   ],
+   [
+    22,
+    19,
+    "routers/api/v1/repo/pull.go:556 EditPullRequest"
+   ],
+   [
+    22,
+    19,
+    "routers/web/web.go:351 registerWebRoutes"
+   ],
+   [
+    22,
+    18,
+    "routers/web/repo/compare.go:161 parseCompareInfo"
+   ],
+   [
+    21,
+    24,
+    "services/context/repo.go:163 PrepareCommitFormOptions"
+   ],
+   [
+    21,
+    20,
+    "routers/web/repo/issue_comment.go:32 NewComment"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 1204,
+ "calls_in_logic_resolved": 2881,
+ "calls_in_logic_unresolved": 1306,
+ "load_seconds": 0.1,
+ "analyze_seconds": 0.1
+}

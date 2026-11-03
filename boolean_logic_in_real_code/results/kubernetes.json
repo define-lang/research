@@ -1,0 +1,1403 @@
+{
+ "name": "kubernetes",
+ "functions": 37933,
+ "functions_with_logic": 8647,
+ "pure_boolean_functions": 1,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 15376,
+   "median": 2,
+   "p90": 2,
+   "p99": 4,
+   "p999": 8,
+   "max": 14
+  },
+  "stmts": {
+   "n": 15376,
+   "median": 1,
+   "p90": 2,
+   "p99": 4,
+   "p999": 9,
+   "max": 20
+  },
+  "max_stmts_within_input_limit": 20,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 8647,
+   "median": 2,
+   "p90": 5,
+   "p99": 13,
+   "p999": 26,
+   "max": 60
+  },
+  "stmts": {
+   "n": 8647,
+   "median": 1,
+   "p90": 5,
+   "p99": 12,
+   "p999": 28,
+   "max": 52
+  },
+  "max_stmts_within_input_limit": 28,
+  "over_inputs": 23,
+  "over_stmts": 0,
+  "over_either": 23,
+  "share_over_either": 0.0026598820400138778,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    60,
+    52,
+    "pkg/kubelet/apis/config/validation/validation.go:57 ValidateKubeletConfiguration"
+   ],
+   [
+    47,
+    40,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1033 ValidateCustomResourceDefinitionOpenAPISchema"
+   ],
+   [
+    44,
+    41,
+    "pkg/kubelet/kubelet_pods.go:2355 convertToAPIContainerStatuses"
+   ],
+   [
+    29,
+    40,
+    "pkg/proxy/winkernel/proxier.go:1186 syncProxyRules"
+   ],
+   [
+    28,
+    37,
+    "pkg/proxy/iptables/proxier.go:625 syncProxyRules"
+   ],
+   [
+    27,
+    30,
+    "pkg/proxy/nftables/proxier.go:1163 syncProxyRules"
+   ],
+   [
+    27,
+    29,
+    "pkg/kubelet/prober/worker.go:215 doProbe"
+   ],
+   [
+    27,
+    26,
+    "pkg/kubelet/kubelet.go:2065 SyncPod"
+   ],
+   [
+    26,
+    26,
+    "pkg/api/pod/warnings.go:95 warningsForPodSpecAndMeta"
+   ],
+   [
+    26,
+    21,
+    "pkg/controller/job/job_controller.go:924 syncJob"
+   ],
+   [
+    25,
+    29,
+    "pkg/apis/batch/validation/validation.go:485 validateJobStatus"
+   ],
+   [
+    23,
+    19,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1320 computePodActions"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    60,
+    52,
+    "pkg/kubelet/apis/config/validation/validation.go:57 ValidateKubeletConfiguration"
+   ],
+   [
+    44,
+    41,
+    "pkg/kubelet/kubelet_pods.go:2355 convertToAPIContainerStatuses"
+   ],
+   [
+    47,
+    40,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1033 ValidateCustomResourceDefinitionOpenAPISchema"
+   ],
+   [
+    29,
+    40,
+    "pkg/proxy/winkernel/proxier.go:1186 syncProxyRules"
+   ],
+   [
+    28,
+    37,
+    "pkg/proxy/iptables/proxier.go:625 syncProxyRules"
+   ],
+   [
+    27,
+    30,
+    "pkg/proxy/nftables/proxier.go:1163 syncProxyRules"
+   ],
+   [
+    27,
+    29,
+    "pkg/kubelet/prober/worker.go:215 doProbe"
+   ],
+   [
+    25,
+    29,
+    "pkg/apis/batch/validation/validation.go:485 validateJobStatus"
+   ],
+   [
+    27,
+    26,
+    "pkg/kubelet/kubelet.go:2065 SyncPod"
+   ],
+   [
+    26,
+    26,
+    "pkg/api/pod/warnings.go:95 warningsForPodSpecAndMeta"
+   ],
+   [
+    22,
+    26,
+    "staging/src/k8s.io/dynamic-resource-allocation/resourceslice/resourceslicecontroller.go:761 syncPool"
+   ],
+   [
+    22,
+    25,
+    "pkg/apis/core/validation/validation.go:6518 ValidatePodResize"
+   ]
+  ],
+  "all_over": [
+   [
+    60,
+    52,
+    "pkg/kubelet/apis/config/validation/validation.go:57 ValidateKubeletConfiguration"
+   ],
+   [
+    47,
+    40,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1033 ValidateCustomResourceDefinitionOpenAPISchema"
+   ],
+   [
+    44,
+    41,
+    "pkg/kubelet/kubelet_pods.go:2355 convertToAPIContainerStatuses"
+   ],
+   [
+    29,
+    40,
+    "pkg/proxy/winkernel/proxier.go:1186 syncProxyRules"
+   ],
+   [
+    28,
+    37,
+    "pkg/proxy/iptables/proxier.go:625 syncProxyRules"
+   ],
+   [
+    27,
+    30,
+    "pkg/proxy/nftables/proxier.go:1163 syncProxyRules"
+   ],
+   [
+    27,
+    29,
+    "pkg/kubelet/prober/worker.go:215 doProbe"
+   ],
+   [
+    27,
+    26,
+    "pkg/kubelet/kubelet.go:2065 SyncPod"
+   ],
+   [
+    26,
+    26,
+    "pkg/api/pod/warnings.go:95 warningsForPodSpecAndMeta"
+   ],
+   [
+    26,
+    21,
+    "pkg/controller/job/job_controller.go:924 syncJob"
+   ],
+   [
+    25,
+    29,
+    "pkg/apis/batch/validation/validation.go:485 validateJobStatus"
+   ],
+   [
+    23,
+    19,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1320 computePodActions"
+   ],
+   [
+    23,
+    15,
+    "pkg/registry/core/serviceaccount/storage/token.go:94 Create"
+   ],
+   [
+    23,
+    14,
+    "staging/src/k8s.io/apimachinery/pkg/util/validation/field/error_matcher.go:80 Matches"
+   ],
+   [
+    22,
+    26,
+    "staging/src/k8s.io/dynamic-resource-allocation/resourceslice/resourceslicecontroller.go:761 syncPool"
+   ],
+   [
+    22,
+    25,
+    "pkg/apis/core/validation/validation.go:6518 ValidatePodResize"
+   ],
+   [
+    22,
+    16,
+    "pkg/printers/internalversion/printers.go:959 printPod"
+   ],
+   [
+    21,
+    25,
+    "staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go:368 ParseQuantity"
+   ],
+   [
+    21,
+    21,
+    "pkg/api/pod/util.go:123 VisitPodSecretNames"
+   ],
+   [
+    21,
+    21,
+    "pkg/api/v1/pod/util.go:113 VisitPodSecretNames"
+   ],
+   [
+    21,
+    20,
+    "pkg/api/v1/persistentvolume/util.go:47 VisitPVSecretNames"
+   ],
+   [
+    21,
+    17,
+    "pkg/scheduler/framework/plugins/dynamicresources/dynamicresources.go:936 Filter"
+   ],
+   [
+    21,
+    17,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:355 validateCustomResourceDefinitionSpec"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 16839,
+   "median": 2,
+   "p90": 3,
+   "p99": 10,
+   "p999": 34,
+   "max": 43
+  },
+  "stmts": {
+   "n": 16839,
+   "median": 1,
+   "p90": 4,
+   "p99": 12,
+   "p999": 39,
+   "max": 54
+  },
+  "max_stmts_within_input_limit": 30,
+  "over_inputs": 41,
+  "over_stmts": 0,
+  "over_either": 41,
+  "share_over_either": 0.0024348239206603717,
+  "depth_capped": 0,
+  "recursion_capped": 84,
+  "size_capped": 0,
+  "depth": {
+   "n": 16839,
+   "median": 0,
+   "p90": 1,
+   "p99": 2,
+   "p999": 4,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    43,
+    54,
+    "pkg/kubelet/prober/worker.go:158 run (lone call)"
+   ],
+   [
+    40,
+    44,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1429 computePodActions"
+   ],
+   [
+    39,
+    54,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go:1022 startRequest (lone call)"
+   ],
+   [
+    39,
+    53,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/rule.go:30 matchesFlowSchema (lone call)"
+   ],
+   [
+    38,
+    44,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1347 emitValidationForChild"
+   ],
+   [
+    36,
+    40,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:170 Filter"
+   ],
+   [
+    36,
+    32,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/validators/customvalidation.go:195 checkFunction"
+   ],
+   [
+    35,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1253 emitValidationForChild"
+   ],
+   [
+    35,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1263 emitValidationForChild"
+   ],
+   [
+    35,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1400 emitValidationForChild"
+   ],
+   [
+    35,
+    36,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:296 validateClaimValidationRules"
+   ],
+   [
+    35,
+    36,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:382 validateClaimMappings"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    43,
+    54,
+    "pkg/kubelet/prober/worker.go:158 run (lone call)"
+   ],
+   [
+    39,
+    54,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go:1022 startRequest (lone call)"
+   ],
+   [
+    39,
+    53,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/rule.go:30 matchesFlowSchema (lone call)"
+   ],
+   [
+    31,
+    49,
+    "pkg/controller/statefulset/stateful_pod_control.go:266 ClaimsMatchRetentionPolicy"
+   ],
+   [
+    31,
+    49,
+    "pkg/controller/statefulset/stateful_pod_control.go:293 UpdatePodClaimForRetentionPolicy"
+   ],
+   [
+    29,
+    47,
+    "staging/src/k8s.io/apiserver/pkg/storage/cacher/cache_watcher.go:423 convertToWatchEvent"
+   ],
+   [
+    40,
+    44,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1429 computePodActions"
+   ],
+   [
+    38,
+    44,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1347 emitValidationForChild"
+   ],
+   [
+    28,
+    43,
+    "staging/src/k8s.io/cloud-provider/controllers/service/controller.go:148 New"
+   ],
+   [
+    31,
+    42,
+    "staging/src/k8s.io/apiserver/pkg/audit/policy/checker.go:64 EvaluatePolicyRule (lone call)"
+   ],
+   [
+    33,
+    41,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1851 requireValidPropertyType"
+   ],
+   [
+    25,
+    41,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/schema/cel/validation.go:460 validateExpressions"
+   ]
+  ],
+  "all_over": [
+   [
+    43,
+    54,
+    "pkg/kubelet/prober/worker.go:158 run (lone call)"
+   ],
+   [
+    40,
+    44,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1429 computePodActions"
+   ],
+   [
+    39,
+    54,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go:1022 startRequest (lone call)"
+   ],
+   [
+    39,
+    53,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/rule.go:30 matchesFlowSchema (lone call)"
+   ],
+   [
+    38,
+    44,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1347 emitValidationForChild"
+   ],
+   [
+    36,
+    40,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:170 Filter"
+   ],
+   [
+    36,
+    32,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/validators/customvalidation.go:195 checkFunction"
+   ],
+   [
+    35,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1253 emitValidationForChild"
+   ],
+   [
+    35,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1263 emitValidationForChild"
+   ],
+   [
+    35,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1400 emitValidationForChild"
+   ],
+   [
+    35,
+    36,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:296 validateClaimValidationRules"
+   ],
+   [
+    35,
+    36,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:382 validateClaimMappings"
+   ],
+   [
+    35,
+    35,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:309 validateClaimMappings"
+   ],
+   [
+    35,
+    35,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:310 validateClaimMappings"
+   ],
+   [
+    34,
+    39,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1181 emitValidationFunction"
+   ],
+   [
+    34,
+    38,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1087 emitRegisterFunction (lone call)"
+   ],
+   [
+    34,
+    38,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1226 emitValidationForChild (lone call)"
+   ],
+   [
+    34,
+    34,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:415 anyUsesEmailVerifiedClaim (lone call)"
+   ],
+   [
+    33,
+    41,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1851 requireValidPropertyType"
+   ],
+   [
+    32,
+    40,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:355 validateCustomResourceDefinitionSpec (lone call)"
+   ],
+   [
+    32,
+    36,
+    "staging/src/k8s.io/apimachinery/pkg/util/validation/field/error_matcher.go:358 Test (lone call)"
+   ],
+   [
+    32,
+    27,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/validators/customvalidation.go:209 signatureMatches"
+   ],
+   [
+    31,
+    49,
+    "pkg/controller/statefulset/stateful_pod_control.go:266 ClaimsMatchRetentionPolicy"
+   ],
+   [
+    31,
+    49,
+    "pkg/controller/statefulset/stateful_pod_control.go:293 UpdatePodClaimForRetentionPolicy"
+   ],
+   [
+    31,
+    42,
+    "staging/src/k8s.io/apiserver/pkg/audit/policy/checker.go:64 EvaluatePolicyRule (lone call)"
+   ],
+   [
+    29,
+    47,
+    "staging/src/k8s.io/apiserver/pkg/storage/cacher/cache_watcher.go:423 convertToWatchEvent"
+   ],
+   [
+    28,
+    43,
+    "staging/src/k8s.io/cloud-provider/controllers/service/controller.go:148 New"
+   ],
+   [
+    26,
+    33,
+    "pkg/controller/endpointslicemirroring/reconciler.go:334 totalChanges"
+   ],
+   [
+    26,
+    33,
+    "staging/src/k8s.io/endpointslice/reconciler.go:521 reconcileByPortMapping"
+   ],
+   [
+    26,
+    22,
+    "staging/src/k8s.io/apimachinery/pkg/runtime/converter.go:875 structToUnstructuredTopLevel"
+   ],
+   [
+    25,
+    41,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/schema/cel/validation.go:460 validateExpressions"
+   ],
+   [
+    24,
+    35,
+    "pkg/controller/certificates/cleaner/cleaner.go:116 handle"
+   ],
+   [
+    24,
+    24,
+    "pkg/api/pod/util.go:1536 dropDisabledAtomicWriteVolumeUserFields (lone call)"
+   ],
+   [
+    23,
+    30,
+    "pkg/controller/storageversionmigrator/storageversionmigrator.go:280 runMigration (lone call)"
+   ],
+   [
+    23,
+    30,
+    "pkg/controller/storageversionmigrator/storageversionmigrator.go:414 isRetriableError"
+   ],
+   [
+    23,
+    21,
+    "pkg/kubelet/kuberuntime/kuberuntime_container.go:1224 computeInitContainerActions"
+   ],
+   [
+    23,
+    21,
+    "pkg/kubelet/kuberuntime/kuberuntime_container.go:1267 computeInitContainerActions"
+   ],
+   [
+    22,
+    31,
+    "pkg/auth/authorizer/abac/abac.go:232 Authorize (lone call)"
+   ],
+   [
+    21,
+    21,
+    "pkg/kubelet/kubelet_pods.go:2819 convertToAPIContainerStatuses"
+   ],
+   [
+    21,
+    20,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1320 computePodActions (lone call)"
+   ],
+   [
+    21,
+    12,
+    "pkg/controller/garbagecollector/graph_builder.go:1001 getAlternateOwnerIdentity"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 9182,
+   "median": 2,
+   "p90": 7,
+   "p99": 23,
+   "p999": 44,
+   "max": 107
+  },
+  "stmts": {
+   "n": 9182,
+   "median": 2,
+   "p90": 8,
+   "p99": 27,
+   "p999": 55,
+   "max": 169
+  },
+  "max_stmts_within_input_limit": 43,
+  "over_inputs": 113,
+  "over_stmts": 0,
+  "over_either": 113,
+  "share_over_either": 0.012306686996297103,
+  "depth_capped": 0,
+  "recursion_capped": 61,
+  "size_capped": 0,
+  "depth": {
+   "n": 9182,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 4,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    107,
+    169,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1226 emitValidationForChild"
+   ],
+   [
+    94,
+    113,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:302 validateClaimMappings"
+   ],
+   [
+    80,
+    91,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1320 computePodActions"
+   ],
+   [
+    67,
+    78,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:355 validateCustomResourceDefinitionSpec"
+   ],
+   [
+    66,
+    64,
+    "pkg/kubelet/kubelet_pods.go:2355 convertToAPIContainerStatuses"
+   ],
+   [
+    65,
+    57,
+    "pkg/kubelet/apis/config/validation/validation.go:57 ValidateKubeletConfiguration"
+   ],
+   [
+    52,
+    43,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1033 ValidateCustomResourceDefinitionOpenAPISchema"
+   ],
+   [
+    46,
+    54,
+    "pkg/kubelet/prober/worker.go:215 doProbe"
+   ],
+   [
+    46,
+    37,
+    "pkg/controller/job/job_controller.go:924 syncJob"
+   ],
+   [
+    44,
+    55,
+    "pkg/kubelet/prober/worker.go:158 run"
+   ],
+   [
+    42,
+    65,
+    "pkg/controller/statefulset/stateful_pod_control.go:275 UpdatePodClaimForRetentionPolicy"
+   ],
+   [
+    42,
+    57,
+    "pkg/proxy/winkernel/proxier.go:1186 syncProxyRules"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    107,
+    169,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1226 emitValidationForChild"
+   ],
+   [
+    94,
+    113,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:302 validateClaimMappings"
+   ],
+   [
+    80,
+    91,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1320 computePodActions"
+   ],
+   [
+    67,
+    78,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:355 validateCustomResourceDefinitionSpec"
+   ],
+   [
+    42,
+    65,
+    "pkg/controller/statefulset/stateful_pod_control.go:275 UpdatePodClaimForRetentionPolicy"
+   ],
+   [
+    66,
+    64,
+    "pkg/kubelet/kubelet_pods.go:2355 convertToAPIContainerStatuses"
+   ],
+   [
+    65,
+    57,
+    "pkg/kubelet/apis/config/validation/validation.go:57 ValidateKubeletConfiguration"
+   ],
+   [
+    42,
+    57,
+    "pkg/proxy/winkernel/proxier.go:1186 syncProxyRules"
+   ],
+   [
+    35,
+    56,
+    "staging/src/k8s.io/cloud-provider/controllers/service/controller.go:103 New"
+   ],
+   [
+    44,
+    55,
+    "pkg/kubelet/prober/worker.go:158 run"
+   ],
+   [
+    46,
+    54,
+    "pkg/kubelet/prober/worker.go:215 doProbe"
+   ],
+   [
+    39,
+    54,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go:1022 startRequest"
+   ]
+  ],
+  "all_over": [
+   [
+    107,
+    169,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1226 emitValidationForChild"
+   ],
+   [
+    94,
+    113,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:302 validateClaimMappings"
+   ],
+   [
+    80,
+    91,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1320 computePodActions"
+   ],
+   [
+    67,
+    78,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:355 validateCustomResourceDefinitionSpec"
+   ],
+   [
+    66,
+    64,
+    "pkg/kubelet/kubelet_pods.go:2355 convertToAPIContainerStatuses"
+   ],
+   [
+    65,
+    57,
+    "pkg/kubelet/apis/config/validation/validation.go:57 ValidateKubeletConfiguration"
+   ],
+   [
+    52,
+    43,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1033 ValidateCustomResourceDefinitionOpenAPISchema"
+   ],
+   [
+    46,
+    54,
+    "pkg/kubelet/prober/worker.go:215 doProbe"
+   ],
+   [
+    46,
+    37,
+    "pkg/controller/job/job_controller.go:924 syncJob"
+   ],
+   [
+    44,
+    55,
+    "pkg/kubelet/prober/worker.go:158 run"
+   ],
+   [
+    42,
+    65,
+    "pkg/controller/statefulset/stateful_pod_control.go:275 UpdatePodClaimForRetentionPolicy"
+   ],
+   [
+    42,
+    57,
+    "pkg/proxy/winkernel/proxier.go:1186 syncProxyRules"
+   ],
+   [
+    41,
+    50,
+    "pkg/kubelet/kuberuntime/kuberuntime_container.go:1072 computeInitContainerActions"
+   ],
+   [
+    40,
+    48,
+    "pkg/proxy/iptables/proxier.go:625 syncProxyRules"
+   ],
+   [
+    40,
+    41,
+    "pkg/proxy/nftables/proxier.go:1163 syncProxyRules"
+   ],
+   [
+    40,
+    24,
+    "pkg/controller/garbagecollector/graph_builder.go:960 getAlternateOwnerIdentity"
+   ],
+   [
+    39,
+    54,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/apf_controller.go:1022 startRequest"
+   ],
+   [
+    39,
+    53,
+    "staging/src/k8s.io/apiserver/pkg/util/flowcontrol/rule.go:30 matchesFlowSchema"
+   ],
+   [
+    39,
+    38,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:246 validateClaimValidationRules"
+   ],
+   [
+    39,
+    37,
+    "staging/src/k8s.io/apimachinery/pkg/conversion/queryparams/convert.go:158 convertStruct"
+   ],
+   [
+    38,
+    43,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1087 emitRegisterFunction"
+   ],
+   [
+    38,
+    43,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1180 emitValidationFunction"
+   ],
+   [
+    37,
+    37,
+    "pkg/kubelet/kuberuntime/kuberuntime_manager.go:1624 SyncPod"
+   ],
+   [
+    36,
+    43,
+    "pkg/controller/endpoint/endpoints_controller.go:355 syncService"
+   ],
+   [
+    36,
+    43,
+    "pkg/controller/job/job_controller.go:1319 trackJobStatusAndRemoveFinalizers"
+   ],
+   [
+    36,
+    40,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:160 Filter"
+   ],
+   [
+    36,
+    32,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/validators/customvalidation.go:183 checkFunction"
+   ],
+   [
+    35,
+    56,
+    "staging/src/k8s.io/cloud-provider/controllers/service/controller.go:103 New"
+   ],
+   [
+    35,
+    54,
+    "pkg/scheduler/framework/plugins/interpodaffinity/filtering.go:828 Filter"
+   ],
+   [
+    35,
+    38,
+    "pkg/registry/core/service/strategy.go:241 dropTypeDependentFields"
+   ],
+   [
+    35,
+    38,
+    "staging/src/k8s.io/apimachinery/pkg/util/validation/field/error_matcher.go:358 Test"
+   ],
+   [
+    35,
+    34,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/lint_rules.go:99 requiredAndOptional"
+   ],
+   [
+    35,
+    29,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/validators/customvalidation.go:205 signatureMatches"
+   ],
+   [
+    34,
+    53,
+    "pkg/controller/statefulset/stateful_pod_control.go:252 ClaimsMatchRetentionPolicy"
+   ],
+   [
+    34,
+    38,
+    "staging/src/k8s.io/endpointslice/reconciler.go:495 reconcileByPortMapping"
+   ],
+   [
+    34,
+    34,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:415 anyUsesEmailVerifiedClaim"
+   ],
+   [
+    34,
+    28,
+    "staging/src/k8s.io/apimachinery/pkg/runtime/converter.go:855 structToUnstructuredTopLevel"
+   ],
+   [
+    33,
+    49,
+    "pkg/api/pod/util.go:1030 dropDisabledPodStatusFields"
+   ],
+   [
+    33,
+    44,
+    "pkg/controller/storageversionmigrator/storageversionmigrator.go:280 runMigration"
+   ],
+   [
+    33,
+    41,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1850 requireValidPropertyType"
+   ],
+   [
+    33,
+    31,
+    "pkg/kubelet/kubelet.go:2065 SyncPod"
+   ],
+   [
+    33,
+    22,
+    "pkg/kubelet/server/auth.go:83 GetRequestAttributes"
+   ],
+   [
+    32,
+    46,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/schema/cel/validation.go:350 validateExpressions"
+   ],
+   [
+    32,
+    38,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1732 specHasKubernetesExtensions"
+   ],
+   [
+    32,
+    38,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/validation/validation.go:1908 specHasInvalidTypes"
+   ],
+   [
+    32,
+    33,
+    "pkg/registry/core/service/storage/alloc.go:102 initIPFamilyFields"
+   ],
+   [
+    31,
+    42,
+    "staging/src/k8s.io/apiserver/pkg/audit/policy/checker.go:64 EvaluatePolicyRule"
+   ],
+   [
+    31,
+    37,
+    "pkg/controller/statefulset/stateful_set_utils.go:256 isClaimOwnerUpToDate"
+   ],
+   [
+    31,
+    36,
+    "pkg/kubelet/kubelet_pods.go:1703 getPhase"
+   ],
+   [
+    30,
+    48,
+    "staging/src/k8s.io/apiserver/pkg/storage/cacher/cache_watcher.go:411 convertToWatchEvent"
+   ],
+   [
+    30,
+    22,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/validation.go:1029 hasValidationsImpl"
+   ],
+   [
+    29,
+    42,
+    "staging/src/k8s.io/dynamic-resource-allocation/structured/internal/experimental/allocator_experimental.go:1659 allocateDevice"
+   ],
+   [
+    29,
+    42,
+    "staging/src/k8s.io/dynamic-resource-allocation/structured/internal/incubating/allocator_incubating.go:1659 allocateDevice"
+   ],
+   [
+    29,
+    31,
+    "pkg/kubelet/kubelet_pods.go:308 makeMounts"
+   ],
+   [
+    29,
+    23,
+    "pkg/printers/internalversion/printers.go:959 printPod"
+   ],
+   [
+    29,
+    22,
+    "staging/src/k8s.io/apimachinery/pkg/util/validation/field/error_matcher.go:80 Matches"
+   ],
+   [
+    28,
+    42,
+    "pkg/apis/batch/validation/validation.go:485 validateJobStatus"
+   ],
+   [
+    28,
+    42,
+    "staging/src/k8s.io/code-generator/cmd/go-to-protobuf/protobuf/parser.go:324 Visit"
+   ],
+   [
+    28,
+    30,
+    "pkg/scheduler/backend/queue/scheduling_queue.go:1822 moveEntitiesToActiveOrBackoffQueue"
+   ],
+   [
+    28,
+    29,
+    "pkg/api/pod/util.go:411 GetValidationOptionsFromPodSpecAndMeta"
+   ],
+   [
+    27,
+    30,
+    "pkg/apis/core/validation/validation.go:6518 ValidatePodResize"
+   ],
+   [
+    27,
+    29,
+    "pkg/registry/core/pod/storage/eviction.go:130 Create"
+   ],
+   [
+    27,
+    29,
+    "pkg/scheduler/framework/plugins/dynamicresources/dynamicresources.go:936 Filter"
+   ],
+   [
+    27,
+    19,
+    "pkg/registry/core/serviceaccount/storage/token.go:94 Create"
+   ],
+   [
+    26,
+    35,
+    "staging/src/k8s.io/endpointslice/reconciler.go:159 reconcileByAddressType"
+   ],
+   [
+    26,
+    33,
+    "pkg/controller/endpointslicemirroring/reconciler.go:320 totalChanges"
+   ],
+   [
+    26,
+    28,
+    "pkg/kubelet/volumemanager/cache/desired_state_of_world.go:261 AddPodToVolume"
+   ],
+   [
+    26,
+    27,
+    "pkg/api/pod/warnings.go:95 warningsForPodSpecAndMeta"
+   ],
+   [
+    26,
+    26,
+    "pkg/controller/imperativeevictionresponder/imperative_eviction_responder_controller.go:276 sync"
+   ],
+   [
+    26,
+    26,
+    "staging/src/k8s.io/code-generator/cmd/validation-gen/generators/targets.go:294 GetTargets"
+   ],
+   [
+    26,
+    26,
+    "staging/src/k8s.io/endpointslice/util/controller_utils.go:299 EndpointsEqualBeyondHash"
+   ],
+   [
+    25,
+    35,
+    "staging/src/k8s.io/dynamic-resource-allocation/structured/internal/stable/allocator_stable.go:1399 allocateDevice"
+   ],
+   [
+    25,
+    26,
+    "pkg/kubelet/eviction/eviction_manager.go:146 Admit"
+   ],
+   [
+    24,
+    35,
+    "pkg/api/pod/util.go:743 dropDisabledFields"
+   ],
+   [
+    24,
+    35,
+    "pkg/controller/certificates/cleaner/cleaner.go:114 handle"
+   ],
+   [
+    24,
+    30,
+    "pkg/controller/imperativeevictionresponder/imperative_eviction_responder_controller.go:90 NewController"
+   ],
+   [
+    24,
+    28,
+    "pkg/scheduler/framework/plugins/volumerestrictions/volume_restrictions.go:280 satisfyVolumeConflicts"
+   ],
+   [
+    24,
+    28,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/apiserver/customresource_handler.go:229 ServeHTTP"
+   ],
+   [
+    24,
+    25,
+    "staging/src/k8s.io/client-go/rest/request.go:1035 request"
+   ],
+   [
+    24,
+    24,
+    "pkg/api/pod/util.go:1536 dropDisabledAtomicWriteVolumeUserFields"
+   ],
+   [
+    24,
+    23,
+    "pkg/registry/core/service/storage/alloc.go:669 updateClusterIPs"
+   ],
+   [
+    24,
+    23,
+    "staging/src/k8s.io/apiserver/pkg/storage/testing/correctness/types.go:87 Describe"
+   ],
+   [
+    24,
+    22,
+    "pkg/controller/cronjob/cronjob_controllerv2.go:449 syncCronJob"
+   ],
+   [
+    24,
+    22,
+    "pkg/proxy/ipvs/proxier.go:658 syncProxyRules"
+   ],
+   [
+    24,
+    20,
+    "pkg/kubelet/pod_workers.go:772 UpdatePod"
+   ],
+   [
+    24,
+    20,
+    "staging/src/k8s.io/code-generator/cmd/conversion-gen/generators/conversion.go:940 doStruct"
+   ],
+   [
+    23,
+    40,
+    "pkg/controller/statefulset/stateful_set_control.go:609 updateStatefulSet"
+   ],
+   [
+    23,
+    30,
+    "pkg/controller/storageversionmigrator/storageversionmigrator.go:413 isRetriableError"
+   ],
+   [
+    23,
+    29,
+    "pkg/kubelet/stats/cadvisor_stats_provider.go:437 filterTerminatedContainerInfoAndAssembleByPodCgroupKey"
+   ],
+   [
+    23,
+    28,
+    "pkg/scheduler/framework/plugins/volumerestrictions/volume_restrictions.go:322 Filter"
+   ],
+   [
+    23,
+    23,
+    "pkg/kubelet/status/status_manager.go:853 checkContainerStateTransition"
+   ],
+   [
+    23,
+    18,
+    "pkg/scheduler/framework/plugins/helper/resource_fit.go:124 FitsRequest"
+   ],
+   [
+    22,
+    35,
+    "pkg/kubelet/eviction/eviction_manager.go:516 localStorageEviction"
+   ],
+   [
+    22,
+    31,
+    "pkg/auth/authorizer/abac/abac.go:232 Authorize"
+   ],
+   [
+    22,
+    27,
+    "pkg/auth/authorizer/abac/abac.go:124 matches"
+   ],
+   [
+    22,
+    27,
+    "pkg/controller/statefulset/stateful_set_control.go:421 processReplica"
+   ],
+   [
+    22,
+    27,
+    "pkg/scheduler/framework/plugins/volumerestrictions/volume_restrictions.go:382 isSchedulableAfterAssignedPodDeleted"
+   ],
+   [
+    22,
+    26,
+    "staging/src/k8s.io/dynamic-resource-allocation/resourceslice/resourceslicecontroller.go:761 syncPool"
+   ],
+   [
+    22,
+    24,
+    "pkg/apis/lifecycle/validation/validation.go:483 ValidateEvictionStatusResponder"
+   ],
+   [
+    22,
+    24,
+    "pkg/controller/resourceclaim/controller.go:1462 syncClaim"
+   ],
+   [
+    22,
+    23,
+    "pkg/controller/resourcepoolstatusrequest/controller.go:349 calculatePoolStatus"
+   ],
+   [
+    22,
+    23,
+    "pkg/scheduler/framework/plugins/noderesources/fit.go:470 isSchedulableAfterNodeChange"
+   ],
+   [
+    22,
+    23,
+    "staging/src/k8s.io/apiextensions-apiserver/pkg/controller/openapi/builder/builder.go:107 generateBuilder"
+   ],
+   [
+    22,
+    20,
+    "pkg/apis/core/validation/validation.go:6089 ValidateInitContainerStateTransition"
+   ],
+   [
+    22,
+    19,
+    "plugin/pkg/admission/nodedeclaredfeatures/admission.go:216 validateNodeAllocatableDRA"
+   ],
+   [
+    21,
+    32,
+    "pkg/registry/batch/job/strategy.go:321 getStatusValidationOptions"
+   ],
+   [
+    21,
+    29,
+    "staging/src/k8s.io/client-go/tools/watch/retrywatcher.go:112 doReceive"
+   ],
+   [
+    21,
+    25,
+    "staging/src/k8s.io/apimachinery/pkg/api/resource/quantity.go:368 ParseQuantity"
+   ],
+   [
+    21,
+    22,
+    "pkg/scheduler/framework/plugins/nodeunschedulable/node_unschedulable.go:141 Filter"
+   ],
+   [
+    21,
+    21,
+    "pkg/api/pod/util.go:123 VisitPodSecretNames"
+   ],
+   [
+    21,
+    21,
+    "pkg/api/v1/pod/util.go:113 VisitPodSecretNames"
+   ],
+   [
+    21,
+    20,
+    "pkg/api/v1/persistentvolume/util.go:47 VisitPVSecretNames"
+   ],
+   [
+    21,
+    15,
+    "staging/src/k8s.io/apiserver/pkg/apis/apiserver/validation/validation.go:428 hasSelectExp"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 3426,
+ "calls_in_logic_resolved": 4961,
+ "calls_in_logic_unresolved": 3588,
+ "load_seconds": 0.3,
+ "analyze_seconds": 0.3
+}

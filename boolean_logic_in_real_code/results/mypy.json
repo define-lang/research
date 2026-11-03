@@ -1,0 +1,2413 @@
+{
+ "name": "mypy",
+ "functions": 8721,
+ "functions_with_logic": 2384,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 5358,
+   "median": 2,
+   "p90": 3,
+   "p99": 6,
+   "p999": 10,
+   "max": 12
+  },
+  "stmts": {
+   "n": 5358,
+   "median": 1,
+   "p90": 3,
+   "p99": 7,
+   "p999": 13,
+   "max": 19
+  },
+  "max_stmts_within_input_limit": 19,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 2384,
+   "median": 3,
+   "p90": 9,
+   "p99": 24,
+   "p999": 40,
+   "max": 45
+  },
+  "stmts": {
+   "n": 2384,
+   "median": 2,
+   "p90": 8,
+   "p99": 25,
+   "p999": 44,
+   "max": 50
+  },
+  "max_stmts_within_input_limit": 24,
+  "over_inputs": 40,
+  "over_stmts": 0,
+  "over_either": 40,
+  "share_over_either": 0.016778523489932886,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    45,
+    34,
+    "mypy/meet.py:352 is_overlapping_types"
+   ],
+   [
+    40,
+    49,
+    "mypy/checker.py:3477 check_assignment"
+   ],
+   [
+    40,
+    36,
+    "mypy/checkexpr.py:1696 check_callable_call"
+   ],
+   [
+    38,
+    50,
+    "mypy/checker.py:1475 check_func_def"
+   ],
+   [
+    35,
+    33,
+    "mypy/checkexpr.py:522 visit_call_expr_inner"
+   ],
+   [
+    34,
+    43,
+    "mypy/checkmember.py:1138 analyze_class_attribute_access"
+   ],
+   [
+    34,
+    40,
+    "mypy/constraints.py:767 visit_instance"
+   ],
+   [
+    34,
+    38,
+    "mypy/messages.py:2198 report_protocol_problems"
+   ],
+   [
+    34,
+    34,
+    "mypy/checker.py:2642 check_override"
+   ],
+   [
+    33,
+    37,
+    "mypy/subtypes.py:1898 are_parameters_compatible"
+   ],
+   [
+    33,
+    36,
+    "mypy/stubdoc.py:187 add_token"
+   ],
+   [
+    32,
+    44,
+    "mypy/semanal.py:4191 check_and_set_up_type_alias"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    38,
+    50,
+    "mypy/checker.py:1475 check_func_def"
+   ],
+   [
+    40,
+    49,
+    "mypy/checker.py:3477 check_assignment"
+   ],
+   [
+    32,
+    44,
+    "mypy/semanal.py:4191 check_and_set_up_type_alias"
+   ],
+   [
+    34,
+    43,
+    "mypy/checkmember.py:1138 analyze_class_attribute_access"
+   ],
+   [
+    34,
+    40,
+    "mypy/constraints.py:767 visit_instance"
+   ],
+   [
+    34,
+    38,
+    "mypy/messages.py:2198 report_protocol_problems"
+   ],
+   [
+    33,
+    37,
+    "mypy/subtypes.py:1898 are_parameters_compatible"
+   ],
+   [
+    40,
+    36,
+    "mypy/checkexpr.py:1696 check_callable_call"
+   ],
+   [
+    33,
+    36,
+    "mypy/stubdoc.py:187 add_token"
+   ],
+   [
+    45,
+    34,
+    "mypy/meet.py:352 is_overlapping_types"
+   ],
+   [
+    34,
+    34,
+    "mypy/checker.py:2642 check_override"
+   ],
+   [
+    27,
+    34,
+    "mypy/checkmember.py:863 analyze_var"
+   ]
+  ],
+  "all_over": [
+   [
+    45,
+    34,
+    "mypy/meet.py:352 is_overlapping_types"
+   ],
+   [
+    40,
+    49,
+    "mypy/checker.py:3477 check_assignment"
+   ],
+   [
+    40,
+    36,
+    "mypy/checkexpr.py:1696 check_callable_call"
+   ],
+   [
+    38,
+    50,
+    "mypy/checker.py:1475 check_func_def"
+   ],
+   [
+    35,
+    33,
+    "mypy/checkexpr.py:522 visit_call_expr_inner"
+   ],
+   [
+    34,
+    43,
+    "mypy/checkmember.py:1138 analyze_class_attribute_access"
+   ],
+   [
+    34,
+    40,
+    "mypy/constraints.py:767 visit_instance"
+   ],
+   [
+    34,
+    38,
+    "mypy/messages.py:2198 report_protocol_problems"
+   ],
+   [
+    34,
+    34,
+    "mypy/checker.py:2642 check_override"
+   ],
+   [
+    33,
+    37,
+    "mypy/subtypes.py:1898 are_parameters_compatible"
+   ],
+   [
+    33,
+    36,
+    "mypy/stubdoc.py:187 add_token"
+   ],
+   [
+    32,
+    44,
+    "mypy/semanal.py:4191 check_and_set_up_type_alias"
+   ],
+   [
+    32,
+    22,
+    "mypy/checkexpr.py:3937 dangerous_comparison"
+   ],
+   [
+    29,
+    28,
+    "mypy/subtypes.py:499 visit_instance"
+   ],
+   [
+    27,
+    34,
+    "mypy/checkmember.py:863 analyze_var"
+   ],
+   [
+    27,
+    28,
+    "mypyc/irbuild/ll_builder.py:465 coerce"
+   ],
+   [
+    26,
+    23,
+    "mypy/semanal.py:6045 visit_call_expr"
+   ],
+   [
+    25,
+    30,
+    "mypy/checkexpr.py:3754 visit_comparison_expr"
+   ],
+   [
+    25,
+    25,
+    "mypy/plugins/dataclasses.py:514 collect_attributes"
+   ],
+   [
+    25,
+    22,
+    "mypyc/irbuild/for_helpers.py:696 make_for_loop_generator"
+   ],
+   [
+    24,
+    31,
+    "mypy/checker.py:2447 check_method_override_for_base_with_name"
+   ],
+   [
+    24,
+    28,
+    "mypy/typeanal.py:308 visit_unbound_type_nonoptional"
+   ],
+   [
+    24,
+    27,
+    "mypy/binder.py:302 update_from_options"
+   ],
+   [
+    24,
+    17,
+    "mypy/plugins/attrs.py:701 _parse_converter"
+   ],
+   [
+    23,
+    30,
+    "mypy/checker.py:5012 check_simple_assignment"
+   ],
+   [
+    23,
+    26,
+    "mypy/checkexpr.py:6212 accept"
+   ],
+   [
+    23,
+    23,
+    "mypy/messages.py:3063 pretty_callable"
+   ],
+   [
+    23,
+    19,
+    "mypy/checker.py:7057 narrow_type_by_identity_equality"
+   ],
+   [
+    22,
+    26,
+    "mypy/stubtest.py:1129 _verify_signature"
+   ],
+   [
+    22,
+    24,
+    "mypy/typeanal.py:2235 instantiate_type_alias"
+   ],
+   [
+    22,
+    22,
+    "mypy/checkmember.py:531 analyze_member_var_access"
+   ],
+   [
+    22,
+    20,
+    "mypy/messages.py:2654 format_type_inner"
+   ],
+   [
+    22,
+    18,
+    "mypy/meet.py:118 narrow_declared_type"
+   ],
+   [
+    22,
+    18,
+    "mypyc/irbuild/expression.py:276 transform_member_expr"
+   ],
+   [
+    22,
+    16,
+    "mypy/server/deps.py:436 visit_assignment_stmt"
+   ],
+   [
+    21,
+    31,
+    "mypyc/irbuild/ll_builder.py:969 _construct_varargs"
+   ],
+   [
+    21,
+    23,
+    "mypyc/irbuild/expression.py:714 translate_super_method_call"
+   ],
+   [
+    21,
+    19,
+    "mypy/semanal.py:1010 analyze_func_def"
+   ],
+   [
+    21,
+    19,
+    "mypy/stubgen.py:1159 is_alias_expression"
+   ],
+   [
+    21,
+    14,
+    "mypy/checkexpr.py:3645 visit_op_expr"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 5910,
+   "median": 2,
+   "p90": 6,
+   "p99": 43,
+   "p999": 350,
+   "max": 429
+  },
+  "stmts": {
+   "n": 5910,
+   "median": 1,
+   "p90": 7,
+   "p99": 57,
+   "p999": 602,
+   "max": 693
+  },
+  "max_stmts_within_input_limit": 29,
+  "over_inputs": 146,
+  "over_stmts": 14,
+  "over_either": 146,
+  "share_over_either": 0.024703891708967852,
+  "depth_capped": 0,
+  "recursion_capped": 83,
+  "size_capped": 0,
+  "depth": {
+   "n": 5910,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 5,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    429,
+    693,
+    "mypy/checkexpr.py:3888 visit_comparison_expr"
+   ],
+   [
+    421,
+    681,
+    "mypy/checkexpr.py:3853 visit_comparison_expr"
+   ],
+   [
+    421,
+    681,
+    "mypy/checkexpr.py:3876 visit_comparison_expr"
+   ],
+   [
+    364,
+    623,
+    "mypy/meet.py:156 narrow_declared_type"
+   ],
+   [
+    351,
+    603,
+    "mypy/checkexpr.py:6599 narrow_type_from_binder"
+   ],
+   [
+    350,
+    602,
+    "mypy/checker.py:8909 conditional_types"
+   ],
+   [
+    350,
+    602,
+    "mypy/checkexpr.py:4066 dangerous_comparison"
+   ],
+   [
+    350,
+    602,
+    "mypy/checkmember.py:1093 check_self_arg"
+   ],
+   [
+    350,
+    602,
+    "mypy/meet.py:187 narrow_declared_type"
+   ],
+   [
+    350,
+    601,
+    "mypy/checker.py:7379 refine_parent_types (lone call)"
+   ],
+   [
+    149,
+    288,
+    "mypy/checker.py:1093 check_overlapping_overloads"
+   ],
+   [
+    148,
+    282,
+    "mypy/subtypes.py:1103 visit_overloaded"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    429,
+    693,
+    "mypy/checkexpr.py:3888 visit_comparison_expr"
+   ],
+   [
+    421,
+    681,
+    "mypy/checkexpr.py:3853 visit_comparison_expr"
+   ],
+   [
+    421,
+    681,
+    "mypy/checkexpr.py:3876 visit_comparison_expr"
+   ],
+   [
+    364,
+    623,
+    "mypy/meet.py:156 narrow_declared_type"
+   ],
+   [
+    351,
+    603,
+    "mypy/checkexpr.py:6599 narrow_type_from_binder"
+   ],
+   [
+    350,
+    602,
+    "mypy/checker.py:8909 conditional_types"
+   ],
+   [
+    350,
+    602,
+    "mypy/checkexpr.py:4066 dangerous_comparison"
+   ],
+   [
+    350,
+    602,
+    "mypy/checkmember.py:1093 check_self_arg"
+   ],
+   [
+    350,
+    602,
+    "mypy/meet.py:187 narrow_declared_type"
+   ],
+   [
+    350,
+    601,
+    "mypy/checker.py:7379 refine_parent_types (lone call)"
+   ],
+   [
+    149,
+    288,
+    "mypy/checker.py:1093 check_overlapping_overloads"
+   ],
+   [
+    148,
+    282,
+    "mypy/subtypes.py:1103 visit_overloaded"
+   ]
+  ],
+  "all_over": [
+   [
+    429,
+    693,
+    "mypy/checkexpr.py:3888 visit_comparison_expr"
+   ],
+   [
+    421,
+    681,
+    "mypy/checkexpr.py:3853 visit_comparison_expr"
+   ],
+   [
+    421,
+    681,
+    "mypy/checkexpr.py:3876 visit_comparison_expr"
+   ],
+   [
+    364,
+    623,
+    "mypy/meet.py:156 narrow_declared_type"
+   ],
+   [
+    351,
+    603,
+    "mypy/checkexpr.py:6599 narrow_type_from_binder"
+   ],
+   [
+    350,
+    602,
+    "mypy/checker.py:8909 conditional_types"
+   ],
+   [
+    350,
+    602,
+    "mypy/checkexpr.py:4066 dangerous_comparison"
+   ],
+   [
+    350,
+    602,
+    "mypy/checkmember.py:1093 check_self_arg"
+   ],
+   [
+    350,
+    602,
+    "mypy/meet.py:187 narrow_declared_type"
+   ],
+   [
+    350,
+    601,
+    "mypy/checker.py:7379 refine_parent_types (lone call)"
+   ],
+   [
+    149,
+    288,
+    "mypy/checker.py:1093 check_overlapping_overloads"
+   ],
+   [
+    148,
+    282,
+    "mypy/subtypes.py:1103 visit_overloaded"
+   ],
+   [
+    147,
+    282,
+    "mypy/checker.py:9306 is_unsafe_overlapping_overload_signatures"
+   ],
+   [
+    147,
+    281,
+    "mypy/meet.py:558 is_overlapping_types"
+   ],
+   [
+    129,
+    198,
+    "mypy/checker.py:2086 check_overlapping_op_methods (lone call)"
+   ],
+   [
+    129,
+    198,
+    "mypy/checker.py:2086 check_overlapping_op_methods (lone call)"
+   ],
+   [
+    127,
+    186,
+    "mypy/subtypes.py:618 visit_instance"
+   ],
+   [
+    127,
+    186,
+    "mypy/subtypes.py:624 visit_instance"
+   ],
+   [
+    96,
+    139,
+    "mypy/subtypes.py:1036 visit_typeddict_type"
+   ],
+   [
+    94,
+    146,
+    "mypy/checker.py:2220 check_inplace_operator_method"
+   ],
+   [
+    89,
+    144,
+    "mypy/checker.py:1035 check_overlapping_overloads (lone call)"
+   ],
+   [
+    89,
+    143,
+    "mypy/checker.py:9330 is_unsafe_overlapping_overload_signatures"
+   ],
+   [
+    88,
+    141,
+    "mypy/checker.py:1146 check_overlapping_overloads"
+   ],
+   [
+    88,
+    140,
+    "mypy/checker.py:1035 check_overlapping_overloads (lone call)"
+   ],
+   [
+    88,
+    140,
+    "mypy/checker.py:1035 check_overlapping_overloads (lone call)"
+   ],
+   [
+    88,
+    140,
+    "mypy/checker.py:1035 check_overlapping_overloads (lone call)"
+   ],
+   [
+    78,
+    107,
+    "mypy/checkexpr.py:4896 visit_cast_expr"
+   ],
+   [
+    76,
+    116,
+    "mypy/subtypes.py:782 visit_tuple_type (lone call)"
+   ],
+   [
+    76,
+    111,
+    "mypy/semanal.py:3313 visit_assignment_stmt (lone call)"
+   ],
+   [
+    71,
+    107,
+    "mypy/checker.py:3247 check_compatibility"
+   ],
+   [
+    62,
+    93,
+    "mypy/join.py:361 visit_instance"
+   ],
+   [
+    62,
+    93,
+    "mypy/join.py:363 visit_instance"
+   ],
+   [
+    62,
+    93,
+    "mypy/subtypes.py:633 visit_instance"
+   ],
+   [
+    62,
+    93,
+    "mypy/subtypes.py:771 visit_callable_type"
+   ],
+   [
+    62,
+    93,
+    "mypy/subtypes.py:817 visit_tuple_type"
+   ],
+   [
+    62,
+    93,
+    "mypy/subtypes.py:1247 visit_type_type"
+   ],
+   [
+    61,
+    92,
+    "mypy/subtypes.py:723 visit_callable_type (lone call)"
+   ],
+   [
+    61,
+    92,
+    "mypy/subtypes.py:1049 visit_overloaded (lone call)"
+   ],
+   [
+    59,
+    89,
+    "mypy/subtypes.py:734 visit_callable_type"
+   ],
+   [
+    59,
+    87,
+    "mypy/subtypes.py:813 visit_tuple_type"
+   ],
+   [
+    58,
+    87,
+    "mypy/meet.py:352 is_overlapping_types (lone call)"
+   ],
+   [
+    58,
+    87,
+    "mypy/meet.py:352 is_overlapping_types (lone call)"
+   ],
+   [
+    57,
+    80,
+    "mypy/checker.py:1530 check_func_def"
+   ],
+   [
+    57,
+    63,
+    "mypy/stubgen.py:978 visit_assignment_stmt"
+   ],
+   [
+    56,
+    80,
+    "mypy/checkexpr.py:4251 check_op_reversible"
+   ],
+   [
+    55,
+    76,
+    "mypy/messages.py:3440 append_invariance_notes"
+   ],
+   [
+    51,
+    74,
+    "mypy/subtypes.py:2350 restrict_subtype_away (lone call)"
+   ],
+   [
+    51,
+    68,
+    "mypy/semanal.py:4269 check_and_set_up_type_alias"
+   ],
+   [
+    48,
+    125,
+    "mypy/checker.py:2522 check_method_override_for_base_with_name"
+   ],
+   [
+    47,
+    70,
+    "mypy/checkexpr.py:2686 check_var_args_kwargs"
+   ],
+   [
+    47,
+    63,
+    "mypy/checker.py:3840 check_compatibility_all_supers"
+   ],
+   [
+    46,
+    70,
+    "mypy/checker.py:1264 get_generator_yield_type"
+   ],
+   [
+    46,
+    70,
+    "mypy/checker.py:1298 get_generator_receive_type"
+   ],
+   [
+    46,
+    68,
+    "mypy/checkexpr.py:6362 is_valid_keyword_var_arg"
+   ],
+   [
+    46,
+    68,
+    "mypy/checkpattern.py:238 visit_sequence_pattern"
+   ],
+   [
+    46,
+    67,
+    "mypy/checkpattern.py:809 construct_sequence_child (lone call)"
+   ],
+   [
+    44,
+    39,
+    "mypy/checker.py:6855 find_isinstance_check_helper"
+   ],
+   [
+    43,
+    65,
+    "mypy/checker.py:3291 check_typeddict_inheritance"
+   ],
+   [
+    43,
+    64,
+    "mypy/checker.py:5257 try_infer_partial_type_from_indexed_assignment"
+   ],
+   [
+    43,
+    57,
+    "mypy/checker.py:4761 infer_variable_type"
+   ],
+   [
+    42,
+    56,
+    "mypy/binder.py:399 update_from_options"
+   ],
+   [
+    41,
+    54,
+    "mypy/meet.py:89 meet_types"
+   ],
+   [
+    40,
+    57,
+    "mypy/checker.py:4963 infer_rvalue_with_fallback_context"
+   ],
+   [
+    40,
+    55,
+    "mypy/binder.py:410 update_from_options"
+   ],
+   [
+    40,
+    54,
+    "mypy/messages.py:3243 get_conflict_protocol_types"
+   ],
+   [
+    40,
+    54,
+    "mypy/messages.py:3250 get_conflict_protocol_types"
+   ],
+   [
+    40,
+    53,
+    "mypy/checkexpr.py:4242 check_op_reversible"
+   ],
+   [
+    39,
+    53,
+    "mypy/checker.py:1429 check_func_def_override"
+   ],
+   [
+    39,
+    53,
+    "mypy/checker.py:9807 is_custom_settable_property"
+   ],
+   [
+    39,
+    53,
+    "mypy/checkexpr.py:4929 visit_assert_type_expr"
+   ],
+   [
+    39,
+    52,
+    "mypy/checker.py:1771 require_correct_self_argument (lone call)"
+   ],
+   [
+    39,
+    52,
+    "mypy/checker.py:2150 is_unsafe_overlapping_op (lone call)"
+   ],
+   [
+    37,
+    41,
+    "mypy/checkexpr.py:3438 check_arg"
+   ],
+   [
+    36,
+    42,
+    "mypy/checkstrformat.py:440 perform_special_format_checks"
+   ],
+   [
+    36,
+    35,
+    "mypy/checker.py:7579 find_tuple_len_narrowing (lone call)"
+   ],
+   [
+    36,
+    35,
+    "mypy/checker.py:7579 find_tuple_len_narrowing (lone call)"
+   ],
+   [
+    35,
+    31,
+    "mypy/checkexpr.py:3976 dangerous_comparison"
+   ],
+   [
+    34,
+    49,
+    "mypy/checker.py:6897 comparison_type_narrowing_helper"
+   ],
+   [
+    34,
+    29,
+    "mypy/checker.py:7057 narrow_type_by_identity_equality (lone call)"
+   ],
+   [
+    34,
+    29,
+    "mypy/checker.py:7057 narrow_type_by_identity_equality (lone call)"
+   ],
+   [
+    34,
+    29,
+    "mypy/checker.py:9165 has_custom_eq_checks"
+   ],
+   [
+    33,
+    49,
+    "mypy/meet.py:1148 resolve_typeddict_item_type"
+   ],
+   [
+    33,
+    49,
+    "mypy/meet.py:1154 resolve_typeddict_item_type"
+   ],
+   [
+    32,
+    47,
+    "mypy/checker.py:1341 get_generator_return_type"
+   ],
+   [
+    32,
+    47,
+    "mypy/checker.py:1768 check_funcdef_item"
+   ],
+   [
+    31,
+    47,
+    "mypy/checker.py:7326 narrow_type_by_identity_equality"
+   ],
+   [
+    31,
+    44,
+    "mypy/subtypes.py:677 visit_type_var"
+   ],
+   [
+    31,
+    44,
+    "mypy/subtypes.py:778 visit_callable_type"
+   ],
+   [
+    31,
+    44,
+    "mypy/subtypes.py:1070 visit_overloaded"
+   ],
+   [
+    31,
+    44,
+    "mypy/subtypes.py:1090 visit_overloaded"
+   ],
+   [
+    31,
+    44,
+    "mypy/subtypes.py:1134 visit_overloaded"
+   ],
+   [
+    31,
+    44,
+    "mypy/subtypes.py:1252 visit_type_type"
+   ],
+   [
+    31,
+    42,
+    "mypy/semanal.py:8182 try_parse_as_type_expression"
+   ],
+   [
+    31,
+    37,
+    "mypy/checker.py:1629 check_func_def"
+   ],
+   [
+    30,
+    45,
+    "mypy/messages.py:3253 get_conflict_protocol_types"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:727 visit_callable_type"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:810 visit_tuple_type"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:835 visit_tuple_type"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:962 variadic_tuple_subtype"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:972 variadic_tuple_subtype"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:1150 visit_union_type"
+   ],
+   [
+    30,
+    44,
+    "mypy/subtypes.py:1174 visit_union_type"
+   ],
+   [
+    30,
+    44,
+    "mypy/plugins/enums.py:246 enum_value_callback"
+   ],
+   [
+    30,
+    43,
+    "mypy/subtypes.py:499 visit_instance (lone call)"
+   ],
+   [
+    30,
+    43,
+    "mypy/subtypes.py:723 visit_callable_type (lone call)"
+   ],
+   [
+    30,
+    43,
+    "mypy/subtypes.py:1049 visit_overloaded (lone call)"
+   ],
+   [
+    30,
+    43,
+    "mypy/subtypes.py:1049 visit_overloaded (lone call)"
+   ],
+   [
+    30,
+    35,
+    "mypy/checkexpr.py:660 visit_call_expr_inner"
+   ],
+   [
+    30,
+    35,
+    "mypyc/irbuild/statement.py:313 transform_operator_assignment_stmt"
+   ],
+   [
+    30,
+    32,
+    "mypyc/analysis/ircheck.py:441 visit_int_op"
+   ],
+   [
+    29,
+    44,
+    "mypy/checker.py:1173 check_overlapping_overloads"
+   ],
+   [
+    29,
+    44,
+    "mypy/join.py:128 join_instances"
+   ],
+   [
+    29,
+    44,
+    "mypy/join.py:149 join_instances"
+   ],
+   [
+    29,
+    44,
+    "mypy/join.py:654 resolve_typeddict_item"
+   ],
+   [
+    29,
+    43,
+    "mypy/checker.py:2447 check_method_override_for_base_with_name (lone call)"
+   ],
+   [
+    29,
+    43,
+    "mypy/checkpattern.py:781 can_match_sequence"
+   ],
+   [
+    29,
+    43,
+    "mypy/join.py:390 visit_callable_type (lone call)"
+   ],
+   [
+    29,
+    43,
+    "mypy/join.py:428 visit_overloaded (lone call)"
+   ],
+   [
+    29,
+    43,
+    "mypy/meet.py:343 are_related_types"
+   ],
+   [
+    29,
+    43,
+    "mypy/meet.py:347 are_related_types"
+   ],
+   [
+    29,
+    43,
+    "mypy/meet.py:878 visit_instance"
+   ],
+   [
+    29,
+    43,
+    "mypy/meet.py:960 visit_callable_type (lone call)"
+   ],
+   [
+    29,
+    43,
+    "mypy/messages.py:3235 get_conflict_protocol_types"
+   ],
+   [
+    29,
+    43,
+    "mypy/messages.py:3258 get_conflict_protocol_types"
+   ],
+   [
+    29,
+    43,
+    "mypy/subtypes.py:247 is_equivalent"
+   ],
+   [
+    29,
+    43,
+    "mypy/subtypes.py:293 is_same_type"
+   ],
+   [
+    29,
+    43,
+    "mypy/subtypes.py:1344 is_protocol_implementation"
+   ],
+   [
+    27,
+    26,
+    "mypyc/codegen/emit.py:789 emit_cast"
+   ],
+   [
+    26,
+    28,
+    "mypy/stubgen.py:708 visit_func_def"
+   ],
+   [
+    26,
+    21,
+    "mypy/checker.py:7688 narrow_with_len"
+   ],
+   [
+    26,
+    21,
+    "mypy/checkstrformat.py:425 perform_special_format_checks"
+   ],
+   [
+    26,
+    19,
+    "mypyc/analysis/ircheck.py:262 check_compatibility"
+   ],
+   [
+    25,
+    30,
+    "mypy/checker.py:5988 check_for_untyped_decorator"
+   ],
+   [
+    24,
+    36,
+    "mypy/checker.py:5085 check_simple_assignment"
+   ],
+   [
+    24,
+    35,
+    "mypy/checker.py:2573 check_method_override_for_base_with_name"
+   ],
+   [
+    24,
+    35,
+    "mypy/checkexpr.py:1886 check_callable_call"
+   ],
+   [
+    24,
+    34,
+    "mypy/checker.py:5060 check_simple_assignment"
+   ],
+   [
+    24,
+    27,
+    "mypy/semanal.py:6685 _lookup (lone call)"
+   ],
+   [
+    23,
+    34,
+    "mypy/checker.py:5415 check_return_stmt"
+   ],
+   [
+    23,
+    24,
+    "mypy/stubgen.py:1310 get_init"
+   ],
+   [
+    23,
+    24,
+    "mypy/stubgenc.py:660 generate_function_stub"
+   ],
+   [
+    23,
+    24,
+    "mypy/stubgenc.py:763 generate_property_stub"
+   ],
+   [
+    23,
+    24,
+    "mypy/stubgenc.py:955 generate_variable_stub"
+   ],
+   [
+    22,
+    31,
+    "mypy/checker.py:2614 check_method_override_for_base_with_name"
+   ],
+   [
+    21,
+    33,
+    "mypy/checkexpr.py:2951 check_overload_call"
+   ],
+   [
+    21,
+    24,
+    "mypyc/irbuild/expression.py:997 transform_index_expr"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 2492,
+   "median": 3,
+   "p90": 16,
+   "p99": 103,
+   "p999": 422,
+   "max": 1200
+  },
+  "stmts": {
+   "n": 2492,
+   "median": 2,
+   "p90": 17,
+   "p99": 146,
+   "p999": 1043,
+   "max": 2110
+  },
+  "max_stmts_within_input_limit": 32,
+  "over_inputs": 193,
+  "over_stmts": 15,
+  "over_either": 193,
+  "share_over_either": 0.0774478330658106,
+  "depth_capped": 0,
+  "recursion_capped": 62,
+  "size_capped": 0,
+  "depth": {
+   "n": 2492,
+   "median": 0,
+   "p90": 2,
+   "p99": 3,
+   "p999": 5,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    1200,
+    2110,
+    "mypy/checkexpr.py:3754 visit_comparison_expr"
+   ],
+   [
+    748,
+    1333,
+    "mypy/meet.py:118 narrow_declared_type"
+   ],
+   [
+    422,
+    1043,
+    "mypy/checker.py:1035 check_overlapping_overloads"
+   ],
+   [
+    420,
+    661,
+    "mypy/checkexpr.py:3937 dangerous_comparison"
+   ],
+   [
+    403,
+    674,
+    "mypy/checker.py:8807 conditional_types"
+   ],
+   [
+    381,
+    564,
+    "mypy/subtypes.py:499 visit_instance"
+   ],
+   [
+    375,
+    632,
+    "mypy/checkmember.py:1062 check_self_arg"
+   ],
+   [
+    360,
+    594,
+    "mypy/subtypes.py:1049 visit_overloaded"
+   ],
+   [
+    354,
+    606,
+    "mypy/checkexpr.py:6582 narrow_type_from_binder"
+   ],
+   [
+    352,
+    603,
+    "mypy/checker.py:7379 refine_parent_types"
+   ],
+   [
+    283,
+    437,
+    "mypy/meet.py:352 is_overlapping_types"
+   ],
+   [
+    266,
+    391,
+    "mypy/subtypes.py:782 visit_tuple_type"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    1200,
+    2110,
+    "mypy/checkexpr.py:3754 visit_comparison_expr"
+   ],
+   [
+    748,
+    1333,
+    "mypy/meet.py:118 narrow_declared_type"
+   ],
+   [
+    422,
+    1043,
+    "mypy/checker.py:1035 check_overlapping_overloads"
+   ],
+   [
+    403,
+    674,
+    "mypy/checker.py:8807 conditional_types"
+   ],
+   [
+    420,
+    661,
+    "mypy/checkexpr.py:3937 dangerous_comparison"
+   ],
+   [
+    375,
+    632,
+    "mypy/checkmember.py:1062 check_self_arg"
+   ],
+   [
+    354,
+    606,
+    "mypy/checkexpr.py:6582 narrow_type_from_binder"
+   ],
+   [
+    352,
+    603,
+    "mypy/checker.py:7379 refine_parent_types"
+   ],
+   [
+    360,
+    594,
+    "mypy/subtypes.py:1049 visit_overloaded"
+   ],
+   [
+    381,
+    564,
+    "mypy/subtypes.py:499 visit_instance"
+   ],
+   [
+    250,
+    490,
+    "mypy/checker.py:9263 is_unsafe_overlapping_overload_signatures"
+   ],
+   [
+    283,
+    437,
+    "mypy/meet.py:352 is_overlapping_types"
+   ]
+  ],
+  "all_over": [
+   [
+    1200,
+    2110,
+    "mypy/checkexpr.py:3754 visit_comparison_expr"
+   ],
+   [
+    748,
+    1333,
+    "mypy/meet.py:118 narrow_declared_type"
+   ],
+   [
+    422,
+    1043,
+    "mypy/checker.py:1035 check_overlapping_overloads"
+   ],
+   [
+    420,
+    661,
+    "mypy/checkexpr.py:3937 dangerous_comparison"
+   ],
+   [
+    403,
+    674,
+    "mypy/checker.py:8807 conditional_types"
+   ],
+   [
+    381,
+    564,
+    "mypy/subtypes.py:499 visit_instance"
+   ],
+   [
+    375,
+    632,
+    "mypy/checkmember.py:1062 check_self_arg"
+   ],
+   [
+    360,
+    594,
+    "mypy/subtypes.py:1049 visit_overloaded"
+   ],
+   [
+    354,
+    606,
+    "mypy/checkexpr.py:6582 narrow_type_from_binder"
+   ],
+   [
+    352,
+    603,
+    "mypy/checker.py:7379 refine_parent_types"
+   ],
+   [
+    283,
+    437,
+    "mypy/meet.py:352 is_overlapping_types"
+   ],
+   [
+    266,
+    391,
+    "mypy/subtypes.py:782 visit_tuple_type"
+   ],
+   [
+    250,
+    490,
+    "mypy/checker.py:9263 is_unsafe_overlapping_overload_signatures"
+   ],
+   [
+    248,
+    411,
+    "mypy/subtypes.py:723 visit_callable_type"
+   ],
+   [
+    163,
+    218,
+    "mypy/semanal.py:3313 visit_assignment_stmt"
+   ],
+   [
+    136,
+    188,
+    "mypy/checker.py:1475 check_func_def"
+   ],
+   [
+    135,
+    252,
+    "mypy/checker.py:2447 check_method_override_for_base_with_name"
+   ],
+   [
+    131,
+    397,
+    "mypy/checker.py:2086 check_overlapping_op_methods"
+   ],
+   [
+    130,
+    136,
+    "mypy/checker.py:7057 narrow_type_by_identity_equality"
+   ],
+   [
+    119,
+    218,
+    "mypy/join.py:355 visit_instance"
+   ],
+   [
+    115,
+    153,
+    "mypy/checker.py:2642 check_override"
+   ],
+   [
+    113,
+    152,
+    "mypy/binder.py:302 update_from_options"
+   ],
+   [
+    111,
+    157,
+    "mypy/messages.py:3214 get_conflict_protocol_types"
+   ],
+   [
+    107,
+    155,
+    "mypy/semanal.py:4191 check_and_set_up_type_alias"
+   ],
+   [
+    103,
+    137,
+    "mypy/checker.py:3162 check_compatibility"
+   ],
+   [
+    102,
+    148,
+    "mypy/subtypes.py:984 visit_typeddict_type"
+   ],
+   [
+    99,
+    137,
+    "mypy/checkexpr.py:4203 check_op_reversible"
+   ],
+   [
+    96,
+    141,
+    "mypy/subtypes.py:1193 visit_type_type"
+   ],
+   [
+    96,
+    92,
+    "mypy/checker.py:6715 find_isinstance_check_helper"
+   ],
+   [
+    95,
+    146,
+    "mypy/checker.py:2202 check_inplace_operator_method"
+   ],
+   [
+    94,
+    111,
+    "mypy/semanal.py:6045 visit_call_expr"
+   ],
+   [
+    90,
+    130,
+    "mypy/subtypes.py:1898 are_parameters_compatible"
+   ],
+   [
+    87,
+    101,
+    "mypy/semanal.py:1742 visit_decorator"
+   ],
+   [
+    85,
+    125,
+    "mypy/checker.py:3762 check_compatibility_all_supers"
+   ],
+   [
+    84,
+    114,
+    "mypy/meet.py:76 meet_types"
+   ],
+   [
+    80,
+    117,
+    "mypy/subtypes.py:2350 restrict_subtype_away"
+   ],
+   [
+    80,
+    108,
+    "mypy/checkexpr.py:4885 visit_cast_expr"
+   ],
+   [
+    77,
+    107,
+    "mypy/subtypes.py:890 variadic_tuple_subtype"
+   ],
+   [
+    76,
+    79,
+    "mypy/checkexpr.py:522 visit_call_expr_inner"
+   ],
+   [
+    73,
+    100,
+    "mypy/messages.py:3426 append_invariance_notes"
+   ],
+   [
+    73,
+    95,
+    "mypy/checker.py:4730 infer_variable_type"
+   ],
+   [
+    71,
+    98,
+    "mypy/join.py:390 visit_callable_type"
+   ],
+   [
+    70,
+    98,
+    "mypy/checker.py:5012 check_simple_assignment"
+   ],
+   [
+    69,
+    90,
+    "mypy/checker.py:1771 require_correct_self_argument"
+   ],
+   [
+    66,
+    93,
+    "mypy/join.py:71 join_instances"
+   ],
+   [
+    66,
+    70,
+    "mypy/checkstrformat.py:406 perform_special_format_checks"
+   ],
+   [
+    66,
+    70,
+    "mypy/stubgen.py:964 visit_assignment_stmt"
+   ],
+   [
+    65,
+    80,
+    "mypy/checkpattern.py:233 visit_sequence_pattern"
+   ],
+   [
+    64,
+    100,
+    "mypy/meet.py:1128 resolve_typeddict_item_type"
+   ],
+   [
+    64,
+    77,
+    "mypy/checker.py:3477 check_assignment"
+   ],
+   [
+    64,
+    72,
+    "mypy/checker.py:7579 find_tuple_len_narrowing"
+   ],
+   [
+    64,
+    70,
+    "mypy/checkexpr.py:1696 check_callable_call"
+   ],
+   [
+    64,
+    49,
+    "mypyc/irbuild/ll_builder.py:1705 binary_op"
+   ],
+   [
+    63,
+    94,
+    "mypy/checkexpr.py:2679 check_var_args_kwargs"
+   ],
+   [
+    61,
+    80,
+    "mypy/checker.py:1700 check_funcdef_item"
+   ],
+   [
+    61,
+    80,
+    "mypy/messages.py:2198 report_protocol_problems"
+   ],
+   [
+    61,
+    78,
+    "mypy/subtypes.py:1269 is_protocol_implementation"
+   ],
+   [
+    60,
+    91,
+    "mypy/subtypes.py:2441 infer_variance"
+   ],
+   [
+    60,
+    88,
+    "mypy/checkpattern.py:809 construct_sequence_child"
+   ],
+   [
+    60,
+    61,
+    "mypyc/irbuild/ll_builder.py:465 coerce"
+   ],
+   [
+    57,
+    86,
+    "mypy/meet.py:339 are_related_types"
+   ],
+   [
+    56,
+    68,
+    "mypy/checker.py:7833 check_subtype"
+   ],
+   [
+    53,
+    74,
+    "mypy/meet.py:875 visit_instance"
+   ],
+   [
+    53,
+    73,
+    "mypy/checker.py:2150 is_unsafe_overlapping_op"
+   ],
+   [
+    53,
+    73,
+    "mypy/join.py:428 visit_overloaded"
+   ],
+   [
+    52,
+    73,
+    "mypy/join.py:168 join_instances_via_supertype"
+   ],
+   [
+    51,
+    73,
+    "mypy/checker.py:1288 get_generator_receive_type"
+   ],
+   [
+    49,
+    71,
+    "mypy/solve.py:565 pre_validate_solutions"
+   ],
+   [
+    49,
+    46,
+    "mypyc/irbuild/for_helpers.py:696 make_for_loop_generator"
+   ],
+   [
+    47,
+    71,
+    "mypy/checker.py:1254 get_generator_yield_type"
+   ],
+   [
+    47,
+    67,
+    "mypy/checker.py:5230 try_infer_partial_type_from_indexed_assignment"
+   ],
+   [
+    47,
+    66,
+    "mypy/subtypes.py:2388 covers_at_runtime"
+   ],
+   [
+    47,
+    63,
+    "mypy/checker.py:3670 get_variable_type_context"
+   ],
+   [
+    47,
+    61,
+    "mypy/meet.py:960 visit_callable_type"
+   ],
+   [
+    46,
+    68,
+    "mypy/checkexpr.py:6358 is_valid_keyword_var_arg"
+   ],
+   [
+    45,
+    67,
+    "mypy/checker.py:3274 check_typeddict_inheritance"
+   ],
+   [
+    45,
+    61,
+    "mypy/checker.py:594 check_first_pass"
+   ],
+   [
+    45,
+    52,
+    "mypy/semanal.py:3539 can_be_type_alias"
+   ],
+   [
+    45,
+    51,
+    "mypy/messages.py:593 incompatible_argument"
+   ],
+   [
+    45,
+    39,
+    "mypyc/codegen/emit.py:735 emit_cast"
+   ],
+   [
+    44,
+    57,
+    "mypy/checker.py:9786 is_custom_settable_property"
+   ],
+   [
+    44,
+    48,
+    "mypy/stubtest.py:645 verify_typeinfo"
+   ],
+   [
+    43,
+    64,
+    "mypy/checkpattern.py:769 can_match_sequence"
+   ],
+   [
+    42,
+    55,
+    "mypy/checkexpr.py:4912 visit_assert_type_expr"
+   ],
+   [
+    41,
+    58,
+    "mypy/checker.py:4927 infer_rvalue_with_fallback_context"
+   ],
+   [
+    40,
+    60,
+    "mypy/modulefinder.py:398 _find_module"
+   ],
+   [
+    40,
+    54,
+    "mypy/checker.py:1424 check_func_def_override"
+   ],
+   [
+    40,
+    53,
+    "mypy/checker.py:6880 comparison_type_narrowing_helper"
+   ],
+   [
+    40,
+    49,
+    "mypy/semanal.py:8149 try_parse_as_type_expression"
+   ],
+   [
+    40,
+    35,
+    "mypy/checkstrformat.py:333 check_specs_in_format_call"
+   ],
+   [
+    39,
+    53,
+    "mypy/plugins/enums.py:160 enum_value_callback"
+   ],
+   [
+    39,
+    42,
+    "mypy/stubdoc.py:187 add_token"
+   ],
+   [
+    39,
+    39,
+    "mypy/stubgen.py:1159 is_alias_expression"
+   ],
+   [
+    38,
+    50,
+    "mypy/checker.py:5354 check_return_stmt"
+   ],
+   [
+    38,
+    50,
+    "mypy/subtypes.py:264 is_same_type"
+   ],
+   [
+    38,
+    49,
+    "mypy/checkmember.py:1138 analyze_class_attribute_access"
+   ],
+   [
+    38,
+    47,
+    "mypy/checkexpr.py:6212 accept"
+   ],
+   [
+    37,
+    50,
+    "mypy/checker.py:1331 get_generator_return_type"
+   ],
+   [
+    37,
+    48,
+    "mypy/argmap.py:174 expand_actual_type"
+   ],
+   [
+    37,
+    46,
+    "mypy/typeanal.py:308 visit_unbound_type_nonoptional"
+   ],
+   [
+    37,
+    41,
+    "mypy/checkexpr.py:3426 check_arg"
+   ],
+   [
+    36,
+    55,
+    "mypyc/codegen/emitfunc.py:495 visit_get_attr"
+   ],
+   [
+    36,
+    44,
+    "mypy/semanal.py:6685 _lookup"
+   ],
+   [
+    36,
+    30,
+    "mypyc/irbuild/ll_builder.py:2016 unary_not"
+   ],
+   [
+    35,
+    43,
+    "mypy/constraints.py:767 visit_instance"
+   ],
+   [
+    35,
+    42,
+    "mypy/typeanal.py:861 analyze_type_with_type_info"
+   ],
+   [
+    35,
+    42,
+    "mypyc/irbuild/ll_builder.py:969 _construct_varargs"
+   ],
+   [
+    35,
+    39,
+    "mypyc/irbuild/statement.py:305 transform_operator_assignment_stmt"
+   ],
+   [
+    35,
+    34,
+    "mypy/checker.py:5887 visit_decorator_inner"
+   ],
+   [
+    34,
+    45,
+    "mypy/meet.py:1087 visit_tuple_type"
+   ],
+   [
+    34,
+    45,
+    "mypy/subtypes.py:666 visit_type_var"
+   ],
+   [
+    34,
+    33,
+    "mypyc/irbuild/expression.py:276 transform_member_expr"
+   ],
+   [
+    34,
+    30,
+    "mypyc/irbuild/ll_builder.py:2272 bool_value"
+   ],
+   [
+    34,
+    29,
+    "mypy/checker.py:9164 has_custom_eq_checks"
+   ],
+   [
+    33,
+    49,
+    "mypy/checker.py:6305 intersect_instances"
+   ],
+   [
+    33,
+    46,
+    "mypy/join.py:624 resolve_typeddict_item"
+   ],
+   [
+    33,
+    36,
+    "mypyc/irbuild/ll_builder.py:3027 translate_eq_cmp"
+   ],
+   [
+    32,
+    46,
+    "mypy/subtypes.py:1138 visit_union_type"
+   ],
+   [
+    32,
+    41,
+    "mypy/checker.py:861 _visit_overloaded_func_def"
+   ],
+   [
+    32,
+    32,
+    "mypy/messages.py:3063 pretty_callable"
+   ],
+   [
+    32,
+    31,
+    "mypy/semanal.py:7184 add_symbol_table_node"
+   ],
+   [
+    32,
+    30,
+    "mypy/stubgenc.py:639 generate_function_stub"
+   ],
+   [
+    31,
+    43,
+    "mypy/checker.py:1222 is_generator_return_type"
+   ],
+   [
+    31,
+    43,
+    "mypy/join.py:588 visit_tuple_type"
+   ],
+   [
+    31,
+    43,
+    "mypy/meet.py:990 visit_overloaded"
+   ],
+   [
+    31,
+    40,
+    "mypy/checkmember.py:863 analyze_var"
+   ],
+   [
+    31,
+    35,
+    "mypy/plugins/dataclasses.py:514 collect_attributes"
+   ],
+   [
+    31,
+    32,
+    "mypy/errors.py:769 add_error_info"
+   ],
+   [
+    31,
+    32,
+    "mypy/stubgen.py:700 visit_func_def"
+   ],
+   [
+    31,
+    30,
+    "mypy/semanal.py:1010 analyze_func_def"
+   ],
+   [
+    31,
+    21,
+    "mypy/stubgenc.py:837 generate_class_stub"
+   ],
+   [
+    30,
+    45,
+    "mypy/plugins/ctypes.py:111 array_constructor_callback"
+   ],
+   [
+    30,
+    44,
+    "mypy/checker.py:5668 check_except_handler_test"
+   ],
+   [
+    30,
+    43,
+    "mypy/checker.py:3099 check_protocol_variance"
+   ],
+   [
+    30,
+    36,
+    "mypy/checkexpr.py:2825 check_arg"
+   ],
+   [
+    30,
+    32,
+    "mypyc/analysis/ircheck.py:432 visit_int_op"
+   ],
+   [
+    30,
+    28,
+    "mypy/messages.py:2654 format_type_inner"
+   ],
+   [
+    29,
+    43,
+    "mypy/subtypes.py:238 is_equivalent"
+   ],
+   [
+    29,
+    42,
+    "mypy/join.py:207 trivial_join"
+   ],
+   [
+    29,
+    42,
+    "mypy/meet.py:63 trivial_meet"
+   ],
+   [
+    29,
+    35,
+    "mypy/stubtest.py:1129 _verify_signature"
+   ],
+   [
+    29,
+    33,
+    "mypy/checkpattern.py:565 visit_class_pattern"
+   ],
+   [
+    29,
+    32,
+    "mypy/semanal.py:5838 visit_type_alias_stmt"
+   ],
+   [
+    29,
+    32,
+    "mypy/stubtest.py:349 verify_mypyfile"
+   ],
+   [
+    29,
+    29,
+    "mypy/checkexpr.py:2524 check_argument_count"
+   ],
+   [
+    29,
+    26,
+    "mypy/stubtest.py:1333 verify_var"
+   ],
+   [
+    28,
+    41,
+    "mypy/checkexpr.py:2870 check_overload_call"
+   ],
+   [
+    28,
+    38,
+    "mypy/checker.py:3346 visit_block"
+   ],
+   [
+    28,
+    34,
+    "mypy/checker.py:4166 check_assignment_to_multiple_lvalues"
+   ],
+   [
+    28,
+    34,
+    "mypy/checkexpr.py:2199 infer_function_type_arguments"
+   ],
+   [
+    28,
+    23,
+    "mypy/semanal_typeddict.py:80 analyze_typeddict_classdef"
+   ],
+   [
+    28,
+    23,
+    "mypyc/subtype.py:65 visit_rprimitive"
+   ],
+   [
+    27,
+    33,
+    "mypy/semanal_typeargs.py:169 validate_args"
+   ],
+   [
+    27,
+    32,
+    "mypy/semanal.py:4555 analyze_name_lvalue"
+   ],
+   [
+    27,
+    30,
+    "mypyc/irbuild/expression.py:714 translate_super_method_call"
+   ],
+   [
+    27,
+    28,
+    "mypy/checker.py:1922 check_for_missing_annotations"
+   ],
+   [
+    27,
+    28,
+    "mypy/stubgen.py:1299 get_init"
+   ],
+   [
+    26,
+    31,
+    "mypy/typeops.py:775 _remove_redundant_union_items"
+   ],
+   [
+    26,
+    30,
+    "mypy/solve.py:263 solve_one"
+   ],
+   [
+    26,
+    29,
+    "mypy/messages.py:1075 no_variant_matches_arguments"
+   ],
+   [
+    26,
+    21,
+    "mypy/checker.py:7676 narrow_with_len"
+   ],
+   [
+    26,
+    19,
+    "mypyc/analysis/ircheck.py:261 check_compatibility"
+   ],
+   [
+    25,
+    30,
+    "mypy/checker.py:5984 check_for_untyped_decorator"
+   ],
+   [
+    25,
+    27,
+    "mypyc/irbuild/specialize.py:376 translate_bytearray_from_bytes_slice"
+   ],
+   [
+    25,
+    26,
+    "mypy/typeanal.py:2235 instantiate_type_alias"
+   ],
+   [
+    25,
+    25,
+    "mypy/checkexpr.py:719 always_returns_none"
+   ],
+   [
+    25,
+    25,
+    "mypy/semanal.py:8250 string_could_be_type_expression"
+   ],
+   [
+    25,
+    25,
+    "mypy/stubgenc.py:732 generate_property_stub"
+   ],
+   [
+    25,
+    25,
+    "mypy/stubgenc.py:943 generate_variable_stub"
+   ],
+   [
+    25,
+    16,
+    "mypy/checkexpr.py:3645 visit_op_expr"
+   ],
+   [
+    24,
+    30,
+    "mypy/messages.py:3486 make_inferred_type_note"
+   ],
+   [
+    24,
+    28,
+    "mypy/checker.py:8439 get_type_range_of_type"
+   ],
+   [
+    24,
+    23,
+    "mypy/plugins/dataclasses.py:232 transform"
+   ],
+   [
+    24,
+    17,
+    "mypy/plugins/attrs.py:701 _parse_converter"
+   ],
+   [
+    23,
+    33,
+    "mypy/semanal.py:3840 unwrap_final"
+   ],
+   [
+    23,
+    28,
+    "mypy/checkstrformat.py:713 check_simple_str_interpolation"
+   ],
+   [
+    23,
+    27,
+    "mypy/semanal.py:3926 store_final_status"
+   ],
+   [
+    23,
+    24,
+    "mypyc/codegen/emit.py:1073 emit_unbox"
+   ],
+   [
+    23,
+    20,
+    "mypy/checkexpr.py:2114 infer_function_type_arguments_using_context"
+   ],
+   [
+    23,
+    17,
+    "mypy/server/deps.py:436 visit_assignment_stmt"
+   ],
+   [
+    22,
+    35,
+    "mypyc/codegen/emitfunc.py:586 get_attr_with_allow_error_value"
+   ],
+   [
+    22,
+    30,
+    "mypy/binder.py:466 assign_type"
+   ],
+   [
+    22,
+    25,
+    "mypyc/irbuild/ast_helpers.py:56 maybe_process_conditional_comparison"
+   ],
+   [
+    22,
+    25,
+    "mypyc/irbuild/expression.py:992 transform_index_expr"
+   ],
+   [
+    22,
+    22,
+    "mypy/checkmember.py:531 analyze_member_var_access"
+   ],
+   [
+    22,
+    22,
+    "mypy/semanal.py:1151 prepare_method_signature"
+   ],
+   [
+    22,
+    22,
+    "mypy/semanal.py:6756 is_active_symbol_in_class_body"
+   ],
+   [
+    22,
+    18,
+    "mypy/checkexpr.py:5352 visit_tuple_expr"
+   ],
+   [
+    21,
+    25,
+    "mypy/checkexpr.py:2473 _detect_missing_positional_arg"
+   ],
+   [
+    21,
+    21,
+    "mypy/build.py:2714 new_state"
+   ],
+   [
+    21,
+    19,
+    "mypyc/irbuild/for_helpers.py:1114 init"
+   ],
+   [
+    21,
+    18,
+    "mypy/main.py:1429 process_options"
+   ],
+   [
+    21,
+    17,
+    "mypyc/codegen/emit.py:1301 emit_box"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 1521,
+ "calls_in_logic_resolved": 2239,
+ "calls_in_logic_unresolved": 3038,
+ "load_seconds": 0.0,
+ "analyze_seconds": 0.1
+}

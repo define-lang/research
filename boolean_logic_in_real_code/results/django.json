@@ -1,0 +1,443 @@
+{
+ "name": "django",
+ "functions": 10115,
+ "functions_with_logic": 2219,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 3596,
+   "median": 2,
+   "p90": 3,
+   "p99": 5,
+   "p999": 9,
+   "max": 11
+  },
+  "stmts": {
+   "n": 3596,
+   "median": 1,
+   "p90": 3,
+   "p99": 5,
+   "p999": 10,
+   "max": 13
+  },
+  "max_stmts_within_input_limit": 13,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 2219,
+   "median": 2,
+   "p90": 5,
+   "p99": 13,
+   "p999": 24,
+   "max": 38
+  },
+  "stmts": {
+   "n": 2219,
+   "median": 1,
+   "p90": 5,
+   "p99": 14,
+   "p999": 30,
+   "max": 61
+  },
+  "max_stmts_within_input_limit": 30,
+  "over_inputs": 5,
+  "over_stmts": 0,
+  "over_either": 5,
+  "share_over_either": 0.002253267237494367,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    38,
+    61,
+    "django/db/backends/base/schema.py:984 _alter_field"
+   ],
+   [
+    25,
+    21,
+    "django/db/models/sql/compiler.py:775 as_sql"
+   ],
+   [
+    24,
+    31,
+    "django/db/models/base.py:1075 _save_table"
+   ],
+   [
+    24,
+    17,
+    "django/forms/models.py:141 fields_for_model"
+   ],
+   [
+    21,
+    23,
+    "django/db/migrations/autodetector.py:444 check_dependency"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    38,
+    61,
+    "django/db/backends/base/schema.py:984 _alter_field"
+   ],
+   [
+    24,
+    31,
+    "django/db/models/base.py:1075 _save_table"
+   ],
+   [
+    21,
+    23,
+    "django/db/migrations/autodetector.py:444 check_dependency"
+   ],
+   [
+    25,
+    21,
+    "django/db/models/sql/compiler.py:775 as_sql"
+   ],
+   [
+    24,
+    17,
+    "django/forms/models.py:141 fields_for_model"
+   ]
+  ],
+  "all_over": [
+   [
+    38,
+    61,
+    "django/db/backends/base/schema.py:984 _alter_field"
+   ],
+   [
+    25,
+    21,
+    "django/db/models/sql/compiler.py:775 as_sql"
+   ],
+   [
+    24,
+    31,
+    "django/db/models/base.py:1075 _save_table"
+   ],
+   [
+    24,
+    17,
+    "django/forms/models.py:141 fields_for_model"
+   ],
+   [
+    21,
+    23,
+    "django/db/migrations/autodetector.py:444 check_dependency"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 3668,
+   "median": 2,
+   "p90": 3,
+   "p99": 6,
+   "p999": 11,
+   "max": 21
+  },
+  "stmts": {
+   "n": 3668,
+   "median": 1,
+   "p90": 3,
+   "p99": 7,
+   "p999": 15,
+   "max": 31
+  },
+  "max_stmts_within_input_limit": 16,
+  "over_inputs": 2,
+  "over_stmts": 0,
+  "over_either": 2,
+  "share_over_either": 0.0005452562704471102,
+  "depth_capped": 0,
+  "recursion_capped": 21,
+  "size_capped": 0,
+  "depth": {
+   "n": 3668,
+   "median": 0,
+   "p90": 0,
+   "p99": 2,
+   "p999": 2,
+   "max": 3
+  },
+  "top_by_inputs": [
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:288 _build_migration_list (lone call)"
+   ],
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:408 _sort_migrations (lone call)"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:288 _build_migration_list (lone call)"
+   ],
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:408 _sort_migrations (lone call)"
+   ]
+  ],
+  "all_over": [
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:288 _build_migration_list (lone call)"
+   ],
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:408 _sort_migrations (lone call)"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 2253,
+   "median": 2,
+   "p90": 6,
+   "p99": 16,
+   "p999": 27,
+   "max": 48
+  },
+  "stmts": {
+   "n": 2253,
+   "median": 2,
+   "p90": 5,
+   "p99": 17,
+   "p999": 37,
+   "max": 80
+  },
+  "max_stmts_within_input_limit": 25,
+  "over_inputs": 12,
+  "over_stmts": 0,
+  "over_either": 12,
+  "share_over_either": 0.005326231691078562,
+  "depth_capped": 0,
+  "recursion_capped": 19,
+  "size_capped": 0,
+  "depth": {
+   "n": 2253,
+   "median": 0,
+   "p90": 1,
+   "p99": 2,
+   "p999": 2,
+   "max": 3
+  },
+  "top_by_inputs": [
+   [
+    48,
+    80,
+    "django/db/backends/base/schema.py:984 _alter_field"
+   ],
+   [
+    28,
+    37,
+    "django/db/migrations/autodetector.py:288 _build_migration_list"
+   ],
+   [
+    27,
+    37,
+    "django/db/models/deletion.py:271 collect"
+   ],
+   [
+    26,
+    37,
+    "django/contrib/admin/options.py:2068 _changeform_view"
+   ],
+   [
+    26,
+    35,
+    "django/db/models/base.py:1075 _save_table"
+   ],
+   [
+    25,
+    21,
+    "django/db/models/sql/compiler.py:775 as_sql"
+   ],
+   [
+    24,
+    25,
+    "django/db/models/constraints.py:585 validate"
+   ],
+   [
+    24,
+    17,
+    "django/forms/models.py:141 fields_for_model"
+   ],
+   [
+    22,
+    31,
+    "django/db/models/base.py:105 __new__"
+   ],
+   [
+    21,
+    35,
+    "django/db/backends/base/schema.py:881 alter_field"
+   ],
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:408 _sort_migrations"
+   ],
+   [
+    21,
+    23,
+    "django/db/migrations/autodetector.py:444 check_dependency"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    48,
+    80,
+    "django/db/backends/base/schema.py:984 _alter_field"
+   ],
+   [
+    28,
+    37,
+    "django/db/migrations/autodetector.py:288 _build_migration_list"
+   ],
+   [
+    27,
+    37,
+    "django/db/models/deletion.py:271 collect"
+   ],
+   [
+    26,
+    37,
+    "django/contrib/admin/options.py:2068 _changeform_view"
+   ],
+   [
+    26,
+    35,
+    "django/db/models/base.py:1075 _save_table"
+   ],
+   [
+    21,
+    35,
+    "django/db/backends/base/schema.py:881 alter_field"
+   ],
+   [
+    22,
+    31,
+    "django/db/models/base.py:105 __new__"
+   ],
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:408 _sort_migrations"
+   ],
+   [
+    24,
+    25,
+    "django/db/models/constraints.py:585 validate"
+   ],
+   [
+    21,
+    23,
+    "django/db/migrations/autodetector.py:444 check_dependency"
+   ],
+   [
+    25,
+    21,
+    "django/db/models/sql/compiler.py:775 as_sql"
+   ],
+   [
+    24,
+    17,
+    "django/forms/models.py:141 fields_for_model"
+   ]
+  ],
+  "all_over": [
+   [
+    48,
+    80,
+    "django/db/backends/base/schema.py:984 _alter_field"
+   ],
+   [
+    28,
+    37,
+    "django/db/migrations/autodetector.py:288 _build_migration_list"
+   ],
+   [
+    27,
+    37,
+    "django/db/models/deletion.py:271 collect"
+   ],
+   [
+    26,
+    37,
+    "django/contrib/admin/options.py:2068 _changeform_view"
+   ],
+   [
+    26,
+    35,
+    "django/db/models/base.py:1075 _save_table"
+   ],
+   [
+    25,
+    21,
+    "django/db/models/sql/compiler.py:775 as_sql"
+   ],
+   [
+    24,
+    25,
+    "django/db/models/constraints.py:585 validate"
+   ],
+   [
+    24,
+    17,
+    "django/forms/models.py:141 fields_for_model"
+   ],
+   [
+    22,
+    31,
+    "django/db/models/base.py:105 __new__"
+   ],
+   [
+    21,
+    35,
+    "django/db/backends/base/schema.py:881 alter_field"
+   ],
+   [
+    21,
+    31,
+    "django/db/migrations/autodetector.py:408 _sort_migrations"
+   ],
+   [
+    21,
+    23,
+    "django/db/migrations/autodetector.py:444 check_dependency"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 296,
+ "calls_in_logic_resolved": 445,
+ "calls_in_logic_unresolved": 1663,
+ "load_seconds": 0.0,
+ "analyze_seconds": 0.0
+}

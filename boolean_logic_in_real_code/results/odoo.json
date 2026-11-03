@@ -1,0 +1,1138 @@
+{
+ "name": "odoo",
+ "functions": 39464,
+ "functions_with_logic": 11954,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 20855,
+   "median": 2,
+   "p90": 3,
+   "p99": 5,
+   "p999": 9,
+   "max": 19
+  },
+  "stmts": {
+   "n": 20855,
+   "median": 1,
+   "p90": 3,
+   "p99": 6,
+   "p999": 10,
+   "max": 24
+  },
+  "max_stmts_within_input_limit": 24,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 11954,
+   "median": 2,
+   "p90": 6,
+   "p99": 15,
+   "p999": 29,
+   "max": 43
+  },
+  "stmts": {
+   "n": 11954,
+   "median": 2,
+   "p90": 5,
+   "p99": 15,
+   "p999": 32,
+   "max": 57
+  },
+  "max_stmts_within_input_limit": 31,
+  "over_inputs": 45,
+  "over_stmts": 0,
+  "over_either": 45,
+  "share_over_either": 0.0037644303162121468,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    43,
+    38,
+    "addons/account/models/account_move.py:6157 _post"
+   ],
+   [
+    37,
+    47,
+    "addons/account/models/account_move.py:4014 write"
+   ],
+   [
+    37,
+    41,
+    "addons/project/models/project_task.py:1281 write"
+   ],
+   [
+    35,
+    32,
+    "addons/sale_loyalty/models/sale_order.py:1439 _program_check_compute_points"
+   ],
+   [
+    33,
+    38,
+    "addons/portal/controllers/portal.py:676 _validate_address_values"
+   ],
+   [
+    33,
+    30,
+    "addons/l10n_it_edi/models/account_move.py:1915 _l10n_it_edi_import_line"
+   ],
+   [
+    33,
+    24,
+    "addons/mrp/models/mrp_production.py:1075 write"
+   ],
+   [
+    32,
+    33,
+    "addons/calendar/models/calendar_event.py:1008 write"
+   ],
+   [
+    31,
+    30,
+    "odoo/tools/mail.py:178 tag_quote"
+   ],
+   [
+    29,
+    44,
+    "addons/l10n_hu_edi/models/account_move.py:325 _l10n_hu_edi_check_invoices"
+   ],
+   [
+    29,
+    33,
+    "addons/website_sale/controllers/main.py:316 shop"
+   ],
+   [
+    29,
+    32,
+    "addons/l10n_es_edi_verifactu/models/verifactu_document.py:344 _check_record_values"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    28,
+    57,
+    "addons/l10n_in/models/account_move_line.py:108 get_sales_section"
+   ],
+   [
+    37,
+    47,
+    "addons/account/models/account_move.py:4014 write"
+   ],
+   [
+    29,
+    44,
+    "addons/l10n_hu_edi/models/account_move.py:325 _l10n_hu_edi_check_invoices"
+   ],
+   [
+    37,
+    41,
+    "addons/project/models/project_task.py:1281 write"
+   ],
+   [
+    43,
+    38,
+    "addons/account/models/account_move.py:6157 _post"
+   ],
+   [
+    33,
+    38,
+    "addons/portal/controllers/portal.py:676 _validate_address_values"
+   ],
+   [
+    28,
+    38,
+    "addons/account/models/chart_template.py:299 _pre_reload_data"
+   ],
+   [
+    27,
+    38,
+    "addons/hr_holidays/models/hr_leave.py:908 _get_durations"
+   ],
+   [
+    24,
+    34,
+    "addons/pos_loyalty/models/pos_order.py:78 _process_loyalty"
+   ],
+   [
+    32,
+    33,
+    "addons/calendar/models/calendar_event.py:1008 write"
+   ],
+   [
+    29,
+    33,
+    "addons/website_sale/controllers/main.py:316 shop"
+   ],
+   [
+    35,
+    32,
+    "addons/sale_loyalty/models/sale_order.py:1439 _program_check_compute_points"
+   ]
+  ],
+  "all_over": [
+   [
+    43,
+    38,
+    "addons/account/models/account_move.py:6157 _post"
+   ],
+   [
+    37,
+    47,
+    "addons/account/models/account_move.py:4014 write"
+   ],
+   [
+    37,
+    41,
+    "addons/project/models/project_task.py:1281 write"
+   ],
+   [
+    35,
+    32,
+    "addons/sale_loyalty/models/sale_order.py:1439 _program_check_compute_points"
+   ],
+   [
+    33,
+    38,
+    "addons/portal/controllers/portal.py:676 _validate_address_values"
+   ],
+   [
+    33,
+    30,
+    "addons/l10n_it_edi/models/account_move.py:1915 _l10n_it_edi_import_line"
+   ],
+   [
+    33,
+    24,
+    "addons/mrp/models/mrp_production.py:1075 write"
+   ],
+   [
+    32,
+    33,
+    "addons/calendar/models/calendar_event.py:1008 write"
+   ],
+   [
+    31,
+    30,
+    "odoo/tools/mail.py:178 tag_quote"
+   ],
+   [
+    29,
+    44,
+    "addons/l10n_hu_edi/models/account_move.py:325 _l10n_hu_edi_check_invoices"
+   ],
+   [
+    29,
+    33,
+    "addons/website_sale/controllers/main.py:316 shop"
+   ],
+   [
+    29,
+    32,
+    "addons/l10n_es_edi_verifactu/models/verifactu_document.py:344 _check_record_values"
+   ],
+   [
+    29,
+    28,
+    "addons/mail/models/mail_thread.py:2270 message_post"
+   ],
+   [
+    28,
+    57,
+    "addons/l10n_in/models/account_move_line.py:108 get_sales_section"
+   ],
+   [
+    28,
+    38,
+    "addons/account/models/chart_template.py:299 _pre_reload_data"
+   ],
+   [
+    28,
+    24,
+    "addons/account/models/account_move_line.py:2577 _prepare_reconciliation_single_partial"
+   ],
+   [
+    27,
+    38,
+    "addons/hr_holidays/models/hr_leave.py:908 _get_durations"
+   ],
+   [
+    26,
+    31,
+    "addons/l10n_gr_edi/models/account_move.py:533 _l10n_gr_edi_get_pre_error_dict"
+   ],
+   [
+    26,
+    25,
+    "addons/stock/models/stock_move_line.py:1532 _auto_wave_lines_into_existing_waves"
+   ],
+   [
+    25,
+    32,
+    "addons/mrp/report/mrp_report_bom_structure.py:179 _get_bom_data"
+   ],
+   [
+    25,
+    23,
+    "addons/project/models/project_project.py:721 write"
+   ],
+   [
+    25,
+    19,
+    "addons/microsoft_calendar/models/calendar_event.py:187 write"
+   ],
+   [
+    24,
+    34,
+    "addons/pos_loyalty/models/pos_order.py:78 _process_loyalty"
+   ],
+   [
+    24,
+    28,
+    "odoo/upgrade_code/tools_js_expressions.py:231 compile_expr"
+   ],
+   [
+    24,
+    18,
+    "odoo/upgrade_code/18.3-00-l10n-fiscal-position-taxes.py:1024 upgrade"
+   ],
+   [
+    23,
+    28,
+    "addons/l10n_es_edi_tbai/models/l10n_es_edi_tbai_document.py:103 _check_can_post"
+   ],
+   [
+    23,
+    27,
+    "addons/l10n_fr_pdp/models/account_move.py:566 check"
+   ],
+   [
+    23,
+    26,
+    "addons/l10n_cl/models/account_move.py:68 _check_document_types_post"
+   ],
+   [
+    23,
+    25,
+    "odoo/orm/fields.py:642 setup_related"
+   ],
+   [
+    23,
+    25,
+    "odoo/tools/babel/javascript_extractor.py:86 extract_javascript"
+   ],
+   [
+    23,
+    24,
+    "odoo/upgrade_code/19.4-00-ir-access.py:78 convert"
+   ],
+   [
+    23,
+    21,
+    "addons/website_forum/models/forum_post.py:297 _compute_post_karma_rights"
+   ],
+   [
+    23,
+    18,
+    "addons/sale_stock/models/account_move.py:12 _get_invoiced_lot_values"
+   ],
+   [
+    22,
+    21,
+    "odoo/orm/models.py:4088 create"
+   ],
+   [
+    22,
+    19,
+    "odoo/tools/convert.py:357 _tag_record"
+   ],
+   [
+    22,
+    17,
+    "addons/mail/models/models.py:400 _message_get_suggested_recipients_batch"
+   ],
+   [
+    22,
+    16,
+    "addons/l10n_it_edi/models/account_move.py:1667 _l10n_it_edi_import_invoice"
+   ],
+   [
+    21,
+    27,
+    "addons/sale_loyalty/models/sale_order.py:1725 _try_apply_code"
+   ],
+   [
+    21,
+    23,
+    "addons/hr_holidays/models/hr_leave.py:1753 write"
+   ],
+   [
+    21,
+    23,
+    "addons/project/models/project_task.py:1175 create"
+   ],
+   [
+    21,
+    21,
+    "addons/calendar/models/calendar_event.py:818 create"
+   ],
+   [
+    21,
+    21,
+    "addons/l10n_sa_edi/models/account_move.py:50 _l10n_sa_get_alerts"
+   ],
+   [
+    21,
+    19,
+    "addons/mrp/models/mrp_production.py:2162 _split_productions"
+   ],
+   [
+    21,
+    19,
+    "addons/mrp/models/mrp_workorder.py:490 write"
+   ],
+   [
+    21,
+    16,
+    "addons/website_event/controllers/main.py:49 events"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 21334,
+   "median": 2,
+   "p90": 3,
+   "p99": 10,
+   "p999": 16,
+   "max": 29
+  },
+  "stmts": {
+   "n": 21334,
+   "median": 1,
+   "p90": 3,
+   "p99": 11,
+   "p999": 21,
+   "max": 73
+  },
+  "max_stmts_within_input_limit": 28,
+  "over_inputs": 7,
+  "over_stmts": 0,
+  "over_either": 7,
+  "share_over_either": 0.00032811474641417456,
+  "depth_capped": 0,
+  "recursion_capped": 7,
+  "size_capped": 0,
+  "depth": {
+   "n": 21334,
+   "median": 0,
+   "p90": 0,
+   "p99": 3,
+   "p999": 4,
+   "max": 5
+  },
+  "top_by_inputs": [
+   [
+    29,
+    73,
+    "addons/pos_adyen/models/pos_payment_method.py:101 proxy_adyen_request"
+   ],
+   [
+    28,
+    44,
+    "addons/sale/wizard/sale_order_discount.py:112 _get_discount_product"
+   ],
+   [
+    26,
+    32,
+    "addons/hr/models/res_users.py:71 search_employee_field"
+   ],
+   [
+    25,
+    25,
+    "addons/stock/models/stock_move_line.py:1679 _auto_wave_lines_into_new_waves"
+   ],
+   [
+    23,
+    24,
+    "addons/stock/models/stock_move_line.py:1590 _auto_wave_lines_into_existing_waves"
+   ],
+   [
+    23,
+    2,
+    "odoo/tools/mail.py:625 html2plaintext"
+   ],
+   [
+    21,
+    24,
+    "addons/account/tools/structured_reference.py:178 is_valid_structured_reference"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    29,
+    73,
+    "addons/pos_adyen/models/pos_payment_method.py:101 proxy_adyen_request"
+   ],
+   [
+    28,
+    44,
+    "addons/sale/wizard/sale_order_discount.py:112 _get_discount_product"
+   ],
+   [
+    26,
+    32,
+    "addons/hr/models/res_users.py:71 search_employee_field"
+   ],
+   [
+    25,
+    25,
+    "addons/stock/models/stock_move_line.py:1679 _auto_wave_lines_into_new_waves"
+   ],
+   [
+    23,
+    24,
+    "addons/stock/models/stock_move_line.py:1590 _auto_wave_lines_into_existing_waves"
+   ],
+   [
+    21,
+    24,
+    "addons/account/tools/structured_reference.py:178 is_valid_structured_reference"
+   ],
+   [
+    23,
+    2,
+    "odoo/tools/mail.py:625 html2plaintext"
+   ]
+  ],
+  "all_over": [
+   [
+    29,
+    73,
+    "addons/pos_adyen/models/pos_payment_method.py:101 proxy_adyen_request"
+   ],
+   [
+    28,
+    44,
+    "addons/sale/wizard/sale_order_discount.py:112 _get_discount_product"
+   ],
+   [
+    26,
+    32,
+    "addons/hr/models/res_users.py:71 search_employee_field"
+   ],
+   [
+    25,
+    25,
+    "addons/stock/models/stock_move_line.py:1679 _auto_wave_lines_into_new_waves"
+   ],
+   [
+    23,
+    24,
+    "addons/stock/models/stock_move_line.py:1590 _auto_wave_lines_into_existing_waves"
+   ],
+   [
+    23,
+    2,
+    "odoo/tools/mail.py:625 html2plaintext"
+   ],
+   [
+    21,
+    24,
+    "addons/account/tools/structured_reference.py:178 is_valid_structured_reference"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 12163,
+   "median": 2,
+   "p90": 7,
+   "p99": 18,
+   "p999": 34,
+   "max": 64
+  },
+  "stmts": {
+   "n": 12163,
+   "median": 2,
+   "p90": 7,
+   "p99": 20,
+   "p999": 42,
+   "max": 81
+  },
+  "max_stmts_within_input_limit": 33,
+  "over_inputs": 82,
+  "over_stmts": 0,
+  "over_either": 82,
+  "share_over_either": 0.00674175779001891,
+  "depth_capped": 0,
+  "recursion_capped": 7,
+  "size_capped": 0,
+  "depth": {
+   "n": 12163,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 4,
+   "max": 5
+  },
+  "top_by_inputs": [
+   [
+    64,
+    68,
+    "odoo/tools/translate.py:244 process"
+   ],
+   [
+    59,
+    75,
+    "addons/stock/models/product_strategy.py:133 _get_putaway_location"
+   ],
+   [
+    51,
+    64,
+    "addons/project/models/project_task.py:1175 create"
+   ],
+   [
+    49,
+    43,
+    "addons/account/models/account_move.py:6157 _post"
+   ],
+   [
+    38,
+    48,
+    "addons/account/models/account_move.py:4014 write"
+   ],
+   [
+    38,
+    42,
+    "addons/project/models/project_task.py:1281 write"
+   ],
+   [
+    37,
+    81,
+    "addons/pos_adyen/models/pos_payment_method.py:85 proxy_adyen_request"
+   ],
+   [
+    36,
+    47,
+    "odoo/orm/models.py:3170 _determine_fields_to_fetch"
+   ],
+   [
+    36,
+    43,
+    "addons/portal/controllers/portal.py:676 _validate_address_values"
+   ],
+   [
+    36,
+    39,
+    "addons/project/models/project_task.py:871 copy_data"
+   ],
+   [
+    36,
+    37,
+    "addons/website_sale/controllers/main.py:316 shop"
+   ],
+   [
+    36,
+    30,
+    "addons/mail/models/mail_thread.py:2270 message_post"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    37,
+    81,
+    "addons/pos_adyen/models/pos_payment_method.py:85 proxy_adyen_request"
+   ],
+   [
+    59,
+    75,
+    "addons/stock/models/product_strategy.py:133 _get_putaway_location"
+   ],
+   [
+    64,
+    68,
+    "odoo/tools/translate.py:244 process"
+   ],
+   [
+    51,
+    64,
+    "addons/project/models/project_task.py:1175 create"
+   ],
+   [
+    30,
+    59,
+    "addons/l10n_in/models/account_move_line.py:108 get_sales_section"
+   ],
+   [
+    38,
+    48,
+    "addons/account/models/account_move.py:4014 write"
+   ],
+   [
+    36,
+    47,
+    "odoo/orm/models.py:3170 _determine_fields_to_fetch"
+   ],
+   [
+    29,
+    45,
+    "addons/sale/wizard/sale_order_discount.py:105 _get_discount_product"
+   ],
+   [
+    33,
+    44,
+    "odoo/orm/models.py:2677 fields_get"
+   ],
+   [
+    29,
+    44,
+    "addons/l10n_hu_edi/models/account_move.py:325 _l10n_hu_edi_check_invoices"
+   ],
+   [
+    49,
+    43,
+    "addons/account/models/account_move.py:6157 _post"
+   ],
+   [
+    36,
+    43,
+    "addons/portal/controllers/portal.py:676 _validate_address_values"
+   ]
+  ],
+  "all_over": [
+   [
+    64,
+    68,
+    "odoo/tools/translate.py:244 process"
+   ],
+   [
+    59,
+    75,
+    "addons/stock/models/product_strategy.py:133 _get_putaway_location"
+   ],
+   [
+    51,
+    64,
+    "addons/project/models/project_task.py:1175 create"
+   ],
+   [
+    49,
+    43,
+    "addons/account/models/account_move.py:6157 _post"
+   ],
+   [
+    38,
+    48,
+    "addons/account/models/account_move.py:4014 write"
+   ],
+   [
+    38,
+    42,
+    "addons/project/models/project_task.py:1281 write"
+   ],
+   [
+    37,
+    81,
+    "addons/pos_adyen/models/pos_payment_method.py:85 proxy_adyen_request"
+   ],
+   [
+    36,
+    47,
+    "odoo/orm/models.py:3170 _determine_fields_to_fetch"
+   ],
+   [
+    36,
+    43,
+    "addons/portal/controllers/portal.py:676 _validate_address_values"
+   ],
+   [
+    36,
+    39,
+    "addons/project/models/project_task.py:871 copy_data"
+   ],
+   [
+    36,
+    37,
+    "addons/website_sale/controllers/main.py:316 shop"
+   ],
+   [
+    36,
+    30,
+    "addons/mail/models/mail_thread.py:2270 message_post"
+   ],
+   [
+    34,
+    32,
+    "addons/sale_loyalty/models/sale_order.py:1439 _program_check_compute_points"
+   ],
+   [
+    33,
+    44,
+    "odoo/orm/models.py:2677 fields_get"
+   ],
+   [
+    33,
+    30,
+    "addons/l10n_it_edi/models/account_move.py:1915 _l10n_it_edi_import_line"
+   ],
+   [
+    33,
+    24,
+    "addons/mrp/models/mrp_production.py:1075 write"
+   ],
+   [
+    32,
+    42,
+    "addons/hr_holidays/models/hr_leave.py:908 _get_durations"
+   ],
+   [
+    32,
+    37,
+    "addons/base_import/models/base_import.py:192 get_fields_tree"
+   ],
+   [
+    32,
+    35,
+    "addons/web/controllers/json.py:40 web_json_1"
+   ],
+   [
+    32,
+    33,
+    "addons/calendar/models/calendar_event.py:1008 write"
+   ],
+   [
+    31,
+    30,
+    "odoo/tools/mail.py:178 tag_quote"
+   ],
+   [
+    31,
+    30,
+    "addons/stock/models/stock_move_line.py:1532 _auto_wave_lines_into_existing_waves"
+   ],
+   [
+    31,
+    22,
+    "addons/account/models/account_move_line.py:2209 write"
+   ],
+   [
+    30,
+    59,
+    "addons/l10n_in/models/account_move_line.py:108 get_sales_section"
+   ],
+   [
+    30,
+    40,
+    "addons/account/models/chart_template.py:299 _pre_reload_data"
+   ],
+   [
+    30,
+    19,
+    "odoo/tools/convert.py:357 _tag_record"
+   ],
+   [
+    29,
+    45,
+    "addons/sale/wizard/sale_order_discount.py:105 _get_discount_product"
+   ],
+   [
+    29,
+    44,
+    "addons/l10n_hu_edi/models/account_move.py:325 _l10n_hu_edi_check_invoices"
+   ],
+   [
+    29,
+    32,
+    "addons/l10n_es_edi_verifactu/models/verifactu_document.py:344 _check_record_values"
+   ],
+   [
+    28,
+    30,
+    "odoo/addons/base/models/ir_attachment.py:725 _search_res_access"
+   ],
+   [
+    28,
+    27,
+    "addons/website_slides/controllers/main.py:535 channel"
+   ],
+   [
+    28,
+    24,
+    "addons/account/models/account_move_line.py:2577 _prepare_reconciliation_single_partial"
+   ],
+   [
+    27,
+    32,
+    "addons/mrp/report/mrp_report_bom_structure.py:179 _get_bom_data"
+   ],
+   [
+    27,
+    30,
+    "odoo/orm/models.py:1317 default_get"
+   ],
+   [
+    27,
+    26,
+    "addons/stock/models/stock_move_line.py:1632 _auto_wave_lines_into_new_waves"
+   ],
+   [
+    26,
+    36,
+    "addons/pos_loyalty/models/pos_order.py:78 _process_loyalty"
+   ],
+   [
+    26,
+    32,
+    "addons/hr/models/res_users.py:66 search_employee_field"
+   ],
+   [
+    26,
+    31,
+    "addons/api_doc/controllers/api_doc.py:140 _doc_index"
+   ],
+   [
+    26,
+    31,
+    "addons/l10n_gr_edi/models/account_move.py:533 _l10n_gr_edi_get_pre_error_dict"
+   ],
+   [
+    26,
+    28,
+    "odoo/tools/translate.py:215 hastext"
+   ],
+   [
+    26,
+    24,
+    "addons/project/models/project_project.py:721 write"
+   ],
+   [
+    26,
+    24,
+    "addons/website_forum/models/forum_post.py:297 _compute_post_karma_rights"
+   ],
+   [
+    25,
+    40,
+    "addons/mail/controllers/thread.py:156 _prepare_message_data"
+   ],
+   [
+    25,
+    31,
+    "addons/l10n_es_edi_tbai/models/l10n_es_edi_tbai_document.py:103 _check_can_post"
+   ],
+   [
+    25,
+    29,
+    "odoo/addons/base/models/ir_attachment.py:673 _compute_res_access"
+   ],
+   [
+    25,
+    19,
+    "addons/microsoft_calendar/models/calendar_event.py:187 write"
+   ],
+   [
+    24,
+    28,
+    "odoo/upgrade_code/tools_js_expressions.py:231 compile_expr"
+   ],
+   [
+    24,
+    28,
+    "odoo/upgrade_code/tools_js_expressions.py:702 fix_template"
+   ],
+   [
+    24,
+    19,
+    "addons/crm/models/crm_lead.py:1111 _get_rainbowman_message"
+   ],
+   [
+    24,
+    18,
+    "odoo/upgrade_code/18.3-00-l10n-fiscal-position-taxes.py:1024 upgrade"
+   ],
+   [
+    23,
+    30,
+    "addons/mail/models/mail_message.py:1184 _store_message_fields"
+   ],
+   [
+    23,
+    27,
+    "addons/l10n_fr_pdp/models/account_move.py:566 check"
+   ],
+   [
+    23,
+    27,
+    "addons/mail/models/discuss/discuss_channel.py:596 write"
+   ],
+   [
+    23,
+    26,
+    "addons/l10n_cl/models/account_move.py:68 _check_document_types_post"
+   ],
+   [
+    23,
+    25,
+    "odoo/orm/fields.py:642 setup_related"
+   ],
+   [
+    23,
+    25,
+    "odoo/tools/babel/javascript_extractor.py:86 extract_javascript"
+   ],
+   [
+    23,
+    24,
+    "odoo/upgrade_code/19.4-00-ir-access.py:78 convert"
+   ],
+   [
+    23,
+    24,
+    "addons/l10n_it_edi/models/account_move.py:707 _l10n_it_edi_get_values"
+   ],
+   [
+    23,
+    23,
+    "addons/l10n_sa_edi/models/account_move.py:50 _l10n_sa_get_alerts"
+   ],
+   [
+    23,
+    22,
+    "addons/website/models/website.py:1737 _enumerate_pages"
+   ],
+   [
+    23,
+    21,
+    "addons/barcodes/models/barcode_nomenclature.py:91 parse_nomenclature_barcode"
+   ],
+   [
+    23,
+    18,
+    "addons/sale_stock/models/account_move.py:12 _get_invoiced_lot_values"
+   ],
+   [
+    23,
+    16,
+    "addons/l10n_it_edi/models/account_move.py:1667 _l10n_it_edi_import_invoice"
+   ],
+   [
+    23,
+    2,
+    "odoo/tools/mail.py:610 html2plaintext"
+   ],
+   [
+    22,
+    33,
+    "addons/mail/controllers/mail.py:77 _redirect_to_record"
+   ],
+   [
+    22,
+    28,
+    "addons/sale_loyalty/models/sale_order.py:1725 _try_apply_code"
+   ],
+   [
+    22,
+    26,
+    "addons/stock/models/stock_move.py:2138 _action_assign"
+   ],
+   [
+    22,
+    26,
+    "addons/web/models/ir_model.py:56 _get_definitions"
+   ],
+   [
+    22,
+    25,
+    "addons/project/controllers/portal.py:429 _prepare_tasks_values"
+   ],
+   [
+    22,
+    24,
+    "addons/hr_holidays/models/hr_leave.py:1753 write"
+   ],
+   [
+    22,
+    21,
+    "odoo/orm/models.py:4088 create"
+   ],
+   [
+    22,
+    19,
+    "addons/mrp/models/mrp_production.py:2162 _split_productions"
+   ],
+   [
+    22,
+    17,
+    "addons/mail/models/models.py:400 _message_get_suggested_recipients_batch"
+   ],
+   [
+    22,
+    17,
+    "addons/website_event/controllers/main.py:49 events"
+   ],
+   [
+    21,
+    24,
+    "addons/account/tools/structured_reference.py:170 is_valid_structured_reference"
+   ],
+   [
+    21,
+    23,
+    "addons/mail/models/discuss/discuss_channel.py:1009 invite_by_email"
+   ],
+   [
+    21,
+    22,
+    "odoo/orm/models.py:3098 fetch"
+   ],
+   [
+    21,
+    21,
+    "addons/calendar/models/calendar_event.py:818 create"
+   ],
+   [
+    21,
+    21,
+    "addons/mail/models/mail_thread.py:5300 _store_thread_fields"
+   ],
+   [
+    21,
+    19,
+    "addons/mrp/models/mrp_workorder.py:490 write"
+   ],
+   [
+    21,
+    19,
+    "addons/stock/models/stock_move.py:872 write"
+   ],
+   [
+    21,
+    18,
+    "odoo/addons/base/models/ir_ui_view.py:2378 _validate_data_icon_accessibility"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 2189,
+ "calls_in_logic_resolved": 2611,
+ "calls_in_logic_unresolved": 6035,
+ "load_seconds": 0.3,
+ "analyze_seconds": 0.3
+}

@@ -1,0 +1,2646 @@
+{
+ "name": "cockroach",
+ "functions": 63589,
+ "functions_with_logic": 13792,
+ "pure_boolean_functions": 4,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 25212,
+   "median": 2,
+   "p90": 2,
+   "p99": 5,
+   "p999": 10,
+   "max": 83
+  },
+  "stmts": {
+   "n": 25212,
+   "median": 1,
+   "p90": 2,
+   "p99": 5,
+   "p999": 13,
+   "max": 83
+  },
+  "max_stmts_within_input_limit": 26,
+  "over_inputs": 5,
+  "over_stmts": 0,
+  "over_either": 5,
+  "share_over_either": 0.00019831826114548627,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    83,
+    83,
+    "pkg/sql/opt/memo/memo.go:490 IsStale"
+   ],
+   [
+    29,
+    29,
+    "pkg/sql/roleoption/role_option.go:332 CheckRoleOptionConflicts"
+   ],
+   [
+    27,
+    26,
+    "pkg/util/ulid/ulid.go:161 parse"
+   ],
+   [
+    26,
+    25,
+    "pkg/util/leaktest/leaktest.go:48 interestingGoroutines"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/sem/tree/backup.go:690 IsDefault"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    83,
+    83,
+    "pkg/sql/opt/memo/memo.go:490 IsStale"
+   ],
+   [
+    29,
+    29,
+    "pkg/sql/roleoption/role_option.go:332 CheckRoleOptionConflicts"
+   ],
+   [
+    27,
+    26,
+    "pkg/util/ulid/ulid.go:161 parse"
+   ],
+   [
+    26,
+    25,
+    "pkg/util/leaktest/leaktest.go:48 interestingGoroutines"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/sem/tree/backup.go:690 IsDefault"
+   ]
+  ],
+  "all_over": [
+   [
+    83,
+    83,
+    "pkg/sql/opt/memo/memo.go:490 IsStale"
+   ],
+   [
+    29,
+    29,
+    "pkg/sql/roleoption/role_option.go:332 CheckRoleOptionConflicts"
+   ],
+   [
+    27,
+    26,
+    "pkg/util/ulid/ulid.go:161 parse"
+   ],
+   [
+    26,
+    25,
+    "pkg/util/leaktest/leaktest.go:48 interestingGoroutines"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/sem/tree/backup.go:690 IsDefault"
+   ]
+  ]
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 13792,
+   "median": 2,
+   "p90": 5,
+   "p99": 14,
+   "p999": 34,
+   "max": 91
+  },
+  "stmts": {
+   "n": 13792,
+   "median": 1,
+   "p90": 5,
+   "p99": 15,
+   "p999": 38,
+   "max": 186
+  },
+  "max_stmts_within_input_limit": 38,
+  "over_inputs": 55,
+  "over_stmts": 0,
+  "over_either": 55,
+  "share_over_either": 0.003987819025522042,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    91,
+    88,
+    "pkg/sql/opt/memo/memo.go:485 IsStale"
+   ],
+   [
+    69,
+    186,
+    "pkg/storage/sst.go:468 CheckSSTConflicts"
+   ],
+   [
+    51,
+    52,
+    "pkg/sql/logictest/logic.go:2812 processSubtest"
+   ],
+   [
+    43,
+    53,
+    "pkg/sql/sem/tree/overload.go:879 typeCheckOverloadedExprs"
+   ],
+   [
+    41,
+    40,
+    "pkg/sql/execinfrapb/component_stats.go:255 Union"
+   ],
+   [
+    40,
+    51,
+    "pkg/sql/conn_executor_exec.go:1202 execStmtInOpenStateWithPausablePortal"
+   ],
+   [
+    39,
+    39,
+    "pkg/sql/logictest/logic.go:4138 finishExecQuery"
+   ],
+   [
+    38,
+    49,
+    "pkg/util/tochar/num_tochar.go:334 numProcessorToChar"
+   ],
+   [
+    37,
+    31,
+    "pkg/sql/opt/exec/explain/emit.go:519 emitNodeAttributes"
+   ],
+   [
+    35,
+    40,
+    "pkg/sql/sem/tree/type_check.go:2533 typeCheckComparisonOp"
+   ],
+   [
+    34,
+    61,
+    "pkg/sql/opt/memo/expr_format.go:252 formatRelational"
+   ],
+   [
+    34,
+    39,
+    "pkg/kv/kvclient/kvcoord/dist_sender.go:2669 sendToReplicas"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    69,
+    186,
+    "pkg/storage/sst.go:468 CheckSSTConflicts"
+   ],
+   [
+    91,
+    88,
+    "pkg/sql/opt/memo/memo.go:485 IsStale"
+   ],
+   [
+    34,
+    61,
+    "pkg/sql/opt/memo/expr_format.go:252 formatRelational"
+   ],
+   [
+    27,
+    61,
+    "pkg/util/timeutil/pgdate/field_extract.go:276 interpretNumber"
+   ],
+   [
+    43,
+    53,
+    "pkg/sql/sem/tree/overload.go:879 typeCheckOverloadedExprs"
+   ],
+   [
+    51,
+    52,
+    "pkg/sql/logictest/logic.go:2812 processSubtest"
+   ],
+   [
+    40,
+    51,
+    "pkg/sql/conn_executor_exec.go:1202 execStmtInOpenStateWithPausablePortal"
+   ],
+   [
+    38,
+    49,
+    "pkg/util/tochar/num_tochar.go:334 numProcessorToChar"
+   ],
+   [
+    26,
+    42,
+    "pkg/storage/mvcc.go:8224 mvccExportToWriter"
+   ],
+   [
+    41,
+    40,
+    "pkg/sql/execinfrapb/component_stats.go:255 Union"
+   ],
+   [
+    35,
+    40,
+    "pkg/sql/sem/tree/type_check.go:2533 typeCheckComparisonOp"
+   ],
+   [
+    39,
+    39,
+    "pkg/sql/logictest/logic.go:4138 finishExecQuery"
+   ]
+  ],
+  "all_over": [
+   [
+    91,
+    88,
+    "pkg/sql/opt/memo/memo.go:485 IsStale"
+   ],
+   [
+    69,
+    186,
+    "pkg/storage/sst.go:468 CheckSSTConflicts"
+   ],
+   [
+    51,
+    52,
+    "pkg/sql/logictest/logic.go:2812 processSubtest"
+   ],
+   [
+    43,
+    53,
+    "pkg/sql/sem/tree/overload.go:879 typeCheckOverloadedExprs"
+   ],
+   [
+    41,
+    40,
+    "pkg/sql/execinfrapb/component_stats.go:255 Union"
+   ],
+   [
+    40,
+    51,
+    "pkg/sql/conn_executor_exec.go:1202 execStmtInOpenStateWithPausablePortal"
+   ],
+   [
+    39,
+    39,
+    "pkg/sql/logictest/logic.go:4138 finishExecQuery"
+   ],
+   [
+    38,
+    49,
+    "pkg/util/tochar/num_tochar.go:334 numProcessorToChar"
+   ],
+   [
+    37,
+    31,
+    "pkg/sql/opt/exec/explain/emit.go:519 emitNodeAttributes"
+   ],
+   [
+    35,
+    40,
+    "pkg/sql/sem/tree/type_check.go:2533 typeCheckComparisonOp"
+   ],
+   [
+    34,
+    61,
+    "pkg/sql/opt/memo/expr_format.go:252 formatRelational"
+   ],
+   [
+    34,
+    39,
+    "pkg/kv/kvclient/kvcoord/dist_sender.go:2669 sendToReplicas"
+   ],
+   [
+    34,
+    32,
+    "pkg/config/zonepb/zone.go:704 DiffWithZone"
+   ],
+   [
+    34,
+    25,
+    "pkg/sql/opt/memo/check_expr.go:25 CheckExpr"
+   ],
+   [
+    33,
+    35,
+    "pkg/cmd/roachtest/spec/cluster_spec.go:596 RoachprodOpts"
+   ],
+   [
+    33,
+    35,
+    "pkg/sql/catalog/tabledesc/validate.go:1636 validateTableIndexes"
+   ],
+   [
+    33,
+    33,
+    "pkg/sql/conn_executor_exec.go:417 execStmtInOpenState"
+   ],
+   [
+    32,
+    37,
+    "pkg/sql/create_table.go:1400 NewTableDesc"
+   ],
+   [
+    32,
+    37,
+    "pkg/util/tochar/num_fromchar.go:34 numFromChar"
+   ],
+   [
+    32,
+    32,
+    "pkg/sql/opt/optbuilder/create_function.go:32 buildCreateFunction"
+   ],
+   [
+    30,
+    29,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:293 dmHandleC"
+   ],
+   [
+    29,
+    36,
+    "pkg/storage/mvcc.go:2251 mvccPutInternal"
+   ],
+   [
+    29,
+    29,
+    "pkg/sql/roleoption/role_option.go:325 CheckRoleOptionConflicts"
+   ],
+   [
+    29,
+    15,
+    "pkg/util/tochar/dch_fromchar.go:1057 tmFromCharToTime"
+   ],
+   [
+    27,
+    61,
+    "pkg/util/timeutil/pgdate/field_extract.go:276 interpretNumber"
+   ],
+   [
+    27,
+    26,
+    "pkg/kv/kvserver/replica_raft.go:889 handleRaftReadyRaftMuLocked"
+   ],
+   [
+    27,
+    26,
+    "pkg/util/ulid/ulid.go:153 parse"
+   ],
+   [
+    27,
+    25,
+    "pkg/sql/alter_primary_key.go:53 AlterPrimaryKey"
+   ],
+   [
+    27,
+    22,
+    "pkg/sql/conn_executor_exec.go:2887 dispatchToExecutionEngine"
+   ],
+   [
+    26,
+    42,
+    "pkg/storage/mvcc.go:8224 mvccExportToWriter"
+   ],
+   [
+    26,
+    34,
+    "pkg/sql/exec_log.go:174 maybeLogStatementInternal"
+   ],
+   [
+    26,
+    25,
+    "pkg/util/leaktest/leaktest.go:35 interestingGoroutines"
+   ],
+   [
+    25,
+    25,
+    "pkg/sql/distsql_running.go:734 Run"
+   ],
+   [
+    25,
+    24,
+    "pkg/storage/mvcc_incremental_iterator.go:874 assertInvariants"
+   ],
+   [
+    25,
+    22,
+    "pkg/sql/sem/tree/type_check.go:1218 TypeCheck"
+   ],
+   [
+    24,
+    23,
+    "pkg/kv/kvnemesis/validator.go:422 processOp"
+   ],
+   [
+    24,
+    21,
+    "pkg/kv/kvserver/kvflowcontrol/rac2/range_controller.go:1119 HandleRaftEventRaftMuLocked"
+   ],
+   [
+    24,
+    20,
+    "pkg/util/fuzzystrmatch/metaphone.go:106 Metaphone"
+   ],
+   [
+    23,
+    33,
+    "pkg/storage/mvcc.go:5492 mvccResolveWriteIntent"
+   ],
+   [
+    23,
+    23,
+    "pkg/workload/schemachange/operation_generator.go:963 createIndex"
+   ],
+   [
+    23,
+    19,
+    "pkg/sql/opt/xform/scan_index_iter.go:214 ForEachStartingAfter"
+   ],
+   [
+    22,
+    22,
+    "pkg/storage/mvcc.go:3168 MVCCClearTimeRange"
+   ],
+   [
+    22,
+    17,
+    "pkg/config/zonepb/zone.go:384 Validate"
+   ],
+   [
+    22,
+    15,
+    "pkg/sql/crdb_internal.go:8209 genClusterLocksGenerator"
+   ],
+   [
+    22,
+    13,
+    "pkg/util/randident/namegen.go:61 GenerateOne"
+   ],
+   [
+    21,
+    26,
+    "pkg/util/tochar/dch_fromchar.go:289 dchFromChar"
+   ],
+   [
+    21,
+    25,
+    "pkg/kv/kvserver/rangefeed/catchup_scan.go:163 CatchUpScan"
+   ],
+   [
+    21,
+    24,
+    "pkg/sql/schemachanger/scbuild/internal/scbuildstmt/alter_table_add_column.go:42 alterTableAddColumn"
+   ],
+   [
+    21,
+    23,
+    "pkg/util/timeutil/pgdate/field_extract.go:902 validate"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/sem/tree/backup.go:688 IsDefault"
+   ],
+   [
+    21,
+    20,
+    "pkg/workload/kv/kv.go:244 validateConfig"
+   ],
+   [
+    21,
+    18,
+    "pkg/cli/log_flags.go:39 setupLogging"
+   ],
+   [
+    21,
+    18,
+    "pkg/internal/sqlsmith/scalar.go:423 makeFunc"
+   ],
+   [
+    21,
+    15,
+    "pkg/sql/opt/optbuilder/select.go:574 buildScan"
+   ],
+   [
+    21,
+    15,
+    "pkg/sql/sem/tree/function_definition.go:281 MatchOverload"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 26958,
+   "median": 2,
+   "p90": 3,
+   "p99": 11,
+   "p999": 45,
+   "max": 157
+  },
+  "stmts": {
+   "n": 26958,
+   "median": 1,
+   "p90": 3,
+   "p99": 14,
+   "p999": 53,
+   "max": 254
+  },
+  "max_stmts_within_input_limit": 34,
+  "over_inputs": 116,
+  "over_stmts": 0,
+  "over_either": 116,
+  "share_over_either": 0.004302989836041249,
+  "depth_capped": 0,
+  "recursion_capped": 221,
+  "size_capped": 0,
+  "depth": {
+   "n": 26958,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 4,
+   "max": 7
+  },
+  "top_by_inputs": [
+   [
+    157,
+    254,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:1131 simplifyFilter"
+   ],
+   [
+    126,
+    131,
+    "pkg/sql/opt/norm/general_funcs.go:707 EitherExprIsNeverNull"
+   ],
+   [
+    105,
+    107,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:630 AggsCanBeDecorrelated"
+   ],
+   [
+    104,
+    107,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:251 deriveGroupByRejectNullCols"
+   ],
+   [
+    104,
+    102,
+    "pkg/sql/schemachanger/scbuild/build.go:201 makeState"
+   ],
+   [
+    104,
+    101,
+    "pkg/sql/schemachanger/scplan/internal/rules/helpers.go:509 ForEachElementInActiveVersion (lone call)"
+   ],
+   [
+    83,
+    83,
+    "pkg/sql/opt/memo/memo.go:490 IsStale"
+   ],
+   [
+    65,
+    64,
+    "pkg/workload/schemachange/operation_generator.go:1064 createIndex"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/memo/expr.go:1141 initUnexportedFields (lone call)"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument (lone call)"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument (lone call)"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/optbuilder/select.go:867 addCheckConstraintsForTable (lone call)"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    157,
+    254,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:1131 simplifyFilter"
+   ],
+   [
+    50,
+    201,
+    "pkg/storage/pebble_mvcc_scanner.go:707 afterScan"
+   ],
+   [
+    35,
+    134,
+    "pkg/storage/col_mvcc.go:224 NextKV"
+   ],
+   [
+    35,
+    134,
+    "pkg/storage/pebble_mvcc_scanner.go:681 scan"
+   ],
+   [
+    126,
+    131,
+    "pkg/sql/opt/norm/general_funcs.go:707 EitherExprIsNeverNull"
+   ],
+   [
+    105,
+    107,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:630 AggsCanBeDecorrelated"
+   ],
+   [
+    104,
+    107,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:251 deriveGroupByRejectNullCols"
+   ],
+   [
+    104,
+    102,
+    "pkg/sql/schemachanger/scbuild/build.go:201 makeState"
+   ],
+   [
+    104,
+    101,
+    "pkg/sql/schemachanger/scplan/internal/rules/helpers.go:509 ForEachElementInActiveVersion (lone call)"
+   ],
+   [
+    28,
+    100,
+    "pkg/storage/pebble_mvcc_scanner.go:629 seekToStartOfScan"
+   ],
+   [
+    83,
+    83,
+    "pkg/sql/opt/memo/memo.go:490 IsStale"
+   ],
+   [
+    45,
+    79,
+    "pkg/sql/opt/partialidx/implicator.go:166 FiltersImplyPredicate (lone call)"
+   ]
+  ],
+  "all_over": [
+   [
+    157,
+    254,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:1131 simplifyFilter"
+   ],
+   [
+    126,
+    131,
+    "pkg/sql/opt/norm/general_funcs.go:707 EitherExprIsNeverNull"
+   ],
+   [
+    105,
+    107,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:630 AggsCanBeDecorrelated"
+   ],
+   [
+    104,
+    107,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:251 deriveGroupByRejectNullCols"
+   ],
+   [
+    104,
+    102,
+    "pkg/sql/schemachanger/scbuild/build.go:201 makeState"
+   ],
+   [
+    104,
+    101,
+    "pkg/sql/schemachanger/scplan/internal/rules/helpers.go:509 ForEachElementInActiveVersion (lone call)"
+   ],
+   [
+    83,
+    83,
+    "pkg/sql/opt/memo/memo.go:490 IsStale"
+   ],
+   [
+    65,
+    64,
+    "pkg/workload/schemachange/operation_generator.go:1064 createIndex"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/memo/expr.go:1141 initUnexportedFields (lone call)"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument (lone call)"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument (lone call)"
+   ],
+   [
+    63,
+    65,
+    "pkg/sql/opt/optbuilder/select.go:867 addCheckConstraintsForTable (lone call)"
+   ],
+   [
+    63,
+    62,
+    "pkg/sql/randgen/table.go:382 randIndexTableDefFromCols"
+   ],
+   [
+    62,
+    64,
+    "pkg/sql/distsql_leaf_txn.go:53 constructReadsTreeForLeaf"
+   ],
+   [
+    54,
+    53,
+    "pkg/sql/opt/norm/groupby_funcs.go:340 CanMergeAggs"
+   ],
+   [
+    53,
+    53,
+    "pkg/sql/opt/norm/groupby_funcs.go:329 CanMergeAggs"
+   ],
+   [
+    52,
+    53,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:575 EnsureCanaryCol"
+   ],
+   [
+    52,
+    53,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:676 TranslateNonIgnoreAggs"
+   ],
+   [
+    52,
+    53,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:688 TranslateNonIgnoreAggs"
+   ],
+   [
+    52,
+    53,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:749 EnsureAggsCanIgnoreNulls"
+   ],
+   [
+    52,
+    53,
+    "pkg/sql/opt/norm/groupby_funcs.go:510 canEliminateGroupByJoin"
+   ],
+   [
+    52,
+    52,
+    "pkg/sql/opt/memo/logical_props_builder.go:639 buildGroupingExprProps (lone call)"
+   ],
+   [
+    52,
+    43,
+    "pkg/sql/catalog/catprivilege/default_privilege.go:158 removeRoleIfEmptyPrivileges"
+   ],
+   [
+    50,
+    201,
+    "pkg/storage/pebble_mvcc_scanner.go:707 afterScan"
+   ],
+   [
+    48,
+    47,
+    "pkg/sql/flowinfra/stream_encoder.go:111 AddRow"
+   ],
+   [
+    45,
+    79,
+    "pkg/sql/opt/partialidx/implicator.go:166 FiltersImplyPredicate (lone call)"
+   ],
+   [
+    45,
+    45,
+    "pkg/sql/schemachanger/scbuild/internal/scbuildstmt/alter_table_add_column.go:159 alterTableAddColumn"
+   ],
+   [
+    45,
+    44,
+    "pkg/workload/schemachange/operation_generator.go:315 addColumn"
+   ],
+   [
+    44,
+    44,
+    "pkg/sql/randgen/table.go:379 randIndexTableDefFromCols"
+   ],
+   [
+    44,
+    43,
+    "pkg/sql/opt/indexrec/hypothetical_table.go:61 BuildOptAndHypTableMaps"
+   ],
+   [
+    44,
+    43,
+    "pkg/workload/schemachange/operation_generator.go:403 addUniqueConstraint"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/opt/indexrec/candidate.go:319 addJoinIndexes"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/opt/indexrec/candidate.go:408 addVariableExprIndex"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/opt/indexrec/candidate.go:441 addMultiColumnIndex"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/randgen/mutator.go:584 foreignKeyMutator"
+   ],
+   [
+    43,
+    52,
+    "pkg/kv/kvserver/concurrency/lock_table.go:2872 scanAndMaybeEnqueue (lone call)"
+   ],
+   [
+    43,
+    44,
+    "pkg/sql/inspect/index_consistency_check.go:182 Start"
+   ],
+   [
+    43,
+    42,
+    "pkg/sql/catalog/colinfo/col_type_info.go:273 ValidateColumnForIndex"
+   ],
+   [
+    43,
+    42,
+    "pkg/sql/inspect/index_consistency_check.go:852 allColumnsDatumsToBytesCompatible"
+   ],
+   [
+    43,
+    42,
+    "pkg/sql/opt/testutils/testcat/create_table.go:1390 addColumnByOrdinal"
+   ],
+   [
+    43,
+    42,
+    "pkg/sql/schemachanger/scbuild/internal/scbuildstmt/alter_table_alter_primary_key.go:453 checkForEarlyExit"
+   ],
+   [
+    43,
+    42,
+    "pkg/workload/schemachange/operation_generator.go:1089 createIndex"
+   ],
+   [
+    43,
+    41,
+    "pkg/internal/sqlsmith/alter.go:337 makeCreateIndex (lone call)"
+   ],
+   [
+    39,
+    41,
+    "pkg/testutils/lint/passes/unconvert/unconvert.go:35 run (lone call)"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/opt/norm/join_funcs.go:427 GetEquivColsWithEquivType"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/opt/norm/join_funcs.go:457 GetEquivColsWithEquivTypeWithEquivGroups"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/opt/optbuilder/join.go:509 addEqualityCondition"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/rowcontainer/disk_row_container.go:147 MakeDiskRowContainer"
+   ],
+   [
+    38,
+    37,
+    "pkg/sql/schemachanger/scexec/scmutationexec/index.go:395 AddColumnToIndex"
+   ],
+   [
+    38,
+    37,
+    "pkg/sql/schemachanger/scexec/scmutationexec/index.go:478 RemoveColumnFromIndex"
+   ],
+   [
+    37,
+    37,
+    "pkg/sql/opt/memo/interner.go:1399 encodeDatum"
+   ],
+   [
+    37,
+    37,
+    "pkg/sql/opt/memo/logical_props_builder.go:3117 CanBeCompositeSensitive"
+   ],
+   [
+    37,
+    37,
+    "pkg/sql/opt/memo/logical_props_builder.go:3139 CanBeCompositeSensitive"
+   ],
+   [
+    37,
+    36,
+    "pkg/crosscluster/ldrrandgen/logical.go:51 GenerateLDRTable (lone call)"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/catalog/tabledesc/structured.go:787 allocateIndexIDs (lone call)"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/opt/memo/extract.go:560 ExtractExactScalarExprsForColumns (lone call)"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/opt/norm/inline_funcs.go:324 CanInlineConstVar (lone call)"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/opt/norm/inline_funcs.go:360 InlineConstVar (lone call)"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/opt/xform/scan_index_iter.go:365 extractConstNonCompositeColumns (lone call)"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/rowcontainer/disk_row_container.go:513 EncRow (lone call)"
+   ],
+   [
+    36,
+    61,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:797 makeSpansForExpr"
+   ],
+   [
+    35,
+    134,
+    "pkg/storage/col_mvcc.go:224 NextKV"
+   ],
+   [
+    35,
+    134,
+    "pkg/storage/pebble_mvcc_scanner.go:681 scan"
+   ],
+   [
+    34,
+    44,
+    "pkg/sql/schemachanger/scplan/internal/rules/current/helpers.go:169 isSimpleDependent"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/datum.go:4794 NewDArrayFromDatums"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/datum.go:5072 Append"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/type_check.go:2522 typeCheckSubqueryWithIn"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/type_check.go:3255 typeCheckSameTypedTupleExprs"
+   ],
+   [
+    32,
+    33,
+    "pkg/sql/gcjob/gc_job.go:342 Resume"
+   ],
+   [
+    31,
+    32,
+    "pkg/sql/schema_changer.go:3324 Resume"
+   ],
+   [
+    31,
+    32,
+    "pkg/sql/schema_changer.go:3528 OnFailOrCancel"
+   ],
+   [
+    31,
+    32,
+    "pkg/sql/type_change.go:1546 execWithRetry"
+   ],
+   [
+    31,
+    32,
+    "pkg/sql/type_change.go:1616 OnFailOrCancel"
+   ],
+   [
+    31,
+    31,
+    "pkg/sql/schemachanger/scjob/job.go:105 run (lone call)"
+   ],
+   [
+    30,
+    32,
+    "pkg/sql/opt/norm/inline_funcs.go:148 CanInlineProjections"
+   ],
+   [
+    29,
+    32,
+    "pkg/internal/sqlsmith/scalar.go:337 makeBinOp"
+   ],
+   [
+    29,
+    31,
+    "pkg/geo/geoindex/s2_geometry_index.go:276 convertToGeomTAndTryClip (lone call)"
+   ],
+   [
+    29,
+    30,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:91 NullRejectProjections"
+   ],
+   [
+    29,
+    30,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:336 deriveProjectRejectNullCols"
+   ],
+   [
+    29,
+    29,
+    "pkg/sql/roleoption/role_option.go:332 CheckRoleOptionConflicts"
+   ],
+   [
+    28,
+    100,
+    "pkg/storage/pebble_mvcc_scanner.go:629 seekToStartOfScan"
+   ],
+   [
+    28,
+    38,
+    "pkg/sql/ttl/ttljob/ttljob.go:84 Resume"
+   ],
+   [
+    28,
+    30,
+    "pkg/sql/lexbase/encode.go:59 EncodeRestrictedSQLIdent"
+   ],
+   [
+    28,
+    29,
+    "pkg/sql/distsql_physical_planner.go:3853 wrapPlan"
+   ],
+   [
+    27,
+    36,
+    "pkg/backup/compaction_job.go:283 ResumeCompaction (lone call)"
+   ],
+   [
+    27,
+    36,
+    "pkg/kv/kvserver/rangefeed/scheduled_processor.go:703 consumeLogicalOps (lone call)"
+   ],
+   [
+    27,
+    36,
+    "pkg/sql/fingerprint/fingerprint_job.go:67 Resume (lone call)"
+   ],
+   [
+    27,
+    36,
+    "pkg/sql/importer/import_job.go:988 ingestWithRetry (lone call)"
+   ],
+   [
+    27,
+    28,
+    "pkg/geo/geomfn/distance.go:215 distanceInternal"
+   ],
+   [
+    27,
+    26,
+    "pkg/util/ulid/ulid.go:161 parse"
+   ],
+   [
+    26,
+    35,
+    "pkg/jobs/joberror/errors.go:29 IsPermanentBulkJobError"
+   ],
+   [
+    26,
+    30,
+    "pkg/sql/scanner/plpgsql_scan.go:23 Scan (lone call)"
+   ],
+   [
+    26,
+    30,
+    "pkg/sql/scanner/plpgsql_scan.go:23 Scan (lone call)"
+   ],
+   [
+    26,
+    30,
+    "pkg/sql/scanner/plpgsql_scan.go:23 Scan (lone call)"
+   ],
+   [
+    26,
+    30,
+    "pkg/sql/scanner/plpgsql_scan.go:23 Scan (lone call)"
+   ],
+   [
+    26,
+    27,
+    "pkg/sql/lexbase/encode.go:71 EncodeUnrestrictedSQLIdent"
+   ],
+   [
+    26,
+    25,
+    "pkg/util/leaktest/leaktest.go:48 interestingGoroutines"
+   ],
+   [
+    25,
+    33,
+    "pkg/kv/kvserver/rangefeed/resolved_timestamp.go:137 ConsumeLogicalOp (lone call)"
+   ],
+   [
+    25,
+    30,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:344 dmHandleC"
+   ],
+   [
+    25,
+    26,
+    "pkg/cli/userfile.go:329 getDefaultQualifiedTableName (lone call)"
+   ],
+   [
+    25,
+    25,
+    "pkg/sql/catalog/colinfo/col_type_info.go:173 ColumnTypeIsIndexable"
+   ],
+   [
+    24,
+    30,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3059 maybeEnqueueNonLockingReadRequest"
+   ],
+   [
+    24,
+    29,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3173 shouldRequestActivelyWait (lone call)"
+   ],
+   [
+    23,
+    26,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:821 makeSpansForExpr"
+   ],
+   [
+    23,
+    20,
+    "pkg/sql/sem/tree/type_check.go:2020 TypeCheck"
+   ],
+   [
+    23,
+    17,
+    "pkg/cmd/roachprod-centralized/utils/api/bindings/stripe/validator.go:33 ValidateFilterValues (lone call)"
+   ],
+   [
+    22,
+    30,
+    "pkg/sql/exec_log.go:200 maybeLogStatementInternal"
+   ],
+   [
+    22,
+    29,
+    "pkg/sql/schemachanger/scplan/internal/rules/release_26_2/helpers.go:124 isSimpleDependent"
+   ],
+   [
+    22,
+    28,
+    "pkg/sql/schemachanger/scplan/internal/rules/release_25_4/helpers.go:125 isSimpleDependent"
+   ],
+   [
+    22,
+    28,
+    "pkg/sql/schemachanger/scplan/internal/rules/release_26_1/helpers.go:125 isSimpleDependent"
+   ],
+   [
+    22,
+    21,
+    "pkg/sql/randgen/table.go:391 randIndexTableDefFromCols"
+   ],
+   [
+    22,
+    18,
+    "pkg/sql/sem/tree/placeholders.go:141 SetType"
+   ],
+   [
+    21,
+    67,
+    "pkg/storage/pebble_mvcc_scanner.go:711 afterScan"
+   ],
+   [
+    21,
+    27,
+    "pkg/sql/schemachanger/scplan/internal/rules/current/dep_two_version.go:139 init"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/sem/tree/backup.go:690 IsDefault"
+   ],
+   [
+    21,
+    19,
+    "pkg/sql/distsql_plan_stats.go:359 createPartialStatsPlan"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 14374,
+   "median": 2,
+   "p90": 7,
+   "p99": 29,
+   "p999": 83,
+   "max": 162
+  },
+  "stmts": {
+   "n": 14374,
+   "median": 2,
+   "p90": 7,
+   "p99": 33,
+   "p999": 108,
+   "max": 268
+  },
+  "max_stmts_within_input_limit": 45,
+  "over_inputs": 239,
+  "over_stmts": 2,
+  "over_either": 239,
+  "share_over_either": 0.01662724363433978,
+  "depth_capped": 0,
+  "recursion_capped": 194,
+  "size_capped": 0,
+  "depth": {
+   "n": 14374,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 4,
+   "max": 7
+  },
+  "top_by_inputs": [
+   [
+    162,
+    259,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:1104 simplifyFilter"
+   ],
+   [
+    132,
+    152,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:293 dmHandleC"
+   ],
+   [
+    126,
+    131,
+    "pkg/sql/opt/norm/general_funcs.go:706 EitherExprIsNeverNull"
+   ],
+   [
+    126,
+    130,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument"
+   ],
+   [
+    112,
+    110,
+    "pkg/sql/schemachanger/scbuild/build.go:188 makeState"
+   ],
+   [
+    110,
+    110,
+    "pkg/sql/opt/norm/groupby_funcs.go:298 CanMergeAggs"
+   ],
+   [
+    107,
+    109,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:234 deriveGroupByRejectNullCols"
+   ],
+   [
+    107,
+    108,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:622 AggsCanBeDecorrelated"
+   ],
+   [
+    105,
+    107,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:662 TranslateNonIgnoreAggs"
+   ],
+   [
+    104,
+    101,
+    "pkg/sql/schemachanger/scplan/internal/rules/helpers.go:509 ForEachElementInActiveVersion"
+   ],
+   [
+    94,
+    97,
+    "pkg/sql/randgen/table.go:289 randIndexTableDefFromCols"
+   ],
+   [
+    91,
+    88,
+    "pkg/sql/opt/memo/memo.go:485 IsStale"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    66,
+    268,
+    "pkg/storage/pebble_mvcc_scanner.go:696 afterScan"
+   ],
+   [
+    162,
+    259,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:1104 simplifyFilter"
+   ],
+   [
+    88,
+    224,
+    "pkg/storage/sst.go:468 CheckSSTConflicts"
+   ],
+   [
+    132,
+    152,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:293 dmHandleC"
+   ],
+   [
+    59,
+    145,
+    "pkg/sql/scanner/plpgsql_scan.go:23 Scan"
+   ],
+   [
+    40,
+    139,
+    "pkg/storage/col_mvcc.go:213 NextKV"
+   ],
+   [
+    37,
+    136,
+    "pkg/storage/pebble_mvcc_scanner.go:675 scan"
+   ],
+   [
+    126,
+    131,
+    "pkg/sql/opt/norm/general_funcs.go:706 EitherExprIsNeverNull"
+   ],
+   [
+    126,
+    130,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument"
+   ],
+   [
+    34,
+    130,
+    "pkg/storage/pebble_mvcc_scanner.go:627 seekToStartOfScan"
+   ],
+   [
+    81,
+    116,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:687 makeSpansForExpr"
+   ],
+   [
+    112,
+    110,
+    "pkg/sql/schemachanger/scbuild/build.go:188 makeState"
+   ]
+  ],
+  "all_over": [
+   [
+    162,
+    259,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:1104 simplifyFilter"
+   ],
+   [
+    132,
+    152,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:293 dmHandleC"
+   ],
+   [
+    126,
+    131,
+    "pkg/sql/opt/norm/general_funcs.go:706 EitherExprIsNeverNull"
+   ],
+   [
+    126,
+    130,
+    "pkg/sql/opt/norm/groupby_funcs.go:279 SingleRegressionCountArgument"
+   ],
+   [
+    112,
+    110,
+    "pkg/sql/schemachanger/scbuild/build.go:188 makeState"
+   ],
+   [
+    110,
+    110,
+    "pkg/sql/opt/norm/groupby_funcs.go:298 CanMergeAggs"
+   ],
+   [
+    107,
+    109,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:234 deriveGroupByRejectNullCols"
+   ],
+   [
+    107,
+    108,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:622 AggsCanBeDecorrelated"
+   ],
+   [
+    105,
+    107,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:662 TranslateNonIgnoreAggs"
+   ],
+   [
+    104,
+    101,
+    "pkg/sql/schemachanger/scplan/internal/rules/helpers.go:509 ForEachElementInActiveVersion"
+   ],
+   [
+    94,
+    97,
+    "pkg/sql/randgen/table.go:289 randIndexTableDefFromCols"
+   ],
+   [
+    91,
+    88,
+    "pkg/sql/opt/memo/memo.go:485 IsStale"
+   ],
+   [
+    88,
+    224,
+    "pkg/storage/sst.go:468 CheckSSTConflicts"
+   ],
+   [
+    87,
+    89,
+    "pkg/kv/kvserver/concurrency/lock_table.go:4282 verify"
+   ],
+   [
+    83,
+    82,
+    "pkg/workload/schemachange/operation_generator.go:963 createIndex"
+   ],
+   [
+    81,
+    116,
+    "pkg/sql/opt/idxconstraint/index_constraints.go:687 makeSpansForExpr"
+   ],
+   [
+    78,
+    78,
+    "pkg/sql/opt/memo/logical_props_builder.go:3086 CanBeCompositeSensitive"
+   ],
+   [
+    68,
+    74,
+    "pkg/sql/colexec/colbuilder/execplan.go:795 NewColOperator"
+   ],
+   [
+    68,
+    72,
+    "pkg/sql/opt/optbuilder/select.go:867 addCheckConstraintsForTable"
+   ],
+   [
+    67,
+    69,
+    "pkg/sql/opt/memo/expr.go:1141 initUnexportedFields"
+   ],
+   [
+    67,
+    66,
+    "pkg/sql/schemachanger/scbuild/internal/scbuildstmt/alter_table_add_column.go:42 alterTableAddColumn"
+   ],
+   [
+    66,
+    268,
+    "pkg/storage/pebble_mvcc_scanner.go:696 afterScan"
+   ],
+   [
+    65,
+    80,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:468 dmHandleG"
+   ],
+   [
+    65,
+    66,
+    "pkg/sql/distsql_leaf_txn.go:50 constructReadsTreeForLeaf"
+   ],
+   [
+    65,
+    62,
+    "pkg/sql/opt/testutils/testcat/create_table.go:1366 addColumnByOrdinal"
+   ],
+   [
+    64,
+    62,
+    "pkg/sql/catalog/colinfo/col_type_info.go:244 ValidateColumnForIndex"
+   ],
+   [
+    63,
+    58,
+    "pkg/internal/sqlsmith/alter.go:337 makeCreateIndex"
+   ],
+   [
+    62,
+    60,
+    "pkg/sql/opt/memo/logical_props_builder.go:639 buildGroupingExprProps"
+   ],
+   [
+    59,
+    145,
+    "pkg/sql/scanner/plpgsql_scan.go:23 Scan"
+   ],
+   [
+    56,
+    67,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:29 doubleMetaphone"
+   ],
+   [
+    55,
+    55,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:726 EnsureAggsCanIgnoreNulls"
+   ],
+   [
+    55,
+    53,
+    "pkg/workload/schemachange/operation_generator.go:234 addColumn"
+   ],
+   [
+    54,
+    55,
+    "pkg/sql/opt/norm/decorrelate_funcs.go:573 EnsureCanaryCol"
+   ],
+   [
+    53,
+    60,
+    "pkg/kv/kvclient/kvcoord/dist_sender.go:2669 sendToReplicas"
+   ],
+   [
+    53,
+    54,
+    "pkg/sql/opt/norm/groupby_funcs.go:496 canEliminateGroupByJoin"
+   ],
+   [
+    52,
+    55,
+    "pkg/sql/logictest/logic.go:2812 processSubtest"
+   ],
+   [
+    52,
+    52,
+    "pkg/sql/inspect/index_consistency_check.go:105 Start"
+   ],
+   [
+    52,
+    48,
+    "pkg/sql/randgen/mutator.go:411 foreignKeyMutator"
+   ],
+   [
+    52,
+    48,
+    "pkg/sql/schemachanger/scbuild/internal/scbuildstmt/alter_table_alter_primary_key.go:405 checkForEarlyExit"
+   ],
+   [
+    52,
+    43,
+    "pkg/sql/catalog/catprivilege/default_privilege.go:146 removeRoleIfEmptyPrivileges"
+   ],
+   [
+    51,
+    50,
+    "pkg/sql/opt/exec/explain/emit.go:519 emitNodeAttributes"
+   ],
+   [
+    50,
+    54,
+    "pkg/sql/opt/optbuilder/create_function.go:32 buildCreateFunction"
+   ],
+   [
+    50,
+    49,
+    "pkg/sql/flowinfra/stream_encoder.go:96 AddRow"
+   ],
+   [
+    50,
+    49,
+    "pkg/workload/schemachange/operation_generator.go:342 addUniqueConstraint"
+   ],
+   [
+    48,
+    49,
+    "pkg/sql/catalog/tabledesc/structured.go:787 allocateIndexIDs"
+   ],
+   [
+    47,
+    59,
+    "pkg/sql/sem/tree/overload.go:879 typeCheckOverloadedExprs"
+   ],
+   [
+    47,
+    57,
+    "pkg/sql/create_table.go:1400 NewTableDesc"
+   ],
+   [
+    47,
+    50,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:680 dmHandleS"
+   ],
+   [
+    47,
+    43,
+    "pkg/sql/schemachanger/scexec/scmutationexec/index.go:419 RemoveColumnFromIndex"
+   ],
+   [
+    46,
+    79,
+    "pkg/sql/opt/partialidx/implicator.go:166 FiltersImplyPredicate"
+   ],
+   [
+    46,
+    52,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3833 recomputeWaitQueues"
+   ],
+   [
+    46,
+    47,
+    "pkg/kv/kvserver/concurrency/lock_table.go:927 IsKeyLockedByConflictingTxn"
+   ],
+   [
+    45,
+    53,
+    "pkg/kv/kvserver/concurrency/lock_table.go:2872 scanAndMaybeEnqueue"
+   ],
+   [
+    45,
+    50,
+    "pkg/kv/kvserver/replica_raft.go:889 handleRaftReadyRaftMuLocked"
+   ],
+   [
+    44,
+    47,
+    "pkg/testutils/lint/passes/unconvert/unconvert.go:35 run"
+   ],
+   [
+    44,
+    43,
+    "pkg/sql/opt/indexrec/hypothetical_table.go:27 BuildOptAndHypTableMaps"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/opt/indexrec/candidate.go:314 addJoinIndexes"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/opt/indexrec/candidate.go:400 addVariableExprIndex"
+   ],
+   [
+    44,
+    42,
+    "pkg/sql/opt/indexrec/candidate.go:419 addMultiColumnIndex"
+   ],
+   [
+    44,
+    40,
+    "pkg/util/fuzzystrmatch/metaphone.go:106 Metaphone"
+   ],
+   [
+    43,
+    55,
+    "pkg/sql/conn_executor_exec.go:1202 execStmtInOpenStateWithPausablePortal"
+   ],
+   [
+    43,
+    49,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3173 shouldRequestActivelyWait"
+   ],
+   [
+    43,
+    42,
+    "pkg/sql/inspect/index_consistency_check.go:850 allColumnsDatumsToBytesCompatible"
+   ],
+   [
+    43,
+    42,
+    "pkg/sql/opt/optbuilder/join.go:476 addEqualityCondition"
+   ],
+   [
+    42,
+    41,
+    "pkg/sql/opt/norm/inline_funcs.go:360 InlineConstVar"
+   ],
+   [
+    42,
+    39,
+    "pkg/sql/schemachanger/scexec/scmutationexec/index.go:345 AddColumnToIndex"
+   ],
+   [
+    41,
+    75,
+    "pkg/sql/opt/memo/expr_format.go:252 formatRelational"
+   ],
+   [
+    41,
+    54,
+    "pkg/util/tochar/num_tochar.go:334 numProcessorToChar"
+   ],
+   [
+    41,
+    41,
+    "pkg/sql/opt/optbuilder/select.go:574 buildScan"
+   ],
+   [
+    41,
+    40,
+    "pkg/crosscluster/ldrrandgen/logical.go:51 GenerateLDRTable"
+   ],
+   [
+    41,
+    40,
+    "pkg/sql/execinfrapb/component_stats.go:255 Union"
+   ],
+   [
+    40,
+    139,
+    "pkg/storage/col_mvcc.go:213 NextKV"
+   ],
+   [
+    40,
+    66,
+    "pkg/sql/distsql_running.go:734 Run"
+   ],
+   [
+    40,
+    39,
+    "pkg/sql/opt/memo/extract.go:560 ExtractExactScalarExprsForColumns"
+   ],
+   [
+    40,
+    27,
+    "pkg/kv/kvserver/kvstorage/storage.go:515 validateIsRaftEngineSpan"
+   ],
+   [
+    39,
+    38,
+    "pkg/kv/kvserver/kvflowcontrol/rac2/range_controller.go:1119 HandleRaftEventRaftMuLocked"
+   ],
+   [
+    39,
+    38,
+    "pkg/sql/opt/norm/inline_funcs.go:324 CanInlineConstVar"
+   ],
+   [
+    39,
+    37,
+    "pkg/sql/schema_changer.go:3260 Resume"
+   ],
+   [
+    38,
+    44,
+    "pkg/sql/schemachanger/scplan/internal/rules/current/dep_two_version.go:23 init"
+   ],
+   [
+    38,
+    42,
+    "pkg/sql/alter_primary_key.go:53 AlterPrimaryKey"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/opt/norm/join_funcs.go:419 GetEquivColsWithEquivType"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/opt/norm/join_funcs.go:449 GetEquivColsWithEquivTypeWithEquivGroups"
+   ],
+   [
+    38,
+    38,
+    "pkg/sql/rowcontainer/disk_row_container.go:100 MakeDiskRowContainer"
+   ],
+   [
+    38,
+    37,
+    "pkg/sql/rowcontainer/disk_row_container.go:513 EncRow"
+   ],
+   [
+    37,
+    136,
+    "pkg/storage/pebble_mvcc_scanner.go:675 scan"
+   ],
+   [
+    37,
+    55,
+    "pkg/kv/kvnemesis/validator.go:422 processOp"
+   ],
+   [
+    37,
+    37,
+    "pkg/sql/opt/memo/interner.go:1392 encodeDatum"
+   ],
+   [
+    37,
+    36,
+    "pkg/sql/opt/xform/scan_index_iter.go:365 extractConstNonCompositeColumns"
+   ],
+   [
+    37,
+    33,
+    "pkg/sql/distsql_plan_stats.go:277 createPartialStatsPlan"
+   ],
+   [
+    36,
+    43,
+    "pkg/sql/sem/tree/type_check.go:3185 typeCheckSameTypedTupleExprs"
+   ],
+   [
+    36,
+    37,
+    "pkg/util/tochar/num_fromchar.go:34 numFromChar"
+   ],
+   [
+    36,
+    36,
+    "pkg/sql/catalog/replication/reader_catalog.go:35 SetupOrAdvanceStandbyReaderCatalog"
+   ],
+   [
+    36,
+    34,
+    "pkg/config/zonepb/zone.go:704 DiffWithZone"
+   ],
+   [
+    36,
+    34,
+    "pkg/sql/conn_executor_prepare.go:379 execBind"
+   ],
+   [
+    36,
+    33,
+    "pkg/internal/sqlsmith/scalar.go:423 makeFunc"
+   ],
+   [
+    36,
+    33,
+    "pkg/sql/catalog/colinfo/col_type_info.go:152 ColumnTypeIsIndexable"
+   ],
+   [
+    35,
+    50,
+    "pkg/raft/raft.go:1824 stepLeader"
+   ],
+   [
+    35,
+    40,
+    "pkg/sql/sem/tree/type_check.go:2533 typeCheckComparisonOp"
+   ],
+   [
+    35,
+    35,
+    "pkg/sql/conn_executor_exec.go:417 execStmtInOpenState"
+   ],
+   [
+    34,
+    130,
+    "pkg/storage/pebble_mvcc_scanner.go:627 seekToStartOfScan"
+   ],
+   [
+    34,
+    44,
+    "pkg/sql/schemachanger/scplan/internal/rules/current/helpers.go:168 isSimpleDependent"
+   ],
+   [
+    34,
+    39,
+    "pkg/sql/logictest/logic.go:4138 finishExecQuery"
+   ],
+   [
+    34,
+    35,
+    "pkg/geo/geoindex/s2_geometry_index.go:276 convertToGeomTAndTryClip"
+   ],
+   [
+    34,
+    33,
+    "pkg/kv/kvserver/replica_raft.go:1383 tick"
+   ],
+   [
+    34,
+    32,
+    "pkg/sql/create_stats.go:694 createStatsDefaultColumns"
+   ],
+   [
+    34,
+    25,
+    "pkg/sql/opt/memo/check_expr.go:25 CheckExpr"
+   ],
+   [
+    33,
+    37,
+    "pkg/sql/pgrepl/pgreplparser/lexer.go:79 lex"
+   ],
+   [
+    33,
+    36,
+    "pkg/cmd/roachtest/spec/cluster_spec.go:596 RoachprodOpts"
+   ],
+   [
+    33,
+    35,
+    "pkg/sql/catalog/tabledesc/validate.go:1636 validateTableIndexes"
+   ],
+   [
+    33,
+    34,
+    "pkg/sql/gcjob/gc_job.go:340 Resume"
+   ],
+   [
+    33,
+    33,
+    "pkg/sql/type_change.go:1585 OnFailOrCancel"
+   ],
+   [
+    33,
+    32,
+    "pkg/sql/schemachanger/scjob/job.go:105 run"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/datum.go:4791 NewDArrayFromDatums"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/datum.go:5069 Append"
+   ],
+   [
+    32,
+    40,
+    "pkg/sql/sem/tree/type_check.go:2514 typeCheckSubqueryWithIn"
+   ],
+   [
+    32,
+    39,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:835 dmHandleW"
+   ],
+   [
+    32,
+    35,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:797 dmHandleT"
+   ],
+   [
+    32,
+    34,
+    "pkg/internal/sqlsmith/scalar.go:328 makeBinOp"
+   ],
+   [
+    32,
+    33,
+    "pkg/sql/distsql_physical_planner.go:3836 wrapPlan"
+   ],
+   [
+    32,
+    29,
+    "pkg/sql/conn_executor.go:2503 execCmd"
+   ],
+   [
+    32,
+    23,
+    "pkg/kv/kvserver/kvstorage/storage.go:452 validateIsStateEngineSpan"
+   ],
+   [
+    32,
+    17,
+    "pkg/util/tochar/dch_fromchar.go:1057 tmFromCharToTime"
+   ],
+   [
+    31,
+    40,
+    "pkg/storage/mvcc.go:2251 mvccPutInternal"
+   ],
+   [
+    31,
+    39,
+    "pkg/backup/compaction_job.go:283 ResumeCompaction"
+   ],
+   [
+    31,
+    38,
+    "pkg/cmd/roachtest/tests/query_comparison_util.go:749 unsortedMatricesDiffWithFloatComp"
+   ],
+   [
+    31,
+    33,
+    "pkg/sql/opt/optbuilder/insert.go:178 buildInsert"
+   ],
+   [
+    31,
+    32,
+    "pkg/sql/schema_changer.go:3471 OnFailOrCancel"
+   ],
+   [
+    31,
+    32,
+    "pkg/sql/type_change.go:1522 execWithRetry"
+   ],
+   [
+    31,
+    31,
+    "pkg/raft/raft.go:1541 Step"
+   ],
+   [
+    31,
+    31,
+    "pkg/sql/create_stats.go:461 makeJobRecord"
+   ],
+   [
+    31,
+    30,
+    "pkg/sql/set_zone_config.go:308 startExec"
+   ],
+   [
+    31,
+    29,
+    "pkg/sql/sem/normalize/normalize_exprs.go:96 normalizeBinaryExpr"
+   ],
+   [
+    30,
+    51,
+    "pkg/sql/opt/props/func_dep.go:987 ProjectCols"
+   ],
+   [
+    30,
+    43,
+    "pkg/storage/pebble_mvcc_scanner.go:827 getOne"
+   ],
+   [
+    30,
+    39,
+    "pkg/sql/importer/import_job.go:988 ingestWithRetry"
+   ],
+   [
+    30,
+    38,
+    "pkg/sql/exec_log.go:174 maybeLogStatementInternal"
+   ],
+   [
+    30,
+    33,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:554 dmHandleGH"
+   ],
+   [
+    30,
+    32,
+    "pkg/sql/opt/norm/inline_funcs.go:146 CanInlineProjections"
+   ],
+   [
+    30,
+    30,
+    "pkg/cli/log_flags.go:39 setupLogging"
+   ],
+   [
+    30,
+    29,
+    "pkg/sql/opt/memo/statistics_builder.go:3563 applyFiltersItem"
+   ],
+   [
+    29,
+    77,
+    "pkg/storage/pebble_mvcc_scanner.go:1386 seekVersion"
+   ],
+   [
+    29,
+    39,
+    "pkg/sql/ttl/ttljob/ttljob.go:80 Resume"
+   ],
+   [
+    29,
+    35,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:605 dmHandleJ"
+   ],
+   [
+    29,
+    34,
+    "pkg/storage/mvcc.go:3168 MVCCClearTimeRange"
+   ],
+   [
+    29,
+    30,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:73 NullRejectProjections"
+   ],
+   [
+    29,
+    30,
+    "pkg/sql/opt/norm/reject_nulls_funcs.go:315 deriveProjectRejectNullCols"
+   ],
+   [
+    29,
+    30,
+    "pkg/sql/schemachanger/scbuild/internal/scbuildstmt/helpers.go:1258 checkTableSchemaChangePrerequisites"
+   ],
+   [
+    29,
+    29,
+    "pkg/geo/geomfn/distance.go:194 distanceInternal"
+   ],
+   [
+    29,
+    29,
+    "pkg/sql/roleoption/role_option.go:325 CheckRoleOptionConflicts"
+   ],
+   [
+    29,
+    25,
+    "pkg/sql/scanner/scan.go:740 scanNumberImpl"
+   ],
+   [
+    29,
+    22,
+    "pkg/cmd/roachprod-centralized/utils/api/bindings/stripe/validator.go:33 ValidateFilterValues"
+   ],
+   [
+    28,
+    43,
+    "pkg/storage/mvcc.go:8224 mvccExportToWriter"
+   ],
+   [
+    28,
+    39,
+    "pkg/geo/geodist/geodist.go:328 onLineStringToPolygon"
+   ],
+   [
+    28,
+    36,
+    "pkg/util/tochar/dch_fromchar.go:289 dchFromChar"
+   ],
+   [
+    28,
+    35,
+    "pkg/sql/alter_table.go:173 startExec"
+   ],
+   [
+    28,
+    30,
+    "pkg/sql/lexbase/encode.go:58 EncodeRestrictedSQLIdent"
+   ],
+   [
+    28,
+    24,
+    "pkg/sql/opt/exec/execbuilder/relational.go:823 buildScan"
+   ],
+   [
+    28,
+    22,
+    "pkg/sql/conn_executor_exec.go:2887 dispatchToExecutionEngine"
+   ],
+   [
+    27,
+    61,
+    "pkg/util/timeutil/pgdate/field_extract.go:276 interpretNumber"
+   ],
+   [
+    27,
+    36,
+    "pkg/kv/kvserver/rangefeed/scheduled_processor.go:703 consumeLogicalOps"
+   ],
+   [
+    27,
+    36,
+    "pkg/sql/fingerprint/fingerprint_job.go:67 Resume"
+   ],
+   [
+    27,
+    32,
+    "pkg/sql/opt/optbuilder/groupby.go:338 buildAggregation"
+   ],
+   [
+    27,
+    30,
+    "pkg/kv/kvclient/kvcoord/dist_sender.go:1847 divideAndSendBatchToRanges"
+   ],
+   [
+    27,
+    28,
+    "pkg/sql/sem/builtins/pg_builtins.go:3756 pgSizeBytes"
+   ],
+   [
+    27,
+    26,
+    "pkg/util/ulid/ulid.go:153 parse"
+   ],
+   [
+    26,
+    38,
+    "pkg/storage/mvcc.go:5492 mvccResolveWriteIntent"
+   ],
+   [
+    26,
+    35,
+    "pkg/jobs/joberror/errors.go:25 IsPermanentBulkJobError"
+   ],
+   [
+    26,
+    33,
+    "pkg/sql/opt/optbuilder/scalar.go:50 buildScalar"
+   ],
+   [
+    26,
+    30,
+    "pkg/sql/opt/memo/constraint_builder.go:69 buildSingleColumnConstraint"
+   ],
+   [
+    26,
+    27,
+    "pkg/sql/lexbase/encode.go:70 EncodeUnrestrictedSQLIdent"
+   ],
+   [
+    26,
+    26,
+    "pkg/kv/kvserver/replica_raft_quiesce.go:283 shouldReplicaQuiesceRaftMuLockedReplicaMuLocked"
+   ],
+   [
+    26,
+    25,
+    "pkg/util/leaktest/leaktest.go:35 interestingGoroutines"
+   ],
+   [
+    26,
+    24,
+    "pkg/sql/export.go:129 buildExportPlanningInfo"
+   ],
+   [
+    26,
+    23,
+    "pkg/sql/sem/tree/type_check.go:1218 TypeCheck"
+   ],
+   [
+    25,
+    33,
+    "pkg/kv/kvserver/rangefeed/resolved_timestamp.go:137 ConsumeLogicalOp"
+   ],
+   [
+    25,
+    33,
+    "pkg/sql/opt/lookupjoin/constraint_builder.go:294 Build"
+   ],
+   [
+    25,
+    26,
+    "pkg/cli/userfile.go:329 getDefaultQualifiedTableName"
+   ],
+   [
+    25,
+    26,
+    "pkg/sql/rowexec/joinreader_strategies.go:235 nextRowToEmit"
+   ],
+   [
+    25,
+    24,
+    "pkg/storage/mvcc_incremental_iterator.go:874 assertInvariants"
+   ],
+   [
+    25,
+    20,
+    "pkg/sql/opt/xform/scan_index_iter.go:214 ForEachStartingAfter"
+   ],
+   [
+    24,
+    41,
+    "pkg/sql/opt/lookupjoin/constraint_builder.go:649 findJoinConstantRangeFilter"
+   ],
+   [
+    24,
+    30,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3057 maybeEnqueueNonLockingReadRequest"
+   ],
+   [
+    24,
+    29,
+    "pkg/sql/drop_role.go:84 startExec"
+   ],
+   [
+    24,
+    28,
+    "pkg/sql/sem/builtins/pg_builtins.go:103 init"
+   ],
+   [
+    24,
+    27,
+    "pkg/kv/kvserver/batcheval/cmd_push_txn.go:111 PushTxn"
+   ],
+   [
+    24,
+    25,
+    "pkg/util/timeutil/pgdate/field_extract.go:902 validate"
+   ],
+   [
+    24,
+    24,
+    "pkg/sql/opaque.go:364 init"
+   ],
+   [
+    24,
+    23,
+    "pkg/sql/distsql_running.go:2489 PlanAndRunPostQueries"
+   ],
+   [
+    24,
+    22,
+    "pkg/sql/lexbase/predicates.go:77 IsBareIdentifier"
+   ],
+   [
+    24,
+    20,
+    "pkg/sql/rowexec/windower.go:417 processPartition"
+   ],
+   [
+    24,
+    20,
+    "pkg/sql/vecindex/cspann/searcher.go:390 searchChildPartitions"
+   ],
+   [
+    24,
+    17,
+    "pkg/sql/rowexec/mergejoiner.go:133 nextRow"
+   ],
+   [
+    23,
+    26,
+    "pkg/kv/kvserver/rangefeed/catchup_scan.go:163 CatchUpScan"
+   ],
+   [
+    23,
+    26,
+    "pkg/sqlproxy/server.go:303 serve"
+   ],
+   [
+    23,
+    25,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3011 conflictsWithLockHolders"
+   ],
+   [
+    23,
+    25,
+    "pkg/sql/opt/optbuilder/plpgsql.go:3042 Visit"
+   ],
+   [
+    23,
+    23,
+    "pkg/internal/sqlsmith/type.go:136 randType"
+   ],
+   [
+    23,
+    23,
+    "pkg/sql/alter_table.go:2637 checkSchemaChangeIsAllowed"
+   ],
+   [
+    23,
+    22,
+    "pkg/sql/opt/xform/coster.go:806 computeScanCost"
+   ],
+   [
+    23,
+    20,
+    "pkg/sql/schema_changer.go:978 exec"
+   ],
+   [
+    23,
+    20,
+    "pkg/sql/sem/tree/type_check.go:2004 TypeCheck"
+   ],
+   [
+    23,
+    19,
+    "pkg/sql/sem/tree/placeholders.go:131 SetType"
+   ],
+   [
+    23,
+    18,
+    "pkg/sql/sem/tree/function_definition.go:281 MatchOverload"
+   ],
+   [
+    22,
+    29,
+    "pkg/sql/schemachanger/scplan/internal/rules/release_26_2/helpers.go:123 isSimpleDependent"
+   ],
+   [
+    22,
+    28,
+    "pkg/sql/schemachanger/scplan/internal/rules/release_25_4/helpers.go:124 isSimpleDependent"
+   ],
+   [
+    22,
+    28,
+    "pkg/sql/schemachanger/scplan/internal/rules/release_26_1/helpers.go:124 isSimpleDependent"
+   ],
+   [
+    22,
+    28,
+    "pkg/storage/mvcc.go:7592 computeStatsForIterWithVisitors"
+   ],
+   [
+    22,
+    23,
+    "pkg/kv/kvserver/batcheval/cmd_end_transaction.go:1331 splitTriggerHelper"
+   ],
+   [
+    22,
+    23,
+    "pkg/kv/kvserver/mvcc_gc_queue.go:405 makeMVCCGCQueueScoreImpl"
+   ],
+   [
+    22,
+    22,
+    "pkg/sql/opt/memo/statistics_builder.go:5315 buildStatsFromCheckConstraints"
+   ],
+   [
+    22,
+    22,
+    "pkg/util/fuzzystrmatch/dmetaphone.go:757 dmHandleSC"
+   ],
+   [
+    22,
+    21,
+    "pkg/sql/opt/optbuilder/routine.go:219 buildRoutine"
+   ],
+   [
+    22,
+    21,
+    "pkg/util/encoding/csv/reader.go:313 readRecord"
+   ],
+   [
+    22,
+    20,
+    "pkg/sql/opt/optbuilder/plpgsql.go:611 buildPLpgSQLStatements"
+   ],
+   [
+    22,
+    19,
+    "pkg/cli/clierrorplus/decorate_error.go:63 MaybeDecorateError"
+   ],
+   [
+    22,
+    19,
+    "pkg/workload/schemachange/operation_generator.go:4483 createFunction"
+   ],
+   [
+    22,
+    17,
+    "pkg/config/zonepb/zone.go:384 Validate"
+   ],
+   [
+    22,
+    16,
+    "pkg/sql/schema_changer.go:314 IsPermanentSchemaChangeError"
+   ],
+   [
+    22,
+    16,
+    "pkg/sql/sem/tree/overload.go:1759 checkReturnPlaceholdersAtIdx"
+   ],
+   [
+    22,
+    15,
+    "pkg/sql/crdb_internal.go:8209 genClusterLocksGenerator"
+   ],
+   [
+    22,
+    15,
+    "pkg/util/duration/parse.go:182 sqlStdToDuration"
+   ],
+   [
+    22,
+    13,
+    "pkg/util/randident/namegen.go:61 GenerateOne"
+   ],
+   [
+    21,
+    61,
+    "pkg/storage/pebble_mvcc_scanner.go:1101 nextKey"
+   ],
+   [
+    21,
+    37,
+    "pkg/storage/mvcc_incremental_iterator.go:582 advance"
+   ],
+   [
+    21,
+    35,
+    "pkg/sql/distsql_check.go:214 checkSupportForPlanNode"
+   ],
+   [
+    21,
+    25,
+    "pkg/cmd/roachtest/tests/query_comparison_util.go:687 sortRowsWithFloatComp"
+   ],
+   [
+    21,
+    25,
+    "pkg/kv/kvserver/allocator/allocatorimpl/allocator.go:2555 TransferLeaseTarget"
+   ],
+   [
+    21,
+    25,
+    "pkg/sql/virtual_schema.go:636 getPlanInfo"
+   ],
+   [
+    21,
+    23,
+    "pkg/sql/schemachanger/scplan/internal/rules/current/helpers.go:83 isSubjectTo2VersionInvariant"
+   ],
+   [
+    21,
+    22,
+    "pkg/sql/plan_opt.go:796 chooseValidPreparedMemo"
+   ],
+   [
+    21,
+    21,
+    "pkg/kv/kvserver/concurrency/lock_table.go:3264 isNonConflictingLock"
+   ],
+   [
+    21,
+    21,
+    "pkg/sql/colexecerror/error.go:45 CatchVectorizedRuntimeError"
+   ],
+   [
+    21,
+    21,
+    "pkg/sql/internal.go:1174 execInternal"
+   ],
+   [
+    21,
+    21,
+    "pkg/sql/opt/xform/optimizer.go:579 optimizeGroupMember"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/opt/exec/execbuilder/relational.go:661 scanParams"
+   ],
+   [
+    21,
+    20,
+    "pkg/sql/sem/tree/backup.go:688 IsDefault"
+   ],
+   [
+    21,
+    20,
+    "pkg/workload/kv/kv.go:244 validateConfig"
+   ],
+   [
+    21,
+    19,
+    "pkg/kv/kvserver/txnwait/queue.go:574 MaybeWaitForPush"
+   ],
+   [
+    21,
+    16,
+    "pkg/ccl/changefeedccl/changefeed_stmt.go:612 createChangefeedJobRecord"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 4000,
+ "calls_in_logic_resolved": 8164,
+ "calls_in_logic_unresolved": 7029,
+ "load_seconds": 0.6,
+ "analyze_seconds": 0.5
+}

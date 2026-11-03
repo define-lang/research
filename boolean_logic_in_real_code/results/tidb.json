@@ -1,0 +1,2928 @@
+{
+ "name": "tidb",
+ "functions": 37974,
+ "functions_with_logic": 9881,
+ "pure_boolean_functions": 2,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 18309,
+   "median": 2,
+   "p90": 3,
+   "p99": 5,
+   "p999": 10,
+   "max": 20
+  },
+  "stmts": {
+   "n": 18309,
+   "median": 1,
+   "p90": 2,
+   "p99": 5,
+   "p999": 11,
+   "max": 24
+  },
+  "max_stmts_within_input_limit": 24,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 9881,
+   "median": 2,
+   "p90": 6,
+   "p99": 16,
+   "p999": 34,
+   "max": 59
+  },
+  "stmts": {
+   "n": 9881,
+   "median": 2,
+   "p90": 5,
+   "p99": 17,
+   "p999": 38,
+   "max": 111
+  },
+  "max_stmts_within_input_limit": 55,
+  "over_inputs": 35,
+  "over_stmts": 0,
+  "over_either": 35,
+  "share_over_either": 0.003542151604088655,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    59,
+    111,
+    "pkg/executor/statement_ru_plan_walk.go:538 calculateStatementRUPlanChildFirst"
+   ],
+   [
+    52,
+    36,
+    "pkg/config/config.go:1721 Valid"
+   ],
+   [
+    46,
+    59,
+    "pkg/executor/simple.go:1731 executeAlterUser"
+   ],
+   [
+    41,
+    36,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:313 Equals"
+   ],
+   [
+    40,
+    37,
+    "pkg/planner/core/find_best_task.go:866 compareCandidates"
+   ],
+   [
+    39,
+    43,
+    "br/pkg/task/restore.go:1407 runSnapshotRestore"
+   ],
+   [
+    35,
+    39,
+    "pkg/executor/select.go:941 ResetContextOfStmt"
+   ],
+   [
+    35,
+    33,
+    "pkg/types/time.go:952 parseDatetime"
+   ],
+   [
+    34,
+    41,
+    "pkg/planner/core/find_best_task.go:2260 findBestTask4LogicalDataSource"
+   ],
+   [
+    34,
+    31,
+    "pkg/planner/core/find_best_task.go:1086 matchProperty"
+   ],
+   [
+    33,
+    43,
+    "pkg/planner/core/rule_join_reorder.go:58 extractJoinGroupImpl"
+   ],
+   [
+    33,
+    41,
+    "pkg/planner/core/exhaust_physical_plans.go:1962 tryToGetMppHashJoin"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    59,
+    111,
+    "pkg/executor/statement_ru_plan_walk.go:538 calculateStatementRUPlanChildFirst"
+   ],
+   [
+    46,
+    59,
+    "pkg/executor/simple.go:1731 executeAlterUser"
+   ],
+   [
+    39,
+    43,
+    "br/pkg/task/restore.go:1407 runSnapshotRestore"
+   ],
+   [
+    33,
+    43,
+    "pkg/planner/core/rule_join_reorder.go:58 extractJoinGroupImpl"
+   ],
+   [
+    34,
+    41,
+    "pkg/planner/core/find_best_task.go:2260 findBestTask4LogicalDataSource"
+   ],
+   [
+    33,
+    41,
+    "pkg/planner/core/exhaust_physical_plans.go:1962 tryToGetMppHashJoin"
+   ],
+   [
+    35,
+    39,
+    "pkg/executor/select.go:941 ResetContextOfStmt"
+   ],
+   [
+    23,
+    38,
+    "pkg/planner/core/find_best_task.go:3064 convertToTableScan"
+   ],
+   [
+    40,
+    37,
+    "pkg/planner/core/find_best_task.go:866 compareCandidates"
+   ],
+   [
+    52,
+    36,
+    "pkg/config/config.go:1721 Valid"
+   ],
+   [
+    41,
+    36,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:313 Equals"
+   ],
+   [
+    35,
+    33,
+    "pkg/types/time.go:952 parseDatetime"
+   ]
+  ],
+  "all_over": [
+   [
+    59,
+    111,
+    "pkg/executor/statement_ru_plan_walk.go:538 calculateStatementRUPlanChildFirst"
+   ],
+   [
+    52,
+    36,
+    "pkg/config/config.go:1721 Valid"
+   ],
+   [
+    46,
+    59,
+    "pkg/executor/simple.go:1731 executeAlterUser"
+   ],
+   [
+    41,
+    36,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:313 Equals"
+   ],
+   [
+    40,
+    37,
+    "pkg/planner/core/find_best_task.go:866 compareCandidates"
+   ],
+   [
+    39,
+    43,
+    "br/pkg/task/restore.go:1407 runSnapshotRestore"
+   ],
+   [
+    35,
+    39,
+    "pkg/executor/select.go:941 ResetContextOfStmt"
+   ],
+   [
+    35,
+    33,
+    "pkg/types/time.go:952 parseDatetime"
+   ],
+   [
+    34,
+    41,
+    "pkg/planner/core/find_best_task.go:2260 findBestTask4LogicalDataSource"
+   ],
+   [
+    34,
+    31,
+    "pkg/planner/core/find_best_task.go:1086 matchProperty"
+   ],
+   [
+    33,
+    43,
+    "pkg/planner/core/rule_join_reorder.go:58 extractJoinGroupImpl"
+   ],
+   [
+    33,
+    41,
+    "pkg/planner/core/exhaust_physical_plans.go:1962 tryToGetMppHashJoin"
+   ],
+   [
+    32,
+    27,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:77 Equals"
+   ],
+   [
+    31,
+    30,
+    "pkg/planner/core/logical_plan_builder.go:5019 buildDataSource"
+   ],
+   [
+    30,
+    29,
+    "pkg/executor/simple.go:1049 executeCreateUser"
+   ],
+   [
+    28,
+    26,
+    "pkg/planner/core/find_best_task.go:1998 skylinePruning"
+   ],
+   [
+    28,
+    26,
+    "pkg/planner/core/planbuilder.go:1336 getPossibleAccessPaths"
+   ],
+   [
+    27,
+    28,
+    "pkg/executor/importer/import.go:770 initOptions"
+   ],
+   [
+    26,
+    24,
+    "pkg/ddl/index.go:4327 checkIndexCondition"
+   ],
+   [
+    26,
+    17,
+    "pkg/executor/show.go:1103 constructResultOfShowCreateTable"
+   ],
+   [
+    25,
+    23,
+    "pkg/distsql/select_result.go:676 updateCopRuntimeStats"
+   ],
+   [
+    23,
+    38,
+    "pkg/planner/core/find_best_task.go:3064 convertToTableScan"
+   ],
+   [
+    23,
+    29,
+    "pkg/table/tables/index.go:299 create"
+   ],
+   [
+    23,
+    23,
+    "pkg/session/session.go:1565 approxParseSQLTokenCnt"
+   ],
+   [
+    23,
+    22,
+    "pkg/planner/core/operator/logicalop/logical_join.go:1752 updateEQCond"
+   ],
+   [
+    23,
+    21,
+    "pkg/planner/core/logical_plan_builder.go:4349 buildSelect"
+   ],
+   [
+    23,
+    20,
+    "br/pkg/stream/table_mapping.go:855 BindUnresolvedTableRoutes"
+   ],
+   [
+    23,
+    18,
+    "pkg/planner/core/operator/logicalop/logical_window.go:147 Equals"
+   ],
+   [
+    22,
+    24,
+    "pkg/session/session.go:2500 executeStmtImpl"
+   ],
+   [
+    21,
+    19,
+    "pkg/ttl/cache/table.go:746 BuildTTLIndexScanPlan"
+   ],
+   [
+    21,
+    18,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:508 Equals"
+   ],
+   [
+    21,
+    18,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:1023 Equals"
+   ],
+   [
+    21,
+    17,
+    "pkg/planner/core/logical_plan_builder.go:6427 buildUpdateLists"
+   ],
+   [
+    21,
+    16,
+    "pkg/util/collate/ucadata/generator/main.go:309 getImplicitWeight0900"
+   ],
+   [
+    21,
+    13,
+    "cmd/tidb-server/main.go:776 overrideConfig"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 19652,
+   "median": 2,
+   "p90": 4,
+   "p99": 17,
+   "p999": 54,
+   "max": 820
+  },
+  "stmts": {
+   "n": 19652,
+   "median": 1,
+   "p90": 4,
+   "p99": 20,
+   "p999": 69,
+   "max": 841
+  },
+  "max_stmts_within_input_limit": 48,
+  "over_inputs": 154,
+  "over_stmts": 4,
+  "over_either": 154,
+  "share_over_either": 0.007836352534093222,
+  "depth_capped": 0,
+  "recursion_capped": 274,
+  "size_capped": 0,
+  "depth": {
+   "n": 19652,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 4,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    820,
+    841,
+    "pkg/expression/infer_pushdown.go:114 canScalarFuncPushDown"
+   ],
+   [
+    819,
+    840,
+    "pkg/expression/expr_to_pb.go:274 scalarFuncToPBExpr"
+   ],
+   [
+    816,
+    831,
+    "pkg/expression/infer_pushdown.go:91 canFuncBePushed"
+   ],
+   [
+    416,
+    415,
+    "pkg/expression/infer_pushdown.go:182 scalarExprSupportedByTiDB"
+   ],
+   [
+    73,
+    72,
+    "pkg/planner/core/operator/physicalop/tiflash_predicate_push_down.go:95 groupByColumnsSortBySelectivity (lone call)"
+   ],
+   [
+    66,
+    149,
+    "pkg/planner/core/rule/rule_predicate_simplification.go:415 updateOrPredicate"
+   ],
+   [
+    58,
+    63,
+    "pkg/dxf/importinto/conflictedkv/deleter.go:148 deleteKeysWithRetry"
+   ],
+   [
+    58,
+    59,
+    "pkg/planner/core/task.go:297 negotiateCommonType"
+   ],
+   [
+    56,
+    61,
+    "lightning/pkg/importinto/job_orchestrator.go:238 cancelJobWithRetry"
+   ],
+   [
+    56,
+    61,
+    "pkg/ddl/backfilling_dist_executor.go:266 IsRetryableError"
+   ],
+   [
+    55,
+    60,
+    "pkg/ingestor/ingestctrl/job_worker.go:205 runJob"
+   ],
+   [
+    55,
+    60,
+    "pkg/ingestor/ingestctrl/job_worker.go:235 runJob"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    820,
+    841,
+    "pkg/expression/infer_pushdown.go:114 canScalarFuncPushDown"
+   ],
+   [
+    819,
+    840,
+    "pkg/expression/expr_to_pb.go:274 scalarFuncToPBExpr"
+   ],
+   [
+    816,
+    831,
+    "pkg/expression/infer_pushdown.go:91 canFuncBePushed"
+   ],
+   [
+    416,
+    415,
+    "pkg/expression/infer_pushdown.go:182 scalarExprSupportedByTiDB"
+   ],
+   [
+    66,
+    149,
+    "pkg/planner/core/rule/rule_predicate_simplification.go:415 updateOrPredicate"
+   ],
+   [
+    51,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:291 buildRangesForPointGet"
+   ],
+   [
+    51,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:359 buildRangesForBatchGet"
+   ],
+   [
+    50,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:269 buildRangesForPointGet"
+   ],
+   [
+    50,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:337 buildRangesForBatchGet"
+   ],
+   [
+    49,
+    137,
+    "pkg/planner/core/plan_cache_rebuild.go:208 buildRangeForTableScan"
+   ],
+   [
+    49,
+    137,
+    "pkg/planner/core/plan_cache_rebuild.go:230 buildRangeForTableScan"
+   ],
+   [
+    49,
+    137,
+    "pkg/planner/core/plan_cache_rebuild.go:428 buildRangeForIndexScan"
+   ]
+  ],
+  "all_over": [
+   [
+    820,
+    841,
+    "pkg/expression/infer_pushdown.go:114 canScalarFuncPushDown"
+   ],
+   [
+    819,
+    840,
+    "pkg/expression/expr_to_pb.go:274 scalarFuncToPBExpr"
+   ],
+   [
+    816,
+    831,
+    "pkg/expression/infer_pushdown.go:91 canFuncBePushed"
+   ],
+   [
+    416,
+    415,
+    "pkg/expression/infer_pushdown.go:182 scalarExprSupportedByTiDB"
+   ],
+   [
+    73,
+    72,
+    "pkg/planner/core/operator/physicalop/tiflash_predicate_push_down.go:95 groupByColumnsSortBySelectivity (lone call)"
+   ],
+   [
+    66,
+    149,
+    "pkg/planner/core/rule/rule_predicate_simplification.go:415 updateOrPredicate"
+   ],
+   [
+    58,
+    63,
+    "pkg/dxf/importinto/conflictedkv/deleter.go:148 deleteKeysWithRetry"
+   ],
+   [
+    58,
+    59,
+    "pkg/planner/core/task.go:297 negotiateCommonType"
+   ],
+   [
+    56,
+    61,
+    "lightning/pkg/importinto/job_orchestrator.go:238 cancelJobWithRetry"
+   ],
+   [
+    56,
+    61,
+    "pkg/ddl/backfilling_dist_executor.go:266 IsRetryableError"
+   ],
+   [
+    55,
+    60,
+    "pkg/ingestor/ingestctrl/job_worker.go:205 runJob"
+   ],
+   [
+    55,
+    60,
+    "pkg/ingestor/ingestctrl/job_worker.go:235 runJob"
+   ],
+   [
+    54,
+    59,
+    "br/pkg/restore/split/client.go:1008 WaitRegionsScattered"
+   ],
+   [
+    54,
+    59,
+    "br/pkg/restore/split/client.go:1053 WaitRegionsScattered"
+   ],
+   [
+    54,
+    59,
+    "pkg/executor/importer/table_import.go:1091 RemoteChecksumTableBySQL"
+   ],
+   [
+    54,
+    59,
+    "pkg/ingestor/ingestctrl/checksum.go:361 checksumDB"
+   ],
+   [
+    54,
+    59,
+    "pkg/lightning/backend/backend.go:374 Import"
+   ],
+   [
+    54,
+    59,
+    "pkg/lightning/backend/tidb/tidb.go:905 execStmts"
+   ],
+   [
+    54,
+    58,
+    "br/pkg/restore/split/client.go:962 isScatterRegionFinished (lone call)"
+   ],
+   [
+    54,
+    58,
+    "pkg/lightning/backend/tidb/tidb.go:715 WriteRows (lone call)"
+   ],
+   [
+    54,
+    58,
+    "pkg/lightning/common/util.go:184 Retry (lone call)"
+   ],
+   [
+    54,
+    57,
+    "pkg/lightning/common/retry.go:75 IsRetryableError"
+   ],
+   [
+    53,
+    71,
+    "pkg/sessiontxn/isolation/readcommitted.go:100 OnStmtStart"
+   ],
+   [
+    52,
+    69,
+    "pkg/executor/select.go:1359 isWeakConsistencyRead"
+   ],
+   [
+    52,
+    69,
+    "pkg/sessiontxn/isolation/readcommitted.go:111 NeedSetRCCheckTSFlag"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:664 validateMaterializedViewLogColumnTypeForModifyColumn"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:720 validateDependentMaterializedViewModifyColumn"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:912 precheckForVarcharToChar"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:979 doModifyColumnWithCheck"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:989 doModifyColumnWithCheck"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:2252 GetModifiableColumnJob"
+   ],
+   [
+    52,
+    58,
+    "pkg/ddl/modify_column.go:104 getModifyColumnType (lone call)"
+   ],
+   [
+    51,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:291 buildRangesForPointGet"
+   ],
+   [
+    51,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:359 buildRangesForBatchGet"
+   ],
+   [
+    51,
+    69,
+    "pkg/planner/optimize.go:270 optimizeNoCache"
+   ],
+   [
+    50,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:269 buildRangesForPointGet"
+   ],
+   [
+    50,
+    138,
+    "pkg/planner/core/plan_cache_rebuild.go:337 buildRangesForBatchGet"
+   ],
+   [
+    49,
+    137,
+    "pkg/planner/core/plan_cache_rebuild.go:208 buildRangeForTableScan"
+   ],
+   [
+    49,
+    137,
+    "pkg/planner/core/plan_cache_rebuild.go:230 buildRangeForTableScan"
+   ],
+   [
+    49,
+    137,
+    "pkg/planner/core/plan_cache_rebuild.go:428 buildRangeForIndexScan"
+   ],
+   [
+    49,
+    66,
+    "pkg/executor/point_get.go:676 get"
+   ],
+   [
+    49,
+    66,
+    "pkg/planner/core/plan_cache_utils.go:374 newPlanCacheKeyWithMatchedBinding"
+   ],
+   [
+    49,
+    66,
+    "pkg/session/session.go:3132 runStmt"
+   ],
+   [
+    49,
+    66,
+    "pkg/session/tidb.go:242 finishStmt"
+   ],
+   [
+    48,
+    65,
+    "pkg/planner/optimize.go:460 allowInReadOnlyMode"
+   ],
+   [
+    48,
+    65,
+    "pkg/session/session.go:2973 validateStatementReadOnlyInStaleness"
+   ],
+   [
+    48,
+    65,
+    "pkg/session/session.go:2978 validateStatementReadOnlyInStaleness"
+   ],
+   [
+    48,
+    65,
+    "pkg/session/session.go:3266 TryDetach"
+   ],
+   [
+    48,
+    65,
+    "pkg/session/tidb.go:253 finishStmt"
+   ],
+   [
+    48,
+    64,
+    "pkg/session/session.go:540 doCommit (lone call)"
+   ],
+   [
+    48,
+    63,
+    "pkg/planner/core/joinorder/conflict_detector.go:607 CheckConnection"
+   ],
+   [
+    48,
+    63,
+    "pkg/planner/core/joinorder/conflict_detector.go:610 CheckConnection"
+   ],
+   [
+    48,
+    49,
+    "pkg/expression/aggregation/agg_to_pb.go:108 AggFuncToPBExpr"
+   ],
+   [
+    48,
+    49,
+    "pkg/expression/aggregation/window_func.go:129 WindowFuncToPBExpr"
+   ],
+   [
+    48,
+    49,
+    "pkg/expression/expr_to_pb.go:111 conOrCorColToPBExpr"
+   ],
+   [
+    48,
+    49,
+    "pkg/expression/expr_to_pb.go:227 columnToPBExpr"
+   ],
+   [
+    48,
+    48,
+    "pkg/expression/expr_to_pb.go:117 encodeDatum (lone call)"
+   ],
+   [
+    48,
+    48,
+    "pkg/expression/expr_to_pb.go:226 columnToPBExpr (lone call)"
+   ],
+   [
+    47,
+    132,
+    "pkg/planner/core/plan_cache_rebuild.go:457 isSafeRange"
+   ],
+   [
+    46,
+    49,
+    "pkg/ddl/util/util.go:93 PauseRunningJob"
+   ],
+   [
+    44,
+    46,
+    "pkg/meta/model/job.go:803 IsPausable"
+   ],
+   [
+    43,
+    82,
+    "pkg/planner/core/exhaust_physical_plans.go:1509 applyLogicalHintVarEigen"
+   ],
+   [
+    43,
+    45,
+    "pkg/ddl/job_worker.go:935 countForError"
+   ],
+   [
+    41,
+    44,
+    "pkg/ddl/ddl.go:1480 cancelRunningJob"
+   ],
+   [
+    41,
+    44,
+    "pkg/ddl/rollingback.go:132 rollingbackModifyColumn"
+   ],
+   [
+    41,
+    44,
+    "pkg/ddl/rollingback.go:348 convertTruncateTablePartitionJob2RollbackJob"
+   ],
+   [
+    41,
+    44,
+    "pkg/privilege/privileges/privileges.go:165 RequestVerification (lone call)"
+   ],
+   [
+    40,
+    47,
+    "pkg/executor/show.go:1047 fetchShowVariables"
+   ],
+   [
+    39,
+    46,
+    "pkg/domain/plan_replayer_dump.go:630 dumpVariables (lone call)"
+   ],
+   [
+    39,
+    46,
+    "pkg/executor/infoschema_reader.go:342 setDataForVariablesInfo (lone call)"
+   ],
+   [
+    39,
+    46,
+    "pkg/executor/show.go:993 fetchShowVariables (lone call)"
+   ],
+   [
+    39,
+    46,
+    "pkg/infoschema/tables.go:2498 GetDataFromSessionVariables (lone call)"
+   ],
+   [
+    38,
+    63,
+    "pkg/planner/core/find_best_task.go:1628 removeCoveredIndexMergeTopLevelFilters (lone call)"
+   ],
+   [
+    38,
+    54,
+    "pkg/planner/core/find_best_task.go:2499 findBestTask4LogicalDataSource"
+   ],
+   [
+    38,
+    43,
+    "pkg/session/session.go:5874 EncodeStates"
+   ],
+   [
+    37,
+    43,
+    "pkg/infoschema/tables.go:2487 SysVarHiddenForSem"
+   ],
+   [
+    37,
+    42,
+    "pkg/planner/core/find_best_task.go:630 findBestTask"
+   ],
+   [
+    37,
+    42,
+    "pkg/planner/core/operator/physicalop/physical_cte.go:261 findBestTask4LogicalCTE"
+   ],
+   [
+    37,
+    41,
+    "pkg/planner/core/expression_rewriter.go:1999 rewriteSystemVariable"
+   ],
+   [
+    37,
+    41,
+    "pkg/planner/core/planbuilder.go:803 buildSet"
+   ],
+   [
+    36,
+    36,
+    "pkg/util/sem/compat/sem.go:50 IsInvisibleTable"
+   ],
+   [
+    35,
+    38,
+    "pkg/session/txn.go:599 KeysNeedToLock"
+   ],
+   [
+    35,
+    37,
+    "pkg/ddl/modify_column.go:1880 checkPartitionColumnTypeChangeAllowlist (lone call)"
+   ],
+   [
+    34,
+    77,
+    "pkg/planner/cardinality/row_count_index.go:59 GetRowCountByIndexRanges"
+   ],
+   [
+    34,
+    67,
+    "pkg/planner/core/exhaust_physical_plans.go:1524 applyLogicalJoinHint"
+   ],
+   [
+    34,
+    37,
+    "pkg/ddl/modify_column.go:1880 checkPartitionColumnTypeChangeAllowlist (lone call)"
+   ],
+   [
+    33,
+    33,
+    "pkg/util/sem/compat/sem.go:76 IsInvisibleSysVar"
+   ],
+   [
+    32,
+    54,
+    "pkg/planner/core/find_best_task.go:1655 indexMergeTopLevelFilterCovered"
+   ],
+   [
+    32,
+    53,
+    "pkg/util/filter/filter.go:296 Match"
+   ],
+   [
+    32,
+    39,
+    "pkg/expression/util.go:978 unwrapCast"
+   ],
+   [
+    32,
+    39,
+    "pkg/expression/util.go:1061 eliminateCastFunction"
+   ],
+   [
+    31,
+    77,
+    "pkg/planner/core/operator/logicalop/logical_datasource.go:563 Convert2Gathers (lone call)"
+   ],
+   [
+    31,
+    40,
+    "pkg/ddl/index.go:2916 writeChunk"
+   ],
+   [
+    31,
+    29,
+    "pkg/planner/core/exhaust_physical_plans.go:2212 exhaustPhysicalPlans4LogicalJoin (lone call)"
+   ],
+   [
+    30,
+    46,
+    "pkg/executor/slow_query.go:980 parseLog"
+   ],
+   [
+    30,
+    46,
+    "pkg/executor/slow_query.go:1001 parseLog"
+   ],
+   [
+    30,
+    46,
+    "pkg/executor/slow_query.go:1007 parseLog"
+   ],
+   [
+    29,
+    68,
+    "pkg/planner/core/plan_cost_ver2.go:213 getPlanCostVer24PhysicalTableScan"
+   ],
+   [
+    29,
+    46,
+    "pkg/sessiontxn/isolation/optimistic.go:140 AdviseOptimizeWithPlan"
+   ],
+   [
+    29,
+    32,
+    "pkg/planner/core/operator/physicalop/base_physical_agg.go:548 CheckAggCanPushCop"
+   ],
+   [
+    28,
+    69,
+    "pkg/planner/core/operator/physicalop/physical_table_scan.go:498 OperatorInfo"
+   ],
+   [
+    28,
+    68,
+    "pkg/planner/core/operator/physicalop/physical_table_scan.go:444 TP (lone call)"
+   ],
+   [
+    28,
+    42,
+    "pkg/util/ranger/detacher.go:1415 AddExpr4EqAndInCondition"
+   ],
+   [
+    28,
+    32,
+    "pkg/planner/funcdep/fd_graph.go:204 ReduceCols"
+   ],
+   [
+    28,
+    30,
+    "pkg/ddl/modify_column.go:137 getModifyColumnType"
+   ],
+   [
+    28,
+    30,
+    "pkg/ddl/modify_column.go:153 getModifyColumnType"
+   ],
+   [
+    28,
+    28,
+    "br/pkg/stream/rewrite_meta_rawkv.go:831 processIngestIndexAndDeleteRangeFromJob (lone call)"
+   ],
+   [
+    28,
+    28,
+    "pkg/ddl/delete_range.go:128 insertJobIntoDeleteRangeTableMultiSchema (lone call)"
+   ],
+   [
+    28,
+    28,
+    "pkg/ddl/job_worker.go:441 finishDDLJob (lone call)"
+   ],
+   [
+    28,
+    28,
+    "pkg/ddl/sanity_check.go:202 checkHistoryJobInTest (lone call)"
+   ],
+   [
+    27,
+    69,
+    "pkg/planner/core/operator/physicalop/physical_index_scan.go:288 OperatorInfo"
+   ],
+   [
+    27,
+    68,
+    "pkg/planner/core/operator/physicalop/physical_index_scan.go:242 TP (lone call)"
+   ],
+   [
+    27,
+    45,
+    "pkg/types/json_path_expr.go:348 parseJSONPathExpr"
+   ],
+   [
+    27,
+    38,
+    "br/pkg/registry/registration.go:839 checkForTableConflicts (lone call)"
+   ],
+   [
+    27,
+    38,
+    "br/pkg/registry/registration.go:839 checkForTableConflicts (lone call)"
+   ],
+   [
+    27,
+    38,
+    "br/pkg/registry/registration.go:839 checkForTableConflicts (lone call)"
+   ],
+   [
+    26,
+    65,
+    "pkg/planner/core/plan_cost_ver2.go:224 getPlanCostVer24PhysicalTableScan"
+   ],
+   [
+    26,
+    64,
+    "pkg/planner/core/indexmerge_path.go:213 accessPathsForConds (lone call)"
+   ],
+   [
+    26,
+    64,
+    "pkg/planner/core/operator/physicalop/physical_table_scan.go:683 IsFullScan"
+   ],
+   [
+    26,
+    64,
+    "pkg/planner/core/rule/rule_partition_processor.go:790 findUsedListPartitions"
+   ],
+   [
+    26,
+    64,
+    "pkg/planner/util/path.go:562 IsFullScanRange (lone call)"
+   ],
+   [
+    26,
+    63,
+    "pkg/util/ranger/types.go:197 HasFullRange (lone call)"
+   ],
+   [
+    26,
+    38,
+    "pkg/types/field_type.go:1515 CheckModifyTypeCompatible"
+   ],
+   [
+    26,
+    31,
+    "pkg/table/tables/tables.go:498 updateRecord"
+   ],
+   [
+    26,
+    31,
+    "pkg/table/tables/tables.go:880 addRecord"
+   ],
+   [
+    26,
+    28,
+    "pkg/planner/core/rule_generate_column_substitute.go:83 collectGenerateColumn"
+   ],
+   [
+    25,
+    64,
+    "pkg/planner/core/indexmerge_path.go:213 accessPathsForConds (lone call)"
+   ],
+   [
+    25,
+    64,
+    "pkg/planner/core/indexmerge_path.go:273 generateANDIndexMerge4NormalIndex (lone call)"
+   ],
+   [
+    25,
+    64,
+    "pkg/planner/core/operator/physicalop/physical_index_scan.go:331 IsFullScan"
+   ],
+   [
+    25,
+    64,
+    "pkg/planner/core/plan_cache_rebuild.go:415 buildRangeForIndexScan (lone call)"
+   ],
+   [
+    24,
+    61,
+    "pkg/planner/util/path.go:270 SplitCorColAccessCondFromFilters"
+   ],
+   [
+    24,
+    33,
+    "pkg/planner/core/plan_cache_utils.go:955 isSafePointGetPath4PlanCache"
+   ],
+   [
+    24,
+    26,
+    "pkg/ddl/modify_column.go:104 getModifyColumnType (lone call)"
+   ],
+   [
+    24,
+    26,
+    "pkg/planner/core/joinorder/conflict_detector.go:585 CheckConnection (lone call)"
+   ],
+   [
+    24,
+    25,
+    "pkg/expression/builtin_time.go:2774 getFunction"
+   ],
+   [
+    24,
+    25,
+    "pkg/expression/builtin_time.go:2854 evalInt"
+   ],
+   [
+    23,
+    24,
+    "pkg/planner/core/operator/physicalop/physical_projection.go:75 ExhaustPhysicalPlans4LogicalProjection"
+   ],
+   [
+    23,
+    24,
+    "pkg/util/diagclient/client.go:130 SendRequest"
+   ],
+   [
+    23,
+    24,
+    "pkg/util/diagclient/client.go:138 SendRequestAsync"
+   ],
+   [
+    22,
+    34,
+    "pkg/planner/core/find_best_task.go:2647 convertToIndexMergeScan"
+   ],
+   [
+    22,
+    32,
+    "pkg/planner/util/path.go:250 SplitCorColAccessCondFromFilters (lone call)"
+   ],
+   [
+    22,
+    30,
+    "pkg/planner/util/path.go:261 SplitCorColAccessCondFromFilters"
+   ],
+   [
+    22,
+    26,
+    "pkg/executor/builder.go:2177 buildHashJoin"
+   ],
+   [
+    22,
+    26,
+    "pkg/executor/builder.go:5457 buildIndexJoinHashJoinExecFromChildExecs"
+   ],
+   [
+    22,
+    26,
+    "pkg/planner/core/exhaust_physical_plans.go:134 getHashJoins"
+   ],
+   [
+    22,
+    23,
+    "pkg/planner/core/expression_rewriter.go:1381 handleInSubquery"
+   ],
+   [
+    21,
+    30,
+    "pkg/executor/statement_ru_plan_walk.go:1111 collectStatementRUJoinUnits"
+   ],
+   [
+    21,
+    30,
+    "pkg/executor/statement_ru_plan_walk.go:1217 collectStatementRUAggregationUnits"
+   ],
+   [
+    21,
+    30,
+    "pkg/executor/statement_ru_plan_walk.go:1226 collectStatementRUAggregationUnits"
+   ],
+   [
+    21,
+    30,
+    "pkg/executor/statement_ru_plan_walk.go:1237 collectStatementRUAggregationUnits"
+   ],
+   [
+    21,
+    26,
+    "pkg/planner/cardinality/row_count_index.go:301 getIndexRowCountForStatsV2"
+   ],
+   [
+    21,
+    25,
+    "pkg/planner/core/rule_join_reorder_projection_inline.go:44 tryInlineProjectionForJoinGroup"
+   ],
+   [
+    21,
+    23,
+    "pkg/util/rowcodec/decoder.go:207 DecodeToChunk (lone call)"
+   ],
+   [
+    21,
+    20,
+    "pkg/expression/infer_pushdown.go:561 PushDownExprsWithExtraInfo (lone call)"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 10284,
+   "median": 2,
+   "p90": 9,
+   "p99": 40,
+   "p999": 94,
+   "max": 821
+  },
+  "stmts": {
+   "n": 10284,
+   "median": 2,
+   "p90": 8,
+   "p99": 50,
+   "p999": 153,
+   "max": 842
+  },
+  "max_stmts_within_input_limit": 59,
+  "over_inputs": 293,
+  "over_stmts": 7,
+  "over_either": 293,
+  "share_over_either": 0.028490859587709062,
+  "depth_capped": 0,
+  "recursion_capped": 193,
+  "size_capped": 0,
+  "depth": {
+   "n": 10284,
+   "median": 0,
+   "p90": 1,
+   "p99": 3,
+   "p999": 5,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    821,
+    842,
+    "pkg/expression/infer_pushdown.go:111 canScalarFuncPushDown"
+   ],
+   [
+    820,
+    840,
+    "pkg/expression/expr_to_pb.go:263 scalarFuncToPBExpr"
+   ],
+   [
+    818,
+    834,
+    "pkg/expression/infer_pushdown.go:62 canFuncBePushed"
+   ],
+   [
+    416,
+    415,
+    "pkg/expression/infer_pushdown.go:180 scalarExprSupportedByTiDB"
+   ],
+   [
+    141,
+    152,
+    "pkg/ddl/modify_column.go:104 getModifyColumnType"
+   ],
+   [
+    110,
+    171,
+    "pkg/planner/core/find_best_task.go:2260 findBestTask4LogicalDataSource"
+   ],
+   [
+    101,
+    281,
+    "pkg/planner/core/plan_cache_rebuild.go:326 buildRangesForBatchGet"
+   ],
+   [
+    100,
+    104,
+    "pkg/expression/expr_to_pb.go:226 columnToPBExpr"
+   ],
+   [
+    99,
+    165,
+    "pkg/executor/statement_ru_plan_walk.go:538 calculateStatementRUPlanChildFirst"
+   ],
+   [
+    98,
+    279,
+    "pkg/planner/core/plan_cache_rebuild.go:256 buildRangesForPointGet"
+   ],
+   [
+    94,
+    275,
+    "pkg/planner/core/plan_cache_rebuild.go:183 buildRangeForTableScan"
+   ],
+   [
+    80,
+    93,
+    "pkg/ddl/modify_column.go:2159 GetModifiableColumnJob"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    821,
+    842,
+    "pkg/expression/infer_pushdown.go:111 canScalarFuncPushDown"
+   ],
+   [
+    820,
+    840,
+    "pkg/expression/expr_to_pb.go:263 scalarFuncToPBExpr"
+   ],
+   [
+    818,
+    834,
+    "pkg/expression/infer_pushdown.go:62 canFuncBePushed"
+   ],
+   [
+    416,
+    415,
+    "pkg/expression/infer_pushdown.go:180 scalarExprSupportedByTiDB"
+   ],
+   [
+    101,
+    281,
+    "pkg/planner/core/plan_cache_rebuild.go:326 buildRangesForBatchGet"
+   ],
+   [
+    98,
+    279,
+    "pkg/planner/core/plan_cache_rebuild.go:256 buildRangesForPointGet"
+   ],
+   [
+    94,
+    275,
+    "pkg/planner/core/plan_cache_rebuild.go:183 buildRangeForTableScan"
+   ],
+   [
+    68,
+    201,
+    "pkg/planner/core/plan_cache_rebuild.go:415 buildRangeForIndexScan"
+   ],
+   [
+    110,
+    171,
+    "pkg/planner/core/find_best_task.go:2260 findBestTask4LogicalDataSource"
+   ],
+   [
+    99,
+    165,
+    "pkg/executor/statement_ru_plan_walk.go:538 calculateStatementRUPlanChildFirst"
+   ],
+   [
+    74,
+    153,
+    "pkg/planner/core/rule/rule_predicate_simplification.go:390 updateOrPredicate"
+   ],
+   [
+    141,
+    152,
+    "pkg/ddl/modify_column.go:104 getModifyColumnType"
+   ]
+  ],
+  "all_over": [
+   [
+    821,
+    842,
+    "pkg/expression/infer_pushdown.go:111 canScalarFuncPushDown"
+   ],
+   [
+    820,
+    840,
+    "pkg/expression/expr_to_pb.go:263 scalarFuncToPBExpr"
+   ],
+   [
+    818,
+    834,
+    "pkg/expression/infer_pushdown.go:62 canFuncBePushed"
+   ],
+   [
+    416,
+    415,
+    "pkg/expression/infer_pushdown.go:180 scalarExprSupportedByTiDB"
+   ],
+   [
+    141,
+    152,
+    "pkg/ddl/modify_column.go:104 getModifyColumnType"
+   ],
+   [
+    110,
+    171,
+    "pkg/planner/core/find_best_task.go:2260 findBestTask4LogicalDataSource"
+   ],
+   [
+    101,
+    281,
+    "pkg/planner/core/plan_cache_rebuild.go:326 buildRangesForBatchGet"
+   ],
+   [
+    100,
+    104,
+    "pkg/expression/expr_to_pb.go:226 columnToPBExpr"
+   ],
+   [
+    99,
+    165,
+    "pkg/executor/statement_ru_plan_walk.go:538 calculateStatementRUPlanChildFirst"
+   ],
+   [
+    98,
+    279,
+    "pkg/planner/core/plan_cache_rebuild.go:256 buildRangesForPointGet"
+   ],
+   [
+    94,
+    275,
+    "pkg/planner/core/plan_cache_rebuild.go:183 buildRangeForTableScan"
+   ],
+   [
+    80,
+    93,
+    "pkg/ddl/modify_column.go:2159 GetModifiableColumnJob"
+   ],
+   [
+    75,
+    88,
+    "pkg/ddl/modify_column.go:1880 checkPartitionColumnTypeChangeAllowlist"
+   ],
+   [
+    74,
+    153,
+    "pkg/planner/core/rule/rule_predicate_simplification.go:390 updateOrPredicate"
+   ],
+   [
+    73,
+    72,
+    "pkg/planner/core/operator/physicalop/tiflash_predicate_push_down.go:95 groupByColumnsSortBySelectivity"
+   ],
+   [
+    68,
+    201,
+    "pkg/planner/core/plan_cache_rebuild.go:415 buildRangeForIndexScan"
+   ],
+   [
+    68,
+    73,
+    "pkg/privilege/privileges/privileges.go:165 RequestVerification"
+   ],
+   [
+    67,
+    95,
+    "pkg/planner/core/joinorder/conflict_detector.go:585 CheckConnection"
+   ],
+   [
+    67,
+    85,
+    "pkg/planner/core/plan_cache_utils.go:348 newPlanCacheKeyWithMatchedBinding"
+   ],
+   [
+    66,
+    88,
+    "pkg/planner/core/find_best_task.go:604 findBestTask"
+   ],
+   [
+    65,
+    80,
+    "pkg/planner/optimize.go:230 optimizeNoCache"
+   ],
+   [
+    65,
+    71,
+    "pkg/lightning/backend/tidb/tidb.go:843 execStmts"
+   ],
+   [
+    63,
+    66,
+    "pkg/ddl/modify_column.go:672 validateDependentMaterializedViewModifyColumn"
+   ],
+   [
+    63,
+    65,
+    "pkg/ddl/backfilling_dist_executor.go:258 IsRetryableError"
+   ],
+   [
+    63,
+    64,
+    "pkg/planner/core/task.go:281 negotiateCommonType"
+   ],
+   [
+    63,
+    45,
+    "pkg/config/config.go:1721 Valid"
+   ],
+   [
+    62,
+    87,
+    "pkg/planner/core/rule_join_reorder.go:58 extractJoinGroupImpl"
+   ],
+   [
+    62,
+    81,
+    "pkg/session/tidb.go:223 finishStmt"
+   ],
+   [
+    61,
+    78,
+    "pkg/session/session.go:3051 runStmt"
+   ],
+   [
+    61,
+    76,
+    "pkg/executor/simple.go:1731 executeAlterUser"
+   ],
+   [
+    60,
+    69,
+    "pkg/util/ranger/checker.go:55 checkScalarFunction"
+   ],
+   [
+    58,
+    65,
+    "pkg/ddl/modify_column.go:959 doModifyColumnWithCheck"
+   ],
+   [
+    58,
+    63,
+    "pkg/dxf/importinto/conflictedkv/deleter.go:137 deleteKeysWithRetry"
+   ],
+   [
+    58,
+    62,
+    "pkg/lightning/backend/tidb/tidb.go:715 WriteRows"
+   ],
+   [
+    57,
+    142,
+    "pkg/planner/core/indexmerge_path.go:213 accessPathsForConds"
+   ],
+   [
+    57,
+    64,
+    "pkg/ddl/modify_column.go:892 precheckForVarcharToChar"
+   ],
+   [
+    57,
+    62,
+    "pkg/ingestor/ingestctrl/job_worker.go:172 runJob"
+   ],
+   [
+    56,
+    120,
+    "br/pkg/restore/split/client.go:977 WaitRegionsScattered"
+   ],
+   [
+    56,
+    61,
+    "lightning/pkg/importinto/job_orchestrator.go:223 cancelJobWithRetry"
+   ],
+   [
+    56,
+    59,
+    "pkg/lightning/common/retry.go:73 IsRetryableError"
+   ],
+   [
+    55,
+    71,
+    "pkg/planner/core/operator/logicalop/logical_join.go:1752 updateEQCond"
+   ],
+   [
+    55,
+    56,
+    "pkg/planner/core/rule/rule_predicate_simplification.go:285 unsatisfiable"
+   ],
+   [
+    54,
+    72,
+    "pkg/sessiontxn/isolation/readcommitted.go:93 OnStmtStart"
+   ],
+   [
+    54,
+    70,
+    "pkg/session/session.go:540 doCommit"
+   ],
+   [
+    54,
+    59,
+    "pkg/executor/importer/table_import.go:1020 RemoteChecksumTableBySQL"
+   ],
+   [
+    54,
+    59,
+    "pkg/ingestor/ingestctrl/checksum.go:323 checksumDB"
+   ],
+   [
+    54,
+    59,
+    "pkg/lightning/backend/backend.go:368 Import"
+   ],
+   [
+    54,
+    58,
+    "br/pkg/restore/split/client.go:962 isScatterRegionFinished"
+   ],
+   [
+    54,
+    58,
+    "pkg/lightning/common/util.go:184 Retry"
+   ],
+   [
+    53,
+    69,
+    "pkg/executor/point_get.go:666 get"
+   ],
+   [
+    52,
+    78,
+    "br/pkg/registry/registration.go:839 checkForTableConflicts"
+   ],
+   [
+    52,
+    71,
+    "pkg/session/session.go:2957 validateStatementReadOnlyInStaleness"
+   ],
+   [
+    52,
+    71,
+    "pkg/session/session.go:3261 TryDetach"
+   ],
+   [
+    52,
+    69,
+    "pkg/executor/select.go:1357 isWeakConsistencyRead"
+   ],
+   [
+    52,
+    69,
+    "pkg/sessiontxn/isolation/readcommitted.go:109 NeedSetRCCheckTSFlag"
+   ],
+   [
+    52,
+    64,
+    "pkg/types/field_type.go:1476 CheckModifyTypeCompatible"
+   ],
+   [
+    52,
+    59,
+    "pkg/ddl/modify_column.go:655 validateMaterializedViewLogColumnTypeForModifyColumn"
+   ],
+   [
+    50,
+    134,
+    "pkg/planner/core/plan_cache_rebuild.go:449 isSafeRange"
+   ],
+   [
+    50,
+    60,
+    "pkg/expression/util.go:992 eliminateCastFunction"
+   ],
+   [
+    50,
+    59,
+    "pkg/expression/util.go:956 unwrapCast"
+   ],
+   [
+    50,
+    50,
+    "pkg/expression/expr_to_pb.go:117 encodeDatum"
+   ],
+   [
+    50,
+    49,
+    "pkg/planner/core/find_best_task.go:866 compareCandidates"
+   ],
+   [
+    49,
+    97,
+    "pkg/planner/util/path.go:250 SplitCorColAccessCondFromFilters"
+   ],
+   [
+    49,
+    65,
+    "pkg/planner/core/expression_rewriter.go:1279 handleInSubquery"
+   ],
+   [
+    49,
+    52,
+    "pkg/planner/core/planbuilder.go:795 buildSet"
+   ],
+   [
+    49,
+    50,
+    "pkg/expression/expr_to_pb.go:99 conOrCorColToPBExpr"
+   ],
+   [
+    48,
+    65,
+    "pkg/planner/optimize.go:430 allowInReadOnlyMode"
+   ],
+   [
+    48,
+    50,
+    "pkg/ddl/util/util.go:89 PauseRunningJob"
+   ],
+   [
+    48,
+    49,
+    "pkg/expression/aggregation/agg_to_pb.go:104 AggFuncToPBExpr"
+   ],
+   [
+    48,
+    49,
+    "pkg/expression/aggregation/window_func.go:126 WindowFuncToPBExpr"
+   ],
+   [
+    48,
+    48,
+    "pkg/planner/core/planbuilder.go:1336 getPossibleAccessPaths"
+   ],
+   [
+    48,
+    33,
+    "pkg/executor/show.go:1103 constructResultOfShowCreateTable"
+   ],
+   [
+    47,
+    72,
+    "pkg/expression/builtin_compare.go:1785 refineArgs"
+   ],
+   [
+    47,
+    57,
+    "pkg/planner/core/stats.go:666 derivePathStatsAndTryHeuristics"
+   ],
+   [
+    46,
+    57,
+    "pkg/executor/show.go:993 fetchShowVariables"
+   ],
+   [
+    46,
+    55,
+    "pkg/expression/builtin_control.go:146 addCollateAndCharsetAndFlagFromArgs"
+   ],
+   [
+    46,
+    55,
+    "pkg/planner/core/expression_rewriter.go:1981 rewriteSystemVariable"
+   ],
+   [
+    46,
+    47,
+    "pkg/ddl/ddl.go:1468 cancelRunningJob"
+   ],
+   [
+    46,
+    47,
+    "pkg/meta/model/job.go:798 IsPausable"
+   ],
+   [
+    46,
+    44,
+    "pkg/ddl/sanity_check.go:202 checkHistoryJobInTest"
+   ],
+   [
+    46,
+    43,
+    "pkg/planner/core/exhaust_physical_plans.go:2212 exhaustPhysicalPlans4LogicalJoin"
+   ],
+   [
+    45,
+    70,
+    "pkg/expression/builtin_time.go:3755 getFunction"
+   ],
+   [
+    45,
+    42,
+    "pkg/planner/core/logical_plan_builder.go:5019 buildDataSource"
+   ],
+   [
+    44,
+    84,
+    "pkg/planner/cardinality/row_count_index.go:45 GetRowCountByIndexRanges"
+   ],
+   [
+    44,
+    64,
+    "pkg/planner/funcdep/fd_graph.go:244 addFunctionalDependency"
+   ],
+   [
+    44,
+    50,
+    "pkg/session/session.go:2500 executeStmtImpl"
+   ],
+   [
+    44,
+    46,
+    "pkg/ddl/rollingback.go:347 convertTruncateTablePartitionJob2RollbackJob"
+   ],
+   [
+    44,
+    46,
+    "pkg/session/session.go:5842 EncodeStates"
+   ],
+   [
+    43,
+    82,
+    "pkg/planner/core/exhaust_physical_plans.go:1508 applyLogicalHintVarEigen"
+   ],
+   [
+    43,
+    49,
+    "pkg/executor/infoschema_reader.go:342 setDataForVariablesInfo"
+   ],
+   [
+    43,
+    45,
+    "pkg/ddl/job_worker.go:918 countForError"
+   ],
+   [
+    43,
+    45,
+    "pkg/ddl/rollingback.go:131 rollingbackModifyColumn"
+   ],
+   [
+    42,
+    56,
+    "pkg/executor/statement_ru_plan_walk.go:1187 collectStatementRUAggregationUnits"
+   ],
+   [
+    42,
+    45,
+    "pkg/types/time.go:757 ParseDateFormat"
+   ],
+   [
+    41,
+    85,
+    "pkg/planner/core/indexmerge_path.go:273 generateANDIndexMerge4NormalIndex"
+   ],
+   [
+    41,
+    48,
+    "pkg/domain/plan_replayer_dump.go:630 dumpVariables"
+   ],
+   [
+    41,
+    47,
+    "pkg/planner/core/operator/physicalop/physical_cte.go:245 findBestTask4LogicalCTE"
+   ],
+   [
+    41,
+    46,
+    "br/pkg/task/restore.go:1407 runSnapshotRestore"
+   ],
+   [
+    41,
+    44,
+    "pkg/util/sem/compat/sem.go:47 IsInvisibleTable"
+   ],
+   [
+    41,
+    41,
+    "pkg/planner/core/logical_plan_builder.go:1864 buildProjection"
+   ],
+   [
+    41,
+    36,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:313 Equals"
+   ],
+   [
+    40,
+    64,
+    "pkg/planner/core/find_best_task.go:1628 removeCoveredIndexMergeTopLevelFilters"
+   ],
+   [
+    40,
+    41,
+    "pkg/table/tables/tables.go:740 addRecord"
+   ],
+   [
+    39,
+    62,
+    "pkg/planner/core/operator/logicalop/logical_datasource.go:872 CheckPartialIndexes"
+   ],
+   [
+    39,
+    46,
+    "pkg/infoschema/tables.go:2498 GetDataFromSessionVariables"
+   ],
+   [
+    39,
+    44,
+    "pkg/infoschema/tables.go:2486 SysVarHiddenForSem"
+   ],
+   [
+    39,
+    39,
+    "pkg/ddl/executor.go:3493 checkTableDefCompatible"
+   ],
+   [
+    39,
+    37,
+    "pkg/planner/funcdep/fd_graph.go:985 ProjectCols"
+   ],
+   [
+    38,
+    81,
+    "pkg/planner/core/operator/physicalop/physical_table_scan.go:466 OperatorInfo"
+   ],
+   [
+    38,
+    81,
+    "pkg/planner/core/rule/rule_partition_processor.go:777 findUsedListPartitions"
+   ],
+   [
+    38,
+    61,
+    "pkg/planner/core/find_best_task.go:1646 indexMergeTopLevelFilterCovered"
+   ],
+   [
+    38,
+    54,
+    "pkg/planner/core/exhaust_physical_plans.go:1962 tryToGetMppHashJoin"
+   ],
+   [
+    38,
+    50,
+    "pkg/planner/core/operator/physicalop/base_physical_agg.go:536 CheckAggCanPushCop"
+   ],
+   [
+    38,
+    49,
+    "pkg/planner/core/find_best_task.go:2568 convertToIndexMergeScan"
+   ],
+   [
+    38,
+    42,
+    "pkg/ttl/cache/table.go:746 BuildTTLIndexScanPlan"
+   ],
+   [
+    38,
+    41,
+    "pkg/executor/select.go:941 ResetContextOfStmt"
+   ],
+   [
+    38,
+    38,
+    "pkg/planner/core/find_best_task.go:1086 matchProperty"
+   ],
+   [
+    37,
+    44,
+    "pkg/ddl/index.go:2876 writeChunk"
+   ],
+   [
+    37,
+    39,
+    "pkg/util/sem/compat/sem.go:73 IsInvisibleSysVar"
+   ],
+   [
+    36,
+    56,
+    "pkg/util/filter/filter.go:283 Match"
+   ],
+   [
+    36,
+    51,
+    "pkg/executor/statement_ru_plan_walk.go:1068 collectStatementRUJoinUnits"
+   ],
+   [
+    36,
+    51,
+    "pkg/planner/core/operator/physicalop/physical_window.go:340 tryToGetMppWindows"
+   ],
+   [
+    36,
+    49,
+    "pkg/expression/builtin_compare.go:1433 GetAccurateCmpType"
+   ],
+   [
+    36,
+    49,
+    "pkg/planner/core/joinorder/join_order.go:94 extractJoinGroup"
+   ],
+   [
+    36,
+    42,
+    "pkg/expression/builtin_compare.go:1404 getBaseCmpType"
+   ],
+   [
+    35,
+    80,
+    "pkg/planner/core/plan_cost_ver2.go:168 getPlanCostVer24PhysicalTableScan"
+   ],
+   [
+    35,
+    52,
+    "pkg/util/ranger/detacher.go:1379 AddExpr4EqAndInCondition"
+   ],
+   [
+    35,
+    41,
+    "pkg/planner/cardinality/row_count_index.go:198 getIndexRowCountForStatsV2"
+   ],
+   [
+    35,
+    38,
+    "pkg/session/txn.go:592 KeysNeedToLock"
+   ],
+   [
+    35,
+    34,
+    "pkg/ddl/modify_column.go:2017 isAllowedTypeChangeForRangeListColumnsPartition"
+   ],
+   [
+    35,
+    34,
+    "pkg/executor/simple.go:1049 executeCreateUser"
+   ],
+   [
+    35,
+    33,
+    "pkg/types/time.go:952 parseDatetime"
+   ],
+   [
+    34,
+    67,
+    "pkg/planner/core/exhaust_physical_plans.go:1523 applyLogicalJoinHint"
+   ],
+   [
+    34,
+    54,
+    "pkg/executor/slow_query.go:922 parseLog"
+   ],
+   [
+    34,
+    41,
+    "pkg/planner/core/rule_join_reorder_projection_inline.go:36 tryInlineProjectionForJoinGroup"
+   ],
+   [
+    34,
+    32,
+    "pkg/planner/core/find_best_task.go:1998 skylinePruning"
+   ],
+   [
+    34,
+    30,
+    "pkg/expression/collation.go:450 inferCollation"
+   ],
+   [
+    34,
+    30,
+    "pkg/planner/core/operator/physicalop/base_physical_agg.go:614 BuildFinalModeAggregation"
+   ],
+   [
+    34,
+    28,
+    "pkg/planner/core/logical_plan_builder.go:793 buildJoin"
+   ],
+   [
+    33,
+    73,
+    "pkg/planner/core/operator/physicalop/physical_table_scan.go:444 TP"
+   ],
+   [
+    33,
+    34,
+    "pkg/planner/core/rule_generate_column_substitute.go:56 collectGenerateColumn"
+   ],
+   [
+    33,
+    31,
+    "pkg/privilege/privileges/privileges.go:632 ConnectionVerification"
+   ],
+   [
+    32,
+    78,
+    "pkg/planner/core/operator/logicalop/logical_datasource.go:563 Convert2Gathers"
+   ],
+   [
+    32,
+    49,
+    "pkg/types/json_path_expr.go:318 parseJSONPathExpr"
+   ],
+   [
+    32,
+    48,
+    "pkg/sessiontxn/isolation/optimistic.go:128 AdviseOptimizeWithPlan"
+   ],
+   [
+    32,
+    46,
+    "pkg/ddl/jobsubmit/submit.go:53 SubmitBatch"
+   ],
+   [
+    32,
+    35,
+    "pkg/ddl/create_table.go:1438 BuildTableInfo"
+   ],
+   [
+    32,
+    28,
+    "pkg/ddl/index.go:4327 checkIndexCondition"
+   ],
+   [
+    32,
+    27,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:77 Equals"
+   ],
+   [
+    32,
+    27,
+    "pkg/session/txn.go:634 KeyNeedToLock"
+   ],
+   [
+    31,
+    49,
+    "pkg/planner/core/find_best_task.go:1662 indexMergePartialPathCoversFilter"
+   ],
+   [
+    31,
+    40,
+    "pkg/planner/core/plan_cache_utils.go:944 isSafePointGetPath4PlanCache"
+   ],
+   [
+    31,
+    37,
+    "pkg/util/ranger/detacher.go:109 getPotentialEqOrInColOffset"
+   ],
+   [
+    31,
+    33,
+    "pkg/planner/core/operator/physicalop/physical_projection.go:49 ExhaustPhysicalPlans4LogicalProjection"
+   ],
+   [
+    31,
+    32,
+    "pkg/ddl/job_worker.go:441 finishDDLJob"
+   ],
+   [
+    31,
+    32,
+    "pkg/executor/importer/import.go:770 initOptions"
+   ],
+   [
+    31,
+    31,
+    "pkg/ddl/index.go:116 buildIndexColumns"
+   ],
+   [
+    31,
+    28,
+    "pkg/planner/cardinality/selectivity.go:51 Selectivity"
+   ],
+   [
+    31,
+    25,
+    "pkg/planner/core/operator/logicalop/logical_join.go:905 ExtractFDForOuterJoin"
+   ],
+   [
+    30,
+    44,
+    "pkg/planner/core/exhaust_physical_plans.go:110 getHashJoins"
+   ],
+   [
+    30,
+    30,
+    "pkg/expression/builtin_time.go:2844 evalInt"
+   ],
+   [
+    30,
+    29,
+    "pkg/planner/core/point_get_plan.go:930 getNameValuePairs"
+   ],
+   [
+    30,
+    28,
+    "pkg/util/ranger/checker.go:160 checkLikeFunc"
+   ],
+   [
+    30,
+    26,
+    "pkg/types/field_type.go:1535 needReorgToChange"
+   ],
+   [
+    29,
+    45,
+    "pkg/planner/core/find_best_task.go:3064 convertToTableScan"
+   ],
+   [
+    29,
+    32,
+    "pkg/expression/util.go:926 noPrecisionLossCastCompatible"
+   ],
+   [
+    29,
+    30,
+    "pkg/planner/core/joinorder/conflict_detector.go:650 checkNonInnerEdgeApplicable"
+   ],
+   [
+    29,
+    29,
+    "pkg/ddl/modify_column.go:2007 isAllowedTypeChangeForKeyPartition"
+   ],
+   [
+    29,
+    27,
+    "pkg/planner/core/logical_plan_builder.go:4349 buildSelect"
+   ],
+   [
+    28,
+    72,
+    "pkg/planner/core/operator/physicalop/physical_index_scan.go:260 OperatorInfo"
+   ],
+   [
+    28,
+    66,
+    "pkg/planner/core/operator/physicalop/physical_table_scan.go:672 IsFullScan"
+   ],
+   [
+    28,
+    65,
+    "pkg/planner/util/path.go:562 IsFullScanRange"
+   ],
+   [
+    28,
+    32,
+    "pkg/planner/funcdep/fd_graph.go:196 ReduceCols"
+   ],
+   [
+    28,
+    32,
+    "pkg/table/tables/tables.go:437 updateRecord"
+   ],
+   [
+    28,
+    31,
+    "pkg/planner/core/rule_decorrelate.go:227 optimize"
+   ],
+   [
+    28,
+    29,
+    "pkg/ddl/materialized_view.go:1471 validateCreateMaterializedViewQuery"
+   ],
+   [
+    28,
+    28,
+    "br/pkg/stream/rewrite_meta_rawkv.go:831 processIngestIndexAndDeleteRangeFromJob"
+   ],
+   [
+    28,
+    28,
+    "lightning/pkg/importer/table_import.go:660 preprocessEngine"
+   ],
+   [
+    28,
+    28,
+    "pkg/ddl/delete_range.go:128 insertJobIntoDeleteRangeTableMultiSchema"
+   ],
+   [
+    28,
+    28,
+    "pkg/planner/core/operator/logicalop/logical_join.go:1206 ExtractUsedCols"
+   ],
+   [
+    28,
+    27,
+    "pkg/planner/core/operator/physicalop/physical_batch_point_get.go:350 PrunePartitions"
+   ],
+   [
+    28,
+    24,
+    "pkg/executor/grant.go:88 Next"
+   ],
+   [
+    28,
+    24,
+    "pkg/parser/ast/base.go:137 convertBinaryStringLiterals"
+   ],
+   [
+    27,
+    68,
+    "pkg/planner/core/operator/physicalop/physical_index_scan.go:242 TP"
+   ],
+   [
+    27,
+    66,
+    "pkg/planner/core/operator/physicalop/physical_index_scan.go:326 IsFullScan"
+   ],
+   [
+    27,
+    34,
+    "pkg/planner/optimize.go:69 getPlanFromNonPreparedPlanCache"
+   ],
+   [
+    27,
+    32,
+    "pkg/planner/core/joinorder/conflict_detector.go:727 alignEQConds"
+   ],
+   [
+    27,
+    25,
+    "pkg/planner/cardinality/selectivity.go:914 GetSelectivityByFilter"
+   ],
+   [
+    27,
+    25,
+    "pkg/planner/funcdep/fd_graph.go:159 InClosure"
+   ],
+   [
+    27,
+    24,
+    "pkg/ddl/modify_column.go:2496 noReorgDataStrict"
+   ],
+   [
+    26,
+    63,
+    "pkg/util/ranger/types.go:197 HasFullRange"
+   ],
+   [
+    26,
+    57,
+    "pkg/planner/core/operator/logicalop/logical_datasource.go:755 IsSingleScan"
+   ],
+   [
+    26,
+    32,
+    "pkg/planner/core/expression_rewriter.go:2428 matchAgainstToExpression"
+   ],
+   [
+    26,
+    32,
+    "pkg/types/field_type.go:1569 checkTypeChangeSupported"
+   ],
+   [
+    26,
+    30,
+    "pkg/table/tables/index.go:299 create"
+   ],
+   [
+    26,
+    27,
+    "pkg/planner/core/operator/physicalop/tiflash_predicate_push_down.go:336 handleTiFlashPredicatePushDown"
+   ],
+   [
+    26,
+    26,
+    "pkg/expression/builtin_time.go:2761 getFunction"
+   ],
+   [
+    26,
+    26,
+    "pkg/table/tables/tables.go:1526 canSkip"
+   ],
+   [
+    26,
+    25,
+    "pkg/planner/core/index_join_path.go:684 indexJoinPathTmpInit"
+   ],
+   [
+    26,
+    24,
+    "pkg/planner/core/mview_refresh_builder.go:96 buildRefreshMaterializedViewImplement"
+   ],
+   [
+    26,
+    23,
+    "pkg/planner/core/find_best_task.go:1849 appendPrunedRangeCandidates"
+   ],
+   [
+    26,
+    21,
+    "pkg/planner/core/task.go:250 needConvert"
+   ],
+   [
+    26,
+    21,
+    "pkg/store/copr/coprocessor.go:529 buildCopTasks"
+   ],
+   [
+    26,
+    20,
+    "pkg/planner/funcdep/fd_graph.go:743 MakeOuterJoin"
+   ],
+   [
+    25,
+    43,
+    "pkg/parser/digester.go:317 reduceLit"
+   ],
+   [
+    25,
+    29,
+    "pkg/planner/core/point_get_plan.go:606 checkTblIndexForPointPlan"
+   ],
+   [
+    25,
+    27,
+    "pkg/ddl/executor.go:3821 checkModifyCharsetAndCollation"
+   ],
+   [
+    25,
+    26,
+    "pkg/ddl/modify_column.go:1095 needIndexReorg"
+   ],
+   [
+    25,
+    26,
+    "pkg/ddl/modify_column.go:1802 checkPartitionColumnModifiable"
+   ],
+   [
+    25,
+    26,
+    "pkg/planner/core/rule_join_reorder.go:734 hasOtherJoinCondition"
+   ],
+   [
+    25,
+    26,
+    "pkg/util/ranger/points.go:718 newBuildFromPatternLike"
+   ],
+   [
+    25,
+    25,
+    "pkg/expression/builtin_time.go:2945 getDateFromString"
+   ],
+   [
+    25,
+    24,
+    "pkg/planner/core/indexmerge_unfinished_path.go:343 buildIntoAccessPath"
+   ],
+   [
+    25,
+    24,
+    "pkg/planner/core/planbuilder.go:4581 buildSelectPlanOfInsert"
+   ],
+   [
+    25,
+    24,
+    "pkg/tablecodec/tablecodec.go:1673 GenIndexValueForClusteredIndexVersion1"
+   ],
+   [
+    25,
+    23,
+    "pkg/distsql/select_result.go:676 updateCopRuntimeStats"
+   ],
+   [
+    25,
+    22,
+    "pkg/ddl/executor.go:4804 dropTableObject"
+   ],
+   [
+    25,
+    20,
+    "pkg/executor/infoschema_reader.go:1176 dataForColumnsInTable"
+   ],
+   [
+    25,
+    19,
+    "pkg/executor/write.go:81 updateRecord"
+   ],
+   [
+    24,
+    59,
+    "pkg/util/ranger/types.go:170 IsFullRange"
+   ],
+   [
+    24,
+    33,
+    "pkg/planner/core/plan_cacheable_checker.go:439 Enter"
+   ],
+   [
+    24,
+    30,
+    "pkg/planner/mview/mview.go:1049 mapMinMaxToCountExprDependencies"
+   ],
+   [
+    24,
+    28,
+    "pkg/table/tables/tables.go:1075 DecodeRawRowData"
+   ],
+   [
+    24,
+    27,
+    "pkg/parser/ast/visitor_codegen/generator.go:1470 ensureNoDelayedChildResultUse"
+   ],
+   [
+    24,
+    26,
+    "pkg/planner/core/joinorder/util.go:340 AlignJoinEdgeArgs"
+   ],
+   [
+    24,
+    25,
+    "pkg/ddl/foreign_key.go:301 checkModifyColumnWithForeignKeyConstraint"
+   ],
+   [
+    24,
+    25,
+    "pkg/planner/core/joinorder/conflict_detector.go:636 checkInnerEdgeApplicable"
+   ],
+   [
+    24,
+    24,
+    "pkg/ddl/modify_column.go:1113 needRowReorg"
+   ],
+   [
+    24,
+    24,
+    "pkg/executor/mem_reader.go:501 getRowData"
+   ],
+   [
+    24,
+    22,
+    "pkg/expression/builtin_compare.go:451 resolveType4Extremum"
+   ],
+   [
+    24,
+    20,
+    "pkg/executor/set.go:117 setSysVariable"
+   ],
+   [
+    24,
+    19,
+    "pkg/planner/cardinality/row_count_index.go:601 AdjustRowCountForAppendedHandleColumns"
+   ],
+   [
+    24,
+    19,
+    "pkg/planner/core/operator/logicalop/logical_join.go:1442 ExtractOnCondition"
+   ],
+   [
+    23,
+    34,
+    "pkg/planner/core/planbuilder.go:2693 buildAnalyzeFullSamplingTask"
+   ],
+   [
+    23,
+    31,
+    "pkg/executor/batch_point_get.go:254 initialize"
+   ],
+   [
+    23,
+    29,
+    "pkg/planner/core/rule_join_reorder.go:850 makeJoin"
+   ],
+   [
+    23,
+    26,
+    "pkg/util/rowcodec/decoder.go:207 DecodeToChunk"
+   ],
+   [
+    23,
+    24,
+    "pkg/expression/builtin_time.go:3387 vecGetDateFromString"
+   ],
+   [
+    23,
+    24,
+    "pkg/util/diagclient/client.go:129 SendRequest"
+   ],
+   [
+    23,
+    24,
+    "pkg/util/diagclient/client.go:137 SendRequestAsync"
+   ],
+   [
+    23,
+    23,
+    "pkg/session/session.go:1565 approxParseSQLTokenCnt"
+   ],
+   [
+    23,
+    21,
+    "pkg/config/config.go:1600 Load"
+   ],
+   [
+    23,
+    20,
+    "br/pkg/stream/table_mapping.go:855 BindUnresolvedTableRoutes"
+   ],
+   [
+    23,
+    18,
+    "pkg/planner/core/operator/logicalop/logical_window.go:147 Equals"
+   ],
+   [
+    22,
+    38,
+    "pkg/ddl/foreign_key.go:443 checkIndexNeededInForeignKey"
+   ],
+   [
+    22,
+    37,
+    "pkg/planner/core/operator/physicalop/physical_batch_point_get.go:814 PrunePartitionsAndValues"
+   ],
+   [
+    22,
+    30,
+    "pkg/planner/core/indexmerge_path.go:627 generateANDIndexMerge4ComposedIndex"
+   ],
+   [
+    22,
+    29,
+    "pkg/parser/ast/visitor_codegen/generator.go:436 parsePackage"
+   ],
+   [
+    22,
+    29,
+    "pkg/planner/mview/mview.go:1012 mapSumToCountExprDependencies"
+   ],
+   [
+    22,
+    26,
+    "lightning/pkg/importer/table_import.go:987 postProcess"
+   ],
+   [
+    22,
+    26,
+    "pkg/executor/builder.go:2176 buildHashJoin"
+   ],
+   [
+    22,
+    26,
+    "pkg/executor/builder.go:5456 buildIndexJoinHashJoinExecFromChildExecs"
+   ],
+   [
+    22,
+    26,
+    "pkg/util/rowcodec/decoder.go:401 decodeToBytesInternal"
+   ],
+   [
+    22,
+    24,
+    "pkg/ddl/modify_column.go:1906 checkTypeChangeForExprBasedPartition"
+   ],
+   [
+    22,
+    24,
+    "pkg/planner/core/find_best_task.go:1446 matchPropForIndexMergeAlternatives"
+   ],
+   [
+    22,
+    24,
+    "pkg/planner/core/indexmerge_unfinished_path.go:156 initUnfinishedPathsFromExpr"
+   ],
+   [
+    22,
+    24,
+    "pkg/tablecodec/tablecodec.go:917 buildRestoredColumn"
+   ],
+   [
+    22,
+    22,
+    "pkg/ddl/executor.go:1943 checkAlterTableMaterializedViewConstraints"
+   ],
+   [
+    22,
+    22,
+    "pkg/executor/check_table_index.go:474 HandleTask"
+   ],
+   [
+    22,
+    22,
+    "pkg/server/conn.go:1157 Run"
+   ],
+   [
+    22,
+    22,
+    "pkg/util/ranger/detacher.go:732 ExtractEqAndInCondition"
+   ],
+   [
+    22,
+    20,
+    "pkg/planner/optimize.go:759 optimize"
+   ],
+   [
+    22,
+    19,
+    "pkg/planner/core/operator/logicalop/logical_datasource.go:634 HandleColsToAppend"
+   ],
+   [
+    22,
+    18,
+    "pkg/util/memory/tracker.go:491 consume"
+   ],
+   [
+    22,
+    17,
+    "pkg/planner/core/logical_plan_builder.go:6427 buildUpdateLists"
+   ],
+   [
+    22,
+    17,
+    "pkg/planner/core/rule/rule_prune_indexes.go:100 PruneIndexesByWhereAndOrder"
+   ],
+   [
+    22,
+    16,
+    "pkg/ddl/mview_worker.go:193 onCreateMaterializedView"
+   ],
+   [
+    22,
+    15,
+    "pkg/session/session.go:6023 usePipelinedDmlOrWarn"
+   ],
+   [
+    22,
+    15,
+    "pkg/table/column.go:427 NewColDesc"
+   ],
+   [
+    21,
+    38,
+    "pkg/planner/core/rule_join_elimination.go:167 isInnerJoinKeysContainUniqueKey"
+   ],
+   [
+    21,
+    35,
+    "pkg/planner/core/rule/rule_order_aware_join_reorder.go:39 optimizeRecursive"
+   ],
+   [
+    21,
+    31,
+    "pkg/planner/core/exhaust_physical_plans.go:2192 canTryMPPJoinForJoin"
+   ],
+   [
+    21,
+    30,
+    "pkg/parser/ast/visitor_codegen/generator.go:1405 validateDirectChildWriteback"
+   ],
+   [
+    21,
+    26,
+    "pkg/executor/mlog_purge.go:204 executePurgeMaterializedViewLog"
+   ],
+   [
+    21,
+    26,
+    "pkg/planner/core/plan_cache_instance.go:89 getPlanFromList"
+   ],
+   [
+    21,
+    25,
+    "pkg/table/tables/mutation_checker.go:215 checkIndexKeys"
+   ],
+   [
+    21,
+    24,
+    "pkg/util/dbutil/common.go:746 ExecSQLWithRetry"
+   ],
+   [
+    21,
+    22,
+    "br/pkg/registry/registration.go:945 registrationClaimsTarget"
+   ],
+   [
+    21,
+    22,
+    "pkg/executor/simple.go:2861 executeSetPwd"
+   ],
+   [
+    21,
+    22,
+    "pkg/planner/core/expression_rewriter.go:1131 handleExistSubquery"
+   ],
+   [
+    21,
+    21,
+    "br/pkg/task/restore_name_route.go:146 buildRestoreNamePlan"
+   ],
+   [
+    21,
+    21,
+    "pkg/planner/core/runtime_filter_generator.go:83 generateRuntimeFilterInterval"
+   ],
+   [
+    21,
+    20,
+    "pkg/executor/adapter.go:656 Exec"
+   ],
+   [
+    21,
+    20,
+    "pkg/expression/infer_pushdown.go:561 PushDownExprsWithExtraInfo"
+   ],
+   [
+    21,
+    20,
+    "pkg/planner/cardinality/row_count_index.go:461 expBackoffEstimationByColIDs"
+   ],
+   [
+    21,
+    19,
+    "pkg/server/conn_stmt.go:250 executePreparedStmtAndWriteResult"
+   ],
+   [
+    21,
+    18,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:508 Equals"
+   ],
+   [
+    21,
+    18,
+    "pkg/planner/core/operator/logicalop/hash64_equals_generated.go:1023 Equals"
+   ],
+   [
+    21,
+    18,
+    "pkg/types/time.go:922 splitDateTime"
+   ],
+   [
+    21,
+    17,
+    "pkg/planner/core/exhaust_physical_plans.go:1088 constructDS2IndexScanTask"
+   ],
+   [
+    21,
+    16,
+    "pkg/planner/funcdep/fd_graph.go:346 addEquivalence"
+   ],
+   [
+    21,
+    16,
+    "pkg/util/collate/ucadata/generator/main.go:309 getImplicitWeight0900"
+   ],
+   [
+    21,
+    13,
+    "cmd/tidb-server/main.go:776 overrideConfig"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 3408,
+ "calls_in_logic_resolved": 6176,
+ "calls_in_logic_unresolved": 2914,
+ "load_seconds": 0.3,
+ "analyze_seconds": 0.2
+}

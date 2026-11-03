@@ -1,0 +1,778 @@
+{
+ "name": "homeassistant",
+ "functions": 77662,
+ "functions_with_logic": 12771,
+ "pure_boolean_functions": 0,
+ "scope1_pieces": {
+  "inputs": {
+   "n": 18388,
+   "median": 2,
+   "p90": 3,
+   "p99": 5,
+   "p999": 7,
+   "max": 14
+  },
+  "stmts": {
+   "n": 18388,
+   "median": 1,
+   "p90": 2,
+   "p99": 5,
+   "p999": 10,
+   "max": 16
+  },
+  "max_stmts_within_input_limit": 16,
+  "over_inputs": 0,
+  "over_stmts": 0,
+  "over_either": 0,
+  "share_over_either": 0.0,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [],
+  "top_by_stmts": [],
+  "all_over": []
+ },
+ "scope1_functions": {
+  "inputs": {
+   "n": 12771,
+   "median": 2,
+   "p90": 4,
+   "p99": 11,
+   "p999": 21,
+   "max": 63
+  },
+  "stmts": {
+   "n": 12771,
+   "median": 1,
+   "p90": 4,
+   "p99": 10,
+   "p999": 22,
+   "max": 51
+  },
+  "max_stmts_within_input_limit": 24,
+  "over_inputs": 14,
+  "over_stmts": 0,
+  "over_either": 14,
+  "share_over_either": 0.0010962336543731892,
+  "depth_capped": 0,
+  "recursion_capped": 0,
+  "size_capped": 0,
+  "depth": {
+   "n": 0
+  },
+  "top_by_inputs": [
+   [
+    63,
+    51,
+    "homeassistant/helpers/device_registry.py:3274 _async_update_device"
+   ],
+   [
+    39,
+    31,
+    "homeassistant/components/matter/discovery.py:90 async_discover_entities"
+   ],
+   [
+    39,
+    28,
+    "homeassistant/components/zwave_js/discovery.py:1549 check_value"
+   ],
+   [
+    30,
+    35,
+    "homeassistant/components/zwave_js/discovery.py:1268 async_discover_single_value"
+   ],
+   [
+    26,
+    18,
+    "homeassistant/components/foscam/coordinator.py:73 gather_all_configs"
+   ],
+   [
+    25,
+    18,
+    "homeassistant/components/mqtt/light/schema_basic.py:656 async_turn_on"
+   ],
+   [
+    24,
+    25,
+    "homeassistant/helpers/entity_registry.py:1255 _validate_item"
+   ],
+   [
+    24,
+    17,
+    "homeassistant/components/doods/image_processing.py:283 process_image"
+   ],
+   [
+    24,
+    16,
+    "homeassistant/components/mqtt/climate.py:480 _setup_from_config"
+   ],
+   [
+    23,
+    20,
+    "homeassistant/components/sensor/entity.py:528 state"
+   ],
+   [
+    22,
+    33,
+    "homeassistant/helpers/intent.py:578 async_match_targets"
+   ],
+   [
+    21,
+    22,
+    "homeassistant/components/mqtt/config_flow.py:3785 data_schema_from_fields"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    63,
+    51,
+    "homeassistant/helpers/device_registry.py:3274 _async_update_device"
+   ],
+   [
+    30,
+    35,
+    "homeassistant/components/zwave_js/discovery.py:1268 async_discover_single_value"
+   ],
+   [
+    22,
+    33,
+    "homeassistant/helpers/intent.py:578 async_match_targets"
+   ],
+   [
+    39,
+    31,
+    "homeassistant/components/matter/discovery.py:90 async_discover_entities"
+   ],
+   [
+    39,
+    28,
+    "homeassistant/components/zwave_js/discovery.py:1549 check_value"
+   ],
+   [
+    24,
+    25,
+    "homeassistant/helpers/entity_registry.py:1255 _validate_item"
+   ],
+   [
+    21,
+    22,
+    "homeassistant/components/mqtt/config_flow.py:3785 data_schema_from_fields"
+   ],
+   [
+    23,
+    20,
+    "homeassistant/components/sensor/entity.py:528 state"
+   ],
+   [
+    21,
+    19,
+    "homeassistant/components/teslemetry/sensor.py:1717 async_setup_entry"
+   ],
+   [
+    26,
+    18,
+    "homeassistant/components/foscam/coordinator.py:73 gather_all_configs"
+   ],
+   [
+    25,
+    18,
+    "homeassistant/components/mqtt/light/schema_basic.py:656 async_turn_on"
+   ],
+   [
+    24,
+    17,
+    "homeassistant/components/doods/image_processing.py:283 process_image"
+   ]
+  ],
+  "all_over": [
+   [
+    63,
+    51,
+    "homeassistant/helpers/device_registry.py:3274 _async_update_device"
+   ],
+   [
+    39,
+    31,
+    "homeassistant/components/matter/discovery.py:90 async_discover_entities"
+   ],
+   [
+    39,
+    28,
+    "homeassistant/components/zwave_js/discovery.py:1549 check_value"
+   ],
+   [
+    30,
+    35,
+    "homeassistant/components/zwave_js/discovery.py:1268 async_discover_single_value"
+   ],
+   [
+    26,
+    18,
+    "homeassistant/components/foscam/coordinator.py:73 gather_all_configs"
+   ],
+   [
+    25,
+    18,
+    "homeassistant/components/mqtt/light/schema_basic.py:656 async_turn_on"
+   ],
+   [
+    24,
+    25,
+    "homeassistant/helpers/entity_registry.py:1255 _validate_item"
+   ],
+   [
+    24,
+    17,
+    "homeassistant/components/doods/image_processing.py:283 process_image"
+   ],
+   [
+    24,
+    16,
+    "homeassistant/components/mqtt/climate.py:480 _setup_from_config"
+   ],
+   [
+    23,
+    20,
+    "homeassistant/components/sensor/entity.py:528 state"
+   ],
+   [
+    22,
+    33,
+    "homeassistant/helpers/intent.py:578 async_match_targets"
+   ],
+   [
+    21,
+    22,
+    "homeassistant/components/mqtt/config_flow.py:3785 data_schema_from_fields"
+   ],
+   [
+    21,
+    19,
+    "homeassistant/components/teslemetry/sensor.py:1717 async_setup_entry"
+   ],
+   [
+    21,
+    16,
+    "homeassistant/helpers/entity_registry.py:2032 _async_update_entity"
+   ]
+  ]
+ },
+ "scope2_pieces": {
+  "inputs": {
+   "n": 18844,
+   "median": 2,
+   "p90": 3,
+   "p99": 6,
+   "p999": 14,
+   "max": 35
+  },
+  "stmts": {
+   "n": 18844,
+   "median": 1,
+   "p90": 3,
+   "p99": 7,
+   "p999": 15,
+   "max": 42
+  },
+  "max_stmts_within_input_limit": 21,
+  "over_inputs": 10,
+  "over_stmts": 0,
+  "over_either": 10,
+  "share_over_either": 0.0005306728932286138,
+  "depth_capped": 0,
+  "recursion_capped": 10,
+  "size_capped": 0,
+  "depth": {
+   "n": 18844,
+   "median": 0,
+   "p90": 0,
+   "p99": 2,
+   "p999": 3,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    35,
+    42,
+    "homeassistant/components/zwave_js/discovery.py:1391 async_discover_single_value"
+   ],
+   [
+    30,
+    39,
+    "homeassistant/components/isy994/helpers.py:332 _categorize_nodes (lone call)"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:528 async_sync_entities"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/google_config.py:563 _handle_device_registry_updated"
+   ],
+   [
+    23,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:586 _handle_entity_registry_updated"
+   ],
+   [
+    23,
+    30,
+    "homeassistant/components/cloud/google_config.py:526 _handle_entity_registry_updated"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/default_agent.py:1077 _get_entity_name_tuples"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/default_agent.py:1081 _get_entity_name_tuples"
+   ],
+   [
+    21,
+    28,
+    "homeassistant/components/conversation/gazetteer.py:115 async_build_home"
+   ],
+   [
+    21,
+    28,
+    "homeassistant/components/homeassistant/llm.py:123 async_get_exposed_entities"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    35,
+    42,
+    "homeassistant/components/zwave_js/discovery.py:1391 async_discover_single_value"
+   ],
+   [
+    30,
+    39,
+    "homeassistant/components/isy994/helpers.py:332 _categorize_nodes (lone call)"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:528 async_sync_entities"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/google_config.py:563 _handle_device_registry_updated"
+   ],
+   [
+    23,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:586 _handle_entity_registry_updated"
+   ],
+   [
+    23,
+    30,
+    "homeassistant/components/cloud/google_config.py:526 _handle_entity_registry_updated"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/default_agent.py:1077 _get_entity_name_tuples"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/default_agent.py:1081 _get_entity_name_tuples"
+   ],
+   [
+    21,
+    28,
+    "homeassistant/components/conversation/gazetteer.py:115 async_build_home"
+   ],
+   [
+    21,
+    28,
+    "homeassistant/components/homeassistant/llm.py:123 async_get_exposed_entities"
+   ]
+  ],
+  "all_over": [
+   [
+    35,
+    42,
+    "homeassistant/components/zwave_js/discovery.py:1391 async_discover_single_value"
+   ],
+   [
+    30,
+    39,
+    "homeassistant/components/isy994/helpers.py:332 _categorize_nodes (lone call)"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:528 async_sync_entities"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/google_config.py:563 _handle_device_registry_updated"
+   ],
+   [
+    23,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:586 _handle_entity_registry_updated"
+   ],
+   [
+    23,
+    30,
+    "homeassistant/components/cloud/google_config.py:526 _handle_entity_registry_updated"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/default_agent.py:1077 _get_entity_name_tuples"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/default_agent.py:1081 _get_entity_name_tuples"
+   ],
+   [
+    21,
+    28,
+    "homeassistant/components/conversation/gazetteer.py:115 async_build_home"
+   ],
+   [
+    21,
+    28,
+    "homeassistant/components/homeassistant/llm.py:123 async_get_exposed_entities"
+   ]
+  ]
+ },
+ "scope2_functions": {
+  "inputs": {
+   "n": 12980,
+   "median": 2,
+   "p90": 5,
+   "p99": 12,
+   "p999": 27,
+   "max": 64
+  },
+  "stmts": {
+   "n": 12980,
+   "median": 1,
+   "p90": 4,
+   "p99": 12,
+   "p999": 30,
+   "max": 101
+  },
+  "max_stmts_within_input_limit": 27,
+  "over_inputs": 32,
+  "over_stmts": 0,
+  "over_either": 32,
+  "share_over_either": 0.002465331278890601,
+  "depth_capped": 0,
+  "recursion_capped": 10,
+  "size_capped": 0,
+  "depth": {
+   "n": 12980,
+   "median": 0,
+   "p90": 1,
+   "p99": 2,
+   "p999": 3,
+   "max": 6
+  },
+  "top_by_inputs": [
+   [
+    64,
+    76,
+    "homeassistant/components/zwave_js/discovery.py:1268 async_discover_single_value"
+   ],
+   [
+    64,
+    51,
+    "homeassistant/helpers/device_registry.py:3274 _async_update_device"
+   ],
+   [
+    61,
+    101,
+    "homeassistant/components/isy994/helpers.py:332 _categorize_nodes"
+   ],
+   [
+    45,
+    38,
+    "homeassistant/components/matter/discovery.py:90 async_discover_entities"
+   ],
+   [
+    39,
+    28,
+    "homeassistant/components/zwave_js/discovery.py:1549 check_value"
+   ],
+   [
+    33,
+    34,
+    "homeassistant/components/homeassistant/llm.py:95 async_get_exposed_entities"
+   ],
+   [
+    30,
+    36,
+    "homeassistant/components/cloud/google_config.py:532 _handle_device_registry_updated"
+   ],
+   [
+    30,
+    35,
+    "homeassistant/components/isy994/helpers.py:253 _is_sensor_a_binary_sensor"
+   ],
+   [
+    30,
+    29,
+    "homeassistant/components/light/significant_change.py:12 async_check_significant_change"
+   ],
+   [
+    28,
+    36,
+    "homeassistant/components/cloud/google_config.py:507 _handle_entity_registry_updated"
+   ],
+   [
+    28,
+    33,
+    "homeassistant/components/zone/trigger.py:147 zone_automation_listener"
+   ],
+   [
+    27,
+    34,
+    "homeassistant/components/cloud/alexa_config.py:577 _handle_entity_registry_updated"
+   ]
+  ],
+  "top_by_stmts": [
+   [
+    61,
+    101,
+    "homeassistant/components/isy994/helpers.py:332 _categorize_nodes"
+   ],
+   [
+    64,
+    76,
+    "homeassistant/components/zwave_js/discovery.py:1268 async_discover_single_value"
+   ],
+   [
+    64,
+    51,
+    "homeassistant/helpers/device_registry.py:3274 _async_update_device"
+   ],
+   [
+    45,
+    38,
+    "homeassistant/components/matter/discovery.py:90 async_discover_entities"
+   ],
+   [
+    30,
+    36,
+    "homeassistant/components/cloud/google_config.py:532 _handle_device_registry_updated"
+   ],
+   [
+    28,
+    36,
+    "homeassistant/components/cloud/google_config.py:507 _handle_entity_registry_updated"
+   ],
+   [
+    30,
+    35,
+    "homeassistant/components/isy994/helpers.py:253 _is_sensor_a_binary_sensor"
+   ],
+   [
+    33,
+    34,
+    "homeassistant/components/homeassistant/llm.py:95 async_get_exposed_entities"
+   ],
+   [
+    27,
+    34,
+    "homeassistant/components/cloud/alexa_config.py:577 _handle_entity_registry_updated"
+   ],
+   [
+    28,
+    33,
+    "homeassistant/components/zone/trigger.py:147 zone_automation_listener"
+   ],
+   [
+    23,
+    33,
+    "homeassistant/helpers/intent.py:578 async_match_targets"
+   ],
+   [
+    23,
+    32,
+    "homeassistant/components/conversation/default_agent.py:1069 _get_entity_name_tuples"
+   ]
+  ],
+  "all_over": [
+   [
+    64,
+    76,
+    "homeassistant/components/zwave_js/discovery.py:1268 async_discover_single_value"
+   ],
+   [
+    64,
+    51,
+    "homeassistant/helpers/device_registry.py:3274 _async_update_device"
+   ],
+   [
+    61,
+    101,
+    "homeassistant/components/isy994/helpers.py:332 _categorize_nodes"
+   ],
+   [
+    45,
+    38,
+    "homeassistant/components/matter/discovery.py:90 async_discover_entities"
+   ],
+   [
+    39,
+    28,
+    "homeassistant/components/zwave_js/discovery.py:1549 check_value"
+   ],
+   [
+    33,
+    34,
+    "homeassistant/components/homeassistant/llm.py:95 async_get_exposed_entities"
+   ],
+   [
+    30,
+    36,
+    "homeassistant/components/cloud/google_config.py:532 _handle_device_registry_updated"
+   ],
+   [
+    30,
+    35,
+    "homeassistant/components/isy994/helpers.py:253 _is_sensor_a_binary_sensor"
+   ],
+   [
+    30,
+    29,
+    "homeassistant/components/light/significant_change.py:12 async_check_significant_change"
+   ],
+   [
+    28,
+    36,
+    "homeassistant/components/cloud/google_config.py:507 _handle_entity_registry_updated"
+   ],
+   [
+    28,
+    33,
+    "homeassistant/components/zone/trigger.py:147 zone_automation_listener"
+   ],
+   [
+    27,
+    34,
+    "homeassistant/components/cloud/alexa_config.py:577 _handle_entity_registry_updated"
+   ],
+   [
+    27,
+    24,
+    "homeassistant/components/sensor/entity.py:528 state"
+   ],
+   [
+    26,
+    21,
+    "homeassistant/helpers/entity_registry.py:2032 _async_update_entity"
+   ],
+   [
+    26,
+    18,
+    "homeassistant/components/foscam/coordinator.py:73 gather_all_configs"
+   ],
+   [
+    25,
+    18,
+    "homeassistant/components/mqtt/light/schema_basic.py:656 async_turn_on"
+   ],
+   [
+    24,
+    30,
+    "homeassistant/components/cloud/alexa_config.py:515 async_sync_entities"
+   ],
+   [
+    24,
+    25,
+    "homeassistant/helpers/entity_registry.py:1255 _validate_item"
+   ],
+   [
+    24,
+    23,
+    "homeassistant/components/zwave_js/binary_sensor.py:522 async_add_binary_sensor"
+   ],
+   [
+    24,
+    21,
+    "homeassistant/components/emulated_hue/hue_api.py:360 put"
+   ],
+   [
+    24,
+    17,
+    "homeassistant/components/doods/image_processing.py:283 process_image"
+   ],
+   [
+    24,
+    16,
+    "homeassistant/components/mqtt/climate.py:480 _setup_from_config"
+   ],
+   [
+    23,
+    33,
+    "homeassistant/helpers/intent.py:578 async_match_targets"
+   ],
+   [
+    23,
+    32,
+    "homeassistant/components/conversation/default_agent.py:1069 _get_entity_name_tuples"
+   ],
+   [
+    23,
+    26,
+    "homeassistant/components/geo_location/trigger.py:67 state_change_listener"
+   ],
+   [
+    23,
+    24,
+    "homeassistant/components/mqtt/config_flow.py:3785 data_schema_from_fields"
+   ],
+   [
+    23,
+    21,
+    "homeassistant/components/google_generative_ai_conversation/entity.py:178 _create_thinking_config"
+   ],
+   [
+    23,
+    18,
+    "homeassistant/components/light/helper.py:218 process_turn_on_params"
+   ],
+   [
+    22,
+    29,
+    "homeassistant/components/conversation/gazetteer.py:96 async_build_home"
+   ],
+   [
+    22,
+    22,
+    "homeassistant/components/bluetooth/match.py:253 match"
+   ],
+   [
+    22,
+    16,
+    "homeassistant/components/homekit/accessories.py:271 get_accessory"
+   ],
+   [
+    21,
+    19,
+    "homeassistant/components/teslemetry/sensor.py:1717 async_setup_entry"
+   ]
+  ]
+ },
+ "scope2_grown_pieces": 1201,
+ "calls_in_logic_resolved": 1922,
+ "calls_in_logic_unresolved": 3918,
+ "load_seconds": 0.5,
+ "analyze_seconds": 0.3
+}
