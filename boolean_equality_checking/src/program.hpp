@@ -20,6 +20,7 @@
 #include "hier.hpp"
 #include "match.hpp"
 #include "min_ands.hpp"
+#include "methods.hpp"
 #include "split.hpp"
 
 namespace beq {
@@ -263,6 +264,19 @@ class ProgramChecker {
   // truth tables up to 20 inputs and SAT up to 32, and stops if the two
   // differ.
   bool split = false, check_split = false;
+  // The exact method (`--method`, methods_experiment.py): "tt" (truth tables
+  // over every input, up to input_limit inputs), "chunk" (truth tables
+  // 2^chunk_inputs input assignments at a time), "bdd" (OBDDs, inputs in
+  // bdd_order), "sat" (SAT sweeping), or "split" (split.hpp). With
+  // measure_executions, each operation's report also gives what an
+  // execution of it refers to and what evaluating that costs.
+  std::string method = "tt", bdd_order = "dfs";
+  uint32_t input_limit = 20, chunk_inputs = 16;
+  size_t bdd_node_limit = size_t{1} << 26;
+  bool measure_executions = false;
+  // Without search_matches (`--matches 0`), no matches or spellings are
+  // searched: the other parts of a method that can't search in time.
+  bool search_matches = true;
   size_t split_compared_tt = 0, split_compared_sat = 0;
   mutable std::map<std::string, std::pair<uint64_t, bool>> views_matter_;
   // Values whose kept search was used, and searched again, so far (with
@@ -669,7 +683,7 @@ class ProgramChecker {
       // The split check finds the limits below.
     } else if (info.boolean_statements > 256 && statement_limit) {
       rep.errors["limits"] = "\"statements\"";
-    } else if (I > 20) {
+    } else if (I > input_limit) {
       rep.errors["limits"] = "\"inputs\"";
     }
     for (size_t k = 0; k < op.stmts.size() && rep.literal_stmt < 0; ++k) {
@@ -696,6 +710,7 @@ class ProgramChecker {
     }
     rep.times.structure = now() - t0;
     if (rep.errors.count("limits") || reaches_cycle_[index]) return rep;
+    if (method != "tt" && op.boolean && !in_registered_reach(op.name)) return check_with_method(op, info, record, rep);
     std::unique_ptr<SplitCheck> sc;
     if (split) {
       const double ts = now();
@@ -710,7 +725,7 @@ class ProgramChecker {
     }
     // Truth tables over every boolean input: always within the limits,
     // where matches and executions need them; past them only with split.
-    const bool full = I <= 20;
+    const bool full = I <= input_limit;
     double t1 = now();
     size_t words = 1;
     lookup_s_ = written_out_s_ = 0;
@@ -760,6 +775,8 @@ class ProgramChecker {
       r.group = groups_of(r.table, op.nbool);
       rep.times.groups = now() - tg;
     }
+    if (measure_executions && op.boolean && record && full && !in_registered_reach(op.name))
+      measure_table_executions(op, rep);
     if (!registry_only) {
       double to = now();
       check_order(op, info, rep);
@@ -785,9 +802,10 @@ class ProgramChecker {
     }
     const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
     // Matches and spellings need every value's function.
-    if (rep.redundant_kind.empty() && !fixed_first && full) {
+    if (rep.redundant_kind.empty() && !fixed_first && full && search_matches) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
       find_matches(op, info, std::move(t), dead, rep);
+      if (measure_executions) rep.stats.emplace_back("matches_found", static_cast<double>(rep.matches.size()));
     }
     return rep;
   }
@@ -819,7 +837,7 @@ class ProgramChecker {
         node.chain = t == 0x8 ? 1 : t == 0xE ? 2 : t == 0x6 ? 3 : t == 0x9 ? 4 : 0;
       }
     }
-    auto eval = [&](uint32_t node, const std::vector<Lit>& args, size_t words, const SplitCheck::Word& word,
+    auto eval = [&, I](uint32_t node, const std::vector<Lit>& args, size_t words, const SplitCheck::Word& word,
                     uint64_t* row) {
       const PStmt& s = op.stmts[static_cast<size_t>(info.node_stmt[node - I - 1])];
       const Recorded& callee = recorded_.at(s.name);
@@ -829,6 +847,7 @@ class ProgramChecker {
         lookup(callee.table, args, words, word, row);
     };
     auto sc = std::make_unique<SplitCheck>(std::move(nodes), I, eval);
+    if (method == "split") sc->input_limit = input_limit;
     sc->run();
     if (sc->over_limits) rep.errors["limits"] = "\"split\"";
     rep.stats.emplace_back("split_parts", static_cast<double>(sc->parts));
@@ -872,6 +891,151 @@ class ProgramChecker {
       if (i->second != std::make_pair(other[n] >> 1, phase) || j->second != std::make_pair(keys[n] >> 1, phase))
         throw std::runtime_error("split check: values' classes differ in " + op.name + " at node " + std::to_string(n));
     }
+  }
+
+  // An operation's boolean values for the methods (methods.hpp).
+  MethodGraph method_graph(const POp& op, const OpInfo& info) const {
+    MethodGraph g;
+    g.inputs = static_cast<uint32_t>(info.inputs.size());
+    g.views = static_cast<uint32_t>(op.nbool);
+    for (int k : info.node_stmt) {
+      const PStmt& s = op.stmts[static_cast<size_t>(k)];
+      MethodGraph::Node n;
+      for (const PArg& a : s.args) n.args.push_back(arg_lit(info, a));
+      if (s.kind == "call") {
+        if (s.args.size() > 6) throw std::runtime_error("methods: an execution of more than six views");
+        n.is_and = false;
+        n.table = recorded_.at(s.name).table[0];
+        if (s.args.size() < 6) n.table &= (1ULL << (1u << s.args.size())) - 1;
+      }
+      g.nodes.push_back(std::move(n));
+    }
+    g.out = arg_lit(info, op.outs[0]);
+    return g;
+  }
+
+  // check() for a boolean operation with a method other than truth tables
+  // over every input. It records nothing: no operation executes it.
+  Report check_with_method(const POp& op, const OpInfo& info, bool record, Report& rep) {
+    const MethodGraph g = method_graph(op, info);
+    const uint32_t I = g.inputs;
+    rep.how = method;
+    if (record) forget(op.name);
+    std::unique_ptr<MethodBase> m;
+    std::unique_ptr<SplitCheck> sc;
+    const double t1 = now();
+    try {
+      if (method == "chunk") {
+        m = std::make_unique<ChunkMethod>(g, chunk_inputs);
+      } else if (method == "bdd") {
+        m = std::make_unique<BddMethod>(g, bdd_order, bdd_node_limit);
+      } else if (method == "sat") {
+        m = std::make_unique<SatMethod>(g);
+      } else if (method == "split") {
+        sc = split_check(op, info, rep);
+        if (!sc || rep.errors.count("limits")) return rep;
+        m = std::make_unique<SplitMethod>(g, *sc);
+      } else {
+        throw std::runtime_error("unknown method " + method);
+      }
+      m->run();
+      rep.times.tables = now() - t1 + (method == "split" ? rep.times.split : 0);
+      rep.times.split = 0;
+      const double tu = now();
+      m->find_unused();
+      rep.times.structure += now() - tu;
+    } catch (const BddLimit&) {
+      rep.errors["limits"] = "\"bdd nodes\"";
+      return rep;
+    }
+    rep.unused_views = m->unused_views;
+    if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
+    rep.dead = dead_statements(op, info);
+    if (!rep.dead.empty()) rep.errors["dead"] = list_json(rep.dead);
+    const double to = now();
+    check_order(op, info, rep);
+    rep.times.order = now() - to;
+    const double tr = now();
+    find_redundant(op, info, m->keys, rep);
+    rep.times.redundant = now() - tr;
+    const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
+    if (rep.redundant_kind.empty() && !fixed_first && search_matches) {
+      try {
+        const std::set<int> dead(rep.dead.begin(), rep.dead.end());
+        find_matches(op, info, {}, dead, rep, m.get());
+      } catch (const BddLimit&) {
+        rep.errors["limits"] = "\"bdd nodes\"";
+        return rep;
+      }
+    }
+    rep.stats.emplace_back("undecided", static_cast<double>(m->undecided));
+    rep.stats.emplace_back("matches_found", static_cast<double>(rep.matches.size()));
+    if (auto* b = dynamic_cast<BddMethod*>(m.get())) {
+      rep.stats.emplace_back("bdd_nodes", static_cast<double>(b->nodes()));
+      rep.stats.emplace_back("bdd_bytes", static_cast<double>(b->memory_bytes()));
+    }
+    if (auto* st = dynamic_cast<SatMethod*>(m.get())) rep.stats.emplace_back("sat_calls", static_cast<double>(st->sat_calls));
+    if (measure_executions) {
+      // An execution refers to the written view's OBDD, or else to the
+      // operation's statements written out.
+      Rng rng(3);
+      const uint64_t mask = I >= 64 ? ~0ULL : ((uint64_t{1} << I) - 1);
+      std::vector<uint64_t> minterms(kExecutionSamples);
+      for (uint64_t& x : minterms) x = rng.next() & mask;
+      if (auto* b = dynamic_cast<BddMethod*>(m.get())) {
+        rep.stats.emplace_back("exec_record_bytes", static_cast<double>(b->out_nodes() * 12));
+        const double te = now();
+        uint64_t ones = 0;
+        for (uint64_t x : minterms) ones += b->evaluate_out(x);
+        rep.stats.emplace_back("exec_ns_per_assignment", (now() - te) * 1e9 / kExecutionSamples);
+        sink_ ^= ones;
+      } else {
+        const std::vector<uint32_t> cone = g.cone({g.out});
+        rep.stats.emplace_back("exec_record_bytes", static_cast<double>(cone.size() * 8));
+        const double te = now();
+        std::vector<uint64_t> v(g.num_nodes(), 0);
+        uint64_t a[8], acc = 0;
+        for (size_t w = 0; w < kExecutionSamples / 64; ++w) {
+          for (uint32_t x : cone) {
+            if (x == 0) {
+              v[x] = 0;
+            } else if (x <= I) {
+              uint64_t bits = 0;
+              for (int k = 0; k < 64; ++k) bits |= ((minterms[w * 64 + static_cast<size_t>(k)] >> (x - 1)) & 1) << k;
+              v[x] = bits;
+            } else {
+              const MethodGraph::Node& node = g.node(x);
+              for (size_t i = 0; i < node.args.size(); ++i) a[i] = v[node_of(node.args[i])] ^ (is_compl(node.args[i]) ? ~0ULL : 0);
+              v[x] = MethodGraph::word(node, a);
+            }
+          }
+          acc ^= v[node_of(g.out)];
+        }
+        rep.stats.emplace_back("exec_ns_per_assignment", (now() - te) * 1e9 / kExecutionSamples);
+        sink_ ^= acc;
+      }
+    }
+    return rep;
+  }
+
+  static constexpr size_t kExecutionSamples = 1 << 16;
+  // Keeps the timed evaluations from being optimized away.
+  mutable uint64_t sink_ = 0;
+
+  // measure_executions for truth tables: an execution refers to the
+  // recorded table and looks up each input assignment in it.
+  void measure_table_executions(const POp& op, Report& rep) const {
+    const Recorded& r = recorded_.at(op.name);
+    rep.stats.emplace_back("exec_record_bytes", static_cast<double>(r.table.size() * 8));
+    Rng rng(3);
+    const uint64_t mask = op.nbool >= 64 ? ~0ULL : ((uint64_t{1} << op.nbool) - 1);
+    std::vector<uint64_t> minterms(kExecutionSamples);
+    for (uint64_t& x : minterms) x = rng.next() & mask;
+    const double te = now();
+    uint64_t ones = 0;
+    for (uint64_t x : minterms) ones += (r.table[x >> 6] >> (x & 63)) & 1;
+    rep.stats.emplace_back("exec_ns_per_assignment", (now() - te) * 1e9 / kExecutionSamples);
+    sink_ ^= ones;
   }
 
   // Whether one of the operation's boolean values never changes.
@@ -1242,7 +1406,7 @@ class ProgramChecker {
   }
 
   void find_matches(const POp& op, const OpInfo& info, std::vector<uint64_t> t, const std::set<int>& dead,
-                    Report& rep) {
+                    Report& rep, MatchOracle* oracle = nullptr) {
     const std::vector<std::string> order = follows(op);
     std::vector<Registered> registered;
     std::map<std::string, int> nodes;
@@ -1316,7 +1480,10 @@ class ProgramChecker {
         double tp = now();
         Matcher m(g, statements, registered);
         m.set_hashes(std::move(hashes));
-        m.set_tables(pass == 0 ? tables : std::move(tables), support);
+        if (oracle)
+          m.set_oracle(oracle);
+        else
+          m.set_tables(pass == 0 ? tables : std::move(tables), support);
         m.set_late_inputs(late);
         m.set_anchor("any");
         m.set_nodes(nodes);

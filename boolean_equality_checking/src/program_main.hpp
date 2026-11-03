@@ -124,6 +124,13 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
   ProgramChecker c(p);
   c.split = get("split", 0) != 0;
   c.check_split = get("check_split", 0) != 0;
+  if (opt.count("method")) c.method = opt["method"];
+  if (opt.count("bdd_order")) c.bdd_order = opt["bdd_order"];
+  c.input_limit = static_cast<uint32_t>(get("input_limit", 20));
+  c.chunk_inputs = static_cast<uint32_t>(get("chunk_inputs", 16));
+  c.bdd_node_limit = static_cast<size_t>(get("bdd_nodes", static_cast<double>(size_t{1} << 26)));
+  c.measure_executions = get("measure_executions", 0) != 0;
+  c.search_matches = get("matches", 1) != 0;
   if (opt.count("patterns_in")) read_patterns(c, opt["patterns_in"]);
   c.record_registered();
   std::cout.precision(6);
@@ -154,7 +161,8 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
     for (size_t i = 0; i < p.ops.size(); ++i) {
       Report r = c.check(i, true, how);
       sum.add(p.ops[i], r, keep);
-      if (details) *details << report_json(p.ops[i], r) << "\n";
+      // Flushed, so the operations checked before a time limit are kept.
+      if (details) *details << report_json(p.ops[i], r) << std::endl;
     }
   };
   if (mode == "check") {

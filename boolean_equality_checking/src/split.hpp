@@ -49,6 +49,9 @@ class SplitCheck {
   using CallEval = std::function<void(uint32_t node, const std::vector<Lit>& args, size_t words, const Word& word,
                                       uint64_t* row)>;
   static constexpr size_t kInputLimit = 20, kStatementLimit = 256;
+  // The most leaves of one part or group (DLP 57's input limit unless
+  // methods_experiment.py raises it).
+  size_t input_limit = kInputLimit;
 
   SplitCheck(std::vector<SplitNode> nodes, uint32_t inputs, CallEval eval)
       : nodes_(std::move(nodes)), inputs_(inputs), eval_(std::move(eval)) {
@@ -122,6 +125,17 @@ class SplitCheck {
     group_values();
   }
 
+  // Each of these values' truth tables over the leaves of one check of
+  // them, or null past the limits.
+  const std::unordered_map<uint32_t, std::vector<uint64_t>>* tables_of(const std::vector<uint32_t>& tops,
+                                                                       size_t& words, uint32_t& leaves) {
+    // Every value checked needs its own table: no leaves merged.
+    Region r = region(tops, false);
+    if (!within(r)) return nullptr;
+    leaves = static_cast<uint32_t>(r.leaf_count());
+    return &evaluate(r, words);
+  }
+
   bool depends_on(uint32_t node, uint32_t input) const { return (supp(node)[input / 64] >> (input % 64)) & 1; }
   bool constant(uint32_t node) const { return konst_[node] >= 0; }
 
@@ -162,8 +176,8 @@ class SplitCheck {
   const uint64_t* supp(uint32_t x) const { return &supp_[x * words_]; }
   void set_bit(uint32_t x, uint32_t bit) { supp(x)[bit / 64] |= 1ULL << (bit % 64); }
 
-  static bool within(const Region& r) {
-    return r.leaf_count() <= kInputLimit && r.expanded.size() <= kStatementLimit;
+  bool within(const Region& r) const {
+    return r.leaf_count() <= input_limit && r.expanded.size() <= kStatementLimit;
   }
   static uint64_t valid_bits(uint32_t leaves) { return leaves >= 6 ? ~0ULL : ((1ULL << (1u << leaves)) - 1); }
 
@@ -182,11 +196,13 @@ class SplitCheck {
     return false;
   }
 
-  Region region(std::vector<uint32_t> tops) const {
+  Region region(std::vector<uint32_t> tops, bool merge = true) const {
     Region r;
     r.tops = tops;
-    std::set<uint32_t> expanded(tops.begin(), tops.end());
-    for (uint32_t t : tops)
+    // An input or a constant checked is its own leaf.
+    std::set<uint32_t> expanded;
+    for (uint32_t t : tops) (t <= inputs_ || konst_[t] >= 0 ? r.cand : expanded).insert(t);
+    for (uint32_t t : expanded)
       for (Lit a : nodes_[t].args)
         if (!expanded.count(node_of(a))) r.cand.insert(node_of(a));
     std::vector<uint64_t> seen(words_), multi(words_);
@@ -246,7 +262,7 @@ class SplitCheck {
     }
     std::set<uint32_t> merged_away;
     for (uint32_t e : r.expanded) {
-      if (r.absorbed.count(e) || nodes_[e].chain == 0) continue;
+      if (!merge || r.absorbed.count(e) || nodes_[e].chain == 0) continue;
       std::set<uint32_t> members{e};
       std::vector<Lit> operands;
       bool negated = false;

@@ -134,6 +134,19 @@ inline std::vector<std::vector<int>> permutations(uint32_t k) {
   return out;
 }
 
+// What the search needs of values' functions when there are no truth
+// tables over every input: each literal's function as a number (equal for
+// equal functions), its value on one input assignment, and the exact check
+// that target is R of args with every argument mattering, which on a
+// difference gives an input assignment that shows it.
+struct MatchOracle {
+  virtual ~MatchOracle() = default;
+  virtual uint64_t function_id(Lit l) = 0;
+  virtual bool bit(Lit l, uint64_t minterm) = 0;
+  virtual bool holds(Lit target, const Registered& r, const std::vector<Lit>& args, bool& differs,
+                     uint64_t& difference) = 0;
+};
+
 class Matcher {
  public:
   // Search results kept from one check of an operation to the next while
@@ -371,7 +384,7 @@ class Matcher {
   // the opposite, an execution and its `not`).
   std::set<Match> run_resub(Stats& stats) {
     const uint32_t I = g_.num_inputs;
-    if (I > 20) throw std::runtime_error("exact matching needs at most 20 inputs");
+    (void)I;
     ensure_tables();
     prepare_variants();
     // Literals become available in statement order; each one's function is
@@ -835,6 +848,18 @@ class Matcher {
   bool check_holds(Lit v, Lit target, const Registered& r, const std::vector<Lit>& args) {
     (void)v;
     ++exact_checks_;
+    if (oracle_) {
+      bool differs = false;
+      uint64_t difference = 0;
+      if (oracle_->holds(target, r, args, differs, difference)) return true;
+      if (differs) {
+        ++refinements_;
+        add_resub_sample(difference);
+      } else {
+        ++inessential_;
+      }
+      return false;
+    }
     const uint64_t* tv = &tables_[size_t{node_of(target)} * words_];
     const uint64_t fv = is_compl(target) ? ~0ULL : 0;
     std::array<const uint64_t*, 8> at{};
@@ -1155,6 +1180,14 @@ class Matcher {
   }
 
   void ensure_tables() {
+    if (oracle_) {
+      if (sample_.empty()) {
+        Rng rng(7);
+        const uint64_t space = uint64_t{1} << g_.num_inputs;
+        for (int k = 0; k < 1024; ++k) sample_.push_back(rng.next() % space);
+      }
+      return;
+    }
     if (!tables_.empty()) return;
     if (!given_tables_.empty()) {
       const uint32_t I = g_.num_inputs;
@@ -1201,6 +1234,7 @@ class Matcher {
   }
 
   bool lit_bit(Lit l, uint64_t minterm) const {
+    if (oracle_) return oracle_->bit(l, minterm);
     const uint64_t* t = &tables_[size_t{node_of(l)} * words_];
     return ((t[minterm >> 6] >> (minterm & 63)) & 1) ^ is_compl(l);
   }
@@ -1212,6 +1246,7 @@ class Matcher {
   }
 
   uint64_t compute_table_hash(Lit l) const {
+    if (oracle_) return oracle_->function_id(l) | 1;
     const uint64_t* t = &tables_[size_t{node_of(l)} * words_];
     uint64_t flip = is_compl(l) ? ~0ULL : 0, h = 0x2545;
     for (size_t w = 0; w < words_; ++w) h = mix64(h ^ ((t[w] ^ flip) & (w + 1 == words_ ? last_mask_ : ~0ULL)));
@@ -1516,6 +1551,8 @@ class Matcher {
   // a bit set, instead of computing them from the graph: for statements
   // that are executions referring to recorded tables, whose nodes have no
   // fanins.
+  // Values' functions from an oracle instead of truth tables.
+  void set_oracle(MatchOracle* oracle) { oracle_ = oracle; }
   void set_tables(std::vector<uint64_t> tables, std::vector<uint32_t> support) {
     given_tables_ = std::move(tables);
     given_support_ = std::move(support);
@@ -1574,6 +1611,7 @@ class Matcher {
   size_t words_ = 1;
   uint64_t last_mask_ = ~0ULL;
   std::vector<uint64_t> tables_;
+  MatchOracle* oracle_ = nullptr;
   mutable std::vector<uint64_t> hash_cache_;
   std::vector<uint64_t> sample_;
   std::vector<Lit> pool_;
