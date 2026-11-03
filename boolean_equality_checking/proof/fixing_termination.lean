@@ -21,28 +21,26 @@ has left (`prog_no_cycle`), and an infinite sequence of fixes would have to
 visit infinitely many states of one value operation within a fixed bound on
 its size (`prog_terminates`).
 
-A value operation's boolean statements are given by their terms (`Term`)
-and how many of their values are constant (`Stmt`). Each statement has one
-value, its term, which is exact: DLP 57 makes a boolean value operation
-write exactly one view, so no execution has several values. An input is a `leaf`,
-and a statement is a `node` applying an operation to the terms of the values
-it reads. A term's code (`ser`) writes it out in DLP 58's rank order: `[1, i]`
-for leaf `i`, and for a statement `2`, then the codes of its values in view
-order, with each group of interchangeable views given its group's codes in
-sorted order (`arrange`), then `0` and the operation.
+A value operation's boolean statements are given by their terms (`Term`).
+Each statement has one value, its term, which is exact: DLP 57 makes a
+boolean value operation write exactly one view, so no execution has several
+values. An input is a `leaf`, and a statement is a `node` applying an
+operation to the terms of the values it reads. A term's code (`ser`) writes
+it out in DLP 58's rank order: `[1, i]` for leaf `i`, and for a statement
+`2`, then the codes of its values in view order, with each group of
+interchangeable views given its group's codes in sorted order (`arrange`),
+then `0` and the operation.
 Comparing codes lexicographically is the rank order: values first, a
 shorter list first, then the operation.
 
-One value operation's measure (`OpLt`) is C, the number of constant values
-(`constCount`), then the number of statements, then the number of them that
-aren't a `not` (`others`), then the multiset of the executions' (negations,
-AIG nodes, declared order) (`triples`), then the multiset of the statements'
-codes (`codes`), with multisets in Mathlib's Dershowitz–Manna order
+No fix makes a value that never changes, and values that never change are
+errors the fixes leave alone, so the model has none. One value operation's
+measure (`OpLt`) is the number of statements, then the number of them that
+aren't a `not` (`others`), then the multiset of the executions'
+(negations, key) (`pairs`), then the multiset of the statements' codes
+(`codes`), with multisets in Mathlib's Dershowitz–Manna order
 (`Multiset.IsDershowitzMannaLT`). Its fixes (`OpFix`):
 
-- `simplify`: a constant value v is simplified away. v's statement is gone,
-  the statements it reached are replaced by new ones with no constant value,
-  and every other statement keeps its functions.
 - `redundant`: a redundant value v that's the same as another. Every
   statement of the result is one of the others, rewritten, with the same
   functions.
@@ -51,32 +49,29 @@ codes (`codes`), with multisets in Mathlib's Dershowitz–Manna order
   isn't a `not`. v's statement becomes `not w`, and every other statement's
   term has v's term replaced by `not w`'s; some may become dead.
 - `ordinary`: an ordinary match. The result is the statements that survive
-  and the one or two added, which aren't constant, and more are removed than
-  added.
+  and the one or two added, and more are removed than added.
 - `spelling`: a single execution v respelled as the execution v', with
   higher precedence (`KeyLt`). Every other statement's term has v's term
   replaced by v''s (`subst`); some may become dead. No other statement has
   v's term, because redundant values are fixed first.
 
 A program (`Program`) is a fixed number of value operations, each present or
-removed, with its numbers of written and read views. V is the number of
-read views of all of them (`vsum`), and Φ the sum of C and the written views
-(`phi`). Its fixes (`ProgStep`) are a fix inside one value operation,
-removing a constant written view, which also lowers C in every value
-operation that executes it, and removing a read view that doesn't matter,
-whose reads are given another read view (which can raise C) and which can
-leave statements dead (and removed) where it's executed; each lowers V,
-or keeps it and lowers Φ, or keeps both and lowers the program pointwise
+removed, with its numbers of written and read views; no fix changes the
+written views. V is the number of read views of all of them (`vsum`). Its
+fixes (`ProgStep`) are a fix inside one value operation, and removing a read
+view that doesn't matter, whose reads are given another read view and which
+can leave statements dead (and removed) where it's executed; the second
+lowers V, and the first keeps it and lowers the program pointwise
 (`ProgLt`). `ProgFix` adds writing out: a match or spelling in one value
 operation whose execution would make a cycle first writes out executions in
 the registered operation's definition, which can grow without bound, but
-comes later in a fixed priority (`rank`). V never goes up, nor Φ while V
-stays, and once both stop going down, each value operation stops changing
-after the ones before it in priority have.
+comes later in a fixed priority (`rank`). V never goes up, and once it stops
+going down, each value operation stops changing after the ones before it in
+priority have.
 
 `and` and `not` are registered operations for every value operation
 (`Signature.registered` is true for both; `IsExec` still leaves out `not`),
-so executions of `and` have triples and can be respelled.
+so executions of `and` have pairs and can be respelled.
 
 The semantics (which fixes exist) never matter: the theorems hold for every
 fix of these shapes.
@@ -102,12 +97,12 @@ structure Signature where
   /-- The operation is a registered boolean operation (`and` and `not` are, for
   every value operation). -/
   registered : ℕ → Bool
-  /-- AIG nodes of a registered operation's own logic. -/
-  nodes : ℕ → ℕ
-  /-- A registered operation's place in the declared order. -/
-  position : ℕ → ℕ
-  position_injective : ∀ o p, registered o = true → registered p = true →
-    position o = position p → o = p
+  /-- A registered operation's place in the order of keys (DLP 59): the
+  fewest `and`s computing its function, then its number of read views,
+  then its truth table as a number. -/
+  key : ℕ → ℕ
+  key_injective : ∀ o p, registered o = true → registered p = true →
+    key o = key p → o = p
 
 variable (sig : Signature)
 
@@ -501,7 +496,7 @@ theorem ser_subst_le {sv : List ℕ} {v' : Term} (hv : ser sig v' < sv) :
       obtain ⟨t, rfl⟩ := mem_arrange_ser ha
       exact ser_prefix_free sig t' t hc
 
-/-! ### Negations and triples -/
+/-! ### Negations and pairs -/
 
 variable (sig) in
 /-- The value is a `not`. -/
@@ -545,26 +540,26 @@ theorem isNotTerm_subst {sv : List ℕ} {v' : Term}
     | node o args => rw [subst_node_of_ne h]; rfl
 
 variable (sig) in
-/-- (negations, AIG nodes, declared order) of an execution. -/
-def tripleL : Term → List ℕ
+/-- (negations, key) of an execution. -/
+def pairL : Term → List ℕ
   | .leaf _ => []
-  | .node o args => [args.countP (isNotTerm sig ·), sig.nodes o, sig.position o]
+  | .node o args => [args.countP (isNotTerm sig ·), sig.key o]
 
 variable (sig) in
-/-- The triple of an execution of a registered operation, and nothing for
+/-- The pair of an execution of a registered operation, and nothing for
 other statements. -/
-def tripleOf : Term → Option (List ℕ)
+def pairOf : Term → Option (List ℕ)
   | .leaf _ => none
-  | .node o args => if sig.registered o then some (tripleL sig (.node o args)) else none
+  | .node o args => if sig.registered o then some (pairL sig (.node o args)) else none
 
-theorem tripleOf_subst {sv : List ℕ} {v' : Term}
+theorem pairOf_subst {sv : List ℕ} {v' : Term}
     (hsv : ∀ a, ser sig a = sv → isNotTerm sig a = false) (hv' : isNotTerm sig v' = false)
-    {t : Term} (ht : ser sig t ≠ sv) : tripleOf sig (subst sig sv v' t) = tripleOf sig t := by
+    {t : Term} (ht : ser sig t ≠ sv) : pairOf sig (subst sig sv v' t) = pairOf sig t := by
   cases t with
   | leaf i => rw [subst_leaf_of_ne ht]
   | node o args =>
     rw [subst_node_of_ne ht]
-    simp only [tripleOf, tripleL, List.countP_map]
+    simp only [pairOf, pairL, List.countP_map]
     congr 3
     exact List.countP_congr fun a _ => by simp [isNotTerm_subst hsv hv' a]
 
@@ -583,16 +578,16 @@ def argCodes : Term → List (List ℕ)
   | .node o args => arrange sig o (args.map (ser sig))
 
 variable (sig) in
-/-- DLP 59's precedence between spellings: negations, AIG nodes, declared
-order, then the values in rank order. -/
+/-- DLP 59's precedence between spellings: negations, key, then the values
+in rank order. -/
 def KeyLt (v' v : Term) : Prop :=
-  tripleL sig v' < tripleL sig v ∨ (tripleL sig v' = tripleL sig v ∧ argCodes sig v' < argCodes sig v)
+  pairL sig v' < pairL sig v ∨ (pairL sig v' = pairL sig v ∧ argCodes sig v' < argCodes sig v)
 
 variable (sig) in
 def codes (P : List Term) : Multiset (List ℕ) := (P.map (ser sig) : Multiset (List ℕ))
 
 variable (sig) in
-def triples (P : List Term) : Multiset (List ℕ) := (P.filterMap (tripleOf sig) : Multiset (List ℕ))
+def pairs (P : List Term) : Multiset (List ℕ) := (P.filterMap (pairOf sig) : Multiset (List ℕ))
 
 variable (sig) in
 /-- The number of statements that aren't a `not`. -/
@@ -606,8 +601,8 @@ variable (sig) in
 def MeasureLt (Q P : List Term) : Prop :=
   Q.length < P.length ∨ (Q.length = P.length ∧ others sig Q < others sig P) ∨
     (Q.length = P.length ∧ others sig Q = others sig P ∧
-      DMLt (triples sig Q) (triples sig P)) ∨
-    (Q.length = P.length ∧ others sig Q = others sig P ∧ triples sig Q = triples sig P ∧
+      DMLt (pairs sig Q) (pairs sig P)) ∨
+    (Q.length = P.length ∧ others sig Q = others sig P ∧ pairs sig Q = pairs sig P ∧
       DMLt (codes sig Q) (codes sig P))
 
 /-! ### The Dershowitz–Manna order
@@ -706,20 +701,20 @@ theorem spelling_measure {P Q E rest : List Term} {v v' : Term} (hP : List.Perm 
     fun a ha => (isNotTerm_of_ser_eq ha).trans hnot
   have hv'n : isNotTerm sig (.node o' args') = false := hnot'
   have hT0 : (E.map (subst sig (ser sig (.node o args)) (.node o' args'))).filterMap
-      (tripleOf sig) = E.filterMap (tripleOf sig) := by
+      (pairOf sig) = E.filterMap (pairOf sig) := by
     rw [List.filterMap_map]
-    exact List.filterMap_congr fun u hu => tripleOf_subst hsv hv'n (hdistinct u hu)
-  have hTQ : triples sig Q =
-      tripleL sig (.node o' args') ::ₘ (E.filterMap (tripleOf sig) :
+    exact List.filterMap_congr fun u hu => pairOf_subst hsv hv'n (hdistinct u hu)
+  have hTQ : pairs sig Q =
+      pairL sig (.node o' args') ::ₘ (E.filterMap (pairOf sig) :
         Multiset (List ℕ)) := by
-    unfold triples
-    rw [Multiset.coe_eq_coe.2 (hQ'.filterMap _), List.filterMap_cons, tripleOf, if_pos hreg', hT0]
+    unfold pairs
+    rw [Multiset.coe_eq_coe.2 (hQ'.filterMap _), List.filterMap_cons, pairOf, if_pos hreg', hT0]
     rfl
-  have hTP : triples sig P =
-      tripleL sig (.node o args) ::ₘ (E.filterMap (tripleOf sig) :
+  have hTP : pairs sig P =
+      pairL sig (.node o args) ::ₘ (E.filterMap (pairOf sig) :
         Multiset (List ℕ)) := by
-    unfold triples
-    rw [Multiset.coe_eq_coe.2 (hP'.filterMap _), List.filterMap_cons, tripleOf, if_pos hreg]
+    unfold pairs
+    rw [Multiset.coe_eq_coe.2 (hP'.filterMap _), List.filterMap_cons, pairOf, if_pos hreg]
     rfl
   have hcQ : codes sig Q = ser sig (.node o' args') ::ₘ
       ((E : Multiset Term).map
@@ -751,10 +746,10 @@ theorem spelling_measure {P Q E rest : List Term} {v v' : Term} (hP : List.Perm 
     right
     right
     refine ⟨by omega, hK, by rw [hTQ, hTP, hk], ?_⟩
-    have hpos : sig.position o' = sig.position o := by
-      simp only [tripleL, List.cons.injEq] at hk
-      exact hk.2.2.1
-    obtain rfl : o' = o := sig.position_injective _ _ hreg' hreg hpos
+    have hpos : sig.key o' = sig.key o := by
+      simp only [pairL, List.cons.injEq] at hk
+      exact hk.2.1
+    obtain rfl : o' = o := sig.key_injective _ _ hreg' hreg hpos
     have hser : ser sig (.node o' args') < ser sig (.node o' args) := by
       rw [ser_node, ser_node]
       refine append_lt_append_left [2] (flatten_lt hargs ?_ ?_ [o'])
@@ -816,208 +811,92 @@ theorem opposite_measure {P Q E rest : List Term} {v v' : Term} (hP : List.Perm 
 
 /-! ### One value operation -/
 
-/-- A statement: its term, and how many of its values are constant. -/
-abbrev Stmt := Term × ℕ
-
-/-- C: the number of constant values. -/
-def constCount (P : List Stmt) : ℕ := (P.map Prod.snd).sum
-
-/-- Rewriting a statement's term keeps its functions, so how many of its
-values are constant. -/
-def keepConst (f : Term → Term) (s : Stmt) : Stmt := (f s.1, s.2)
-
-theorem constCount_map_keepConst (f : Term → Term) (P : List Stmt) :
-    constCount (P.map (keepConst f)) = constCount P := by
-  simp [constCount, keepConst, List.map_map, Function.comp_def]
-
-theorem constCount_perm {P Q : List Stmt} (h : List.Perm P Q) : constCount P = constCount Q :=
-  (h.map Prod.snd).sum_eq
-
-theorem constCount_subperm {P Q : List Stmt} (h : List.Subperm P Q) :
-    constCount P ≤ constCount Q := by
-  obtain ⟨l, hl, hsub⟩ := h
-  rw [← constCount_perm hl]
-  exact (hsub.map Prod.snd).sum_le_sum fun _ _ => Nat.zero_le _
-
-theorem constCount_append (P Q : List Stmt) :
-    constCount (P ++ Q) = constCount P + constCount Q := by
-  simp [constCount]
-
-theorem constCount_cons (s : Stmt) (P : List Stmt) : constCount (s :: P) = s.2 + constCount P := by
-  simp [constCount]
-
-theorem constCount_erase {P : List Stmt} {v : Stmt} (hv : v ∈ P) :
-    constCount P = v.2 + constCount (P.erase v) := by
-  rw [constCount_perm (List.perm_cons_erase hv), constCount_cons]
-
-theorem constCount_zero {P : List Stmt} (h : ∀ a ∈ P, a.2 = 0) : constCount P = 0 := by
-  induction P with
-  | nil => rfl
-  | cons a P ih =>
-    rw [constCount_cons, h a (by simp), ih fun b hb => h b (by simp [hb])]
-
 variable (sig) in
-/-- The fixes inside one value operation, on its statements. -/
-inductive OpFix : List Stmt → List Stmt → Prop
-  /-- Simplifying a constant value v: v is gone, the statements it reached
-  are replaced by new ones with no constant value, and every other statement
-  keeps its functions. -/
-  | simplify {P Q : List Stmt} (v : Stmt) (hv : v ∈ P) (hconst : 1 ≤ v.2) (added survivors : List Stmt)
-      (rw : Term → Term) (hQ : List.Perm Q (added ++ survivors))
-      (hs : List.Subperm survivors ((P.erase v).map (keepConst rw)))
-      (hadded : ∀ a ∈ added, a.2 = 0) : OpFix P Q
+/-- The fixes inside one value operation, on its statements' terms. No fix
+makes a value that never changes (termination.md, Lemma 0), so none is
+modeled: every statement a fix rewrites keeps its function. -/
+inductive OpFix : List Term → List Term → Prop
   /-- A redundant value v that's the same as w: reading w instead makes v's
   statement dead, and every other statement keeps its functions. -/
-  | redundant {P Q : List Stmt} (v : Stmt) (hv : v ∈ P) (rw : Term → Term)
-      (hQ : List.Subperm Q ((P.erase v).map (keepConst rw))) : OpFix P Q
+  | redundant {P Q : List Term} (v : Term) (hv : v ∈ P) (rw : Term → Term)
+      (hQ : List.Subperm Q ((P.erase v).map rw)) : OpFix P Q
   /-- Removing dead statements: v's, and maybe others; every statement left
   is unchanged. -/
-  | dead {P Q : List Stmt} (v : Stmt) (hv : v ∈ P) (hQ : List.Subperm Q (P.erase v)) : OpFix P Q
+  | dead {P Q : List Term} (v : Term) (hv : v ∈ P) (hQ : List.Subperm Q (P.erase v)) : OpFix P Q
   /-- A redundant value v that's the opposite of w, and isn't a `not`: v's
   statement becomes `not w` (`o` is `not`), with the same functions, and
   every other statement has v's term replaced by `not w`'s. -/
-  | opposite {P Q : List Stmt} (v w : Term) (o c : ℕ) (rest : List Stmt) (hv : (v, c) ∈ P)
+  | opposite {P Q : List Term} (v w : Term) (o : ℕ) (rest : List Term) (hv : v ∈ P)
       (hnot : isNotTerm sig v = false) (ho : sig.isNot o = true)
-      (hQ : List.Perm Q ((.node o [w], c) :: rest))
-      (hrest : List.Subperm rest
-        ((P.erase (v, c)).map (keepConst (subst sig (ser sig v) (.node o [w]))))) :
+      (hQ : List.Perm Q (.node o [w] :: rest))
+      (hrest : List.Subperm rest ((P.erase v).map (subst sig (ser sig v) (.node o [w])))) :
       OpFix P Q
   /-- An ordinary match: the statements that survive, and the one or two
-  added, none of them constant, with more removed than added. -/
-  | ordinary {P Q : List Stmt} (v : Stmt) (hv : v ∈ P) (added survivors : List Stmt)
+  added, with more removed than added. -/
+  | ordinary {P Q : List Term} (v : Term) (hv : v ∈ P) (added survivors : List Term)
       (rw : Term → Term) (hQ : List.Perm Q (added ++ survivors))
-      (hs : List.Subperm survivors ((P.erase v).map (keepConst rw)))
-      (hadded : ∀ a ∈ added, a.2 = 0)
+      (hs : List.Subperm survivors ((P.erase v).map rw))
       (hrestrict : survivors.length + added.length + 1 ≤ P.length) : OpFix P Q
   /-- A spelling: v becomes v', with the same functions, and every other
   statement has v's term replaced by v''s. -/
-  | spelling {P Q : List Stmt} (v v' : Term) (c : ℕ) (rest : List Stmt) (hv : (v, c) ∈ P)
+  | spelling {P Q : List Term} (v v' : Term) (rest : List Term) (hv : v ∈ P)
       (hexec : IsExec sig v) (hexec' : IsExec sig v') (hkey : KeyLt sig v' v)
-      (hdistinct : ∀ u ∈ ((P.erase (v, c)).map Prod.fst), ser sig u ≠ ser sig v)
-      (hQ : List.Perm Q ((v', c) :: rest))
-      (hrest : List.Subperm rest ((P.erase (v, c)).map (keepConst (subst sig (ser sig v) v')))) :
+      (hdistinct : ∀ u ∈ P.erase v, ser sig u ≠ ser sig v)
+      (hQ : List.Perm Q (v' :: rest))
+      (hrest : List.Subperm rest ((P.erase v).map (subst sig (ser sig v) v'))) :
       OpFix P Q
 
 variable (sig) in
-/-- The measure of one value operation: C, then the statements' measure. -/
-def OpLt (Q P : List Stmt) : Prop :=
-  constCount Q < constCount P ∨
-    (constCount Q = constCount P ∧ MeasureLt sig (Q.map Prod.fst) (P.map Prod.fst))
+/-- The measure of one value operation. -/
+abbrev OpLt (Q P : List Term) : Prop := MeasureLt sig Q P
 
-theorem OpLt.trans {R Q P : List Stmt} (h₁ : OpLt sig R Q) (h₂ : OpLt sig Q P) : OpLt sig R P := by
-  rcases h₁ with h₁ | ⟨e₁, m₁⟩ <;> rcases h₂ with h₂ | ⟨e₂, m₂⟩
-  · exact .inl (by omega)
-  · exact .inl (by omega)
-  · exact .inl (by omega)
-  · exact .inr ⟨by omega, m₁.trans m₂⟩
+theorem OpLt.trans {R Q P : List Term} (h₁ : OpLt sig R Q) (h₂ : OpLt sig Q P) : OpLt sig R P :=
+  MeasureLt.trans h₁ h₂
 
-theorem OpLt.irrefl (P : List Stmt) : ¬ OpLt sig P P := by
-  rintro (h | ⟨-, h⟩)
-  · exact lt_irrefl _ h
-  · exact MeasureLt.irrefl _ h
-
-theorem length_map_fst (P : List Stmt) : (P.map Prod.fst).length = P.length := List.length_map _
-
-theorem opFix_constCount_le {P Q : List Stmt} (h : OpFix sig P Q) : constCount Q ≤ constCount P := by
-  cases h with
-  | simplify v hv _ added survivors rw hQ hs hadded =>
-    rw [constCount_perm hQ, constCount_append, constCount_zero hadded, constCount_erase hv]
-    have := (constCount_subperm hs).trans (constCount_map_keepConst rw _).le
-    omega
-  | redundant v hv rw hQ =>
-    rw [constCount_erase hv]
-    have := (constCount_subperm hQ).trans (constCount_map_keepConst rw _).le
-    omega
-  | dead v hv hQ =>
-    rw [constCount_erase hv]
-    have := constCount_subperm hQ
-    omega
-  | opposite v w o c rest hv _ _ hQ hrest =>
-    rw [constCount_perm hQ, constCount_cons, constCount_erase hv]
-    have := (constCount_subperm hrest).trans (constCount_map_keepConst _ _).le
-    simp only at this ⊢
-    omega
-  | ordinary v hv added survivors rw hQ hs hadded _ =>
-    rw [constCount_perm hQ, constCount_append, constCount_zero hadded, constCount_erase hv]
-    have := (constCount_subperm hs).trans (constCount_map_keepConst _ _).le
-    omega
-  | spelling v v' c rest hv _ _ _ _ hQ hrest =>
-    rw [constCount_perm hQ, constCount_cons, constCount_erase hv]
-    have := (constCount_subperm hrest).trans (constCount_map_keepConst _ _).le
-    simp only at this ⊢
-    omega
+theorem OpLt.irrefl (P : List Term) : ¬ OpLt sig P P := MeasureLt.irrefl P
 
 /-- Theorem 1: every fix in a value operation lowers its measure. -/
-theorem opFix_lt {P Q : List Stmt} (h : OpFix sig P Q) : OpLt sig Q P := by
-  have hC := opFix_constCount_le h
-  rcases Nat.lt_or_eq_of_le hC with hlt | heq
-  · exact .inl hlt
-  refine .inr ⟨heq, ?_⟩
+theorem opFix_lt {P Q : List Term} (h : OpFix sig P Q) : OpLt sig Q P := by
   cases h with
-  | simplify v hv hconst added survivors rw hQ hs hadded =>
-    exfalso
-    rw [constCount_perm hQ, constCount_append, constCount_zero hadded, constCount_erase hv] at heq
-    have := (constCount_subperm hs).trans (constCount_map_keepConst rw _).le
-    omega
   | redundant v hv rw hQ =>
     left
     have h1 := hQ.length_le
     have h2 := List.length_erase_of_mem hv
     have h3 := List.length_pos_of_mem hv
-    simp only [List.length_map] at h1 ⊢
+    simp only [List.length_map] at h1
     omega
   | dead v hv hQ =>
     left
     have h1 := hQ.length_le
     have h2 := List.length_erase_of_mem hv
     have h3 := List.length_pos_of_mem hv
-    simp only [List.length_map]
     omega
-  | opposite v w o c rest hv hnot ho hQ hrest =>
-    refine opposite_measure (E := (P.erase (v, c)).map Prod.fst) (rest := rest.map Prod.fst)
-      ?_ hnot (show isNotTerm sig (.node o [w]) = true from ho) (by simpa using hQ.map Prod.fst) ?_
-    · simpa using (List.perm_cons_erase hv).map Prod.fst
-    · obtain ⟨l, hl, hsub⟩ := hrest
-      refine ⟨l.map Prod.fst, hl.map _, ?_⟩
-      simpa [keepConst, List.map_map, Function.comp_def] using hsub.map Prod.fst
-  | ordinary v hv added survivors rw hQ hs hadded hrestrict =>
+  | opposite v w o rest hv hnot ho hQ hrest =>
+    exact opposite_measure (E := P.erase v) (List.perm_cons_erase hv) hnot
+      (show isNotTerm sig (.node o [w]) = true from ho) hQ hrest
+  | ordinary v hv added survivors rw hQ hs hrestrict =>
     left
-    rw [length_map_fst, length_map_fst, hQ.length_eq, List.length_append]
+    rw [hQ.length_eq, List.length_append]
     omega
-  | spelling v v' c rest hv hexec hexec' hkey hdistinct hQ hrest =>
-    refine spelling_measure (E := (P.erase (v, c)).map Prod.fst) (rest := rest.map Prod.fst)
-      ?_ hexec hexec' hkey hdistinct (by simpa using hQ.map Prod.fst) ?_
-    · simpa using (List.perm_cons_erase hv).map Prod.fst
-    · obtain ⟨l, hl, hsub⟩ := hrest
-      refine ⟨l.map Prod.fst, hl.map _, ?_⟩
-      simpa [keepConst, List.map_map, Function.comp_def] using hsub.map Prod.fst
+  | spelling v v' rest hv hexec hexec' hkey hdistinct hQ hrest =>
+    exact spelling_measure (E := P.erase v) (List.perm_cons_erase hv) hexec hexec' hkey hdistinct
+      hQ hrest
 
-/-- A fix that keeps C adds no statement. -/
-theorem opFix_length_le {P Q : List Stmt} (h : OpFix sig P Q)
-    (hC : constCount Q = constCount P) : Q.length ≤ P.length := by
-  rcases opFix_lt h with hlt | ⟨-, hm⟩
-  · omega
-  rcases hm with hl | ⟨hl, -⟩ | ⟨hl, -⟩ | ⟨hl, -⟩ <;> simp only [List.length_map] at hl <;> omega
+/-- No fix adds a statement. -/
+theorem opFix_length_le {P Q : List Term} (h : OpFix sig P Q) : Q.length ≤ P.length := by
+  rcases opFix_lt h with hl | ⟨hl, -⟩ | ⟨hl, -⟩ | ⟨hl, -⟩ <;> omega
 
 /-! ### A program -/
 
-/-- A value operation: its boolean statements, and its numbers of written and
-read views. -/
+/-- A value operation: its boolean statements' terms, and its numbers of
+written and read views. No fix changes the written views. -/
 structure OpState where
-  stmts : List Stmt
+  stmts : List Term
   views : ℕ
   reads : ℕ
 
 /-- A program of `n` value operations; `none` is one that was removed. -/
 abbrev Program (n : ℕ) := Fin n → Option OpState
-
-/-- C plus the number of written views. -/
-def weight : Option OpState → ℕ
-  | none => 0
-  | some A => constCount A.stmts + A.views
-
-/-- Φ. -/
-def phi {n : ℕ} (p : Program n) : ℕ := ∑ a, weight (p a)
 
 /-- The number of read views, or 0 for a removed value operation. -/
 def readCount : Option OpState → ℕ
@@ -1048,21 +927,18 @@ theorem OptLt.irrefl (x : Option OpState) : ¬ OptLt sig x x := by
   | some A => exact fun h => OpLt.irrefl A.stmts h.2.2
 
 variable (sig) in
-/-- Programs, ordered by V, then Φ, and then pointwise. -/
+/-- Programs, ordered by V and then pointwise. -/
 def ProgLt {n : ℕ} (q p : Program n) : Prop :=
-  vsum q < vsum p ∨ (vsum q = vsum p ∧ phi q < phi p) ∨
-    (vsum q = vsum p ∧ phi q = phi p ∧ (∀ a, q a = p a ∨ OptLt sig (q a) (p a)) ∧
-      ∃ a, OptLt sig (q a) (p a))
+  vsum q < vsum p ∨
+    (vsum q = vsum p ∧ (∀ a, q a = p a ∨ OptLt sig (q a) (p a)) ∧ ∃ a, OptLt sig (q a) (p a))
 
 theorem ProgLt.trans {n : ℕ} {r q p : Program n} (h₁ : ProgLt sig r q) (h₂ : ProgLt sig q p) :
     ProgLt sig r p := by
-  rcases h₁ with h₁ | ⟨v₁, h₁⟩ | ⟨v₁, e₁, le₁, ⟨a, lt₁⟩⟩ <;>
-    rcases h₂ with h₂ | ⟨v₂, h₂⟩ | ⟨v₂, e₂, le₂, -⟩
+  rcases h₁ with h₁ | ⟨v₁, le₁, ⟨a, lt₁⟩⟩ <;> rcases h₂ with h₂ | ⟨v₂, le₂, -⟩
   all_goals first
     | exact .inl (by omega)
-    | exact .inr (.inl ⟨by omega, by omega⟩)
     | skip
-  refine .inr (.inr ⟨by omega, by omega, fun b => ?_, ⟨a, ?_⟩⟩)
+  refine .inr ⟨by omega, fun b => ?_, ⟨a, ?_⟩⟩
   · rcases le₁ b with h | h <;> rcases le₂ b with h' | h'
     · exact .inl (h.trans h')
     · exact .inr (h ▸ h')
@@ -1073,8 +949,7 @@ theorem ProgLt.trans {n : ℕ} {r q p : Program n} (h₁ : ProgLt sig r q) (h₂
     · exact lt₁.trans h'
 
 theorem ProgLt.irrefl {n : ℕ} (p : Program n) : ¬ ProgLt sig p p := by
-  rintro (h | ⟨-, h⟩ | ⟨-, -, -, ⟨a, h⟩⟩)
-  · exact lt_irrefl _ h
+  rintro (h | ⟨-, -, ⟨a, h⟩⟩)
   · exact lt_irrefl _ h
   · exact OptLt.irrefl _ h
 
@@ -1086,92 +961,17 @@ inductive ProgStep {n : ℕ} : Program n → Program n → Prop
   | local {p q : Program n} (a : Fin n) (A A' : OpState) (ha : p a = some A) (hqa : q a = some A')
       (hfix : OpFix sig A.stmts A'.stmts) (hviews : A'.views = A.views) (hreads : A'.reads = A.reads)
       (hrest : ∀ b, b ≠ a → q b = p b) : ProgStep p q
-  /-- Removing a constant written view of `a` (Lemma 8): `a` has one fewer
-  written view, no more read views, and no more constant values, or it's
-  removed if that was its only one; every value operation in `callers`
-  executes it, keeps its written and read views, and has fewer constant
-  values; the others don't change. -/
-  | dropView {p q : Program n} (a : Fin n) (A : OpState) (ha : p a = some A)
-      (hcallee : (q a = none ∧ A.views = 1) ∨
-        ∃ A', q a = some A' ∧ A'.views + 1 = A.views ∧ A'.reads ≤ A.reads ∧
-          constCount A'.stmts ≤ constCount A.stmts)
-      (callers : Finset (Fin n)) (hnot : a ∉ callers)
-      (hcallers : ∀ b ∈ callers, ∃ B B', p b = some B ∧ q b = some B' ∧ B'.views = B.views ∧
-        B'.reads = B.reads ∧ constCount B'.stmts < constCount B.stmts)
-      (hrest : ∀ b, b ≠ a → b ∉ callers → q b = p b) : ProgStep p q
-  /-- Removing a read view of `a` that doesn't matter (Lemma 10): `a` has one
+  /-- Removing a read view of `a` that doesn't matter (Lemma 9): `a` has one
   fewer read view and the same written views, and any statements, since its
   reads are given another read view; every value operation in `callers`
-  executes it, keeps its written and read views, and has no more constant
-  values (it only loses statements left dead); the others don't change. -/
+  executes it, keeps its written and read views, and only loses statements
+  left dead; the others don't change. -/
   | dropRead {p q : Program n} (a : Fin n) (A A' : OpState) (ha : p a = some A) (hqa : q a = some A')
       (hreads : A'.reads + 1 = A.reads) (hviews : A'.views = A.views)
       (callers : Finset (Fin n)) (hnot : a ∉ callers)
       (hcallers : ∀ b ∈ callers, ∃ B B', p b = some B ∧ q b = some B' ∧ B'.views = B.views ∧
-        B'.reads = B.reads ∧ constCount B'.stmts ≤ constCount B.stmts)
+        B'.reads = B.reads)
       (hrest : ∀ b, b ≠ a → b ∉ callers → q b = p b) : ProgStep p q
-
-theorem weight_local {A A' : OpState} (hviews : A'.views = A.views) (_hreads : A'.reads = A.reads) :
-    weight (some A') + constCount A.stmts = weight (some A) + constCount A'.stmts := by
-  simp only [weight, hviews]
-  omega
-
-theorem local_phi_le {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState} (ha : p a = some A)
-    (hqa : q a = some A') (hviews : A'.views = A.views) (hreads : A'.reads = A.reads)
-    (hC : constCount A'.stmts ≤ constCount A.stmts) (hrest : ∀ b, b ≠ a → q b = p b) :
-    ∀ b ∈ Finset.univ, weight (q b) ≤ weight (p b) := by
-  intro b _
-  by_cases hb : b = a
-  · subst hb
-    rw [ha, hqa]
-    have := weight_local hviews hreads
-    omega
-  · rw [hrest b hb]
-
-theorem local_phi_lt {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState} (ha : p a = some A)
-    (hqa : q a = some A') (hviews : A'.views = A.views) (hreads : A'.reads = A.reads)
-    (hC : constCount A'.stmts < constCount A.stmts) (hrest : ∀ b, b ≠ a → q b = p b) :
-    phi q < phi p := by
-  refine Finset.sum_lt_sum (local_phi_le ha hqa hviews hreads hC.le hrest) ⟨a, Finset.mem_univ _, ?_⟩
-  rw [ha, hqa]
-  have := weight_local hviews hreads
-  omega
-
-theorem dropView_phi_lt {n : ℕ} {p q : Program n} {a : Fin n} {A : OpState} (ha : p a = some A)
-    (hcallee : (q a = none ∧ A.views = 1) ∨
-      ∃ A', q a = some A' ∧ A'.views + 1 = A.views ∧ A'.reads ≤ A.reads ∧
-        constCount A'.stmts ≤ constCount A.stmts)
-    {callers : Finset (Fin n)}
-    (hcallers : ∀ b ∈ callers, ∃ B B', p b = some B ∧ q b = some B' ∧ B'.views = B.views ∧
-      B'.reads = B.reads ∧ constCount B'.stmts < constCount B.stmts)
-    (hrest : ∀ b, b ≠ a → b ∉ callers → q b = p b) : phi q < phi p := by
-  classical
-  have hle : ∀ b ∈ Finset.univ, weight (q b) ≤ weight (p b) := by
-    intro b _
-    by_cases hb : b = a
-    · subst hb
-      rw [ha]
-      rcases hcallee with ⟨hq, -⟩ | ⟨A', hq, hv, hr, hc⟩
-      · rw [hq]
-        exact Nat.zero_le _
-      · rw [hq]
-        simp only [weight]
-        omega
-    · by_cases hc : b ∈ callers
-      · obtain ⟨B, B', hp, hq, hv, -, hlt⟩ := hcallers b hc
-        rw [hp, hq]
-        simp only [weight, hv]
-        omega
-      · rw [hrest b hb hc]
-  refine Finset.sum_lt_sum hle ⟨a, Finset.mem_univ _, ?_⟩
-  rw [ha]
-  rcases hcallee with ⟨hq, hv⟩ | ⟨A', hq, hv, hr, hc⟩
-  · rw [hq]
-    simp only [weight]
-    omega
-  · rw [hq]
-    simp only [weight]
-    omega
 
 /-- A fix inside one value operation keeps V. -/
 theorem local_vsum_eq {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState} (ha : p a = some A)
@@ -1184,36 +984,11 @@ theorem local_vsum_eq {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState} (
     simp only [readCount, hreads]
   · rw [hrest b hb]
 
-/-- Removing a constant written view doesn't raise V. -/
-theorem dropView_vsum_le {n : ℕ} {p q : Program n} {a : Fin n} {A : OpState} (ha : p a = some A)
-    (hcallee : (q a = none ∧ A.views = 1) ∨
-      ∃ A', q a = some A' ∧ A'.views + 1 = A.views ∧ A'.reads ≤ A.reads ∧
-        constCount A'.stmts ≤ constCount A.stmts)
-    {callers : Finset (Fin n)}
-    (hcallers : ∀ b ∈ callers, ∃ B B', p b = some B ∧ q b = some B' ∧ B'.views = B.views ∧
-      B'.reads = B.reads ∧ constCount B'.stmts < constCount B.stmts)
-    (hrest : ∀ b, b ≠ a → b ∉ callers → q b = p b) : vsum q ≤ vsum p := by
-  classical
-  refine Finset.sum_le_sum fun b _ => ?_
-  by_cases hb : b = a
-  · subst hb
-    rw [ha]
-    rcases hcallee with ⟨hq, -⟩ | ⟨A', hq, -, hr, -⟩
-    · rw [hq]
-      exact Nat.zero_le _
-    · rw [hq]
-      exact hr
-  · by_cases hc : b ∈ callers
-    · obtain ⟨B, B', hp, hq, -, hr, -⟩ := hcallers b hc
-      rw [hp, hq]
-      simp only [readCount, hr, le_refl]
-    · rw [hrest b hb hc]
-
-/-- Lemma 10: removing a read view that doesn't matter lowers V. -/
+/-- Lemma 9: removing a read view that doesn't matter lowers V. -/
 theorem dropRead_vsum_lt {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState} (ha : p a = some A)
     (hqa : q a = some A') (hreads : A'.reads + 1 = A.reads) {callers : Finset (Fin n)}
     (hcallers : ∀ b ∈ callers, ∃ B B', p b = some B ∧ q b = some B' ∧ B'.views = B.views ∧
-      B'.reads = B.reads ∧ constCount B'.stmts ≤ constCount B.stmts)
+      B'.reads = B.reads)
     (hrest : ∀ b, b ≠ a → b ∉ callers → q b = p b) : vsum q < vsum p := by
   classical
   have hle : ∀ b ∈ Finset.univ, readCount (q b) ≤ readCount (p b) := by
@@ -1224,7 +999,7 @@ theorem dropRead_vsum_lt {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState
       simp only [readCount]
       omega
     · by_cases hc : b ∈ callers
-      · obtain ⟨B, B', hp, hq, -, hr, -⟩ := hcallers b hc
+      · obtain ⟨B, B', hp, hq, -, hr⟩ := hcallers b hc
         rw [hp, hq]
         simp only [readCount, hr, le_refl]
       · rw [hrest b hb hc]
@@ -1237,29 +1012,15 @@ theorem dropRead_vsum_lt {n : ℕ} {p q : Program n} {a : Fin n} {A A' : OpState
 theorem progStep_lt {n : ℕ} {p q : Program n} (h : ProgStep sig p q) : ProgLt sig q p := by
   cases h with
   | «local» a A A' ha hqa hfix hviews hreads hrest =>
-    have hv := local_vsum_eq ha hqa hreads hrest
-    rcases Nat.lt_or_eq_of_le (opFix_constCount_le hfix) with hC | hC
-    · exact .inr (.inl ⟨hv, local_phi_lt ha hqa hviews hreads hC hrest⟩)
-    · right
-      right
-      refine ⟨hv, Finset.sum_congr rfl fun b _ => ?_, fun b => ?_, ⟨a, ?_⟩⟩
-      · by_cases hb : b = a
-        · subst hb
-          rw [ha, hqa]
-          have := weight_local hviews hreads
-          omega
-        · rw [hrest b hb]
-      · by_cases hb : b = a
-        · subst hb
-          rw [ha, hqa]
-          exact .inr ⟨hviews, hreads, opFix_lt hfix⟩
-        · exact .inl (hrest b hb)
-      · rw [ha, hqa]
-        exact ⟨hviews, hreads, opFix_lt hfix⟩
-  | dropView a A ha hcallee callers hnot hcallers hrest =>
-    rcases Nat.lt_or_eq_of_le (dropView_vsum_le ha hcallee hcallers hrest) with hv | hv
-    · exact .inl hv
-    · exact .inr (.inl ⟨hv, dropView_phi_lt ha hcallee hcallers hrest⟩)
+    right
+    refine ⟨local_vsum_eq ha hqa hreads hrest, fun b => ?_, ⟨a, ?_⟩⟩
+    · by_cases hb : b = a
+      · subst hb
+        rw [ha, hqa]
+        exact .inr ⟨hviews, hreads, opFix_lt hfix⟩
+      · exact .inl (hrest b hb)
+    · rw [ha, hqa]
+      exact ⟨hviews, hreads, opFix_lt hfix⟩
   | dropRead a A A' ha hqa hreads hviews callers hnot hcallers hrest =>
     exact .inl (dropRead_vsum_lt ha hqa hreads hcallers hrest)
 
@@ -1268,21 +1029,16 @@ def size : Option OpState → ℕ
   | none => 0
   | some A => A.stmts.length
 
-/-- A fix that keeps Φ adds no statement anywhere. -/
+/-- A fix that keeps V adds no statement anywhere. -/
 theorem progStep_size_le {n : ℕ} {p q : Program n} (h : ProgStep sig p q) (hv : vsum q = vsum p)
-    (hphi : phi q = phi p) (b : Fin n) : size (q b) ≤ size (p b) := by
+    (b : Fin n) : size (q b) ≤ size (p b) := by
   cases h with
   | «local» a A A' ha hqa hfix hviews hreads hrest =>
     by_cases hb : b = a
     · subst hb
       rw [ha, hqa]
-      simp only [size]
-      rcases Nat.lt_or_eq_of_le (opFix_constCount_le hfix) with hC | hC
-      · exact absurd hphi (ne_of_lt (local_phi_lt ha hqa hviews hreads hC hrest))
-      · exact opFix_length_le hfix hC
+      exact opFix_length_le hfix
     · rw [hrest b hb]
-  | dropView a A ha hcallee callers hnot hcallers hrest =>
-    exact absurd hphi (ne_of_lt (dropView_phi_lt ha hcallee hcallers hrest))
   | dropRead a A A' ha hqa hreads hviews callers hnot hcallers hrest =>
     exact absurd hv (ne_of_lt (dropRead_vsum_lt ha hqa hreads hcallers hrest))
 
@@ -1291,49 +1047,28 @@ theorem progStep_size_le {n : ℕ} {p q : Program n} (h : ProgStep sig p q) (hv 
 variable (sig) in
 /-- The fixes of a program, with value operations given a priority `rank`:
 every unregistered value operation has 0, and registered ones come after,
-the last one listed in booleans.defcl first. Besides the fixes of
-`ProgStep`, a match or spelling in `a` whose execution of the registered
-operation `r` would make an execution cycle first writes out, in `r`'s
-definition, the executions that lead back to `a`: `a` gets the fix, and `r`
-gets any statements, with the same written and read views and no more
-constant values. `r` comes after `a` in priority: a registered `a` follows
-`r`, so `r` is listed before it, and an unregistered `a` comes before every
-registered operation. -/
+the one with the largest key first. Besides the fixes of `ProgStep`, a
+match or spelling in `a` whose execution of the registered operation `r`
+would make an execution cycle first writes out, in `r`'s definition, the
+executions that lead back to `a`: `a` gets the fix, and `r` gets any
+statements, with the same written and read views. `r` comes after `a` in
+priority: a registered `a` follows `r`, so `r`'s key is smaller, and an
+unregistered `a` comes before every registered operation. -/
 inductive ProgFix {n : ℕ} (rank : Fin n → ℕ) : Program n → Program n → Prop
   | step {p q : Program n} (h : ProgStep sig p q) : ProgFix rank p q
   | writeOut {p q : Program n} (a r : Fin n) (hrank : rank a < rank r) (A A' R R' : OpState)
       (ha : p a = some A) (hqa : q a = some A') (hfix : OpFix sig A.stmts A'.stmts)
       (hviews : A'.views = A.views) (hreads : A'.reads = A.reads)
       (hr : p r = some R) (hqr : q r = some R') (hRviews : R'.views = R.views)
-      (hRreads : R'.reads = R.reads) (hRC : constCount R'.stmts ≤ constCount R.stmts)
+      (hRreads : R'.reads = R.reads)
       (hrest : ∀ b, b ≠ a → b ≠ r → q b = p b) : ProgFix rank p q
-
-theorem writeOut_weight_le {n : ℕ} {p q : Program n} {a r : Fin n} {A A' R R' : OpState}
-    (ha : p a = some A) (hqa : q a = some A') (hfix : OpFix sig A.stmts A'.stmts)
-    (hviews : A'.views = A.views) (_hreads : A'.reads = A.reads)
-    (hr : p r = some R) (hqr : q r = some R') (hRviews : R'.views = R.views)
-    (_hRreads : R'.reads = R.reads) (hRC : constCount R'.stmts ≤ constCount R.stmts)
-    (hrest : ∀ b, b ≠ a → b ≠ r → q b = p b) : ∀ b ∈ Finset.univ, weight (q b) ≤ weight (p b) := by
-  intro b _
-  by_cases hb : b = a
-  · subst hb
-    rw [ha, hqa]
-    have := opFix_constCount_le hfix
-    simp only [weight, hviews]
-    omega
-  · by_cases hbr : b = r
-    · subst hbr
-      rw [hr, hqr]
-      simp only [weight, hRviews]
-      omega
-    · rw [hrest b hb hbr]
 
 /-- No fix raises V. -/
 theorem progFix_vsum_le {n : ℕ} {rank : Fin n → ℕ} {p q : Program n} (h : ProgFix sig rank p q) :
     vsum q ≤ vsum p := by
   cases h with
-  | step h => rcases progStep_lt h with h | ⟨h, -⟩ | ⟨h, -⟩ <;> omega
-  | writeOut a r _ A A' R R' ha hqa hfix hviews hreads hr hqr hRviews hRreads hRC hrest =>
+  | step h => rcases progStep_lt h with h | ⟨h, -⟩ <;> omega
+  | writeOut a r _ A A' R R' ha hqa hfix hviews hreads hr hqr hRviews hRreads hrest =>
     refine Finset.sum_le_sum fun b _ => ?_
     by_cases hb : b = a
     · subst hb
@@ -1344,15 +1079,6 @@ theorem progFix_vsum_le {n : ℕ} {rank : Fin n → ℕ} {p q : Program n} (h : 
         rw [hr, hqr]
         simp only [readCount, hRreads, le_refl]
       · rw [hrest b hb hbr]
-
-/-- No fix that keeps V raises Φ. -/
-theorem progFix_phi_le {n : ℕ} {rank : Fin n → ℕ} {p q : Program n} (h : ProgFix sig rank p q)
-    (hv : vsum q = vsum p) : phi q ≤ phi p := by
-  cases h with
-  | step h => rcases progStep_lt h with h | ⟨-, h⟩ | ⟨-, h, -⟩ <;> omega
-  | writeOut a r _ A A' R R' ha hqa hfix hviews hreads hr hqr hRviews hRreads hRC hrest =>
-    exact Finset.sum_le_sum
-      (writeOut_weight_le ha hqa hfix hviews hreads hr hqr hRviews hRreads hRC hrest)
 
 theorem opFix_ne {A A' : OpState} (hfix : OpFix sig A.stmts A'.stmts) : A' ≠ A := by
   rintro rfl
@@ -1365,39 +1091,32 @@ theorem progFix_ne {n : ℕ} {rank : Fin n → ℕ} {p q : Program n} (h : ProgF
   | step h =>
     rintro rfl
     exact ProgLt.irrefl _ (progStep_lt h)
-  | writeOut a r _ A A' R R' ha hqa hfix _ _ _ _ _ _ _ _ =>
+  | writeOut a r _ A A' R R' ha hqa hfix _ _ _ _ _ _ _ =>
     intro he
     have := congrFun he a
     rw [ha, hqa] at this
     exact opFix_ne hfix (Option.some.inj this)
 
-/-- Once V and Φ stop going down, a value operation that a fix changes either
+/-- Once V stops going down, a value operation that a fix changes either
 gets the fix, which lowers its measure and adds no statement, or has its
 definition written out for a fix of a value operation before it in
 priority, which changes too. -/
 theorem progFix_change {n : ℕ} {rank : Fin n → ℕ} {p q : Program n} (h : ProgFix sig rank p q)
-    (hv : vsum q = vsum p) (hphi : phi q = phi p) (b : Fin n) (hb : q b ≠ p b) :
+    (hv : vsum q = vsum p) (b : Fin n) (hb : q b ≠ p b) :
     (OptLt sig (q b) (p b) ∧ size (q b) ≤ size (p b)) ∨ ∃ a, rank a < rank b ∧ q a ≠ p a := by
   cases h with
   | step h =>
     left
-    refine ⟨?_, progStep_size_le h hv hphi b⟩
-    rcases progStep_lt h with hlt | ⟨-, hlt⟩ | ⟨-, -, hle, -⟩
-    · omega
+    refine ⟨?_, progStep_size_le h hv b⟩
+    rcases progStep_lt h with hlt | ⟨-, hle, -⟩
     · omega
     · exact (hle b).resolve_left hb
-  | writeOut a r hrank A A' R R' ha hqa hfix hviews hreads hr hqr hRviews hRreads hRC hrest =>
-    have hle := writeOut_weight_le ha hqa hfix hviews hreads hr hqr hRviews hRreads hRC hrest
-    have heq := (Finset.sum_eq_sum_iff_of_le hle).1 hphi
+  | writeOut a r hrank A A' R R' ha hqa hfix hviews hreads hr hqr hRviews hRreads hrest =>
     by_cases hba : b = a
     · subst hba
       left
       rw [ha, hqa]
-      refine ⟨⟨hviews, hreads, opFix_lt hfix⟩, ?_⟩
-      have hw := heq b (Finset.mem_univ _)
-      rw [ha, hqa] at hw
-      simp only [weight, hviews] at hw
-      exact opFix_length_le hfix (by omega)
+      exact ⟨⟨hviews, hreads, opFix_lt hfix⟩, opFix_length_le hfix⟩
     · by_cases hbr : b = r
       · subst hbr
         right
@@ -1442,7 +1161,7 @@ theorem eventually_const (u : ℕ → ℕ) (K : ℕ) (h : ∀ k, K ≤ k → u (
   exact ⟨K', hK', fun k hk => le_antisymm (h k (le_trans hK' hk))
     ((hmono K' k hK' hk).trans (hmin (k + 1) (by omega)))⟩
 
-/-- Fixing a program terminates. V and then Φ stop going down; after that, by
+/-- Fixing a program terminates. V stops going down; after that, by
 induction on priority, each value operation stops changing once the ones
 before it have: it then changes only by its own fixes, which lower its
 measure and add no statement, among finitely many states. Then nothing
@@ -1450,11 +1169,9 @@ changes, but every fix changes something. -/
 theorem prog_terminates {n : ℕ} (rank : Fin n → ℕ) (f : ℕ → Program n)
     (hstep : ∀ k, ProgFix sig rank (f k) (f (k + 1)))
     (hfin : ∀ (a : Fin n) (bound : ℕ), {A | (∃ k, f k a = A) ∧ size A ≤ bound}.Finite) : False := by
-  -- V is constant from some k₀ on, and then Φ from some k₁ on.
-  obtain ⟨k₀, -, hvc⟩ := eventually_const (fun k => vsum (f k)) 0
+  -- V is constant from some k₁ on.
+  obtain ⟨k₁, -, hvc⟩ := eventually_const (fun k => vsum (f k)) 0
     (fun k _ => progFix_vsum_le (hstep k))
-  obtain ⟨k₁, hk₁, hconst⟩ := eventually_const (fun k => phi (f k)) k₀
-    (fun k hk => progFix_phi_le (hstep k) (hvc k hk))
   have key : ∀ j, ∃ K, k₁ ≤ K ∧ ∀ k, K ≤ k → ∀ b, rank b < j → f (k + 1) b = f k b := by
     intro j
     induction j with
@@ -1471,7 +1188,7 @@ theorem prog_terminates {n : ℕ} (rank : Fin n → ℕ) (f : ℕ → Program n)
             by_cases he : f (K + k + 1) b = f (K + k) b
             · exact .inl he
             · right
-              rcases progFix_change (hstep (K + k)) (hvc _ (by omega)) (hconst _ (by omega)) b he
+              rcases progFix_change (hstep (K + k)) (hvc _ (by omega)) b he
                 with h | ⟨a, ha, hne⟩
               · exact h
               · exact absurd (hK (K + k) (by omega) a (hbj ▸ ha)) hne

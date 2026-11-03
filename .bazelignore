@@ -3,3 +3,4 @@ define-parallel-particle-operations
 literal-c
 operation_graph_proofs
 node_modules
+boolean_logic_in_real_code/work

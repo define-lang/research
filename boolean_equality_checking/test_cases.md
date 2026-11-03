@@ -11,10 +11,10 @@ operation. "Error R at v" means rule R is reported with v as the value it
 names; "no error" means the value operation compiles.
 
 Unless a case says otherwise, booleans.defcl registers `or`, `implies`,
-`xor`, `eq`, `mux`, and `maj`, in that order, with the definitions of
-`gen/program.py` (`DEFINITIONS`), which compile. `and` and `not` are
-registered for every value operation without being listed, before the
-rest (DLP 59).
+`xor`, `eq`, `mux`, and `maj`, with the definitions of `gen/program.py`
+(`DEFINITIONS`), which compile. `and` and `not` are registered for every
+value operation without being listed, before the rest, which are ordered by
+key (DLP 59): `implies`, `or`, `xor`, `eq`, `mux`, `maj`.
 
 ## 1. Boolean Value Operations and One Written View (DLP 57)
 
@@ -124,17 +124,17 @@ the value it's the same as or the opposite of.
 | M13 | a single statement equal to R of earlier values | a single statement is never a match | no error (unless it's a spelling, P-cases) |
 | M14 | `g(a, b)` where g's own statements contain `or` written out | executions are whole | no error in the caller; the error is in g |
 | M15 | a value inside an executed operation as an argument | arguments are the operation's own values | not available |
-| M16 | `or`'s own definition written out, `or` listed first | a registered operation's definition follows only `and`, `not`, and the ones listed before it | no error for `or` in `or`, nor for operations listed after it |
-| M16b | `or` written with `and` and `not`, booleans.defcl `[implies, or]` | the definition follows earlier ones | error match: `implies(not a, b)` |
-| M16c | `xor` written out, booleans.defcl `[xor, eq]`; `eq` written out | the motivating case: no cycle | `xor` can't use `eq`; `eq` is reported as `not xor(a, b)` |
-| M16d | a standard-library operation's definition | the standard library's own order | follows only `and`, `not`, and the standard library operations listed before it |
-| M16e | a project operation's definition | the project after the standard library | follows `and`, `not`, every standard-library operation, and the project's earlier ones |
-| M16f | booleans.defcl `[eq, xor]`, `eq` defined as `not xor(a, b)`, and `xor` written out | the match in `xor` would make `xor` and `eq` execute each other | the fix first writes out `eq`'s execution of `xor`, then makes `xor` `not eq(a, b)`; `eq` ends written out with `and` and `not` |
+| M16 | `implies`'s own definition written out | a registered operation's definition follows only `and`, `not`, and the ones with smaller keys | no error for `implies` in `implies` (it has the smallest key) |
+| M16b | `or` written with `and` and `not` | the definition follows ones with smaller keys: `implies` (1 `and`, 2 views, table 13) before `or` (1, 2, 14) | error match: `implies(not a, b)` |
+| M16c | `xor` and `eq` both written out | the motivating case: no cycle | `xor` (key 3, 2, 6) can't use `eq` (3, 2, 9); `eq` is reported as `not xor(a, b)` |
+| M16d | a standard-library operation's definition | the standard library's own keys | follows only `and`, `not`, and the standard library operations with smaller keys |
+| M16e | a project operation's definition | the project after the standard library | follows `and`, `not`, every standard-library operation, and the project's operations with smaller keys |
+| M16f | `xor` defined as `not eq(a, b)`, and `eq` written out | the match in `eq` would make `eq` and `xor` execute each other | the fix first writes out `xor`'s execution of `eq`, then makes `eq` `not xor(a, b)`; `xor` ends written with `or` |
 | M16g | booleans.defcl `[maj]`, `maj` defined as `U(a, b, c, or(a, b))`, `U(a, b, c, t)` majority written out `and t` | the same through an unregistered operation | the fix first writes out `U` in `maj`, whose `m and or(a, b)` is then redundant with `m`, then makes `U` `maj(a, b, c) and t`; `maj` ends written out |
 | M16h | `eq` executes `xor` and `xor` executes `eq` | DLP 9 forbids execution cycles | error cycle in both, at the execution that leads back; an operation that executes one of them gets no other check |
 | M17 | two matches removing 4 and 3 statements | the largest is reported | the 4-statement one |
 | M18 | two matches of equal size, different values | the earlier value | the earlier one |
-| M19 | two of equal size and value, different operations | the registered operation that comes first | `and`, then `not`, then the project's booleans.defcl, then the standard library's (not alphabetical) |
+| M19 | two of equal size and value, different operations | the registered operation that comes first | `and`, then `not`, then the project's by key, then the standard library's by key (not alphabetical, not as listed) |
 | M28 | `mux(not c, c, b)` | `and` counts as registered | error match: `b and c` (removes the execution and `not c`) |
 | M29 | `or(not a, not b)` with `or` registered, where that removes at least 3 statements | opposite results of `and` | error match: `not (a and b)` |
 | M30 | `or(not a, not b)` where `not a` is read elsewhere | the 3-statement rule for an opposite of `and` | no error (it would remove only 2) |
@@ -156,14 +156,14 @@ value from earlier values. Only the first spelling is allowed.
 | id | case | tests | expected |
 | --- | --- | --- | --- |
 | P1 | `n = not b; or(a, n)` with `implies` registered | fewest negations | error spelling: `implies(b, a)` |
-| P2 | two spellings with equal negations, `or` (1 `and`) and `mux` (3) | fewest `and`s | the `or` spelling |
-| P3 | equal negations and `and`s, different places in booleans.defcl | listed first | the one that comes first: `and`, `not`, the project's list, then the standard library's |
+| P2 | two spellings with equal negations, `or` (key: 1 `and`) and `mux` (3) | key | the `or` spelling |
+| P3 | equal negations, two operations with the same fewest `and`s | the key's views, then truth table | `implies` before `or`; `xor` before `eq`; `eq` before `mux` (fewer views) |
 | P11 | `a and implies(a, b)` | an `and` statement is a spelling too | error spelling: `a and b` (same key until the arguments' ranks) |
-| P12 | `mux(a, b, a)` | `and` has the fewest `and`s | error spelling: `a and b` |
+| P12 | `mux(a, b, a)` | `and` comes before every other registered operation | error spelling: `a and b` |
 | P4 | equal in all three, different arguments | rank order | the lower-ranked arguments |
-| P5 | the `and` count with executions in the definition written out | "different `and`s", structurally hashed | counted after writing out and sharing |
-| P6 | a registered operation from the standard library and one from the project with otherwise equal keys | project's list, then the standard library's | the project's |
-| P7 | a `not` of an execution that another execution could compute | only single executions are respelled | no spelling error |
+| P5 | a registered operation's count of `and`s | the fewest in any and-inverter graph computing its function, not its definition | `or` has 1 whether defined as `not (not a and not b)` or as `implies(not a, b)`; `maj` has 4 |
+| P6 | a registered operation from the standard library and one from the project with otherwise equal keys | project's, then the standard library's | the project's |
+| P7 | a `not` of an execution that another execution could compute, or a `not` that an `and` could compute | a `not` isn't respelled: a value that's the opposite of an earlier one is its `not` (DLP 57) | no spelling error; with w = `x implies (not y)`, `not w` stays though `x and y` computes it |
 | P8 | swapping two operations in booleans.defcl | the order is the precedence | values that were first spellings may become errors, everywhere in the project |
 | P9 | a spelling over values after v | only earlier values | not a spelling |
 | P10 | a user operation (not registered) whose execution computes R(a, b) | spellings are executions of registered operations | no error (one statement isn't a match) |
@@ -251,17 +251,13 @@ past them or as one graph.
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
-| F1 | `a and true` | step 1, literals | `a` |
-| F2 | `g(a, false)` with g = `x or y` | step 1 through an execution | `a` |
+| F1 | `a and true` | literals are errors the programmer fixes | error literal; the tool stops |
+| F2 | `g(a, false)` with g = `x or y` | the same through an execution | error literal; the tool stops |
 | F3 | redundant value same as w | step 2 | reads use w; statements nothing reads are removed |
 | F4 | opposite of w | step 2 | `not w` |
-| F5 | `x and false` | step 3 | false, then propagated |
-| F6 | `mux(s, c, b)` with c always false | step 3 can add statements | `(not s) and b`: two statements |
-| F7 | a constant reaching a non-boolean statement | literals stop at non-boolean statements | that statement takes the literal |
-| F8 | an execution given a constant whose result is no simpler function | writing it out | the executed operation's statements written out in place, the constant given to the view, then simplified (no value operation is added) |
-| F9 | a boolean value operation whose written view is constant | step 4 | the operation is removed; callers get the literal and simplify |
-| F10 | a mixed operation with one constant boolean written view | step 4 | the view is removed; callers' values from it become literals |
-| F11 | F10 across three levels of execution | constant simplification across value operations | each level simplified in turn |
+| F5 | `x and not x` | values that never change are errors the programmer fixes | error redundant (constant); the tool stops |
+| F7 | a literal given to a statement that isn't boolean | only boolean statements can't take literals | no error |
+| F9 | a boolean value operation whose written view is constant | a value that never changes | error; the tool stops |
 | F12 | a wrapper | DLP 59's wrapper rule as a fix | callers execute the wrapped operation directly; the wrapper is removed |
 | F13 | an operation that only writes one of its views | a projection | callers use the argument |
 | F14 | the largest match | matches as fixes | replaced by an execution with its first spelling |
@@ -270,9 +266,8 @@ past them or as one graph.
 | F17 | order | canonicalizing | statements and arguments sorted, copies inserted where a value goes to two views |
 | F18 | a program needing all of the above | termination | it compiles in finitely many rounds (`proof/termination.md`); the measure goes down at every fix |
 | F19 | 1,000 random programs | termination in practice | every fix loop ends |
-| F20 | a program at 256 statements that a constant pushes past 256 | step 3 can add statements | reported as a limit error; the tool can't fix it alone |
 | F21 | dead statements | step 5 | removed |
-| F22 | a read view that doesn't matter | step 6 | removed from the operation, after its reads are given a constant and simplified, and from every execution of it |
+| F22 | a read view that doesn't matter | step 6 | its reads get the first read view the operation keeps that makes no value constant, then it's removed from the operation and from every execution of it |
 | F23 | F22 where the value given to the view was computed only for it | step 6 makes callers' statements dead | they're removed too |
 | F24 | F22 where removing the view makes a caller's own view not matter | steps cascade | the caller loses that view in turn |
 
@@ -292,5 +287,5 @@ past them or as one graph.
 | D10 | a mixed operation with a numeric view nobody reads | only boolean value operations | no error from this rule |
 | D11 | g(x, y) where y matters on exactly one combination of x and y | "for some combination" | no error |
 | D12 | callers of g after D7's fix | executions stop giving the view a value | the callers' values given to it can become dead (F23) |
-| D13 | D8's fix | the reads of z get another read view g keeps, not a constant | `xor(xor(x, x), xor(y, x))`, whose values then take the usual fixes: `xor(x, x)` is constant |
-| D14 | a view that doesn't matter read by an execution of a wide operation | giving it a constant would write that operation out, with everything it executes | the execution is given another view and stays one execution |
+| D13 | D8's fix | every kept view makes a value constant: z := x makes `xor(x, x)` constant, z := y `xor(y, y)` | the error stays; the tool stops |
+| D14 | a view that doesn't matter read by an execution | the reads get another kept view, not a literal | the execution stays one execution |

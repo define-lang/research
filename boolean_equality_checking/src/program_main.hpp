@@ -273,7 +273,7 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
       o << (first ? "" : ",") << "\"" << k << "\":" << n;
       first = false;
     }
-    o << "},\"write_s\":" << write_s << ",\"ands_s\":" << c.ands_s << ",\"phase_s\":{";
+    o << "},\"write_s\":" << write_s << ",\"phase_s\":{";
     first = true;
     for (const auto& [k, sec] : fixer.phase_s) {
       o << (first ? "" : ",") << "\"" << k << "\":" << sec;
@@ -380,17 +380,12 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
     return 0;
   }
   if (mode == "registry") {
-    // Edits to booleans.defcl: the registered operations apply to every
+    // Registering an operation: the registered operations apply to every
     // operation, so every one is checked again, but only for matches and
-    // spellings of the operations the edit added or moved (all of them with
-    // --focused 0).
+    // spellings of the one added (all of them with --focused 0). The order
+    // is by key, so registering one only puts it among the others.
     const std::vector<std::string> original = p.registered;
     std::vector<std::pair<std::string, std::vector<std::string>>> edits;
-    {
-      std::vector<std::string> swapped = original;
-      std::swap(swapped[0], swapped[1]);
-      edits.push_back({"swap " + original[0] + " " + original[1], swapped});
-    }
     if (opt.count("register")) {
       std::vector<std::string> added = original;
       added.push_back(opt["register"]);
@@ -399,11 +394,11 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
     for (const auto& [name, registered] : edits) {
       p.registered = registered;
       std::set<std::string> changed, added;
-      for (size_t i = 0; i < registered.size(); ++i) {
-        auto it = std::find(original.begin(), original.end(), registered[i]);
-        if (it == original.end()) added.insert(registered[i]);
-        if (it == original.end() || static_cast<size_t>(it - original.begin()) != i) changed.insert(registered[i]);
-      }
+      for (const std::string& r : registered)
+        if (std::find(original.begin(), original.end(), r) == original.end()) {
+          added.insert(r);
+          changed.insert(r);
+        }
       if (get("focused", 1) != 0) c.set_registry_edit(changed, added, !added.empty());
       CheckSummary sum;
       const double te = ProgramChecker::now();

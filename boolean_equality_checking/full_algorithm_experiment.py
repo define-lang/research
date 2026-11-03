@@ -243,7 +243,9 @@ def main(only: str, steps: str) -> None:
                         "--mode",
                         "edits",
                         "--edits",
-                        "200",
+                        # The wide program's edits cascade further: 100 of
+                        # them and undoing each fit the step's cap.
+                        "100" if name.endswith("wide") else "200",
                         "--patterns_in",
                         str(patterns),
                     ],

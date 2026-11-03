@@ -873,7 +873,7 @@ def generated_cases(rng: random.Random) -> list[tuple[list[str], str]]:
         s = program.Settings(
             statements=(target, target), views=(views, views), tracked=views <= 12
         )
-        s.wrapper_rate = s.literal_rate = s.constant_view_rate = 0.0
+        s.wrapper_rate = 0.0
         text, _ = program.boolean_operation("f", rng, s, [], {})
         out.append((ALL, render_program(text + "\n", ["f"])))
     # Programs that already compile at the limits: an `xor` chain of `and`s

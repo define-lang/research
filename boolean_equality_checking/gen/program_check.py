@@ -22,6 +22,7 @@ import json
 import random
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 
 BOOLEAN_STATEMENTS = ("and", "not", "call")
 NOT_BOOLEAN_STATEMENTS = ("cmp", "num", "run")
@@ -135,7 +136,6 @@ class Checker:
         self.program = program
         self.groups_memo: dict[str, list[list[int]]] = {}
         self.function_memo: dict[str, int] = {}
-        self.ands_memo: dict[str, int] = {}
         self.opposite_memo: dict[tuple[str, tuple[str, ...]], bool] = {}
 
     # Values.
@@ -228,20 +228,29 @@ class Checker:
                 return value
         raise KeyError(index)
 
+    def key(self, name: str) -> tuple[int, int, int]:
+        """Return a registered operation's key (DLP 59).
+
+        The fewest `and`s computing its function, then its number of read
+        views, then its truth table as a number.
+        """
+        views = self.arity(name)
+        table = self.own_function(name)
+        # Only operations of up to four read views can be registered.
+        return (fewest_ands(table, views) if views <= 4 else sys.maxsize, views, table)
+
     def follows(self, op: Operation) -> list[str]:
         """Return the registered operations an operation follows, in order.
 
-        `and` and `not` come first, then booleans.defcl; a registered
-        operation's own definition follows only the ones listed before it.
+        `and` and `not` come first, then the others by key; a registered
+        operation's own definition follows only the ones with smaller keys.
         """
-        out = ["and", "not"]
-        for name in self.program.registered:
-            if name == op.name:
-                break
-            # One in or executing a cycle has no function to match (DLP 9).
-            if not self.reaches_cycle(name):
-                out.append(name)
-        return out
+        # One in or executing a cycle has no function to match (DLP 9).
+        names = [n for n in self.program.registered if not self.reaches_cycle(n)]
+        names.sort(key=self.key)
+        if op.name in names:
+            names = names[: names.index(op.name)]
+        return ["and", "not", *names]
 
     def arity(self, name: str) -> int:
         """Return how many views a registered operation reads."""
@@ -613,8 +622,11 @@ class Checker:
         follows = self.follows(op)
         for i in boolean:
             statement = op.statements[i]
-            # Every execution of a registered operation, `and` and `not`
-            # included, is a spelling.
+            # Every execution of a registered operation, `and` included, is
+            # a spelling. A `not` isn't respelled: a value that's the `not`
+            # of another is written as that `not` (DLP 57's opposite values).
+            if statement.kind == "not":
+                continue
             name_of = (
                 statement.kind if statement.kind in ("and", "not") else statement.name
             )
@@ -643,16 +655,8 @@ class Checker:
         self, op: Operation, follows: list[str], a: tuple, b: tuple
     ) -> int:
         """Compare two spellings by DLP 59's precedence."""
-        ka = (
-            self.negations(op, a[1]),
-            self.ands(a[0]),
-            follows.index(a[0]),
-        )
-        kb = (
-            self.negations(op, b[1]),
-            self.ands(b[0]),
-            follows.index(b[0]),
-        )
+        ka = (self.negations(op, a[1]), follows.index(a[0]))
+        kb = (self.negations(op, b[1]), follows.index(b[0]))
         if ka != kb:
             return -1 if ka < kb else 1
         return self.compare_lists(op, a[1], b[1])
@@ -664,43 +668,6 @@ class Checker:
             statement = self.statement_of(op, a)
             count += statement is not None and statement.kind == "not"
         return count
-
-    def ands(self, name: str) -> int:
-        """Return the different `and`s of a definition written out with `and` and `not`."""
-        if name in ("and", "not"):
-            return 1 if name == "and" else 0
-        if name not in self.ands_memo:
-            nodes: dict[tuple[int, int], int] = {}
-            op = self.program.operations[name]
-            literals = [2 * (i + 1) for i in range(op.boolean_views)]
-            self.write_out(op, literals, nodes)
-            self.ands_memo[name] = len(nodes)
-        return self.ands_memo[name]
-
-    def write_out(
-        self, op: Operation, given: list[int], nodes: dict[tuple[int, int], int]
-    ) -> int:
-        """Return the literal of an operation's written view, adding its `and` nodes."""
-        literals = {i + 1: lit for i, lit in enumerate(given)}
-        for index, statement in enumerate(op.statements):
-            value = self.first_value(op, index)
-            args = [literals[self.resolve(op, a)] for a in statement.args]  # type: ignore[index]
-            if statement.kind == "copy":
-                literals[value] = args[0]
-            elif statement.kind == "not":
-                literals[value] = args[0] ^ 1
-            elif statement.kind == "and":
-                a, b = sorted(args)
-                key = (a, b)
-                if key not in nodes:
-                    nodes[key] = 2 * (1000000 + len(nodes))
-                literals[value] = nodes[key]
-            else:
-                assert statement.name is not None  # noqa: S101 - A `call` names its operation.
-                literals[value] = self.write_out(
-                    self.program.operations[statement.name], args, nodes
-                )
-        return literals[self.resolve(op, op.outputs[0])]  # type: ignore[index]
 
     def opposite_registered(self, name: str, follows: list[str]) -> bool:
         """Return whether an operation that's followed computes R's opposite."""
@@ -852,6 +819,39 @@ def operation_name(statement: Statement) -> str:
     return statement.name
 
 
+MIN_ANDS = {
+    row["class"]: row["ands"]
+    for row in json.loads(
+        (Path(__file__).parent.parent / "results" / "min_ands.json").read_text()
+    )
+}
+
+
+@functools.cache
+def npn_class(table: int) -> int:
+    """Return a four-view function's smallest truth table under NPN."""
+    best = 0xFFFF
+    for perm in itertools.permutations(range(4)):
+        for flips in range(16):
+            out = 0
+            for row in range(16):
+                source = sum(1 << perm[i] for i in range(4) if (row >> i) & 1) ^ flips
+                out |= ((table >> source) & 1) << row
+            best = min(best, out, out ^ 0xFFFF)
+    return best
+
+
+def fewest_ands(table: int, views: int) -> int:
+    """Return the fewest `and`s computing a function of up to four views.
+
+    The counts are min_ands_experiment.py's, by NPN class.
+    """
+    wide = 0
+    for row in range(16):
+        wide |= ((table >> (row & ((1 << views) - 1))) & 1) << row
+    return MIN_ANDS[npn_class(wide)]
+
+
 def projections(count: int) -> list[int]:
     """Return the function of each of `count` independent inputs."""
     out = []
@@ -980,11 +980,12 @@ SELF_TESTS: list[tuple[str, dict[str, dict[str, object]]]] = [
     ),
     (
         "registered or implies\n"
-        + OR
         + IMPLIES
+        + "op or bool 2\nnot 1\ncall implies 3 2\nout 4\nend\n"
         + "op sp bool 2\nnot 2\ncall or 1 3\nout 4\nend\n",
         {
-            # `or` is listed first, so its definition only follows `and` and `not`.
+            # `implies` has the smaller key (the same `and`s and views, a
+            # smaller truth table), so `or`'s definition follows it.
             "or": {},
             "implies": {},
             "sp": {

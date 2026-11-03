@@ -57,10 +57,9 @@ class ProgramFixer {
     return out;
   }
 
-  // What each removed operation, or removed written view, was replaced by,
-  // one line each: NAME VIEW literal T|F, NAME VIEW view K (from 1), or NAME
-  // VIEW statement KIND [OP] ARG... with arguments as view numbers (the
-  // views the operation has after any were dropped).
+  // What each removed operation was replaced by, one line each: NAME 0 view
+  // K (from 1), or NAME 0 statement KIND [OP] ARG... with arguments as view
+  // numbers (the views the operation has after any were dropped).
   void write_replacements(std::ostream& out) const {
     // NAME - dropped K ...: read views removed (from 1, among the views the
     // operation was written with).
@@ -74,7 +73,6 @@ class ProgramFixer {
         const Replacement& r = views[o];
         if (r.kind.empty()) continue;
         out << name << " " << o << " " << r.kind;
-        if (r.kind == "literal") out << " " << r.literal;
         if (r.kind == "view") out << " " << r.view + 1;
         if (r.kind == "statement") {
           out << " " << r.statement.kind;
@@ -86,11 +84,9 @@ class ProgramFixer {
   }
 
  private:
-  // How the callers of a removed operation, or of a removed written view,
-  // compute its value instead.
+  // How the callers of a removed operation compute its value instead.
   struct Replacement {
-    std::string kind;  // literal, view, statement
-    std::string literal;
+    std::string kind;  // view, statement
     int view = 0;  // the view whose argument it is, from 0
     PStmt statement;  // its arguments' ids are view numbers
   };
@@ -112,7 +108,6 @@ class ProgramFixer {
     }
     const double t0 = ProgramChecker::now();
     c_.forget_values();
-    forget_specialized(res.name);
     {
       Phase p{phase_s, "replacements"};
       apply_replacements(index);
@@ -144,11 +139,15 @@ class ProgramFixer {
         res.status = "cycle";
         break;
       }
+      // A literal or a value that never changes is the programmer's to
+      // fix (DLP 57).
       if (rep.literal_stmt >= 0) {
-        Phase p{phase_s, "literals"};
-        simplify_literals(index);
-        ++res.fixes["literal"];
-        continue;
+        res.status = "literal";
+        break;
+      }
+      if (rep.redundant_kind == "constant") {
+        res.status = "constant";
+        break;
       }
       if (!rep.redundant_kind.empty()) {
         // Every redundant value, up to an opposite value that's already a
@@ -156,7 +155,6 @@ class ProgramFixer {
         // every function, and doing them together saves a check of the
         // whole operation for each.
         Phase p{phase_s, "redundant values"};
-        bool literals = false;
         for (const Report::Merge& m : rep.merges) {
           if (m.opposite) {
             PStmt& st = stmt_of(op, m.value);
@@ -167,17 +165,16 @@ class ProgramFixer {
             continue;
           }
           replace_reads(op, m.value, m.with);
-          literals |= m.with.is_literal();
-          ++res.fixes[m.with.is_literal() ? "constant" : "redundant"];
+          ++res.fixes["redundant"];
         }
-        if (literals) simplify_literals(index);
         continue;
       }
       if (!rep.unused_views.empty()) {
         Phase p{phase_s, "unused views"};
-        drop_views(index, rep.unused_views);
-        // The values that read a dropped view now compute something else.
-        c_.forget_values();
+        if (!drop_views(index, rep.unused_views)) {
+          res.status = "unused view";
+          break;
+        }
         ++res.fixes["unused view"];
         continue;
       }
@@ -289,7 +286,6 @@ class ProgramFixer {
         continue;
       }
       inline_call(reg, k);
-      forget_specialized(reg.name);
       ++written;
     }
   }
@@ -327,8 +323,6 @@ class ProgramFixer {
     auto name = [](const Report::Found& f) { return f.op.rfind("not:", 0) == 0 ? f.op.substr(4) : f.op; };
     const int na = negations(a), nb = negations(b);
     if (na != nb) return na < nb;
-    const int ca = c_.ands_of_name(name(a)), cb = c_.ands_of_name(name(b));
-    if (ca != cb) return ca < cb;
     const std::vector<std::string> order = c_.follows(op);
     const auto pa = std::find(order.begin(), order.end(), name(a));
     const auto pb = std::find(order.begin(), order.end(), name(b));
@@ -495,26 +489,26 @@ class ProgramFixer {
 
   // DLP 57's refactoring step 6: read views that don't matter are removed.
   // The written view doesn't depend on them, so their reads can be given
-  // any value without changing it: another read view the operation keeps,
-  // so that no execution is given a literal and written out. When it keeps
-  // none, its written view is a constant and nothing reads the views any
-  // more, so the literal is never used. Then the views after them move
-  // down, and every caller stops giving them a value
-  // (`apply_replacements`).
-  void drop_views(size_t index, const std::vector<int>& views) {
-    {
-      POp& op = p_.ops[index];
+  // any value without changing it: the first read view the operation keeps
+  // that makes none of its values constant, which would be an error the
+  // fix loop doesn't fix. Then the views after them move down, and every
+  // caller stops giving them a value (`apply_replacements`). Returns false,
+  // changing nothing, when no kept view will do.
+  bool drop_views(size_t index, const std::vector<int>& views) {
+    const POp original_op = p_.ops[index];
+    bool found = false;
+    for (int y = 1; y <= original_op.nbool && !found; ++y) {
+      if (std::find(views.begin(), views.end(), y) != views.end()) continue;
       PArg with;
-      with.literal = "F";
-      for (int v = 1; v <= op.nbool; ++v)
-        if (std::find(views.begin(), views.end(), v) == views.end()) {
-          with.literal.clear();
-          with.id = v;
-          break;
-        }
-      for (int v : views) replace_reads(op, v, with);
+      with.id = y;
+      for (int v : views) replace_reads(p_.ops[index], v, with);
+      // The values that read a dropped view now compute something else.
+      c_.forget_values();
+      found = !c_.has_constant_value(index);
+      if (!found) p_.ops[index] = original_op;
     }
-    simplify_literals(index);
+    c_.forget_values();
+    if (!found) return false;
     POp& op = p_.ops[index];
     std::vector<int> original = dropped_.count(op.name) ? dropped_.at(op.name).first : std::vector<int>{};
     const int arity = dropped_.count(op.name) ? dropped_.at(op.name).second : op.nbool;
@@ -535,175 +529,7 @@ class ProgramFixer {
     for (PArg& a : op.outs)
       if (!a.is_literal() && a.id <= op.nbool) a.id = moved.at(a.id);
     op.nbool = next - 1;
-  }
-
-  // DLP 57's simplification of a value that never changes, until no
-  // boolean statement is given a literal: `x and false` is false, `x and
-  // true` is x, the `not` of a literal is the other one, and an execution
-  // given a literal computes what the executed operation computes with it.
-  void simplify_literals(size_t index) { simplify_literals(p_.ops[index], !c_.in_registered_reach(p_.ops[index].name)); }
-
-  // `specialize`: an execution written out uses its operation's statements
-  // already simplified with the same literals, kept for the next one. Only
-  // where no registered operation executes op, so that the copy's
-  // executions can't lead back to it.
-  void simplify_literals(POp& op, bool specialize) {
-    for (;;) {
-      size_t k = 0;
-      for (; k < op.stmts.size(); ++k) {
-        const PStmt& s = op.stmts[k];
-        if (!is_boolean_statement(s.kind)) continue;
-        if (std::any_of(s.args.begin(), s.args.end(), [](const PArg& a) { return a.is_literal(); })) break;
-      }
-      if (k == op.stmts.size()) return;
-      PStmt s = op.stmts[k];
-      const int v = s.ids[0];
-      auto lit = [](bool b) {
-        PArg a;
-        a.literal = b ? "T" : "F";
-        return a;
-      };
-      auto truth = [](const PArg& a) { return a.literal == "T"; };
-      if (s.kind == "not") {
-        op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k));
-        replace_reads(op, v, lit(!truth(s.args[0])));
-        continue;
-      }
-      if (s.kind == "and") {
-        const PArg& a = s.args[0];
-        const PArg& b = s.args[1];
-        PArg with;
-        if (a.is_literal() && b.is_literal())
-          with = lit(truth(a) && truth(b));
-        else {
-          const PArg& l = a.is_literal() ? a : b;
-          const PArg& other = a.is_literal() ? b : a;
-          with = truth(l) ? other : lit(false);
-        }
-        op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k));
-        replace_reads(op, v, with);
-        continue;
-      }
-      simplify_call(op, k, specialize);
-    }
-  }
-
-  // An execution given literals: what the executed operation computes with
-  // them, over its other arguments.
-  void simplify_call(POp& op, size_t k, bool specialize) {
-    const PStmt s = op.stmts[k];
-    const int v = s.ids[0];
-    const std::vector<uint64_t>& table = c_.recorded(s.name).table;
-    std::vector<int> free;
-    uint64_t fixed = 0;
-    for (size_t j = 0; j < s.args.size(); ++j) {
-      if (s.args[j].is_literal())
-        fixed |= static_cast<uint64_t>(s.args[j].literal == "T") << j;
-      else
-        free.push_back(static_cast<int>(j));
-    }
-    const size_t r = free.size();
-    std::vector<uint64_t> residual(r <= 6 ? 1 : (size_t{1} << (r - 6)), 0);
-    for (uint64_t m = 0; m < (uint64_t{1} << r); ++m) {
-      uint64_t full = fixed;
-      for (size_t i = 0; i < r; ++i) full |= ((m >> i) & 1) << free[i];
-      if ((table[full >> 6] >> (full & 63)) & 1) residual[m >> 6] |= 1ULL << (m & 63);
-    }
-    const uint64_t mask = r >= 6 ? ~0ULL : ((1ULL << (1u << r)) - 1);
-    auto all = [&](uint64_t value) {
-      for (size_t w = 0; w < residual.size(); ++w)
-        if (residual[w] != (value & mask)) return false;
-      return true;
-    };
-    auto lit = [](bool b) {
-      PArg a;
-      a.literal = b ? "T" : "F";
-      return a;
-    };
-    auto arg = [&](size_t i) { return s.args[static_cast<size_t>(free[i])]; };
-    if (all(0) || all(~0ULL)) {
-      op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k));
-      replace_reads(op, v, lit(!all(0)));
-      return;
-    }
-    if (r <= 6) {
-      static const uint64_t kVar[6] = {0xAAAAAAAAAAAAAAAAULL, 0xCCCCCCCCCCCCCCCCULL, 0xF0F0F0F0F0F0F0F0ULL,
-                                       0xFF00FF00FF00FF00ULL, 0xFFFF0000FFFF0000ULL, 0xFFFFFFFF00000000ULL};
-      const uint64_t t = residual[0];
-      for (size_t i = 0; i < r; ++i) {
-        if (t == (kVar[i] & mask)) {
-          op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k));
-          replace_reads(op, v, arg(i));
-          return;
-        }
-        if (t == (~kVar[i] & mask)) {
-          PStmt& n = op.stmts[k];
-          n.kind = "not";
-          n.name.clear();
-          n.args = {arg(i)};
-          return;
-        }
-      }
-      // An `and` of two arguments, either of them negated.
-      if (r == 2)
-        for (int na = 0; na < 2; ++na)
-          for (int nb = 0; nb < 2; ++nb) {
-            const uint64_t x = na ? ~kVar[0] : kVar[0], y = nb ? ~kVar[1] : kVar[1];
-            for (int out = 0; out < 2; ++out) {
-              const uint64_t f = out ? ~(x & y) : (x & y);
-              if ((f & mask) != t) continue;
-              rewrite(op, k, "and", "", {negated(op, k, arg(0), na), negated(op, k, arg(1), nb)}, out != 0);
-              return;
-            }
-          }
-      // A registered operation of the same arity that op follows and that
-      // doesn't execute it, with its result negated or not.
-      for (const std::string& name : c_.follows(op)) {
-        if (name == "and" || name == "not" || executes(name, op.name)) continue;
-        const POp& reg = p_.ops[static_cast<size_t>(c_.index_of(name))];
-        if (static_cast<size_t>(reg.nbool) != r) continue;
-        const uint64_t rt = c_.recorded(name).table[0];
-        Registered rr{name, static_cast<uint32_t>(r), rt};
-        for (const std::vector<int>& perm : permutations(static_cast<uint32_t>(r))) {
-          uint64_t f = 0;
-          for (uint64_t m = 0; m < (uint64_t{1} << r); ++m) f |= static_cast<uint64_t>(permuted_bit(rr, perm, static_cast<uint32_t>(m))) << m;
-          for (int out = 0; out < 2; ++out) {
-            if (((out ? ~f : f) & mask) != t) continue;
-            std::vector<PArg> args(r);
-            for (size_t i = 0; i < r; ++i) args[i] = arg(static_cast<size_t>(perm[i]));
-            rewrite(op, k, "call", name, args, out != 0);
-            return;
-          }
-        }
-      }
-    }
-    // Otherwise the executed operation's statements, written out in this
-    // one with the literals given to its views, which simplifying then
-    // removes; the program keeps its value operations, as the termination
-    // proof models it.
-    // Only the outermost write-out is timed: simplifying its copy writes
-    // out more.
-    struct Depth {
-      int& depth;
-      ~Depth() { --depth; }
-    } depth{++write_out_depth_};
-    std::optional<Phase> p;
-    if (write_out_depth_ == 1) p.emplace(phase_s, "literal write-outs");
-    if (!specialize) {
-      inline_call(op, k);
-      return;
-    }
-    std::string key = s.name;
-    for (const PArg& a : s.args) key += a.is_literal() ? " " + a.literal : " *";
-    auto it = specialized_.find(key);
-    if (it == specialized_.end()) {
-      POp body = p_.ops[static_cast<size_t>(c_.index_of(s.name))];
-      for (int view = 1; view <= body.nbool; ++view)
-        if (s.args[static_cast<size_t>(view - 1)].is_literal()) replace_reads(body, view, s.args[static_cast<size_t>(view - 1)]);
-      simplify_literals(body, true);
-      it = specialized_.emplace(key, std::move(body)).first;
-    }
-    inline_body(op, k, it->second);
+    return true;
   }
 
   // Replaces statement k, an execution, with the executed operation's own
@@ -735,63 +561,18 @@ class ProgramFixer {
     replace_reads(op, s.ids[0], result);
   }
 
-  // The value of statement k becomes kind(args), negated if `negate`.
-  static void rewrite(POp& op, size_t k, const std::string& kind, const std::string& name, const std::vector<PArg>& args,
-                      bool negate) {
-    PStmt exec;
-    exec.kind = kind;
-    exec.name = name;
-    exec.args = args;
-    if (!negate) {
-      exec.ids = op.stmts[k].ids;
-      op.stmts[k] = std::move(exec);
-      return;
-    }
-    exec.ids = {op.next_id++};
-    PStmt& n = op.stmts[k];
-    n.kind = "not";
-    n.name.clear();
-    PArg e;
-    e.id = exec.ids[0];
-    n.args = {e};
-    op.stmts.insert(op.stmts.begin() + static_cast<std::ptrdiff_t>(k), std::move(exec));
-  }
-
-  // The argument, or its `not`: an existing `not` statement of it if one
-  // comes before statement k, otherwise a new one right before k.
-  static PArg negated(POp& op, size_t& k, const PArg& a, bool negate) {
-    if (!negate) return a;
-    for (size_t j = 0; j < k; ++j)
-      if (op.stmts[j].kind == "not" && op.stmts[j].args[0] == a) {
-        PArg x;
-        x.id = op.stmts[j].ids[0];
-        return x;
-      }
-    PStmt n;
-    n.kind = "not";
-    n.args = {a};
-    n.ids = {op.next_id++};
-    PArg x;
-    x.id = n.ids[0];
-    op.stmts.insert(op.stmts.begin() + static_cast<std::ptrdiff_t>(k), std::move(n));
-    ++k;
-    return x;
-  }
-
   // After an operation compiles: if it's a boolean operation that only
-  // names a constant, one of its views, or one statement it wraps, it's
-  // removed and its callers compute that instead; a mixed operation's
-  // constant boolean written views are removed the same way (DLP 57's
-  // refactoring step 4).
+  // names one of its views, or one statement it wraps (DLP 59's wrapper),
+  // it's removed and its callers compute that instead. A mixed operation
+  // keeps its written views: a caller's values from a `run` are boolean
+  // inputs there, and giving the caller the value instead would change
+  // its functions, and could make one never change.
   void settle(size_t index) {
     POp& op = p_.ops[index];
     if (op.boolean) {
       const PArg& o = op.outs[0];
       Replacement r;
-      if (o.is_literal()) {
-        r.kind = "literal";
-        r.literal = o.literal;
-      } else if (o.id <= op.views()) {
+      if (o.id <= op.views()) {
         r.kind = "view";
         r.view = o.id - 1;
       } else {
@@ -815,29 +596,7 @@ class ProgramFixer {
       if (c_.is_registered(op.name)) return;
       replacements_[op.name] = {r};
       removed_.insert(op.name);
-      return;
     }
-    std::vector<Replacement> views(op.outs.size());
-    bool any = false;
-    std::vector<PArg> kept;
-    for (size_t o = 0; o < op.outs.size(); ++o) {
-      const PArg& a = op.outs[o];
-      if (a.is_literal() && a.literal[0] != '#') {
-        views[o].kind = "literal";
-        views[o].literal = a.literal;
-        any = true;
-      } else if (!a.is_literal() && a.id <= op.nbool) {
-        views[o].kind = "view";
-        views[o].view = a.id - 1;
-        any = true;
-      } else {
-        kept.push_back(a);
-      }
-    }
-    if (!any) return;
-    op.outs = kept;
-    replacements_[op.name] = views;
-    c_.check(index, true, "tt");
   }
 
   // Fixes each operation in `ops` in order, each after the ones it executes,
@@ -882,28 +641,19 @@ class ProgramFixer {
     *progress << std::endl;
   }
 
-  // The operation is about to change: its statements simplified with
-  // literals aren't its statements any more.
-  void forget_specialized(const std::string& name) {
-    for (auto it = specialized_.lower_bound(name + " "); it != specialized_.end() && it->first.rfind(name + " ", 0) == 0;)
-      it = specialized_.erase(it);
-  }
-
   // Whether an operation executes one that was removed, or gives values to
-  // views that were dropped or to written views that were removed.
+  // views that were dropped.
   bool stale(const POp& op) const {
     for (const PStmt& s : op.stmts) {
       if (s.kind != "call" && s.kind != "run") continue;
       if (removed_.count(s.name)) return true;
       const auto d = dropped_.find(s.name);
       if (s.kind == "call" && d != dropped_.end() && static_cast<int>(s.args.size()) == d->second.second) return true;
-      const auto r = replacements_.find(s.name);
-      if (s.kind == "run" && r != replacements_.end() && s.ids.size() == r->second.size()) return true;
     }
     return false;
   }
 
-  // Calls of removed operations, and values of removed written views, in
+  // Calls of removed operations, and values given to dropped views, in
   // an operation about to be fixed.
   void apply_replacements(size_t index) {
     POp& op = p_.ops[index];
@@ -921,50 +671,23 @@ class ProgramFixer {
     for (size_t k = 0; k < op.stmts.size(); ++k) {
       PStmt& s = op.stmts[k];
       auto it = replacements_.find(s.name);
-      if (it == replacements_.end() || (s.kind != "call" && s.kind != "run")) continue;
-      if (s.kind == "call") {
-        const Replacement& r = it->second[0];
-        const int v = s.ids[0];
-        if (r.kind == "literal") {
-          PArg l;
-          l.literal = r.literal;
-          op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k--));
-          replace_reads(op, v, l);
-        } else if (r.kind == "view") {
-          const PArg a = s.args[static_cast<size_t>(r.view)];
-          op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k--));
-          replace_reads(op, v, a);
-        } else {
-          PStmt n = r.statement;
-          for (PArg& a : n.args)
-            if (!a.is_literal()) a = s.args[static_cast<size_t>(a.id - 1)];
-          n.ids = s.ids;
-          s = std::move(n);
-          // The wrapped statement may itself call a removed operation.
-          --k;
-        }
-        continue;
+      if (it == replacements_.end() || s.kind != "call") continue;
+      const Replacement& r = it->second[0];
+      const int v = s.ids[0];
+      if (r.kind == "view") {
+        const PArg a = s.args[static_cast<size_t>(r.view)];
+        op.stmts.erase(op.stmts.begin() + static_cast<std::ptrdiff_t>(k--));
+        replace_reads(op, v, a);
+      } else {
+        PStmt n = r.statement;
+        for (PArg& a : n.args)
+          if (!a.is_literal()) a = s.args[static_cast<size_t>(a.id - 1)];
+        n.ids = s.ids;
+        s = std::move(n);
+        // The wrapped statement may itself call a removed operation.
+        --k;
       }
-      // A run already rewritten has fewer values than the replacement has
-      // views.
-      if (s.ids.size() != it->second.size()) continue;
-      std::vector<int> ids;
-      for (size_t o = 0; o < s.ids.size(); ++o) {
-        const Replacement& r = it->second[o];
-        if (r.kind.empty()) {
-          ids.push_back(s.ids[o]);
-          continue;
-        }
-        PArg with;
-        if (r.kind == "literal")
-          with.literal = r.literal;
-        else
-          with = s.args[static_cast<size_t>(r.view)];
-        replace_reads(op, s.ids[o], with);
-      }
-      s.ids = ids;
     }
-    simplify_literals(index);
   }
 
   // Removes the operations that were replaced, and puts every operation
@@ -1003,10 +726,6 @@ class ProgramFixer {
   // Operations whose definitions a fix of another one wrote executions out
   // in, by index.
   std::set<size_t> rewritten_;
-  // Each operation's statements simplified with literals given to some of
-  // its views, by NAME then T, F or * for each view.
-  std::map<std::string, POp> specialized_;
-  int write_out_depth_ = 0;
   // Operations written with more than 256 boolean statements.
   std::set<std::string> over_limit_;
 };

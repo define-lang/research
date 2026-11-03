@@ -32,16 +32,15 @@ and how many planted equalities each one finds.
     spellings of a value, and whether it makes the fixes converge.
   - [full_algorithm.md](full_algorithm.md): every check of DLPs 57–59 at
     once on whole generated programs that follow the rules, with the fix
-    loop that makes them compile. Both are linear: 18.6 s to check 150,000
-    operations and 159 s to fix them. Writing out an execution given a
-    constant can cascade past DLP 57's statement limit, which the fix loop
-    can't undo.
+    loop that makes them compile, and the fewest `and`s of every function
+    of up to four views, which orders registered operations (DLP 59).
+    Checking and fixing are linear: 18.1 s to check 150,000 operations
+    and 164 s to fix them.
   - [proof/termination.md](proof/termination.md): a proof, in English and
     in Lean (`proof/fixing_termination.lean`), that fixing a program under
-    DLP 57's and DLP 59's rules always terminates, including simplifying
-    constants, removing constant written views and read views that don't
-    matter, and writing out the executions that would make a match's fix
-    an execution cycle.
+    DLP 57's and DLP 59's rules always terminates, including removing read
+    views that don't matter and writing out the executions that would make
+    a match's fix an execution cycle.
 
 ## Recommendations
 
@@ -62,9 +61,9 @@ the SAT sweeping the earlier studies recommended there saves at most the
 time of grouping tables by function, and costs much more on a first check
 with no stored patterns: on whole programs of 16–20-input operations, 44 s
 against 1.5 s ([full_algorithm.md](full_algorithm.md)). The truth tables
-take at most 52 ms for 256 statements at 20 inputs, and up to 106 ms for
+take at most 52 ms for 256 statements at 20 inputs, and up to 98 ms for
 an operation that executes several 16–20-view operations; the whole
-2,000-operation program of them checks in 19.9 s. Truth tables are
+2,000-operation program of them checks in 19.6 s. Truth tables are
 exact and deterministic, so the classes are a property of the graph.
 
 What the earlier studies measured beyond that, for value operations past

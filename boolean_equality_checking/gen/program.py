@@ -2,11 +2,10 @@
 
 A program is a list of value operations in dependency order (every
 operation comes after the operations it executes), and the project's
-`booleans.defcl`: the registered boolean operations, in their declared
-order. This module generates programs (`generate`) and reads and writes
+`booleans.defcl`: the set of registered boolean operations. This module generates programs (`generate`) and reads and writes
 them in this text format:
 
-    registered NAME ...          the booleans.defcl list, in order (first line)
+    registered NAME ...          the booleans.defcl set, in any order (first line)
     op NAME bool VIEWS           a boolean value operation with VIEWS read views
     op NAME mixed NBOOL NNUM     a value operation that isn't purely boolean:
                                  NBOOL boolean read views, then NNUM numeric ones
@@ -61,6 +60,8 @@ Semantics, per operation:
 The rules (DLPs 57, 58, and 59), each reported at its first violation:
 
 - `limits`: more than 256 boolean statements, or more than 20 boolean inputs.
+- `cycle`: an execution that leads, through other value operations, back to
+  the operation it's in (DLP 9).
 - `literal`: a boolean statement given a literal.
 - `wrapper`: a boolean value operation whose only boolean statement is an
   `and`, a `not`, or a `call` of a registered operation.
@@ -69,6 +70,9 @@ The rules (DLPs 57, 58, and 59), each reported at its first violation:
   statement's value, or always the opposite of one, unless the statement is
   the `not` of that value. A value that's the same as one value and the
   opposite of another is reported as the same.
+- `dead`: every boolean statement whose value reaches no exit.
+- `unused_view`: every read view of a boolean value operation its written
+  view doesn't depend on.
 - `order_arguments`: a boolean statement whose arguments to a group of
   interchangeable views aren't in rank order, the lowest to the view
   defined first. Two views of an operation are interchangeable when swapping
@@ -80,8 +84,10 @@ The rules (DLPs 57, 58, and 59), each reported at its first violation:
   same for its own arguments (in view order), then the statement itself;
   then the same for the written views in order. A `copy` comes right before
   the execution that reads it and isn't otherwise ordered.
-- `match`: a boolean statement's value v and a registered operation R (not
-  R itself when checking R's definition) with arguments: at most four
+- `match`: a boolean statement's value v and a registered operation R
+  (`and` and `not` included; when checking a registered operation's
+  definition, only `and`, `not`, and the ones with smaller keys) with
+  arguments: at most four
   distinct values that come before v (boolean inputs and earlier boolean
   statements' values), given to R's views in some order, every one
   mattering, with v always R of them, or always its opposite when no
@@ -90,14 +96,20 @@ The rules (DLPs 57, 58, and 59), each reported at its first violation:
   The statements of a match are v's and every statement nothing reads once
   v comes from the execution; there must be at least two, or three for an
   opposite. The reported one removes the most statements, then has the
-  earliest value, then R's name first alphabetically, then the arguments
-  first in rank order.
+  earliest value, then R first (`and`, `not`, then by key), then the
+  arguments first in rank order.
 - `spelling`: a `call` of a registered operation, single execution, whose
   value another single execution of a registered operation on values before
   it also computes, with a key that comes first: (number of arguments that
-  are the value of a `not` statement, the number of different `and`s in the
-  operation's definition with every execution written out as `and` and
-  `not`, its place in `booleans.defcl`, the arguments' ranks in view order).
+  are the value of a `not` statement, the operation's place: `and`, `not`,
+  then by key, the arguments' ranks in view order). `and` and `not`
+  statements are spellings too.
+
+A registered operation's key (DLP 59) is the fewest `and`s in any
+and-inverter graph computing its function (`src/min_ands.hpp`, found by
+`min_ands_experiment.py`), then its number of read views, then its truth
+table as a number, view 1 the lowest bit of the row. No two registered
+operations compute the same function, so keys are distinct.
 
 Ranks (DLP 58): read views first, in order; then literals, by value quality
 (`boolean` before `number`) and text; then statement values, compared by
@@ -116,17 +128,18 @@ import functools
 import random
 from dataclasses import dataclass, field
 
-# booleans.defcl, in its declared order.
-REGISTERED = ["or", "implies", "xor", "eq", "mux", "maj"]
+# booleans.defcl, a set: the order is by key (DLP 59).
+REGISTERED = ["implies", "or", "xor", "eq", "mux", "maj"]
 # The registered operations' definitions, each after the ones it executes:
 # (views, statements, written view). These are the forms the fix loop
 # reaches from definitions written with `and` and `not` only: each one
-# follows `and`, `not`, and the registered operations listed before it
-# (DLP 59), so `xor` is written with `or`, `eq` is the `not` of `xor`, and
-# `maj` is a `mux`.
+# follows `and`, `not`, and the registered operations with smaller keys
+# (implies, or, xor, eq, mux, maj: the fewest `and`s, then views, then
+# the truth table), so `or` is written with `implies`, `xor` with `or`,
+# `eq` is the `not` of `xor`, and `maj` is a `mux`.
 DEFINITIONS = {
-    "or": (2, ["not 1", "not 2", "and 3 4", "not 5"], 6),
     "implies": (2, ["not 2", "and 1 3", "not 4"], 5),
+    "or": (2, ["not 1", "call implies 3 2"], 4),
     "xor": (2, ["not 2", "and 1 3", "not 1", "and 2 5", "call or 4 6"], 7),
     "eq": (2, ["call xor 1 2", "not 3"], 4),
     "mux": (3, ["and 1 2", "not 1", "and 3 5", "call or 4 6"], 7),
@@ -162,9 +175,9 @@ class Settings:
     # operation already has. Off for wide operations, where the fix loop
     # removes them instead.
     tracked: bool = True
-    # Rates of deliberate errors in the programs the fix loop starts from.
-    constant_view_rate: float = 0.01
-    literal_rate: float = 0.01
+    # The rate of a deliberate error in the programs the fix loop starts
+    # from. Literals and values that never change are the programmer's to
+    # fix (DLP 57), so the programs have none.
     wrapper_rate: float = 0.005
     copy_rate: float = 0.05
 
@@ -441,19 +454,22 @@ def _close(b: Builder) -> int:
     while len(b.unused) > 1:
         x, y = b.unused[-2], b.unused[-1]
         names = ["and", "or", "xor", "implies", "eq"]
+        tables = {}
         for name in names:
-            table = (
-                (
-                    FUNCTIONS[name](b.tables[x], b.tables[y])
-                    if name != "and"
-                    else b.tables[x] & b.tables[y]
-                )
-                if b.tracked
-                else 0
-            )
-            # Every value is read, so there are no dead statements; if no
-            # combination is new, the last one is a redundant value.
-            if b.new(table) or name == names[-1]:
+            if not b.tracked:
+                tables[name] = 0
+            elif name == "and":
+                tables[name] = b.tables[x] & b.tables[y]
+            else:
+                tables[name] = FUNCTIONS[name](b.tables[x], b.tables[y])
+        # A value that never changes is the programmer's to fix (DLP 57), so
+        # none is made; if no other combination is new, the last one that
+        # changes is a redundant value.
+        changing = [n for n in names if tables[n] & b.mask not in (0, b.mask)] or names
+        for name in names:
+            table = tables[name]
+            # Every value is read, so there are no dead statements.
+            if b.new(table) or name == changing[-1]:
                 line = f"and {x} {y}" if name == "and" else f"call {name} {x} {y}"
                 b.use(x)
                 b.use(y)
@@ -487,9 +503,6 @@ def boolean_operation(
     target = rng.randint(*s.statements)
     while len(b.lines) < target:
         _boolean_statement(b, rng, s, users)
-    if rng.random() < s.literal_rate:
-        x = rng.choice(b.boolean)
-        b.emit(f"and {x} T", b.tables[x] if b.tracked else 0)
     out = _close(b)
     if b.tracked:
         # Random statements often leave a read view that doesn't matter,
@@ -499,10 +512,6 @@ def boolean_operation(
         for i in unused_views(so_far, known):
             table = FUNCTIONS["xor"](b.tables[out], b.tables[i + 1])
             out = b.emit(f"call xor {out} {i + 1}", table)
-    if rng.random() < s.constant_view_rate:
-        n = b.emit(f"not {out}", 0)
-        out = b.emit(f"and {out} {n}", 0)
-        b.tables[out] = 0
     table = b.tables.get(out) if b.tracked else None
     return b.text([str(out)]), UserOp(name, views, table, _body(b.lines), out)
 
@@ -598,11 +607,6 @@ def mixed_operation(
     for _ in range(bool_outs):
         if b.unused:
             v = b.unused.pop()
-            if rng.random() < s.constant_view_rate:
-                n = b.emit(f"not {v}", 0)
-                b.unused.remove(n)
-                v = b.emit(f"and {v} {n}", 0)
-                b.unused.remove(v)
             outs.append(str(v))
             out_kinds.append(True)
     while b.unused:

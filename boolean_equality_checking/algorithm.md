@@ -9,9 +9,9 @@ matches need every value's truth table anyway, so SAT sweeping at 13–20
 inputs saves at most the time of grouping the tables by function, and on a
 first check with no stored patterns it costs far more: 44 s against 1.5 s
 on a whole program of 16–20-input operations, where the tables themselves
-took 11 s. That's `auto` in `beq program` now: truth tables up to 20
+took 11 s. That's `auto` in `beq program`: truth tables up to 20
 inputs, SAT only past them, and the whole check of that program takes
-19.9 s, 13.1 s of it tables ([full_algorithm.md](full_algorithm.md)). Executions are looked
+19.6 s, 13.0 s of it tables ([full_algorithm.md](full_algorithm.md)). Executions are looked
 up in the executed operation's recorded table, or evaluated as its
 written-out and-inverter graph when that has at most 16 nodes per view.
 

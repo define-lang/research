@@ -7,6 +7,8 @@
 #include <chrono>
 #include <fstream>
 #include <functional>
+#include <limits>
+#include <tuple>
 #include <map>
 #include <memory>
 #include <set>
@@ -17,6 +19,7 @@
 
 #include "hier.hpp"
 #include "match.hpp"
+#include "min_ands.hpp"
 
 namespace beq {
 
@@ -141,7 +144,6 @@ struct Recorded {
   std::vector<int> group;       // a label per read view: equal labels are interchangeable
   std::vector<char> out_boolean;  // a mixed operation: which written views are boolean
   uint64_t hash = 0;
-  int ands = -1;  // a registered operation's different `and`s, written out
   // The written view's function also as an and-inverter graph over the read
   // views (nodes from views + 1), with every execution written out and
   // structural hashing, when that's smaller than looking each minterm up in
@@ -203,10 +205,10 @@ struct Report {
   std::map<std::string, std::string> errors;
   // For the fixes.
   int redundant_value = 0, redundant_other = 0;
-  // The first redundant value and every later one, up to the first that
-  // is the opposite of an earlier value and already a `not`, with what
-  // replaces it: an earlier value, T or F, or for an opposite value, the
-  // `not` of the earlier value.
+  // Unless the first redundant value never changes: it and every later one,
+  // up to the first that never changes or is the opposite of an earlier
+  // value and already a `not`, with what replaces it: an earlier value, or
+  // for an opposite value, the `not` of the earlier value.
   struct Merge {
     int value = 0;
     PArg with;
@@ -255,8 +257,6 @@ class ProgramChecker {
   size_t search_hits = 0, search_misses = 0;
   size_t kept_hits() const { return search_hits + search_cache_.hits; }
   size_t kept_misses() const { return search_misses + search_cache_.misses; }
-  // Seconds spent counting registered operations' `and`s again.
-  double ands_s = 0;
 
   // While the fix loop works on one operation, every value keeps its
   // function from one fix to the next (until a read view is dropped), so
@@ -733,6 +733,18 @@ class ProgramChecker {
     return rep;
   }
 
+  // Whether one of the operation's boolean values never changes.
+  bool has_constant_value(size_t index) const {
+    const POp& op = p_.ops[index];
+    const OpInfo info = analyze(op);
+    size_t words = 1;
+    const std::vector<uint64_t> t = tables(op, info, words);
+    const std::vector<uint64_t> keys = tt_keys(info, t, words);
+    for (const PStmt& s : op.stmts)
+      if (is_boolean_statement(s.kind) && (keys[node_of(info.lit.at(s.ids[0]))] >> 1) == (keys[0] >> 1)) return true;
+    return false;
+  }
+
   // Boolean statements whose value doesn't reach a written view or a
   // statement that isn't boolean (DLP 57), in statement order.
   static std::vector<int> dead_statements(const POp& op, const OpInfo& info) {
@@ -877,56 +889,6 @@ class ProgramChecker {
       }
       r.hash = h;
     }
-    r.ands = -1;
-    // A registered operation's `and`s count every operation its definition
-    // executes, written out, so they change when one of those changes.
-    if (registered_reach_.count(op.name))
-      for (const std::string& name : p_.registered)
-        if (recorded_.count(name)) recorded_[name].ands = -1;
-  }
-
-  // A registered operation's number of different `and`s with every
-  // execution in its definition written out, structurally hashed.
-  int ands_of(const std::string& name) {
-    Recorded& r = recorded_.at(name);
-    if (r.ands >= 0) return r.ands;
-    const double start = now();
-    struct Add {
-      double& total;
-      double start;
-      ~Add() { total += now() - start; }
-    } add{ands_s, start};
-    std::map<std::pair<Lit, Lit>, Lit> strash;
-    uint32_t next = 1;
-    std::function<Lit(const std::string&, const std::vector<Lit>&)> inline_op = [&](const std::string& opname,
-                                                                                      const std::vector<Lit>& views) {
-      const POp& op = p_.ops[static_cast<size_t>(index_.at(opname))];
-      const OpInfo info = analyze(op);
-      std::unordered_map<int, Lit> value;
-      for (int v = 1; v <= op.nbool; ++v) value[v] = views[static_cast<size_t>(v - 1)];
-      auto get = [&](const PArg& a) { return a.is_literal() ? Lit{a.literal == "T" ? 1u : 0u} : value.at(info.resolve(a.id)); };
-      for (const PStmt& s : op.stmts) {
-        if (s.kind == "and") {
-          Lit a = get(s.args[0]), b = get(s.args[1]);
-          if (a > b) std::swap(a, b);
-          auto it = strash.find({a, b});
-          value[s.ids[0]] = it != strash.end() ? it->second : (strash[{a, b}] = make_lit(next++));
-        } else if (s.kind == "not") {
-          value[s.ids[0]] = get(s.args[0]) ^ 1;
-        } else if (s.kind == "call") {
-          std::vector<Lit> args;
-          for (const PArg& a : s.args) args.push_back(get(a));
-          value[s.ids[0]] = inline_op(s.name, args);
-        }
-      }
-      return get(op.outs[0]);
-    };
-    const POp& op = p_.ops[static_cast<size_t>(index_.at(name))];
-    std::vector<Lit> views;
-    for (int v = 0; v < op.nbool; ++v) views.push_back(make_lit(next++));
-    inline_op(name, views);
-    r.ands = static_cast<int>(strash.size());
-    return r.ands;
   }
 
   void check_order(const POp& op, const OpInfo& info, Report& rep) const {
@@ -1073,8 +1035,9 @@ class ProgramChecker {
         }
         if (!kind.empty()) {
           // An opposite value that's a `not` of another value waits: that
-          // value is redundant itself, fixed in this batch.
-          if (kind == "opposite" && s.kind == "not" && !rep.merges.empty()) return;
+          // value is redundant itself, fixed in this batch. A value that
+          // never changes is an error the fix loop doesn't fix.
+          if (!rep.merges.empty() && ((kind == "opposite" && s.kind == "not") || kind == "constant")) return;
           if (rep.redundant_kind.empty()) {
             rep.redundant_kind = kind;
             rep.redundant_value = v;
@@ -1082,13 +1045,11 @@ class ProgramChecker {
             rep.errors["redundant"] = "[" + std::to_string(v) + ",\"" + kind + "\"," +
                                       (kind == "constant" ? (other ? "\"T\"" : "\"F\"") : std::to_string(other)) + "]";
           }
+          if (kind == "constant") return;
           Report::Merge m;
           m.value = v;
           m.opposite = kind == "opposite";
-          if (kind == "constant")
-            m.with.literal = other ? "T" : "F";
-          else
-            m.with.id = other;
+          m.with.id = other;
           rep.merges.push_back(m);
           // An opposite value stays, as the `not` of the earlier one.
           if (kind == "opposite") note(k, v);
@@ -1099,23 +1060,31 @@ class ProgramChecker {
     }
   }
 
-  // The registered operations an operation follows, in their order: `and`,
-  // `not`, then booleans.defcl; a registered operation's own definition
-  // follows only the ones listed before it (DLP 59).
-  std::vector<std::string> follows(const POp& op) const {
-    std::vector<std::string> out{"and", "not"};
-    for (const std::string& name : p_.registered) {
-      if (name == op.name) break;
-      // One in or executing a cycle has no function to match (DLP 9).
-      if (!reaches_cycle_[static_cast<size_t>(index_.at(name))]) out.push_back(name);
-    }
-    return out;
+  // A registered operation's key (DLP 59): the fewest `and`s computing its
+  // function, then its number of read views, then its truth table as a
+  // number. Only operations of up to four read views can be registered.
+  std::tuple<int, int, uint64_t> key_of(const std::string& name) const {
+    const POp& op = p_.ops[static_cast<size_t>(index_.at(name))];
+    const uint64_t table = recorded_.at(name).table[0];
+    return {op.nbool <= 4 ? min_ands(table, op.nbool) : std::numeric_limits<int>::max(), op.nbool, table};
   }
 
-  int ands_of_name(const std::string& name) {
-    if (name == "and") return 1;
-    if (name == "not") return 0;
-    return ands_of(name);
+  // The registered operations an operation follows, in their order: `and`
+  // and `not`, then the others by key; a registered operation's own
+  // definition follows only the ones with smaller keys (DLP 59).
+  std::vector<std::string> follows(const POp& op) const {
+    std::vector<std::pair<std::tuple<int, int, uint64_t>, std::string>> keyed;
+    for (const std::string& name : p_.registered)
+      // One in or executing a cycle has no function to match (DLP 9).
+      if (!reaches_cycle_[static_cast<size_t>(index_.at(name))]) keyed.push_back({key_of(name), name});
+    std::sort(keyed.begin(), keyed.end());
+    const bool registered = is_registered(op.name) && recorded_.count(op.name);
+    std::vector<std::string> out{"and", "not"};
+    for (const auto& [key, name] : keyed) {
+      if (registered && key >= key_of(op.name)) break;
+      out.push_back(name);
+    }
+    return out;
   }
 
   std::vector<int> groups_of_name(const std::string& name) const {
@@ -1138,7 +1107,7 @@ class ProgramChecker {
     std::map<std::string, int> nodes;
     for (const std::string& name : order) {
       registered.push_back(registered_of(name));
-      nodes[name] = ands_of_name(name);
+      nodes[name] = 0;
     }
     auto place = [&](const std::string& name) { return std::find(order.begin(), order.end(), name) - order.begin(); };
     // The graph the matcher sees: inputs, then a node per `and` or `call`.
@@ -1317,16 +1286,17 @@ class ProgramChecker {
     auto key_less = [&](const std::string& ra, const std::vector<int>& aa, const std::string& rb, const std::vector<int>& ab) {
       const int na = negations(aa), nb = negations(ab);
       if (na != nb) return na < nb;
-      const int ca = ands_of_name(ra), cb = ands_of_name(rb);
-      if (ca != cb) return ca < cb;
       if (place(ra) != place(rb)) return place(ra) < place(rb);
       return rank_less(aa, ab);
     };
     for (const PStmt& s : op.stmts) {
-      // Every execution of a registered operation is a spelling, `and` and
-      // `not` included.
+      // Every execution of a registered operation is a spelling, `and`
+      // included. A `not` isn't respelled: a value that's the `not` of
+      // another is written as that `not` (DLP 57's opposite values).
       const std::string name = s.kind == "call" ? s.name : s.kind;
-      if (!is_boolean_statement(s.kind) || place(name) == static_cast<std::ptrdiff_t>(order.size())) continue;
+      if (!is_boolean_statement(s.kind) || s.kind == "not" ||
+          place(name) == static_cast<std::ptrdiff_t>(order.size()))
+        continue;
       // An execution given a literal is DLP 57's error, not a spelling.
       if (std::any_of(s.args.begin(), s.args.end(), [](const PArg& a) { return a.is_literal(); })) continue;
       const int v = s.ids[0];
