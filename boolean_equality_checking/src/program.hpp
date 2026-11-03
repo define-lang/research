@@ -20,6 +20,7 @@
 #include "hier.hpp"
 #include "match.hpp"
 #include "min_ands.hpp"
+#include "split.hpp"
 
 namespace beq {
 
@@ -182,7 +183,7 @@ inline std::string rank_name(const PStmt& s) {
 }
 
 struct CheckTimes {
-  double structure = 0, tables = 0, groups = 0, order = 0, redundant = 0, matches = 0, spellings = 0;
+  double structure = 0, tables = 0, groups = 0, order = 0, redundant = 0, matches = 0, spellings = 0, split = 0;
   // Parts of `tables`: executions of operations looked up in their recorded
   // tables, minterm by minterm, and executions of written-out ones.
   double lookups = 0, written_out = 0;
@@ -196,8 +197,9 @@ struct CheckTimes {
     redundant += o.redundant;
     matches += o.matches;
     spellings += o.spellings;
+    split += o.split;
   }
-  double total() const { return structure + tables + groups + order + redundant + matches + spellings; }
+  double total() const { return structure + tables + groups + order + redundant + matches + spellings + split; }
 };
 
 // The first violation of each rule, in gen/program.py's terms.
@@ -252,6 +254,17 @@ class ProgramChecker {
   // check_search as well, every check also searches again and stops if the
   // two differ.
   bool reuse_search = false, check_search = false;
+  // With split (`--split 1`), the rules on values (redundant values, read
+  // views that don't matter) and the limits are checked statement by
+  // statement (split.hpp) instead of with truth tables over every boolean
+  // input; past 20 inputs, only those rules and the ones that don't need
+  // values' functions are checked. With check_split as well, every check
+  // also finds the redundant values and read views the other way, with
+  // truth tables up to 20 inputs and SAT up to 32, and stops if the two
+  // differ.
+  bool split = false, check_split = false;
+  size_t split_compared_tt = 0, split_compared_sat = 0;
+  mutable std::map<std::string, std::pair<uint64_t, bool>> views_matter_;
   // Values whose kept search was used, and searched again, so far (with
   // the ones in search_cache_).
   size_t search_hits = 0, search_misses = 0;
@@ -652,8 +665,13 @@ class ProgramChecker {
     OpInfo info = analyze(op);
     const uint32_t I = static_cast<uint32_t>(info.inputs.size());
     rep.inputs = I;
-    if (info.boolean_statements > 256 && statement_limit) rep.errors["limits"] = "\"statements\"";
-    else if (I > 20) rep.errors["limits"] = "\"inputs\"";
+    if (split) {
+      // The split check finds the limits below.
+    } else if (info.boolean_statements > 256 && statement_limit) {
+      rep.errors["limits"] = "\"statements\"";
+    } else if (I > 20) {
+      rep.errors["limits"] = "\"inputs\"";
+    }
     for (size_t k = 0; k < op.stmts.size() && rep.literal_stmt < 0; ++k) {
       const PStmt& s = op.stmts[k];
       if (!is_boolean_statement(s.kind)) continue;
@@ -678,31 +696,65 @@ class ProgramChecker {
     }
     rep.times.structure = now() - t0;
     if (rep.errors.count("limits") || reaches_cycle_[index]) return rep;
+    std::unique_ptr<SplitCheck> sc;
+    if (split) {
+      const double ts = now();
+      sc = split_check(op, info, rep);
+      rep.times.split = now() - ts;
+      if (rep.errors.count("limits")) {
+        // What a mixed operation records doesn't need its values' functions.
+        if (record && op.boolean) forget(op.name);
+        if (record && !op.boolean) record_op(op, info, {}, 0);
+        return rep;
+      }
+    }
+    // Truth tables over every boolean input: always within the limits,
+    // where matches and executions need them; past them only with split.
+    const bool full = I <= 20;
     double t1 = now();
     size_t words = 1;
     lookup_s_ = written_out_s_ = 0;
-    std::vector<uint64_t> t = tables(op, info, words);
+    std::vector<uint64_t> t;
+    if (full) t = tables(op, info, words);
     rep.times.lookups = lookup_s_;
     rep.times.written_out = written_out_s_;
     if (record) {
-      record_op(op, info, t, words);
-      update_hierarchy(index, info);
+      if (full || !op.boolean) {
+        record_op(op, info, t, words);
+        update_hierarchy(index, info);
+      } else {
+        // An operation that executes it is past the limits (split_check).
+        forget(op.name);
+      }
     }
     rep.times.tables = now() - t1;
+    std::vector<int> table_unused;
     {
       double td = now();
       rep.dead = dead_statements(op, info);
       if (!rep.dead.empty()) rep.errors["dead"] = list_json(rep.dead);
-      if (op.boolean) {
+      if (op.boolean && full) {
         std::vector<uint64_t> written;
         const Lit o = arg_lit(info, op.outs[0]);
         for (size_t w = 0; w < words; ++w) written.push_back(t[size_t{node_of(o)} * words + w] ^ (is_compl(o) ? ~0ULL : 0));
-        rep.unused_views = unused_views(written, op.nbool);
+        table_unused = unused_views(written, op.nbool);
+      }
+      if (op.boolean) {
+        if (split) {
+          const Lit o = arg_lit(info, op.outs[0]);
+          for (int v = 1; v <= op.nbool; ++v)
+            if (sc->constant(node_of(o)) || !sc->depends_on(node_of(o), static_cast<uint32_t>(v)))
+              rep.unused_views.push_back(v);
+          if (check_split && full && rep.unused_views != table_unused)
+            throw std::runtime_error("split check: read views that don't matter differ in " + op.name);
+        } else {
+          rep.unused_views = table_unused;
+        }
         if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
       }
       rep.times.structure += now() - td;
     }
-    if (op.boolean && record) {
+    if (op.boolean && record && full) {
       double tg = now();
       Recorded& r = recorded_[op.name];
       r.group = groups_of(r.table, op.nbool);
@@ -713,24 +765,113 @@ class ProgramChecker {
       check_order(op, info, rep);
       rep.times.order = now() - to;
       double tr = now();
-      rep.how = (how == "auto" && I > 20) ? "sat" : "tt";
+      rep.how = split ? "split" : (how == "auto" && I > 20) ? "sat" : "tt";
       if (rep.how == "sat" && !record) update_hierarchy(index, info);
-      std::vector<uint64_t> keys = rep.how == "sat" ? hier_->check_sat(index, rep.stats, 4) : keys_of(op, info, t, words);
+      std::vector<uint64_t> keys;
+      if (split) {
+        keys = sc->keys;
+        if (check_split) compare_split(index, op, info, t, words, keys, rep);
+      } else {
+        keys = rep.how == "sat" ? hier_->check_sat(index, rep.stats, 4) : keys_of(op, info, t, words);
+      }
       find_redundant(op, info, keys, rep);
       rep.times.redundant = now() - tr;
     } else {
       // The registered operations only change matches and spellings; the
       // redundant-value rule still decides whether they're checked.
-      std::vector<uint64_t> keys = keys_of(op, info, t, words);
+      std::vector<uint64_t> keys = split ? sc->keys : keys_of(op, info, t, words);
       find_redundant(op, info, keys, rep);
       rep.errors.erase("redundant");
     }
     const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
-    if (rep.redundant_kind.empty() && !fixed_first) {
+    // Matches and spellings need every value's function.
+    if (rep.redundant_kind.empty() && !fixed_first && full) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
       find_matches(op, info, std::move(t), dead, rep);
     }
     return rep;
+  }
+
+  // The split check of an operation's values (split.hpp). Past the limits,
+  // a limits error in rep instead: a part or group of values past them, or
+  // an execution of an operation with no recorded function (one past them).
+  std::unique_ptr<SplitCheck> split_check(const POp& op, const OpInfo& info, Report& rep) {
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    std::vector<SplitNode> nodes(info.num_nodes);
+    for (size_t j = 0; j < info.node_stmt.size(); ++j) {
+      const PStmt& s = op.stmts[static_cast<size_t>(info.node_stmt[j])];
+      SplitNode& node = nodes[I + 1 + j];
+      for (const PArg& a : s.args) node.args.push_back(arg_lit(info, a));
+      if (s.kind == "and") {
+        node.chain = 1;
+        node.is_and = true;
+        continue;
+      }
+      auto it = recorded_.find(s.name);
+      if (it == recorded_.end() || it->second.table.empty()) {
+        rep.errors["limits"] = "\"execution\"";
+        return nullptr;
+      }
+      const Recorded& r = it->second;
+      node.all_views_matter = all_views_matter(s.name, r);
+      if (s.args.size() == 2) {
+        const uint64_t t = r.table[0] & 0xF;
+        node.chain = t == 0x8 ? 1 : t == 0xE ? 2 : t == 0x6 ? 3 : t == 0x9 ? 4 : 0;
+      }
+    }
+    auto eval = [&](uint32_t node, const std::vector<Lit>& args, size_t words, const SplitCheck::Word& word,
+                    uint64_t* row) {
+      const PStmt& s = op.stmts[static_cast<size_t>(info.node_stmt[node - I - 1])];
+      const Recorded& callee = recorded_.at(s.name);
+      if (callee.has_aig)
+        evaluate_aig(callee, args, words, word, row);
+      else
+        lookup(callee.table, args, words, word, row);
+    };
+    auto sc = std::make_unique<SplitCheck>(std::move(nodes), I, eval);
+    sc->run();
+    if (sc->over_limits) rep.errors["limits"] = "\"split\"";
+    rep.stats.emplace_back("split_parts", static_cast<double>(sc->parts));
+    rep.stats.emplace_back("split_part_max_leaves", static_cast<double>(sc->parts_max_leaves));
+    rep.stats.emplace_back("split_groups", static_cast<double>(sc->groups));
+    rep.stats.emplace_back("split_groups_fixed_form", static_cast<double>(sc->groups_fixed_form));
+    rep.stats.emplace_back("split_group_max_leaves", static_cast<double>(sc->groups_max_leaves));
+    return sc;
+  }
+
+  bool all_views_matter(const std::string& name, const Recorded& r) const {
+    auto it = views_matter_.find(name);
+    if (it != views_matter_.end() && it->second.first == r.hash) return it->second.second;
+    const POp& callee = p_.ops[static_cast<size_t>(index_.at(name))];
+    const bool all = unused_views(r.table, callee.nbool).empty();
+    views_matter_[name] = {r.hash, all};
+    return all;
+  }
+
+  // check_split: the split check's classes of values against truth tables
+  // over every input, or past 20 inputs SAT, up to 32.
+  void compare_split(size_t index, const POp& op, const OpInfo& info, const std::vector<uint64_t>& t, size_t words,
+                     const std::vector<uint64_t>& keys, Report& rep) {
+    std::vector<uint64_t> other;
+    if (info.inputs.size() <= 20) {
+      other = tt_keys(info, t, words);
+      ++split_compared_tt;
+    } else if (info.inputs.size() <= 32) {
+      update_hierarchy(index, info);
+      other = hier_->check_sat(index, rep.stats, 4);
+      ++split_compared_sat;
+    } else {
+      return;
+    }
+    // Equal classes both ways, with one phase between them per class.
+    std::map<uint64_t, std::pair<uint64_t, uint64_t>> to, from;
+    for (size_t n = 0; n < keys.size(); ++n) {
+      const uint64_t phase = (keys[n] ^ other[n]) & 1;
+      const auto i = to.try_emplace(keys[n] >> 1, other[n] >> 1, phase).first;
+      const auto j = from.try_emplace(other[n] >> 1, keys[n] >> 1, phase).first;
+      if (i->second != std::make_pair(other[n] >> 1, phase) || j->second != std::make_pair(keys[n] >> 1, phase))
+        throw std::runtime_error("split check: values' classes differ in " + op.name + " at node " + std::to_string(n));
+    }
   }
 
   // Whether one of the operation's boolean values never changes.

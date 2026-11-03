@@ -15,7 +15,7 @@ inline std::string times_json(const CheckTimes& t) {
   o.precision(6);
   o << "{\"structure\":" << t.structure << ",\"tables\":" << t.tables << ",\"groups\":" << t.groups
     << ",\"order\":" << t.order << ",\"redundant\":" << t.redundant << ",\"matches\":" << t.matches
-    << ",\"spellings\":" << t.spellings << ",\"total\":" << t.total() << ",\"tables_lookups\":" << t.lookups
+    << ",\"spellings\":" << t.spellings << ",\"split\":" << t.split << ",\"total\":" << t.total() << ",\"tables_lookups\":" << t.lookups
     << ",\"tables_written_out\":" << t.written_out << "}";
   return o.str();
 }
@@ -122,6 +122,8 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
   Program p = read_program(path);
   const double read_s = ProgramChecker::now() - t_read;
   ProgramChecker c(p);
+  c.split = get("split", 0) != 0;
+  c.check_split = get("check_split", 0) != 0;
   if (opt.count("patterns_in")) read_patterns(c, opt["patterns_in"]);
   c.record_registered();
   std::cout.precision(6);
@@ -142,6 +144,9 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
     o << "{\"mode\":\"" << mode << "\",\"file\":\"" << path << "\",\"ops\":" << p.ops.size()
       << ",\"boolean_ops\":" << boolean_ops << ",\"boolean_statements\":" << statements
       << ",\"user_executions\":" << executions << ",\"copies\":" << copies << ",\"read_s\":" << read_s;
+    if (c.split)
+      o << ",\"split\":true,\"split_compared_tt\":" << c.split_compared_tt
+        << ",\"split_compared_sat\":" << c.split_compared_sat;
     return o.str();
   };
   // Every operation, in order, recording what it computes.

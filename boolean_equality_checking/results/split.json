@@ -1,0 +1,1204 @@
+{
+ "real_code": {
+  "scope2_pieces": {
+   "units": 1068,
+   "too_big": 0,
+   "all_disjoint": 255,
+   "under_limits": 563,
+   "left_overlap": 505,
+   "left_group": 3,
+   "left_resolved_by_bdd": 409,
+   "left_unresolved": 96,
+   "parts": 14030,
+   "groups": 1781,
+   "groups_read_once": 1433,
+   "max_part_leaves": 494,
+   "max_group_leaves": 185,
+   "split_seconds": {
+    "total": 23.54,
+    "median": 0.0003,
+    "max": 0.581
+   },
+   "bdd_seconds": {
+    "total": 77.91,
+    "median": 0.0,
+    "max": 2.002
+   },
+   "with_literals": 1052,
+   "with_merges": 97,
+   "examples": [
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:2872 scanAndMaybeEnqueue (lone call)",
+     [
+      43,
+      52
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3057 maybeEnqueueNonLockingReadRequest",
+     [
+      24,
+      30
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3173 shouldRequestActivelyWait (lone call)",
+     [
+      24,
+      29
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/rangefeed/resolved_timestamp.go:137 ConsumeLogicalOp (lone call)",
+     [
+      25,
+      33
+     ],
+     [
+      [
+       "overlap",
+       22,
+       15,
+       {
+        "callee input not reading parameters": 3
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/rangefeed/scheduled_processor.go:703 consumeLogicalOps (lone call)",
+     [
+      27,
+      36
+     ],
+     [
+      [
+       "overlap",
+       22,
+       15,
+       {
+        "callee input not reading parameters": 3
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/distsql_leaf_txn.go:50 constructReadsTreeForLeaf",
+     [
+      62,
+      64
+     ],
+     [
+      [
+       "overlap",
+       21,
+       17,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       18,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       23,
+       19,
+       {
+        "callee input not reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/opt/idxconstraint/index_constraints.go:687 makeSpansForExpr",
+     [
+      36,
+      61
+     ],
+     [
+      [
+       "overlap",
+       21,
+       11,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       12,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       23,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/opt/idxconstraint/index_constraints.go:1104 simplifyFilter",
+     [
+      157,
+      254
+     ],
+     [
+      [
+       "overlap",
+       21,
+       11,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       12,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       23,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     5
+    ],
+    [
+     "pkg/sql/opt/partialidx/implicator.go:166 FiltersImplyPredicate (lone call)",
+     [
+      45,
+      79
+     ],
+     [
+      [
+       "overlap",
+       24,
+       16,
+       {
+        "callee input not reading parameters": 7
+       }
+      ],
+      [
+       "overlap",
+       24,
+       16,
+       {
+        "callee input not reading parameters": 7
+       }
+      ],
+      [
+       "overlap",
+       53,
+       40,
+       {
+        "callee input not reading parameters": 7
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/storage/col_mvcc.go:213 NextKV",
+     [
+      35,
+      134
+     ],
+     [
+      [
+       "overlap",
+       50,
+       34,
+       {
+        "callee input not reading parameters": 5
+       }
+      ],
+      [
+       "overlap",
+       55,
+       37,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       69,
+       49,
+       {
+        "callee input not reading parameters": 4
+       }
+      ]
+     ],
+     3
+    ],
+    [
+     "pkg/storage/pebble_mvcc_scanner.go:627 seekToStartOfScan",
+     [
+      28,
+      100
+     ],
+     [
+      [
+       "overlap",
+       50,
+       34,
+       {
+        "callee input not reading parameters": 5
+       }
+      ],
+      [
+       "overlap",
+       55,
+       37,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       69,
+       49,
+       {
+        "callee input not reading parameters": 4
+       }
+      ]
+     ],
+     2
+    ],
+    [
+     "pkg/storage/pebble_mvcc_scanner.go:675 scan",
+     [
+      35,
+      134
+     ],
+     [
+      [
+       "overlap",
+       50,
+       34,
+       {
+        "callee input not reading parameters": 5
+       }
+      ],
+      [
+       "overlap",
+       55,
+       37,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       69,
+       49,
+       {
+        "callee input not reading parameters": 4
+       }
+      ]
+     ],
+     3
+    ],
+    [
+     "pkg/storage/pebble_mvcc_scanner.go:696 afterScan",
+     [
+      50,
+      201
+     ],
+     [
+      [
+       "overlap",
+       50,
+       34,
+       {
+        "callee input not reading parameters": 5
+       }
+      ],
+      [
+       "overlap",
+       50,
+       34,
+       {
+        "callee input not reading parameters": 5
+       }
+      ],
+      [
+       "overlap",
+       55,
+       37,
+       {
+        "callee input not reading parameters": 1
+       }
+      ]
+     ],
+     2
+    ],
+    [
+     "pkg/storage/pebble_mvcc_scanner.go:696 afterScan",
+     [
+      21,
+      67
+     ],
+     [
+      [
+       "overlap",
+       21,
+       12,
+       {
+        "callee input not reading parameters": 2
+       }
+      ],
+      [
+       "overlap",
+       49,
+       34,
+       {
+        "callee input not reading parameters": 4
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/testutils/lint/passes/unconvert/unconvert.go:35 run (lone call)",
+     [
+      39,
+      41
+     ],
+     [
+      [
+       "overlap",
+       24,
+       12,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       25,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       28,
+       15,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ]
+   ]
+  },
+  "scope2_functions": {
+   "units": 1822,
+   "too_big": 0,
+   "all_disjoint": 853,
+   "under_limits": 1416,
+   "left_overlap": 406,
+   "left_group": 5,
+   "left_resolved_by_bdd": 326,
+   "left_unresolved": 80,
+   "parts": 13892,
+   "groups": 2819,
+   "groups_read_once": 2283,
+   "max_part_leaves": 494,
+   "max_group_leaves": 185,
+   "split_seconds": {
+    "total": 24.23,
+    "median": 0.0001,
+    "max": 5.478
+   },
+   "bdd_seconds": {
+    "total": 54.71,
+    "median": 0.0,
+    "max": 2.023
+   },
+   "with_literals": 1597,
+   "with_merges": 248,
+   "examples": [
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:927 IsKeyLockedByConflictingTxn",
+     [
+      46,
+      47
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:2872 scanAndMaybeEnqueue",
+     [
+      45,
+      53
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3011 conflictsWithLockHolders",
+     [
+      23,
+      25
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3057 maybeEnqueueNonLockingReadRequest",
+     [
+      24,
+      30
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3173 shouldRequestActivelyWait",
+     [
+      43,
+      49
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3264 isNonConflictingLock",
+     [
+      21,
+      21
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:3833 recomputeWaitQueues",
+     [
+      46,
+      52
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/concurrency/lock_table.go:4282 verify",
+     [
+      87,
+      89
+     ],
+     [
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       14,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       21,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/rangefeed/resolved_timestamp.go:137 ConsumeLogicalOp",
+     [
+      25,
+      33
+     ],
+     [
+      [
+       "overlap",
+       22,
+       15,
+       {
+        "callee input not reading parameters": 3
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/kv/kvserver/rangefeed/scheduled_processor.go:703 consumeLogicalOps",
+     [
+      27,
+      36
+     ],
+     [
+      [
+       "overlap",
+       22,
+       15,
+       {
+        "callee input not reading parameters": 3
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/colexec/colbuilder/execplan.go:795 NewColOperator",
+     [
+      68,
+      74
+     ],
+     [
+      [
+       "overlap",
+       22,
+       12,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/distsql_leaf_txn.go:50 constructReadsTreeForLeaf",
+     [
+      65,
+      66
+     ],
+     [
+      [
+       "overlap",
+       21,
+       17,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       18,
+       {
+        "callee input not reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       23,
+       19,
+       {
+        "callee input not reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/opt/idxconstraint/index_constraints.go:687 makeSpansForExpr",
+     [
+      81,
+      116
+     ],
+     [
+      [
+       "overlap",
+       21,
+       11,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       12,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       23,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     0
+    ],
+    [
+     "pkg/sql/opt/idxconstraint/index_constraints.go:1104 simplifyFilter",
+     [
+      162,
+      259
+     ],
+     [
+      [
+       "overlap",
+       21,
+       11,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       22,
+       12,
+       {
+        "callee input reading parameters": 1
+       }
+      ],
+      [
+       "overlap",
+       23,
+       13,
+       {
+        "callee input reading parameters": 1
+       }
+      ]
+     ],
+     5
+    ],
+    [
+     "pkg/sql/opt/partialidx/implicator.go:166 FiltersImplyPredicate",
+     [
+      46,
+      79
+     ],
+     [
+      [
+       "overlap",
+       24,
+       16,
+       {
+        "callee input not reading parameters": 7
+       }
+      ],
+      [
+       "overlap",
+       24,
+       16,
+       {
+        "callee input not reading parameters": 7
+       }
+      ],
+      [
+       "overlap",
+       53,
+       40,
+       {
+        "callee input not reading parameters": 7
+       }
+      ]
+     ],
+     0
+    ]
+   ]
+  },
+  "scope1_functions": {
+   "units": 367,
+   "too_big": 0,
+   "all_disjoint": 325,
+   "under_limits": 367,
+   "left_overlap": 0,
+   "left_group": 0,
+   "left_resolved_by_bdd": 0,
+   "left_unresolved": 0,
+   "parts": 83,
+   "groups": 420,
+   "groups_read_once": 394,
+   "max_part_leaves": 20,
+   "max_group_leaves": 20,
+   "split_seconds": {
+    "total": 0.12,
+    "median": 0.0,
+    "max": 0.091
+   },
+   "bdd_seconds": {
+    "total": 0.0,
+    "median": 0.0,
+    "max": 0.0
+   },
+   "with_literals": 46,
+   "with_merges": 52,
+   "examples": []
+  },
+  "scope1_pieces": {
+   "units": 10,
+   "too_big": 0,
+   "all_disjoint": 9,
+   "under_limits": 10,
+   "left_overlap": 0,
+   "left_group": 0,
+   "left_resolved_by_bdd": 0,
+   "left_unresolved": 0,
+   "parts": 1,
+   "groups": 0,
+   "groups_read_once": 0,
+   "max_part_leaves": 4,
+   "max_group_leaves": 0,
+   "split_seconds": {
+    "total": 0.0,
+    "median": 0.0,
+    "max": 0.0
+   },
+   "bdd_seconds": {
+    "total": 0.0,
+    "median": 0.0,
+    "max": 0.0
+   },
+   "with_literals": 0,
+   "with_merges": 0,
+   "examples": []
+  }
+ },
+ "beq": {
+  "cost/check_ops_150k_0": {
+   "wall_s": 18.4101,
+   "ops_with_errors": 0,
+   "split_s": 0,
+   "tables_s": 0.718321
+  },
+  "cost/check_ops_150k_1": {
+   "wall_s": 23.5429,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0,
+   "ops_with_errors": 0,
+   "split_s": 5.08109,
+   "tables_s": 0.60235
+  },
+  "cost/check_ops_15k_0": {
+   "wall_s": 1.86121,
+   "ops_with_errors": 0,
+   "split_s": 0,
+   "tables_s": 0.0607175
+  },
+  "cost/check_ops_15k_1": {
+   "wall_s": 2.4121,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0,
+   "ops_with_errors": 0,
+   "split_s": 0.513641,
+   "tables_s": 0.0571677
+  },
+  "cost/check_ops_2k_wide_0": {
+   "wall_s": 19.6496,
+   "ops_with_errors": 0,
+   "split_s": 0,
+   "tables_s": 13.0376
+  },
+  "cost/check_ops_2k_wide_1": {
+   "wall_s": 36.2658,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0,
+   "ops_with_errors": 0,
+   "split_s": 18.0284,
+   "tables_s": 13.0219
+  },
+  "cost/edits_ops_150k_0": {
+   "first_check_s": 18.1925,
+   "edit_time_median_s": 0.000106041,
+   "edit_time_max_s": 0.0035119
+  },
+  "cost/edits_ops_150k_1": {
+   "first_check_s": 23.5165,
+   "edit_time_median_s": 0.000132561,
+   "edit_time_max_s": 0.005495,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0
+  },
+  "cost/edits_ops_15k_0": {
+   "first_check_s": 1.82265,
+   "edit_time_median_s": 0.000113542,
+   "edit_time_max_s": 0.00207422
+  },
+  "cost/edits_ops_15k_1": {
+   "first_check_s": 2.31708,
+   "edit_time_median_s": 0.000144941,
+   "edit_time_max_s": 0.00314689,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0
+  },
+  "cost/edits_ops_2k_wide_0": {
+   "first_check_s": 19.6142,
+   "edit_time_median_s": 0.00933762,
+   "edit_time_max_s": 1.40866
+  },
+  "cost/edits_ops_2k_wide_1.json": "killed at its cap",
+  "cost/fix_ops_15k_0": {
+   "wall_s": 15.8655,
+   "ops_with_errors_after": 0,
+   "split_s": 0,
+   "tables_s": 0.279571
+  },
+  "cost/fix_ops_15k_1": {
+   "wall_s": 20.7751,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0,
+   "ops_with_errors_after": 0,
+   "split_s": 4.54712,
+   "tables_s": 0.290388
+  },
+  "cost/fix_ops_2k_wide_0": {
+   "wall_s": 55.1429,
+   "ops_with_errors_after": 0,
+   "split_s": 0,
+   "tables_s": 18.2227
+  },
+  "cost/fix_ops_2k_wide_1": {
+   "wall_s": 277.361,
+   "split_compared_tt": 0,
+   "split_compared_sat": 0,
+   "ops_with_errors_after": 0,
+   "split_s": 224.2,
+   "tables_s": 17.9737
+  },
+  "exact/check_ops_150k": {
+   "wall_s": 23.8059,
+   "split_compared_tt": 148858,
+   "split_compared_sat": 0,
+   "ops_with_errors": 0,
+   "split_s": 5.08478,
+   "tables_s": 0.599698
+  },
+  "exact/check_ops_15k": {
+   "wall_s": 2.35311,
+   "split_compared_tt": 14897,
+   "split_compared_sat": 0,
+   "ops_with_errors": 0,
+   "split_s": 0.497514,
+   "tables_s": 0.0544947
+  },
+  "exact/check_ops_15k_raw": {
+   "wall_s": 8.95124,
+   "split_compared_tt": 15006,
+   "split_compared_sat": 0,
+   "ops_with_errors": 14907,
+   "split_s": 1.88973,
+   "tables_s": 0.0724019
+  },
+  "exact/check_ops_2k_wide": {
+   "wall_s": 39.5392,
+   "split_compared_tt": 1995,
+   "split_compared_sat": 0,
+   "ops_with_errors": 0,
+   "split_s": 18.8246,
+   "tables_s": 13.6747
+  },
+  "exact/check_ops_2k_wide_raw": {
+   "wall_s": 47.5998,
+   "split_compared_tt": 2006,
+   "split_compared_sat": 0,
+   "ops_with_errors": 2000,
+   "split_s": 22.9014,
+   "tables_s": 16.0476
+  },
+  "exact/fix_ops_15k": {
+   "wall_s": 21.0459,
+   "split_compared_tt": 58579,
+   "split_compared_sat": 0,
+   "ops_with_errors_after": 0,
+   "split_s": 4.5682,
+   "tables_s": 0.292327
+  },
+  "exact/fix_ops_2k_wide.json": "killed at its cap",
+  "past_limits/seed1": {
+   "split_compared_tt": 9,
+   "split_compared_sat": 29,
+   "errors": {
+    "limits": 68,
+    "match": 1,
+    "order_arguments": 32,
+    "order_statements": 32,
+    "redundant": 6,
+    "spelling": 1
+   }
+  },
+  "past_limits/seed2": {
+   "split_compared_tt": 7,
+   "split_compared_sat": 28,
+   "errors": {
+    "limits": 71,
+    "order_arguments": 29,
+    "order_statements": 29,
+    "redundant": 10,
+    "spelling": 1
+   }
+  },
+  "past_limits/seed3": {
+   "split_compared_tt": 9,
+   "split_compared_sat": 22,
+   "errors": {
+    "limits": 75,
+    "order_arguments": 25,
+    "order_statements": 25,
+    "redundant": 8
+   }
+  },
+  "reduction_cases": {
+   "cases": 96,
+   "fix_runs": 96,
+   "check_runs": 73,
+   "same_fix": 96,
+   "different_fix": 0,
+   "failures": 0,
+   "compared_tt": 1630,
+   "compared_sat": 1
+  }
+ }
+}

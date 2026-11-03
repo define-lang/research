@@ -356,6 +356,8 @@ Argued, not measured:
     search, and the search over earlier values).
   - `hier.hpp`: libraries of operations that execute each other, with
     references, copying, stored patterns, and rechecking after edits.
+  - `split.hpp`: the split check (`beq program --split 1`): DLP 57's rules
+    on values checked statement by statement, exactly, past 20 inputs.
   - `main.cpp`: the `beq` command.
 - `gen/`: workload generators and helpers. `aig_builder.py`, `workloads.py`,
   `matching.py`, and `hierarchy.py` generate; `generate.py` is their command
@@ -371,7 +373,10 @@ Argued, not measured:
   `matching_experiment.py`, `hierarchy_experiment.py`,
   `steady_state_experiment.py`, `caller_redundancy_experiment.py`,
   `resub_experiment.py`, `fixpoint_experiment.py`,
-  `final_program_experiment.py`, `cadical_adversarial.sh`, and
+  `final_program_experiment.py`, `split_experiment.py` (the split check on
+  the real-code study's operations past the limits, and its exactness
+  against checks over every input; results in `results/split.json`),
+  `cadical_adversarial.sh`, and
   `run_everything.sh`. Every driver runs each check through
   `experiments.run_limited`, which kills it past 30 seconds (only the final
   whole-program study may take longer) or past its memory limit.
