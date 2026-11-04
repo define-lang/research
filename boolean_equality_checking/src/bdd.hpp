@@ -13,20 +13,20 @@ namespace beq {
 
 // DLP 57's budget: a fixed number of steps of the compiler's own work per
 // value operation, never time. A BDD operation past its trivial cases is 6
-// steps, a node or a candidate of the match search 1, and a value evaluated
-// on a new sample 40: those weights make steps follow time (about 2.6 ns a
-// step, with half the measured value operations within 10% of it). `at` is
-// the value being worked on, as a literal of the value operation's graph,
-// for the error.
+// steps, a new BDD node 20, a node or a candidate of the match search 1, and
+// a value evaluated on a new sample 30: those weights make steps follow time
+// (about 2.4 ns a step, half the measured value operations within 9% of it).
+// `at` is the value being worked on, as a literal of the value operation's
+// graph, for the error.
 struct BudgetExceeded : std::runtime_error {
   BudgetExceeded() : std::runtime_error("step budget") {}
 };
 struct StepBudget {
-  enum Kind { kBdd, kSearch, kSample };
+  enum Kind { kBdd, kSearch, kSample, kNode };
   uint64_t used = 0, limit = UINT64_MAX;
-  uint64_t by_kind[3] = {0, 0, 0};
+  uint64_t by_kind[4] = {0, 0, 0, 0};
   Lit at = 0;
-  static constexpr uint64_t kWeight[3] = {6, 1, 40};
+  static constexpr uint64_t kWeight[4] = {6, 1, 30, 20};
   void spend(uint64_t n, Kind kind) {
     used += n * kWeight[kind];
     by_kind[kind] += n;
@@ -159,6 +159,7 @@ class Bdd {
       slot = (slot + 1) & mask;
     }
     if (level_.size() >= node_limit_) throw BddLimit();
+    if (budget) budget->spend(1, StepBudget::kNode);
     uint32_t n = static_cast<uint32_t>(level_.size());
     level_.push_back(level);
     lo_.push_back(lo);

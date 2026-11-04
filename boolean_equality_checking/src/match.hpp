@@ -617,7 +617,7 @@ class Matcher {
   mutable std::vector<int> delta_;
   mutable std::vector<size_t> touched_;
 
-  static constexpr size_t kMaxPoolWords = 32;
+  static constexpr size_t kMaxPoolWords = 128;
   struct Variant {
     Registered r;
     std::vector<int> prev;
@@ -856,6 +856,8 @@ class Matcher {
   bool check_holds(Lit v, Lit target, const Registered& r, const std::vector<Lit>& args) {
     (void)v;
     ++exact_checks_;
+    // An exact check on truth tables costs a step for every word.
+    if (budget_ && !oracle_) budget_->spend(words_, StepBudget::kSearch);
     if (oracle_) {
       bool differs = false;
       uint64_t difference = 0;

@@ -57,10 +57,16 @@ METHODS = {
     "bdd_reverse": ["--bdd_order", "reverse"],
     "bdd_random": ["--bdd_order", "random"],
     "auto": [],
+    "auto_unbudgeted": ["--step_budget", "0"],
 }
 # The other orders, only at a few sizes: the order's effect, not a curve.
 ORDER_INPUTS = {16, 20, 24, 32, 48}
-STATEMENTS = {"dense": [32, 64, 128, 256], "xor_heavy": [64, 256], "parity": [64, 256]}
+STATEMENTS = {
+    "long": [384, 512, 1024],
+    "dense": [32, 64, 128, 256],
+    "xor_heavy": [64, 256],
+    "parity": [64, 256],
+}
 
 
 # ---------------------------------------------------------------------------
@@ -117,11 +123,13 @@ def statement_count(text: str) -> int:
     )
 
 
-def clean(make: Any, inputs: int) -> str:
+def clean(make: Any, inputs: int, max_statements: int = 0) -> str:
     """Return the first operation from make() with no redundant value and at most 256 statements, of at most 50."""
     text = make()
     for _ in range(49):
-        if not redundant(text, inputs) and statement_count(text) <= MAX_STATEMENTS:
+        if not redundant(text, inputs) and statement_count(text) <= (
+            max_statements or MAX_STATEMENTS
+        ):
             break
         text = make()
     return text
@@ -138,6 +146,20 @@ def dense(name: str, rng: random.Random, inputs: int, statements: int) -> str:
         *((r, 25 / len(program.REGISTERED)) for r in program.REGISTERED),
     ]
     return clean(lambda: tracked_random(name, rng, inputs, target, kinds), inputs)
+
+
+def long_dense(name: str, rng: random.Random, inputs: int, statements: int) -> str:
+    """Return a random operation like dense's, past 256 statements."""
+    kinds = [
+        ("and", 45),
+        ("not", 12),
+        *((r, 25 / len(program.REGISTERED)) for r in program.REGISTERED),
+    ]
+    return clean(
+        lambda: tracked_random(name, rng, inputs, statements, kinds),
+        inputs,
+        4 * statements,
+    )
 
 
 def read_once(name: str, inputs: int) -> str:
@@ -554,6 +576,8 @@ def point_ops(
         name = f"p{k}"
         if shape == "dense":
             out.append(dense(name, rng, inputs, statements))
+        elif shape == "long":
+            out.append(long_dense(name, rng, inputs, statements))
         elif shape == "read_once":
             out.append(read_once(name, inputs))
             break

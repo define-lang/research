@@ -693,7 +693,7 @@ class ProgramChecker {
     rep.inputs = I;
     if (split) {
       // The split check finds the limits below.
-    } else if (info.boolean_statements > 256 && statement_limit) {
+    } else if (info.boolean_statements > 256 && statement_limit && method != "auto") {
       rep.errors["limits"] = "\"statements\"";
     } else if (I > input_limit && method != "auto") {
       rep.errors["limits"] = "\"inputs\"";
@@ -722,13 +722,32 @@ class ProgramChecker {
     }
     rep.times.structure = now() - t0;
     if (rep.errors.count("limits") || reaches_cycle_[index]) return rep;
+    // auto is DLP 57's rule: truth tables up to 16 inputs, and up to 20 for
+    // a value operation that executes one of more than six views, which
+    // tables look up where BDDs would have to apply it node by node; BDDs
+    // otherwise. Past the old limits (256 statements, 20 inputs), checking
+    // counts steps against the budget; within them, a value operation whose
+    // BDDs go over the budget is checked with truth tables instead.
+    const bool old_limits = info.boolean_statements <= 256 && I <= 20;
     {
-      // auto is DLP 57's rule: truth tables up to 16 inputs, BDDs past them
-      // within the step budget.
-      const std::string use = method == "auto" ? (I <= 16 ? "tt" : "bdd") : method;
-      if (use != "tt" && !in_registered_reach(op.name) && (op.boolean || method == "auto"))
-        return check_with_method(op, info, record, rep, use);
+      bool wide_execution = false;
+      for (const PStmt& s : op.stmts) wide_execution |= s.kind == "call" && s.args.size() > 6;
+      const std::string use =
+          method == "auto" ? (I <= 16 || (I <= 20 && wide_execution) ? "tt" : "bdd") : method;
+      if (use != "tt" && !in_registered_reach(op.name) && (op.boolean || method == "auto")) {
+        const Report before = rep;
+        bool fell_back = false;
+        Report r = check_with_method(op, info, record, rep, use, old_limits, fell_back);
+        if (!fell_back) return r;
+        rep = before;
+        rep.stats.emplace_back("budget_fallback", 1);
+      }
     }
+    StepBudget budget;
+    const bool budgeted = method == "auto" && !old_limits && step_budget && !in_registered_reach(op.name);
+    if (budgeted) budget.limit = step_budget;
+    try {
+
     std::unique_ptr<SplitCheck> sc;
     if (split) {
       const double ts = now();
@@ -749,6 +768,8 @@ class ProgramChecker {
     lookup_s_ = written_out_s_ = 0;
     std::vector<uint64_t> t;
     if (full) t = tables(op, info, words);
+    // Truth tables cost a step for every 2 words they compute.
+    if (budgeted) budget.spend(size_t{info.num_nodes} * words / 2 + 1, StepBudget::kSearch);
     rep.times.lookups = lookup_s_;
     rep.times.written_out = written_out_s_;
     if (record) {
@@ -822,9 +843,16 @@ class ProgramChecker {
     // Matches and spellings need every value's function.
     if (rep.redundant_kind.empty() && !fixed_first && full && search_matches) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
-      find_matches(op, info, std::move(t), dead, rep);
+      find_matches(op, info, std::move(t), dead, rep, nullptr, budgeted ? &budget : nullptr);
       if (measure_executions) rep.stats.emplace_back("matches_found", static_cast<double>(rep.matches.size()));
     }
+    } catch (const BudgetExceeded&) {
+      rep.errors["limits"] = "[\"budget\"," + std::to_string(budget_value(op, info, budget.at)) + "]";
+      add_steps(rep, budget);
+      if (record && op.boolean) forget(op.name);
+      return rep;
+    }
+    if (budgeted) add_steps(rep, budget);
     return rep;
   }
 
@@ -958,11 +986,9 @@ class ProgramChecker {
     return r.table_diagram.get();
   }
 
-  // DLP 57's budget, in steps (StepBudget), for each value operation
-  // checked with BDDs (`--step_budget`; 0 is no budget): ten times the most
-  // that any value operation of at most 256 statements from real programs
-  // took, with the functions it calls written out.
-  uint64_t step_budget = 40'000'000'000ULL;
+  // DLP 57's budget, in steps (StepBudget), for each value operation past
+  // the old limits (`--step_budget`; 0 is no budget).
+  uint64_t step_budget = 1'000'000'000ULL;
 
   // The order of the boolean inputs for BDDs (a level per input, from 1):
   // as first reached depth-first from each value no boolean statement reads,
@@ -1079,7 +1105,30 @@ class ProgramChecker {
 
   // check() for a boolean operation with a method other than truth tables
   // over every input. It records nothing: no operation executes it.
-  Report check_with_method(const POp& op, const OpInfo& info, bool record, Report& rep, const std::string& method) {
+  static void add_steps(Report& rep, const StepBudget& budget) {
+    rep.stats.emplace_back("steps", static_cast<double>(budget.used));
+    rep.stats.emplace_back("steps_bdd", static_cast<double>(budget.by_kind[StepBudget::kBdd]));
+    rep.stats.emplace_back("steps_search", static_cast<double>(budget.by_kind[StepBudget::kSearch]));
+    rep.stats.emplace_back("steps_sample", static_cast<double>(budget.by_kind[StepBudget::kSample]));
+    rep.stats.emplace_back("steps_node", static_cast<double>(budget.by_kind[StepBudget::kNode]));
+  }
+
+  // The statement whose value the budget's work was for, as its value.
+  static int budget_value(const POp& op, const OpInfo& info, Lit at) {
+    int value = 0;
+    for (const PStmt& st : op.stmts)
+      if (is_boolean_statement(st.kind) && node_of(info.lit.at(st.ids[0])) == node_of(at) &&
+          (st.kind != "not" || info.lit.at(st.ids[0]) == at)) {
+        value = st.ids[0];
+        if (st.kind != "not") break;
+      }
+    return value;
+  }
+
+  // With may_fall_back, a value operation within the old limits that goes
+  // over the budget sets fell_back instead of getting the error.
+  Report check_with_method(const POp& op, const OpInfo& info, bool record, Report& rep, const std::string& method,
+                           bool may_fall_back, bool& fell_back) {
     const MethodGraph g = method_graph(op, info);
     const uint32_t I = g.inputs;
     rep.how = method;
@@ -1131,16 +1180,12 @@ class ProgramChecker {
       rep.errors["limits"] = "\"bdd nodes\"";
       return rep;
     } catch (const BudgetExceeded&) {
-      // Pointed at the statement whose value the work was for.
-      int value = 0;
-      for (const PStmt& st : op.stmts)
-        if (is_boolean_statement(st.kind) && node_of(info.lit.at(st.ids[0])) == node_of(budget.at) &&
-            (st.kind != "not" || info.lit.at(st.ids[0]) == budget.at)) {
-          value = st.ids[0];
-          if (st.kind != "not") break;
-        }
-      rep.errors["limits"] = "[\"budget\"," + std::to_string(value) + "]";
-      rep.stats.emplace_back("steps", static_cast<double>(budget.used));
+      if (may_fall_back) {
+        fell_back = true;
+        return rep;
+      }
+      rep.errors["limits"] = "[\"budget\"," + std::to_string(budget_value(op, info, budget.at)) + "]";
+      add_steps(rep, budget);
       if (record) {
         if (op.boolean)
           forget(op.name);
@@ -1149,10 +1194,7 @@ class ProgramChecker {
       }
       return rep;
     }
-    rep.stats.emplace_back("steps", static_cast<double>(budget.used));
-    rep.stats.emplace_back("steps_bdd", static_cast<double>(budget.by_kind[StepBudget::kBdd]));
-    rep.stats.emplace_back("steps_search", static_cast<double>(budget.by_kind[StepBudget::kSearch]));
-    rep.stats.emplace_back("steps_sample", static_cast<double>(budget.by_kind[StepBudget::kSample]));
+    add_steps(rep, budget);
     if (record) {
       const double tg = now();
       auto* b = dynamic_cast<BddMethod*>(m.get());
@@ -1654,7 +1696,9 @@ class ProgramChecker {
     };
     std::vector<Report::Found> matches, spellings;
     std::vector<uint64_t> hashes;
-    const bool reuse = reuse_values && reuse_name_ == op.name;
+    // The kept hashes are of truth tables; an oracle's function ids aren't
+    // those, so a check with an oracle keeps nothing.
+    const bool reuse = reuse_values && reuse_name_ == op.name && !oracle;
     const std::vector<int> node_value = reuse ? node_values(op, info) : std::vector<int>{};
     if (reuse) {
       hashes.assign(2 * size_t{info.num_nodes} + 2, 0);
