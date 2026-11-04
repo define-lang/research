@@ -23,7 +23,7 @@ git_override(
 
 git_override(
     module_name = "rules_lean",
-    commit = "6a1358298edf00e97ff994fe6fba56f440f7f5e2",
+    commit = "2b681aef0ef38c195c3efaa674a1e6157bc9ef6c",
     # Keeps the research_lean and lean_deps Mathlib fetches from sharing
     # ~/.cache/mathlib. Drop once rules_lean includes this change.
     patch_strip = 1,
