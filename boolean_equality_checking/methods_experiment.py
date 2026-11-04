@@ -56,7 +56,6 @@ METHODS = {
     "bdd_natural": ["--bdd_order", "natural"],
     "bdd_reverse": ["--bdd_order", "reverse"],
     "bdd_random": ["--bdd_order", "random"],
-    "diagram": [],
     "auto": [],
 }
 # The other orders, only at a few sizes: the order's effect, not a curve.
@@ -458,13 +457,13 @@ def unit_op(dag: Any, roots: list[int], name: str) -> tuple[str, int, int] | Non
     return text, len(inputs), len(lines)
 
 
-def real_counts() -> None:
-    """Count the decision diagram of every real-code unit past the study's limits (src/diagram.hpp)."""
+def real_steps() -> None:
+    """Check every real-code unit past the study's limits with DLP 57's rule, without a budget, counting its steps."""
     se: Any = importlib.import_module("split_experiment")
     analyze: Any = importlib.import_module("analyze")
     folder = WORK / "real_units"
     folder.mkdir(parents=True, exist_ok=True)
-    out = WORK / "real_counts.jsonl"
+    out = WORK / "real_steps.jsonl"
     out.unlink(missing_ok=True)
     for name in [
         "cockroach",
@@ -504,28 +503,30 @@ def real_counts() -> None:
                 path.write_text("\n".join([*library(), text]) + "\n")
                 details = path.with_suffix(".details")
                 command = ["timeout", "-s", "KILL", str(SECONDS), "prlimit", f"--as={MEMORY_GB << 30}", str(BEQ), "program",
-                           str(path), "--mode", "check", "--details", str(details), "--method", "diagram",
-                           "--diagram_limit", str(1 << 26), "--statement_limit", "0", "--matches", "0"]  # fmt: skip
+                           str(path), "--mode", "check", "--details", str(details), "--method", "auto",
+                           "--statement_limit", "0"]  # fmt: skip
+                start = time.perf_counter()
                 done = subprocess.run(  # noqa: S603
                     command, capture_output=True, text=True, check=False
                 )
+                wall = time.perf_counter() - start
                 if done.returncode != 0:
                     row["status"] = "over cap: " + (
                         "time"
                         if done.returncode in (137, -9)
                         else done.stderr.strip()[-120:]
                     )
+                    row["wall_s"] = wall
                 else:
                     r = next(
                         json.loads(x)
                         for x in details.read_text().splitlines()
                         if x.startswith('{"op":"u"')
                     )
-                    row.update(
-                        status="ok",
-                        nodes=r["stats"].get("diagram_nodes"),
-                        seconds=r["t"]["total"],
-                    )
+                    st = r["stats"]
+                    row.update(status="ok", how=r["how"], steps=st.get("steps"), steps_bdd=st.get("steps_bdd"),
+                               steps_search=st.get("steps_search"), steps_sample=st.get("steps_sample"),
+                               seconds=r["t"]["total"], errors=r["errors"])  # fmt: skip
                 details.unlink(missing_ok=True)
                 path.unlink()
             with out.open("a") as f:
@@ -959,8 +960,8 @@ def markdown(table: list[dict[str, Any]], crossovers: list[dict[str, Any]]) -> s
 
 def main() -> None:
     """Run or summarize."""
-    if sys.argv[1] == "real_counts":
-        real_counts()
+    if sys.argv[1] == "real_steps":
+        real_steps()
         return
     if sys.argv[1] == "run":
         # run SHAPES [STATEMENTS [MIN_I [I,... [METHODS [RESULTS]]]]]; 0 or - for all.

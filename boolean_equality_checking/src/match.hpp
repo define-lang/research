@@ -425,6 +425,7 @@ class Matcher {
     size_t next_late = 0;
     for (size_t k = 0; k < statements_.size(); ++k) {
       const Statement& s = statements_[k];
+      if (budget_) budget_->at = s.lit;
       while (next_late < late_inputs_.size() && late_inputs_[next_late].first <= k)
         add(late_inputs_[next_late++].second);
       for (Lit a : s.args) add(a);
@@ -665,6 +666,7 @@ class Matcher {
 
   void resub_assign(Lit v, Lit target, const Variant& var, std::set<Match>& found) {
     ++search_nodes_;
+    if (budget_) budget_->spend(1, StepBudget::kSearch);
     const Registered& r = var.r;
     const uint32_t j = static_cast<uint32_t>(chosen_.size());
     // Candidates: available literals before v, after the previous
@@ -765,6 +767,7 @@ class Matcher {
           if (!((cand[x >> 6] >> (x & 63)) & 1) || !same_bits(x)) continue;
           chosen_.push_back(x);
           ++leaf_candidates_;
+          if (budget_) budget_->spend(1, StepBudget::kSearch);
           resub_verify(v, target, var, found);
           chosen_.pop_back();
         }
@@ -784,6 +787,7 @@ class Matcher {
           const size_t x = lw * 64 + static_cast<size_t>(__builtin_ctzll(bits));
           if (x >= n) break;
           ++position_steps_;
+          if (budget_) budget_->spend(1, StepBudget::kSearch);
           for (size_t w = 0; w < sw; ++w)
             if ((lit_samples_[x][w] ^ m1_[w]) & (m0_[w] | m1_[w])) {
               cand[lw] &= ~(1ULL << (x & 63));
@@ -799,6 +803,7 @@ class Matcher {
           const size_t k = w * 64 + static_cast<size_t>(__builtin_ctzll(bits));
           const bool one = (m1_[w] >> (k & 63)) & 1;
           ++position_steps_;
+          if (budget_) budget_->spend(1, StepBudget::kSearch);
           const std::vector<uint64_t>& at = positions_[k];
           uint64_t any = 0;
           for (size_t lw = 0; lw < lwords_; ++lw) {
@@ -813,7 +818,10 @@ class Matcher {
         const int x = static_cast<int>(w * 64 + static_cast<size_t>(__builtin_ctzll(bits)));
         if (static_cast<size_t>(x) >= n) break;
         chosen_.push_back(x);
-        if (j + 1 == r.arity) ++leaf_candidates_;
+        if (j + 1 == r.arity) {
+          ++leaf_candidates_;
+          if (budget_) budget_->spend(1, StepBudget::kSearch);
+        }
         if (j + 1 < r.arity)
           resub_assign(v, target, var, found);
         else
@@ -1553,6 +1561,8 @@ class Matcher {
   // fanins.
   // Values' functions from an oracle instead of truth tables.
   void set_oracle(MatchOracle* oracle) { oracle_ = oracle; }
+  // Steps of the search count against DLP 57's budget.
+  void set_budget(StepBudget* budget) { budget_ = budget; }
   void set_tables(std::vector<uint64_t> tables, std::vector<uint32_t> support) {
     given_tables_ = std::move(tables);
     given_support_ = std::move(support);
@@ -1612,6 +1622,7 @@ class Matcher {
   uint64_t last_mask_ = ~0ULL;
   std::vector<uint64_t> tables_;
   MatchOracle* oracle_ = nullptr;
+  StepBudget* budget_ = nullptr;
   mutable std::vector<uint64_t> hash_cache_;
   std::vector<uint64_t> sample_;
   std::vector<Lit> pool_;

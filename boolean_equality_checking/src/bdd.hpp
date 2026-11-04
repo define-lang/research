@@ -11,6 +11,29 @@
 
 namespace beq {
 
+// DLP 57's budget: a fixed number of steps of the compiler's own work per
+// value operation, never time. A BDD operation past its trivial cases is 6
+// steps, a node or a candidate of the match search 1, and a value evaluated
+// on a new sample 40: those weights make steps follow time (about 2.6 ns a
+// step, with half the measured value operations within 10% of it). `at` is
+// the value being worked on, as a literal of the value operation's graph,
+// for the error.
+struct BudgetExceeded : std::runtime_error {
+  BudgetExceeded() : std::runtime_error("step budget") {}
+};
+struct StepBudget {
+  enum Kind { kBdd, kSearch, kSample };
+  uint64_t used = 0, limit = UINT64_MAX;
+  uint64_t by_kind[3] = {0, 0, 0};
+  Lit at = 0;
+  static constexpr uint64_t kWeight[3] = {6, 1, 40};
+  void spend(uint64_t n, Kind kind) {
+    used += n * kWeight[kind];
+    by_kind[kind] += n;
+    if (used > limit) throw BudgetExceeded();
+  }
+};
+
 struct BddLimit : std::runtime_error {
   BddLimit() : std::runtime_error("bdd node limit") {}
 };
@@ -29,12 +52,15 @@ class Bdd {
     cache_.assign(1u << 16, CacheEntry{UINT32_MAX, 0, 0});
   }
 
+  StepBudget* budget = nullptr;
+
   Edge var(uint32_t level) { return make(level, kFalse, kTrue); }
 
   Edge land(Edge f, Edge g) {
     if (f == kFalse || g == kFalse || f == (g ^ 1)) return kFalse;
     if (f == kTrue || f == g) return g;
     if (g == kTrue) return f;
+    if (budget) budget->spend(1, StepBudget::kBdd);
     if (f > g) std::swap(f, g);
     size_t slot = mix64((static_cast<uint64_t>(f) << 32) | g) & (cache_.size() - 1);
     CacheEntry& e = cache_[slot];

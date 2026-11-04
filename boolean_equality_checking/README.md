@@ -357,12 +357,11 @@ Argued, not measured:
   - `hier.hpp`: libraries of operations that execute each other, with
     references, copying, stored patterns, and rechecking after edits.
   - `methods.hpp`: exact methods besides truth tables over every input
-    (truth tables in chunks, OBDDs, SAT sweeping, DLP 57's decision diagram),
-    for `beq program --method`; `--method auto` is DLP 57's rule: truth tables
-    up to 16 inputs, the decision diagram from 17 to 20 within a node budget,
-    and past 20 within 1,048,576 nodes.
-  - `diagram.hpp`: decision diagrams without complement edges, whose node
-    count DLP 57 limits.
+    (truth tables in chunks, OBDDs, SAT sweeping), for `beq program
+    --method`; `--method auto` is DLP 57's rule: truth tables up to 16 inputs,
+    OBDDs past 16 within a budget of steps (`StepBudget` in `bdd.hpp`).
+  - `diagram.hpp`: the written view's decision diagram that a value operation
+    checked with OBDDs records for the ones that execute it.
   - `split.hpp`: the split check (`beq program --split 1`): DLP 57's rules
     on values checked statement by statement, exactly, past 20 inputs.
   - `main.cpp`: the `beq` command.
@@ -385,9 +384,9 @@ Argued, not measured:
   against checks over every input; results in `results/split.json`),
   `methods_experiment.py` (where truth tables over every input stop being
   the fastest exact check, against the other methods; tables in
-  `results/methods_tables.md`; with `real_counts`, DLP 57's node count of
-  every real-code unit past the study's limits; the limit's measurements are in
-  `results/diagram_limit.md`), `cadical_adversarial.sh`, and
+  `results/methods_tables.md`; with `real_steps`, DLP 57's rule on every
+  real-code unit past the study's limits; the budget's measurements are in
+  `results/budget.md`), `cadical_adversarial.sh`, and
   `run_everything.sh`. Every driver runs each check through
   `experiments.run_limited`, which kills it past 30 seconds (only the final
   whole-program study may take longer) or past its memory limit.

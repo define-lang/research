@@ -82,8 +82,24 @@ struct MethodGraph {
     std::vector<char> v(num_nodes(), 0);
     for (uint32_t i = 1; i <= inputs; ++i) v[i] = static_cast<char>((minterm >> (i - 1)) & 1);
     uint64_t a[64];
+    std::vector<char> at;
     for (uint32_t n = inputs + 1; n < num_nodes(); ++n) {
       const Node& x = node(n);
+      if (x.big_table) {
+        uint64_t m = 0;
+        for (size_t i = 0; i < x.args.size(); ++i) m |= static_cast<uint64_t>(v[node_of(x.args[i])] ^ is_compl(x.args[i])) << i;
+        v[n] = static_cast<char>(((*x.big_table)[m >> 6] >> (m & 63)) & 1);
+        continue;
+      }
+      if (x.diagram) {
+        at.assign(x.diagram->view_of_level.size(), 0);
+        for (size_t l = 0; l < at.size(); ++l) {
+          const Lit arg = x.args[x.diagram->view_of_level[l]];
+          at[l] = static_cast<char>(v[node_of(arg)] ^ is_compl(arg));
+        }
+        v[n] = static_cast<char>(x.diagram->dd.evaluate(x.diagram->root, at));
+        continue;
+      }
       for (size_t i = 0; i < x.args.size(); ++i) a[i] = (v[node_of(x.args[i])] ^ is_compl(x.args[i])) ? ~0ULL : 0;
       v[n] = static_cast<char>(word(x, a) & 1);
     }
@@ -153,13 +169,72 @@ class MethodBase : public MatchOracle {
   }
   bool bit(Lit l, uint64_t minterm) override {
     auto it = sampled_.find(minterm);
-    if (it == sampled_.end()) it = sampled_.emplace(minterm, g_.evaluate(minterm)).first;
+    if (it == sampled_.end()) {
+      if (budget) budget->spend(g_.num_nodes(), StepBudget::kSample);
+      it = sampled_.emplace(minterm, g_.evaluate(minterm)).first;
+    }
     return it->second[node_of(l)] ^ is_compl(l);
   }
+
+  // Whether swapping read views i and j (from 0) can leave the written view
+  // the same: false when it changes it on one of 128 random assignments.
+  // Only the values that read i or j are simulated again for each pair.
+  bool may_be_interchangeable(uint32_t i, uint32_t j) {
+    if (sim_cone_.empty()) {
+      sim_cone_ = g_.cone({g_.out});
+      sim_.assign(size_t{g_.num_nodes()} * kWords, 0);
+      reads_.assign(g_.num_nodes(), 0);
+      Rng rng(9);
+      uint64_t a[64];
+      for (uint32_t x : sim_cone_) {
+        if (x == 0) continue;
+        if (x <= g_.inputs) {
+          for (size_t w = 0; w < kWords; ++w) sim_[x * kWords + w] = rng.next();
+          if (x - 1 < 64) reads_[x] = uint64_t{1} << (x - 1);
+          continue;
+        }
+        const MethodGraph::Node& node = g_.node(x);
+        for (Lit l : node.args) reads_[x] |= reads_[node_of(l)];
+        for (size_t w = 0; w < kWords; ++w) {
+          for (size_t k = 0; k < node.args.size(); ++k)
+            a[k] = sim_[node_of(node.args[k]) * kWords + static_cast<size_t>(w)] ^ (is_compl(node.args[k]) ? ~0ULL : 0);
+          sim_[x * kWords + w] = MethodGraph::word(node, a);
+        }
+      }
+      swapped_.assign(sim_.size(), 0);
+    }
+    if (i >= 64 || j >= 64) return true;
+    const uint64_t pair = (uint64_t{1} << i) | (uint64_t{1} << j);
+    uint64_t a[64];
+    auto value = [&](uint32_t x, int w) {
+      return (reads_[x] & pair) ? swapped_[x * kWords + w] : sim_[x * kWords + w];
+    };
+    for (uint32_t x : sim_cone_) {
+      if (x == 0 || !(reads_[x] & pair)) continue;
+      for (size_t w = 0; w < kWords; ++w) {
+        if (x <= g_.inputs) {
+          swapped_[x * kWords + w] = sim_[(x == i + 1 ? j + 1 : i + 1) * kWords + static_cast<size_t>(w)];
+          continue;
+        }
+        const MethodGraph::Node& node = g_.node(x);
+        for (size_t k = 0; k < node.args.size(); ++k)
+          a[k] = value(node_of(node.args[k]), w) ^ (is_compl(node.args[k]) ? ~0ULL : 0);
+        swapped_[x * kWords + w] = MethodGraph::word(node, a);
+      }
+    }
+    for (size_t w = 0; w < kWords; ++w)
+      if (value(node_of(g_.out), w) != sim_[node_of(g_.out) * kWords + static_cast<size_t>(w)]) return false;
+    return true;
+  }
+
+  StepBudget* budget = nullptr;
 
  protected:
   const MethodGraph& g_;
   std::unordered_map<uint64_t, std::vector<char>> sampled_;
+  static constexpr size_t kWords = 2;
+  std::vector<uint32_t> sim_cone_;
+  std::vector<uint64_t> sim_, swapped_, reads_;
 };
 
 // Truth tables computed 2^C input assignments at a time, the inputs past C
@@ -338,9 +413,11 @@ class BddMethod : public MethodBase {
 
   void run() override {
     const uint32_t n = g_.num_nodes();
+    bdd_.budget = budget;
     edge_.assign(n, Bdd::kFalse);
     for (uint32_t i = 1; i <= g_.inputs; ++i) edge_[i] = bdd_.var(level_[i]);
     for (uint32_t x = g_.inputs + 1; x < n; ++x) {
+      if (budget) budget->at = make_lit(x);
       const MethodGraph::Node& node = g_.node(x);
       std::vector<Bdd::Edge> a;
       for (Lit l : node.args) a.push_back(lit(l));
@@ -353,8 +430,9 @@ class BddMethod : public MethodBase {
       else
         edge_[x] = apply_table(node.table, a);
     }
+    // Equal functions are the same edge, and opposite ones the same node.
     keys.assign(n, 0);
-    for (uint32_t x = 0; x < n; ++x) keys[x] = mix64(edge_[x] >> 1) << 1 | (edge_[x] & 1);
+    for (uint32_t x = 0; x < n; ++x) keys[x] = edge_[x];
   }
 
   void find_unused() override {
@@ -388,6 +466,27 @@ class BddMethod : public MethodBase {
   size_t nodes() const { return bdd_.num_nodes(); }
   size_t memory_bytes() const { return bdd_.memory_bytes(); }
   // The written view's OBDD nodes: what an execution of the operation refers to.
+  // The written view's diagram alone, without complement edges, levels in
+  // this operation's order, for the operations that execute it.
+  RecordedDiagram record() const {
+    RecordedDiagram rd;
+    rd.dd = Diagram(g_.inputs);
+    std::unordered_map<Bdd::Edge, Diagram::Node> copy;
+    std::function<Diagram::Node(Bdd::Edge)> go = [&](Bdd::Edge e) -> Diagram::Node {
+      if ((e >> 1) == 0) return e == Bdd::kTrue ? Diagram::kTrue : Diagram::kFalse;
+      auto it = copy.find(e);
+      if (it != copy.end()) return it->second;
+      const uint32_t n = e >> 1, c = e & 1;
+      const Diagram::Node lo = go(bdd_.low(n) ^ c), hi = go(bdd_.high(n) ^ c);
+      const Diagram::Node r = rd.dd.make(bdd_.level_of(n), lo, hi);
+      copy.emplace(e, r);
+      return r;
+    };
+    rd.root = go(edge_[node_of(g_.out)] ^ (is_compl(g_.out) ? 1u : 0u));
+    for (uint32_t l = 0; l < g_.inputs; ++l) rd.view_of_level.push_back(input_at_[l] - 1);
+    return rd;
+  }
+
   size_t out_nodes() {
     const std::vector<uint32_t> counts = bdd_.reachable_level_counts({lit(g_.out)});
     return std::accumulate(counts.begin(), counts.end(), size_t{0});
@@ -700,244 +799,6 @@ class SplitMethod : public MethodBase {
 
  private:
   SplitCheck& sc_;
-};
-
-// One boolean statement, in written order, for the decision diagram.
-struct DiagramStatement {
-  enum Kind { kAnd, kNot, kCall } kind = kAnd;
-  std::vector<Lit> args;  // as literals of the method graph
-  uint32_t node = 0;      // the method graph's node for an `and` or a `call`
-  int value = 0;          // the statement's value, for the error
-};
-
-// DLP 57's decision diagram: every value the boolean statements compute,
-// in one diagram without complement edges, the inputs in the order given.
-// The shared diagram's size is counted statement by statement, and
-// building stops at the first statement that takes it past `limit`
-// (over_value is then that statement's value); otherwise it gives the
-// classes, the read views the written view depends on, and the exact check
-// of a match.
-class DiagramMethod : public MethodBase {
- public:
-  DiagramMethod(const MethodGraph& g, std::vector<DiagramStatement> statements, std::vector<uint32_t> level_of_input,
-                size_t limit)
-      : MethodBase(g), dd_(g.inputs), statements_(std::move(statements)), level_(std::move(level_of_input)),
-        limit_(limit) {
-    input_at_.assign(g.inputs, 0);
-    for (uint32_t i = 1; i <= g.inputs; ++i) input_at_[level_[i]] = i;
-  }
-
-  size_t count = 0;   // nodes of the shared diagram
-  int over_value = 0;  // the statement past the limit, if any
-
-  // Returns false past the limit.
-  bool build() {
-    const uint32_t n = g_.num_nodes();
-    node_.assign(n, Diagram::kFalse);
-    opposite_.assign(n, kNone);
-    // Every node made counts, except an input's own node that no value
-    // contains: at most one per input.
-    dd_.node_limit = limit_ + g_.inputs;
-    try {
-      for (uint32_t i = 1; i <= g_.inputs; ++i) node_[i] = dd_.var(level_[i]);
-      for (const DiagramStatement& s : statements_) {
-        current_ = s.value;
-        Diagram::Node v;
-        if (s.kind == DiagramStatement::kNot) {
-          v = dd_.negate(value(s.args[0]));
-          const Lit a = s.args[0];
-          if (!is_compl(a)) opposite_[node_of(a)] = v;
-        } else {
-          std::vector<Diagram::Arg> a;
-          for (Lit l : s.args) a.push_back(Diagram::arg(node_[node_of(l)], is_compl(l)));
-          const MethodGraph::Node& x = g_.node(s.node);
-          if (x.is_and)
-            v = dd_.apply(0x8, 2, a);
-          else if (x.diagram)
-            v = dd_.compose(x.diagram->dd, x.diagram->root, by_level(*x.diagram, a));
-          else if (x.big_table)
-            v = dd_.apply(x.big_table->data(), static_cast<uint32_t>(a.size()), a);
-          else
-            v = dd_.apply(x.table, static_cast<uint32_t>(a.size()), a);
-          node_[s.node] = v;
-        }
-        count += dd_.mark(v);
-        if (count > limit_) {
-          over_value = s.value;
-          return false;
-        }
-      }
-    } catch (const Diagram::LimitError&) {
-      // Only nodes of values were made, so the statement being built is past
-      // the limit.
-      over_value = current_;
-      return false;
-    }
-    // The checks after this make nodes that aren't values.
-    dd_.node_limit = 8 * limit_ + (size_t{1} << 20);
-    return true;
-  }
-
-  // Each value's class up to complement: the pair of its node and its
-  // opposite's node, which equal functions share and opposite ones share
-  // swapped. The opposites are made after the count.
-  void run() override {
-    const uint32_t n = g_.num_nodes();
-    keys.assign(n, 0);
-    for (uint32_t x = 0; x < n; ++x) {
-      const Diagram::Node f = node_[x];
-      if (opposite_[x] == kNone) opposite_[x] = dd_.negate(f);
-      const Diagram::Node o = opposite_[x];
-      keys[x] = (mix64((uint64_t{std::min(f, o)} << 32) | std::max(f, o)) & ~1ULL) | (f > o ? 1u : 0u);
-    }
-  }
-
-  void find_unused() override {
-    const std::vector<char> in = dd_.support(node_[node_of(g_.out)]);
-    for (uint32_t i = 1; i <= g_.views; ++i)
-      if (!in[level_[i]]) unused_views.push_back(static_cast<int>(i));
-  }
-
-  bool holds(Lit target, const Registered& r, const std::vector<Lit>& args, bool& differs,
-             uint64_t& difference) override {
-    // Matches need many exact checks, each a function of earlier values:
-    // complement edges make them cheaper, so they're checked on an OBDD
-    // with complement edges, inputs in the same order.
-    if (!bdd_) {
-      bdd_ = std::make_unique<BddMethod>(g_, level_, bdd_limit_);
-      bdd_->run();
-    }
-    return bdd_->holds(target, r, args, differs, difference);
-  }
-
-  // The written view's diagram alone, levels in this operation's order, for
-  // the operations that execute it.
-  RecordedDiagram record() {
-    RecordedDiagram rd;
-    rd.dd = Diagram(g_.inputs);
-    std::unordered_map<Diagram::Node, Diagram::Node> copy{{Diagram::kFalse, Diagram::kFalse}, {Diagram::kTrue, Diagram::kTrue}};
-    std::function<Diagram::Node(Diagram::Node)> go = [&](Diagram::Node f) {
-      auto it = copy.find(f);
-      if (it != copy.end()) return it->second;
-      const Diagram::Node lo = go(dd_.lo(f)), hi = go(dd_.hi(f));
-      const Diagram::Node c = rd.dd.make(dd_.level(f), lo, hi);
-      copy.emplace(f, c);
-      return c;
-    };
-    rd.root = go(value(g_.out));
-    for (uint32_t l = 0; l < g_.inputs; ++l) rd.view_of_level.push_back(input_at_[l] - 1);
-    return rd;
-  }
-
-  // The written view's truth table over every input (at most twenty), from
-  // its statements a word at a time: as much work as truth tables for those
-  // statements alone.
-  std::vector<uint64_t> written_table() const {
-    const uint32_t I = g_.inputs;
-    const size_t words = I <= 6 ? 1 : (size_t{1} << (I - 6));
-    static const uint64_t kVar[6] = {0xAAAAAAAAAAAAAAAAULL, 0xCCCCCCCCCCCCCCCCULL, 0xF0F0F0F0F0F0F0F0ULL,
-                                     0xFF00FF00FF00FF00ULL, 0xFFFF0000FFFF0000ULL, 0xFFFFFFFF00000000ULL};
-    const std::vector<uint32_t> cone = g_.cone({g_.out});
-    std::vector<uint64_t> v(g_.num_nodes(), 0), out(words);
-    uint64_t a[64];
-    for (size_t w = 0; w < words; ++w) {
-      for (uint32_t x : cone) {
-        if (x == 0) continue;
-        if (x <= I) {
-          const uint32_t bit = x - 1;
-          v[x] = bit < 6 ? kVar[bit] : (((w >> (bit - 6)) & 1) ? ~0ULL : 0);
-          continue;
-        }
-        const MethodGraph::Node& node = g_.node(x);
-        for (size_t i = 0; i < node.args.size(); ++i) a[i] = v[node_of(node.args[i])] ^ (is_compl(node.args[i]) ? ~0ULL : 0);
-        v[x] = MethodGraph::word(node, a);
-      }
-      out[w] = v[node_of(g_.out)] ^ (is_compl(g_.out) ? ~0ULL : 0);
-    }
-    return out;
-  }
-
-  // Whether swapping read views i and j (from 0) can leave the written view
-  // the same: false when it changes it on one of 1,024 random assignments.
-  // Only the values that read i or j are simulated again for each pair.
-  bool may_be_interchangeable(uint32_t i, uint32_t j) {
-    if (sim_cone_.empty()) {
-      sim_cone_ = g_.cone({g_.out});
-      sim_.assign(size_t{g_.num_nodes()} * 16, 0);
-      reads_.assign(g_.num_nodes(), 0);
-      Rng rng(9);
-      uint64_t a[64];
-      for (uint32_t x : sim_cone_) {
-        if (x == 0) continue;
-        if (x <= g_.inputs) {
-          for (int w = 0; w < 16; ++w) sim_[x * 16 + static_cast<size_t>(w)] = rng.next();
-          if (x - 1 < 64) reads_[x] = uint64_t{1} << (x - 1);
-          continue;
-        }
-        const MethodGraph::Node& node = g_.node(x);
-        for (Lit l : node.args) reads_[x] |= reads_[node_of(l)];
-        for (int w = 0; w < 16; ++w) {
-          for (size_t k = 0; k < node.args.size(); ++k)
-            a[k] = sim_[node_of(node.args[k]) * 16 + static_cast<size_t>(w)] ^ (is_compl(node.args[k]) ? ~0ULL : 0);
-          sim_[x * 16 + static_cast<size_t>(w)] = MethodGraph::word(node, a);
-        }
-      }
-      swapped_.assign(sim_.size(), 0);
-    }
-    if (i >= 64 || j >= 64) return true;
-    const uint64_t pair = (uint64_t{1} << i) | (uint64_t{1} << j);
-    uint64_t a[64];
-    auto value = [&](uint32_t x, int w) {
-      return (reads_[x] & pair) ? swapped_[x * 16 + static_cast<size_t>(w)] : sim_[x * 16 + static_cast<size_t>(w)];
-    };
-    for (uint32_t x : sim_cone_) {
-      if (x == 0 || !(reads_[x] & pair)) continue;
-      for (int w = 0; w < 16; ++w) {
-        if (x <= g_.inputs) {
-          swapped_[x * 16 + static_cast<size_t>(w)] = sim_[(x == i + 1 ? j + 1 : i + 1) * 16 + static_cast<size_t>(w)];
-          continue;
-        }
-        const MethodGraph::Node& node = g_.node(x);
-        for (size_t k = 0; k < node.args.size(); ++k)
-          a[k] = value(node_of(node.args[k]), w) ^ (is_compl(node.args[k]) ? ~0ULL : 0);
-        swapped_[x * 16 + static_cast<size_t>(w)] = MethodGraph::word(node, a);
-      }
-    }
-    for (int w = 0; w < 16; ++w)
-      if (value(node_of(g_.out), w) != sim_[node_of(g_.out) * 16 + static_cast<size_t>(w)]) return false;
-    return true;
-  }
-
-  size_t nodes_made() const { return dd_.size(); }
-  size_t memory_bytes() const { return dd_.memory_bytes(); }
-
- private:
-  static constexpr Diagram::Node kNone = UINT32_MAX;
-  Diagram dd_;
-  std::vector<DiagramStatement> statements_;
-  std::vector<uint32_t> level_, input_at_;
-  size_t limit_;
-  std::vector<Diagram::Node> node_, opposite_;
-  int current_ = 0;
-  std::unique_ptr<BddMethod> bdd_;
-  static constexpr size_t bdd_limit_ = size_t{1} << 26;
-  std::vector<uint32_t> sim_cone_;
-  std::vector<uint64_t> sim_, swapped_, reads_;
-
-  // A literal's diagram: a negated one is the value of the `not` that
-  // computes it.
-  Diagram::Node value(Lit l) {
-    const uint32_t n = node_of(l);
-    if (!is_compl(l)) return node_[n];
-    if (opposite_[n] == kNone) opposite_[n] = dd_.negate(node_[n]);
-    return opposite_[n];
-  }
-
-  static std::vector<Diagram::Arg> by_level(const RecordedDiagram& rd, const std::vector<Diagram::Arg>& by_view) {
-    std::vector<Diagram::Arg> out;
-    for (uint32_t v : rd.view_of_level) out.push_back(by_view[v]);
-    return out;
-  }
 };
 
 }  // namespace beq
