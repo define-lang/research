@@ -131,6 +131,9 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
   c.bdd_node_limit = static_cast<size_t>(get("bdd_nodes", static_cast<double>(size_t{1} << 26)));
   c.measure_executions = get("measure_executions", 0) != 0;
   c.search_matches = get("matches", 1) != 0;
+  c.diagram_budget_factor = get("diagram_budget", 2.0);
+  c.diagram_limit = static_cast<size_t>(get("diagram_limit", static_cast<double>(ProgramChecker::kDiagramLimit)));
+  c.statement_limit = get("statement_limit", 1) != 0;
   if (opt.count("patterns_in")) read_patterns(c, opt["patterns_in"]);
   c.record_registered();
   std::cout.precision(6);

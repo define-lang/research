@@ -154,6 +154,9 @@ struct Recorded {
   std::vector<std::pair<Lit, Lit>> aig;
   Lit aig_out = 0;
   bool has_aig = false;
+  // Past twenty boolean inputs, the written view's decision diagram (DLP
+  // 57) instead of a table.
+  std::shared_ptr<RecordedDiagram> diagram;
 };
 
 // Everything about one operation's values that the rules need.
@@ -486,7 +489,10 @@ class ProgramChecker {
       } else {
         const Recorded& callee = recorded_.at(s.name);
         const double te = now();
-        if (callee.has_aig) {
+        if (callee.diagram) {
+          evaluate_diagram(*callee.diagram, args, words, word, row);
+          written_out_s_ += now() - te;
+        } else if (callee.has_aig) {
           evaluate_aig(callee, args, words, word, row);
           written_out_s_ += now() - te;
         } else {
@@ -683,7 +689,7 @@ class ProgramChecker {
       // The split check finds the limits below.
     } else if (info.boolean_statements > 256 && statement_limit) {
       rep.errors["limits"] = "\"statements\"";
-    } else if (I > input_limit) {
+    } else if (I > input_limit && method != "auto" && method != "diagram") {
       rep.errors["limits"] = "\"inputs\"";
     }
     for (size_t k = 0; k < op.stmts.size() && rep.literal_stmt < 0; ++k) {
@@ -710,7 +716,23 @@ class ProgramChecker {
     }
     rep.times.structure = now() - t0;
     if (rep.errors.count("limits") || reaches_cycle_[index]) return rep;
-    if (method != "tt" && op.boolean && !in_registered_reach(op.name)) return check_with_method(op, info, record, rep);
+    {
+      // auto: truth tables up to 16 inputs; the decision diagram past them,
+      // from 17 to 20 within a budget that keeps it no slower than tables,
+      // or else tables; past 20 within DLP 57's limit.
+      // Tables look executions of wide value operations up cheaply, where
+      // the diagram has to compose them: those stay on tables up to 20.
+      bool wide_execution = false;
+      for (const PStmt& s : op.stmts) wide_execution |= s.kind == "call" && s.args.size() > 6;
+      const std::string use =
+          method == "auto" ? (I <= 16 || (I <= 20 && wide_execution) ? "tt" : "diagram") : method;
+      if (use != "tt" && !in_registered_reach(op.name) && (op.boolean || use == "diagram")) {
+        bool fell_back = false;
+        Report r = check_with_method(op, info, record, rep, use, fell_back);
+        if (!fell_back) return r;
+        rep.stats.emplace_back("diagram_over_budget", 1);
+      }
+    }
     std::unique_ptr<SplitCheck> sc;
     if (split) {
       const double ts = now();
@@ -903,29 +925,214 @@ class ProgramChecker {
       MethodGraph::Node n;
       for (const PArg& a : s.args) n.args.push_back(arg_lit(info, a));
       if (s.kind == "call") {
-        if (s.args.size() > 6) throw std::runtime_error("methods: an execution of more than six views");
+        if (s.args.size() > 64) throw std::runtime_error("methods: an execution of more than 64 views");
         n.is_and = false;
-        n.table = recorded_.at(s.name).table[0];
-        if (s.args.size() < 6) n.table &= (1ULL << (1u << s.args.size())) - 1;
+        const Recorded& r = recorded_.at(s.name);
+        if (r.diagram) {
+          n.diagram = r.diagram.get();
+        } else if (s.args.size() > 6) {
+          n.big_table = &r.table;
+        } else {
+          n.table = r.table[0];
+          if (s.args.size() < 6) n.table &= (1ULL << (1u << s.args.size())) - 1;
+        }
       }
       g.nodes.push_back(std::move(n));
     }
-    g.out = arg_lit(info, op.outs[0]);
+    g.out = op.boolean ? arg_lit(info, op.outs[0]) : 0;
     return g;
+  }
+
+  // DLP 57's limit on the decision diagram past twenty boolean inputs.
+  static constexpr size_t kDiagramLimit = size_t{1} << 20;
+  // For measuring diagrams past the limit (`--diagram_limit`).
+  size_t diagram_limit = kDiagramLimit;
+  // From 17 to 20 inputs, the most nodes for which the decision diagram is
+  // no slower than truth tables: diagram_budget_factor nodes per 64 rows of
+  // a table.
+  double diagram_budget_factor = 2.0;
+  size_t diagram_budget(uint32_t inputs) const {
+    return static_cast<size_t>(diagram_budget_factor * static_cast<double>(size_t{1} << (inputs - 6)));
+  }
+
+  // The boolean statements in written order, for the decision diagram.
+  std::vector<DiagramStatement> diagram_statements(const POp& op, const OpInfo& info) const {
+    std::vector<DiagramStatement> out;
+    for (const PStmt& s : op.stmts) {
+      if (!is_boolean_statement(s.kind)) continue;
+      DiagramStatement d;
+      d.kind = s.kind == "not" ? DiagramStatement::kNot : s.kind == "and" ? DiagramStatement::kAnd : DiagramStatement::kCall;
+      for (const PArg& a : s.args) d.args.push_back(arg_lit(info, a));
+      if (d.kind != DiagramStatement::kNot) d.node = node_of(info.lit.at(s.ids[0]));
+      d.value = s.ids[0];
+      out.push_back(std::move(d));
+    }
+    return out;
+  }
+
+  // DLP 57's order of the boolean inputs (a level per input, from 1): as
+  // first reached depth-first from each value no boolean statement reads,
+  // in statement order, through each statement's values in written order.
+  std::vector<uint32_t> diagram_order(const POp& op, const OpInfo& info) const {
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    std::vector<uint32_t> level(I + 1, UINT32_MAX);
+    uint32_t next = 0;
+    std::set<int> read, visited;
+    for (const PStmt& s : op.stmts)
+      if (is_boolean_statement(s.kind))
+        for (const PArg& a : s.args)
+          if (!a.is_literal()) read.insert(info.resolve(a.id));
+    std::function<void(int)> visit = [&](int v) {
+      v = info.resolve(v);
+      if (!visited.insert(v).second) return;
+      auto in = info.input_number.find(v);
+      if (in != info.input_number.end()) {
+        level[static_cast<uint32_t>(in->second)] = next++;
+        return;
+      }
+      const OpInfo::Value& val = info.values.at(v);
+      if (val.stmt < 0) return;
+      const PStmt& s = op.stmts[static_cast<size_t>(val.stmt)];
+      if (!is_boolean_statement(s.kind)) return;
+      for (const PArg& a : s.args)
+        if (!a.is_literal()) visit(a.id);
+    };
+    for (const PStmt& s : op.stmts)
+      if (is_boolean_statement(s.kind) && !read.count(s.ids[0])) visit(s.ids[0]);
+    // Inputs no boolean statement reads aren't in the diagram.
+    for (uint32_t i = 1; i <= I; ++i)
+      if (level[i] == UINT32_MAX) level[i] = next++;
+    return level;
+  }
+
+  // Records a boolean operation checked with its decision diagram: up to
+  // twenty inputs a table, from the written view's diagram; past them the
+  // diagram itself. Interchangeable views come from either.
+  void record_diagram(const POp& op, const OpInfo& info, DiagramMethod& dm) {
+    if (!op.boolean) {
+      record_op(op, info, {}, 0);
+      return;
+    }
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    auto rd = std::make_shared<RecordedDiagram>(dm.record());
+    Recorded& r = recorded_[op.name];
+    r.aig.clear();
+    r.has_aig = false;
+    if (I <= 20) {
+      r.table = dm.written_table();
+      if (I < 6) r.table[0] &= (1ULL << (1u << I)) - 1;
+      r.diagram.reset();
+      uint64_t h = 0x77;
+      for (uint64_t w : r.table) h = mix64(h ^ w);
+      r.hash = h;
+      record_aig(op, info, r);
+      r.group = groups_of(r.table, op.nbool);
+    } else {
+      r.table.clear();
+      std::vector<uint64_t> h, o;
+      rd->dd.hashes(h, o);
+      r.hash = h[rd->root];
+      r.diagram = rd;
+      r.group = diagram_groups(*rd, op.nbool, dm);
+    }
+    update_hierarchy(index_.at(op.name), info);
+  }
+
+  // Interchangeable views of a recorded diagram: swapping views i and j
+  // leaves it the same when it's the same with i false and j true as with
+  // i true and j false.
+  static std::vector<int> diagram_groups(RecordedDiagram& rd, int views, DiagramMethod& dm) {
+    std::vector<uint32_t> level_of(static_cast<size_t>(views), 0);
+    for (uint32_t l = 0; l < rd.view_of_level.size(); ++l) level_of[rd.view_of_level[l]] = l;
+    std::vector<int> parent(static_cast<size_t>(views));
+    std::iota(parent.begin(), parent.end(), 0);
+    std::function<int(int)> find = [&](int x) {
+      int& p = parent[static_cast<size_t>(x)];
+      return p == x ? x : p = find(p);
+    };
+    for (int i = 0; i < views; ++i)
+      for (int j = i + 1; j < views; ++j) {
+        if (find(i) == find(j) || !dm.may_be_interchangeable(static_cast<uint32_t>(i), static_cast<uint32_t>(j))) continue;
+        const uint32_t li = level_of[static_cast<size_t>(i)], lj = level_of[static_cast<size_t>(j)];
+        if (rd.dd.restrict2(rd.root, li, false, lj, true) == rd.dd.restrict2(rd.root, li, true, lj, false))
+          parent[static_cast<size_t>(find(j))] = find(i);
+      }
+    std::vector<int> label(static_cast<size_t>(views));
+    for (int v = 0; v < views; ++v) label[static_cast<size_t>(v)] = find(v);
+    return label;
+  }
+
+  // An execution of an operation that records a decision diagram, over
+  // the caller's words: each node's word from its children's, children
+  // first (nodes are made after their children).
+  template <typename Word>
+  static void evaluate_diagram(const RecordedDiagram& rd, const std::vector<Lit>& args, size_t words, Word word,
+                               uint64_t* row) {
+    std::vector<Diagram::Node> nodes;
+    {
+      std::vector<char> seen(rd.dd.size() + 2, 0);
+      std::vector<Diagram::Node> stack{rd.root};
+      while (!stack.empty()) {
+        const Diagram::Node n = stack.back();
+        stack.pop_back();
+        if (Diagram::terminal(n) || seen[n]) continue;
+        seen[n] = 1;
+        nodes.push_back(n);
+        stack.push_back(rd.dd.lo(n));
+        stack.push_back(rd.dd.hi(n));
+      }
+      std::sort(nodes.begin(), nodes.end());
+    }
+    std::vector<uint32_t> at(rd.dd.size() + 2, 0);
+    for (size_t k = 0; k < nodes.size(); ++k) at[nodes[k]] = static_cast<uint32_t>(k);
+    std::vector<uint64_t> v(nodes.size());
+    auto get = [&](Diagram::Node n) { return n == Diagram::kTrue ? ~0ULL : n == Diagram::kFalse ? 0ULL : v[at[n]]; };
+    for (size_t w = 0; w < words; ++w) {
+      for (size_t k = 0; k < nodes.size(); ++k) {
+        const Diagram::Node n = nodes[k];
+        const uint64_t x = word(args[rd.view_of_level[rd.dd.level(n)]], w);
+        v[k] = (x & get(rd.dd.hi(n))) | (~x & get(rd.dd.lo(n)));
+      }
+      row[w] = get(rd.root);
+    }
   }
 
   // check() for a boolean operation with a method other than truth tables
   // over every input. It records nothing: no operation executes it.
-  Report check_with_method(const POp& op, const OpInfo& info, bool record, Report& rep) {
+  Report check_with_method(const POp& op, const OpInfo& info, bool record, Report& rep, const std::string& method,
+                           bool& fell_back) {
     const MethodGraph g = method_graph(op, info);
     const uint32_t I = g.inputs;
     rep.how = method;
-    if (record) forget(op.name);
     std::unique_ptr<MethodBase> m;
     std::unique_ptr<SplitCheck> sc;
+    DiagramMethod* dm = nullptr;
     const double t1 = now();
     try {
-      if (method == "chunk") {
+      if (method == "diagram") {
+        const bool budgeted = this->method == "auto" && I <= 20;
+        const size_t limit = budgeted ? diagram_budget(I) : diagram_limit;
+        auto d = std::make_unique<DiagramMethod>(g, diagram_statements(op, info), diagram_order(op, info), limit);
+        dm = d.get();
+        const bool within = d->build();
+        rep.stats.emplace_back("diagram_nodes", static_cast<double>(d->count));
+        if (!within) {
+          if (budgeted) {
+            fell_back = true;
+            return rep;
+          }
+          rep.errors["limits"] = "[\"diagram\"," + std::to_string(d->over_value) + "]";
+          if (record) {
+            if (op.boolean)
+              forget(op.name);
+            else
+              record_op(op, info, {}, 0);
+          }
+          rep.times.tables = now() - t1;
+          return rep;
+        }
+        m = std::move(d);
+      } else if (method == "chunk") {
         m = std::make_unique<ChunkMethod>(g, chunk_inputs);
       } else if (method == "bdd") {
         m = std::make_unique<BddMethod>(g, bdd_order, bdd_node_limit);
@@ -942,11 +1149,21 @@ class ProgramChecker {
       rep.times.tables = now() - t1 + (method == "split" ? rep.times.split : 0);
       rep.times.split = 0;
       const double tu = now();
-      m->find_unused();
+      if (op.boolean) m->find_unused();
       rep.times.structure += now() - tu;
     } catch (const BddLimit&) {
       rep.errors["limits"] = "\"bdd nodes\"";
       return rep;
+    }
+    if (record) {
+      const double tg = now();
+      if (dm)
+        record_diagram(op, info, *dm);
+      else if (op.boolean)
+        forget(op.name);
+      else
+        record_op(op, info, {}, 0);
+      rep.times.groups = now() - tg;
     }
     rep.unused_views = m->unused_views;
     if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
@@ -965,6 +1182,9 @@ class ProgramChecker {
         find_matches(op, info, {}, dead, rep, m.get());
       } catch (const BddLimit&) {
         rep.errors["limits"] = "\"bdd nodes\"";
+        return rep;
+      } catch (const Diagram::LimitError&) {
+        rep.errors["limits"] = "\"diagram nodes while matching\"";
         return rep;
       }
     }
@@ -994,7 +1214,7 @@ class ProgramChecker {
         rep.stats.emplace_back("exec_record_bytes", static_cast<double>(cone.size() * 8));
         const double te = now();
         std::vector<uint64_t> v(g.num_nodes(), 0);
-        uint64_t a[8], acc = 0;
+        uint64_t a[64], acc = 0;
         for (size_t w = 0; w < kExecutionSamples / 64; ++w) {
           for (uint32_t x : cone) {
             if (x == 0) {

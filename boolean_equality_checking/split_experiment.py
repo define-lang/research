@@ -35,7 +35,10 @@ import threading
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 STUDY = Path.home() / "projects/research/boolean_logic_in_real_code"
 sys.path.insert(0, str(STUDY))
@@ -942,6 +945,53 @@ def unit_record(
     return rec
 
 
+def over_limit_units(
+    cb: analyze.Codebase, part: int = 0, parts: int = 1
+) -> Iterator[dict[str, Any]]:
+    """Yield the study's units past its limits: the function, where to start, and what the study counted."""
+    for fi, fn in enumerate(cb.funcs):
+        if fi % parts != part:
+            continue
+        pieces, lone = analyze.scope1_pieces(cb, fi)
+        if not pieces and not lone:
+            continue
+        where = f"{fn['file']}:{fn['line']} {fn['name']}"
+        all_members: list[int] = []
+        fn_inputs: set[str] = set()
+        for p in pieces:
+            all_members.extend(p["members"])
+            fn_inputs |= p["inputs"]
+            if len(p["inputs"]) > INPUT_LIMIT or p["stmts"] > STMT_LIMIT:
+                yield {"fi": fi, "starts": p["members"], "scope": 1, "kind": "piece", "where": where,
+                       "study": (len(p["inputs"]), p["stmts"])}  # fmt: skip
+        if pieces:
+            stmts = sum(p["stmts"] for p in pieces)
+            if len(fn_inputs) > INPUT_LIMIT or stmts > STMT_LIMIT:
+                yield {"fi": fi, "starts": all_members, "scope": 1, "kind": "function", "where": where,
+                       "study": (len(fn_inputs), stmts)}  # fmt: skip
+        all_starts: list[int] = []
+        for p in pieces:
+            e = cb.expand(fi, p["members"], analyze.DEPTH_CAP)
+            all_starts.extend(p["members"])
+            if e.big or e.input_count() > INPUT_LIMIT or e.stmts > STMT_LIMIT:
+                yield {"fi": fi, "starts": p["members"], "scope": 2, "kind": "piece", "where": where,
+                       "study": (e.input_count(), e.stmts), "big": e.big}  # fmt: skip
+        for r in lone:
+            e = cb.expand(fi, [r], analyze.DEPTH_CAP)
+            all_starts.append(r)
+            if (e.stmts or e.big) and (
+                e.big or e.input_count() > INPUT_LIMIT or e.stmts > STMT_LIMIT
+            ):
+                yield {"fi": fi, "starts": [r], "scope": 2, "kind": "piece", "where": where + " (lone call)",
+                       "study": (e.input_count(), e.stmts), "big": e.big}  # fmt: skip
+        e = cb.expand(fi, all_starts, analyze.DEPTH_CAP)
+        if (e.stmts or e.big) and (
+            e.big or e.input_count() > INPUT_LIMIT or e.stmts > STMT_LIMIT
+        ):
+            yield {"fi": fi, "starts": all_starts, "scope": 2, "kind": "function", "where": where,
+                   "study": (e.input_count(), e.stmts), "big": e.big}  # fmt: skip
+
+
 def measure(out_path: str, names: list[str]) -> None:
     """Check every over-limit unit of the named codebases and write the records."""
     report: dict[str, Any] = {}
@@ -951,90 +1001,11 @@ def measure(out_path: str, names: list[str]) -> None:
         t_load = time.perf_counter()
         cb = analyze.Codebase(str(STUDY / "work/ir" / f"{name}.jsonl"))
         units: list[dict[str, Any]] = []
-        for fi, fn in enumerate(cb.funcs):
-            if fi % int(parts) != int(part):
-                continue
-            pieces, lone = analyze.scope1_pieces(cb, fi)
-            if not pieces and not lone:
-                continue
-            where = f"{fn['file']}:{fn['line']} {fn['name']}"
-            all_members: list[int] = []
-            fn_inputs: set[str] = set()
-            for p in pieces:
-                all_members.extend(p["members"])
-                fn_inputs |= p["inputs"]
-                if len(p["inputs"]) > INPUT_LIMIT or p["stmts"] > STMT_LIMIT:
-                    rec = unit_record(cb, fi, p["members"], scope2=False)
-                    units.append(
-                        dict(
-                            rec,
-                            scope=1,
-                            kind="piece",
-                            where=where,
-                            study=(len(p["inputs"]), p["stmts"]),
-                        )
-                    )
-            if pieces:
-                stmts = sum(p["stmts"] for p in pieces)
-                if len(fn_inputs) > INPUT_LIMIT or stmts > STMT_LIMIT:
-                    rec = unit_record(cb, fi, all_members, scope2=False)
-                    units.append(
-                        dict(
-                            rec,
-                            scope=1,
-                            kind="function",
-                            where=where,
-                            study=(len(fn_inputs), stmts),
-                        )
-                    )
-            all_starts: list[int] = []
-            for p in pieces:
-                e = cb.expand(fi, p["members"], analyze.DEPTH_CAP)
-                all_starts.extend(p["members"])
-                if e.big or e.input_count() > INPUT_LIMIT or e.stmts > STMT_LIMIT:
-                    rec = unit_record(cb, fi, p["members"], scope2=True)
-                    units.append(
-                        dict(
-                            rec,
-                            scope=2,
-                            kind="piece",
-                            where=where,
-                            study=(e.input_count(), e.stmts),
-                            big=e.big,
-                        )
-                    )
-            for r in lone:
-                e = cb.expand(fi, [r], analyze.DEPTH_CAP)
-                all_starts.append(r)
-                if (e.stmts or e.big) and (
-                    e.big or e.input_count() > INPUT_LIMIT or e.stmts > STMT_LIMIT
-                ):
-                    rec = unit_record(cb, fi, [r], scope2=True)
-                    units.append(
-                        dict(
-                            rec,
-                            scope=2,
-                            kind="piece",
-                            where=where + " (lone call)",
-                            study=(e.input_count(), e.stmts),
-                            big=e.big,
-                        )
-                    )
-            e = cb.expand(fi, all_starts, analyze.DEPTH_CAP)
-            if (e.stmts or e.big) and (
-                e.big or e.input_count() > INPUT_LIMIT or e.stmts > STMT_LIMIT
-            ):
-                rec = unit_record(cb, fi, all_starts, scope2=True)
-                units.append(
-                    dict(
-                        rec,
-                        scope=2,
-                        kind="function",
-                        where=where,
-                        study=(e.input_count(), e.stmts),
-                        big=e.big,
-                    )
-                )
+        for u in over_limit_units(cb, int(part), int(parts)):
+            rec = unit_record(cb, u["fi"], u["starts"], scope2=u["scope"] == 2)
+            units.append(
+                dict(rec, **{k: v for k, v in u.items() if k not in ("fi", "starts")})
+            )
         report[spec] = {"seconds": time.perf_counter() - t_load, "units": units}
         print(
             f"{spec}: {len(units)} units, {report[spec]['seconds']:.1f}s",

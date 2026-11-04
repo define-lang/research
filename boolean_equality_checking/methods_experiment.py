@@ -56,6 +56,8 @@ METHODS = {
     "bdd_natural": ["--bdd_order", "natural"],
     "bdd_reverse": ["--bdd_order", "reverse"],
     "bdd_random": ["--bdd_order", "random"],
+    "diagram": [],
+    "auto": [],
 }
 # The other orders, only at a few sizes: the order's effect, not a curve.
 ORDER_INPUTS = {16, 20, 24, 32, 48}
@@ -150,9 +152,10 @@ def read_once(name: str, inputs: int) -> str:
     return b.text([str(v)])
 
 
-def multiplier(name: str, inputs: int) -> str:
-    """Return bit k of the product of two k-bit numbers, k = inputs // 2."""
+def multiplier(name: str, inputs: int, column: int | None = None) -> str:
+    """Return bit k (or column) of the product of two k-bit numbers, k = inputs // 2."""
     k = inputs // 2
+    top = k if column is None else column
     exprs: list[tuple[str, tuple[int, ...]]] = []
     memo: dict[tuple[str, tuple[int, ...]], int] = {}
 
@@ -169,25 +172,25 @@ def multiplier(name: str, inputs: int) -> str:
     def b(j: int) -> int:
         return k + j + 1
 
-    columns: list[list[int]] = [[] for _ in range(k + 1)]
+    columns: list[list[int]] = [[] for _ in range(top + 1)]
     for i in range(k):
         for j in range(k):
-            if i + j <= k:
+            if i + j <= top:
                 columns[i + j].append(node("and", a(i), b(j)))
-    for c in range(k + 1):
+    for c in range(top + 1):
         bits = columns[c]
         while len(bits) > 1:
             if len(bits) >= 3:
                 x, y, z = bits.pop(), bits.pop(), bits.pop()
                 bits.insert(0, node("xor", node("xor", x, y), z))
-                if c < k:
+                if c < top:
                     columns[c + 1].append(node("maj", x, y, z))
             else:
                 x, y = bits.pop(), bits.pop()
                 bits.insert(0, node("xor", x, y))
-                if c < k:
+                if c < top:
                     columns[c + 1].append(node("and", x, y))
-    return emit_exprs(name, 2 * k, exprs, columns[k][0])
+    return emit_exprs(name, 2 * k, exprs, columns[top][0])
 
 
 def emit_exprs(
@@ -395,6 +398,141 @@ def cone_op(dag: Any, roots: list[int], name: str) -> tuple[str, int]:
     )
 
 
+def unit_op(dag: Any, roots: list[int], name: str) -> tuple[str, int, int] | None:
+    """Return a unit as one operation writing every value nothing else reads, with its inputs and statements."""
+    cone: set[int] = set()
+    stack = [r >> 1 for r in roots]
+    while stack:
+        x = stack.pop()
+        if x in cone:
+            continue
+        cone.add(x)
+        stack.extend(k >> 1 for k in dag.kids[x])
+    nodes = sorted(cone)
+    inputs = [x for x in nodes if dag.op[x] == "in"]
+    if len(inputs) == len(nodes):
+        return None
+    number = {x: i + 1 for i, x in enumerate(inputs)}
+    lines: list[str] = []
+    nots: dict[int, int] = {}
+    nxt = len(inputs) + 1
+
+    def lit(k: int) -> int:
+        nonlocal nxt
+        v = number[k >> 1]
+        if not k & 1:
+            return v
+        if v not in nots:
+            lines.append(f"not {v}")
+            nots[v] = nxt
+            nxt += 1
+        return nots[v]
+
+    for x in nodes:
+        if dag.op[x] == "in":
+            continue
+        args = [lit(k) for k in dag.kids[x]]
+        op = dag.op[x]
+        if op == "and":
+            lines.append(f"and {args[0]} {args[1]}")
+        else:
+            lines.append(
+                f"call {'mux' if op == 'choose' else op} " + " ".join(map(str, args))
+            )
+        number[x] = nxt
+        nxt += 1
+    outs: list[int] = []
+    for r in roots:
+        if (r >> 1) in number and dag.op[r >> 1] != "in":
+            o = lit(r)
+            if o not in outs:
+                outs.append(o)
+    text = "\n".join(
+        [
+            f"op {name} mixed {len(inputs)} 0",
+            *lines,
+            "out " + " ".join(map(str, outs)),
+            "end",
+        ]
+    )
+    return text, len(inputs), len(lines)
+
+
+def real_counts() -> None:
+    """Count the decision diagram of every real-code unit past the study's limits (src/diagram.hpp)."""
+    se: Any = importlib.import_module("split_experiment")
+    analyze: Any = importlib.import_module("analyze")
+    folder = WORK / "real_units"
+    folder.mkdir(parents=True, exist_ok=True)
+    out = WORK / "real_counts.jsonl"
+    out.unlink(missing_ok=True)
+    for name in [
+        "cockroach",
+        "cpython",
+        "django",
+        "gitea",
+        "go",
+        "homeassistant",
+        "kubernetes",
+        "mypy",
+        "odoo",
+        "saleor",
+        "tidb",
+    ]:
+        cb = analyze.Codebase(str(se.STUDY / "work/ir" / f"{name}.jsonl"))
+        for k, u in enumerate(se.over_limit_units(cb)):
+            b = se.Builder(cb, scope2=u["scope"] == 2)
+            row: dict[str, Any] = {
+                "codebase": name,
+                "scope": u["scope"],
+                "kind": u["kind"],
+                "where": u["where"],
+                "study": u["study"],
+            }
+            try:
+                ctx = b.top(u["fi"])
+                roots = [b.build(ctx, n) for n in u["starts"]]
+            except se.TooBigError:
+                row["status"] = "too big to write out"
+            else:
+                made = unit_op(b.dag, roots, "u")
+                if made is None:
+                    continue
+                text, inputs, statements = made
+                row.update(inputs=inputs, statements=statements)
+                path = folder / f"{name}_{k}.prog"
+                path.write_text("\n".join([*library(), text]) + "\n")
+                details = path.with_suffix(".details")
+                command = ["timeout", "-s", "KILL", str(SECONDS), "prlimit", f"--as={MEMORY_GB << 30}", str(BEQ), "program",
+                           str(path), "--mode", "check", "--details", str(details), "--method", "diagram",
+                           "--diagram_limit", str(1 << 26), "--statement_limit", "0", "--matches", "0"]  # fmt: skip
+                done = subprocess.run(  # noqa: S603
+                    command, capture_output=True, text=True, check=False
+                )
+                if done.returncode != 0:
+                    row["status"] = "over cap: " + (
+                        "time"
+                        if done.returncode in (137, -9)
+                        else done.stderr.strip()[-120:]
+                    )
+                else:
+                    r = next(
+                        json.loads(x)
+                        for x in details.read_text().splitlines()
+                        if x.startswith('{"op":"u"')
+                    )
+                    row.update(
+                        status="ok",
+                        nodes=r["stats"].get("diagram_nodes"),
+                        seconds=r["t"]["total"],
+                    )
+                details.unlink(missing_ok=True)
+                path.unlink()
+            with out.open("a") as f:
+                f.write(json.dumps(row) + "\n")
+        print(name, flush=True)
+
+
 def library() -> list[str]:
     """Return booleans.defcl and the registered operations' definitions."""
     parts = ["registered " + " ".join(program.REGISTERED)]
@@ -484,7 +622,7 @@ def run_point(path: Path, method: str, *, matches: bool) -> dict[str, Any]:
     if over:
         return {
             "status": "over cap",
-            "reason": "limits " + over[0]["errors"]["limits"],
+            "reason": "limits " + json.dumps(over[0]["errors"]["limits"]),
             "wall_s": wall,
             "peak_rss_kb": summary["peak_rss_kb"],
         }
@@ -501,6 +639,8 @@ def run(
     only_statements: int = 0,
     min_inputs: int = 0,
     inputs_list: list[int] | None = None,
+    methods: list[str] | None = None,
+    results: str = "results.jsonl",
 ) -> None:
     """Run every point of these shapes with every method (optionally one statement count, from some I)."""
     WORK.mkdir(parents=True, exist_ok=True)
@@ -510,7 +650,7 @@ def run(
         if not cache.exists():
             cache.write_text(json.dumps(real_ops()))
         real = {int(k): v for k, v in json.loads(cache.read_text()).items()}
-    out = WORK / "results.jsonl"
+    out = WORK / results
     for shape in shapes:
         for statements in STATEMENTS.get(shape, [0]):
             if only_statements and statements != only_statements:
@@ -528,7 +668,7 @@ def run(
                     continue
                 path = WORK / f"{shape}_{inputs}_{statements}.prog"
                 path.write_text("\n".join([*library(), *ops]) + "\n")
-                for method in METHODS:
+                for method in methods or METHODS:
                     if (
                         method.startswith("bdd_")
                         and method != "bdd_dfs"
@@ -584,16 +724,14 @@ def answers(op: dict[str, Any], *, with_matches: bool = True) -> str:
     )
 
 
-def summarize() -> None:
-    """Write results/methods.json from the runs."""
-    rows = [
-        json.loads(line) for line in (WORK / "results.jsonl").read_text().splitlines()
-    ]
+def summarize(results: str = "results.jsonl", name: str = "methods") -> None:
+    """Write results/NAME.json and results/NAME_tables.md from the runs."""
+    rows = [json.loads(line) for line in (WORK / results).read_text().splitlines()]
     points: dict[tuple[str, int, int], dict[str, Any]] = {}
     for r in rows:
         key = (r["shape"], r["statements"], r["inputs"])
-        name = r["method"] + ("" if r.get("matches", True) else NO_MATCHES)
-        m = points.setdefault(key, {}).setdefault(name, {"runs": [], "over": None})
+        method = r["method"] + ("" if r.get("matches", True) else NO_MATCHES)
+        m = points.setdefault(key, {}).setdefault(method, {"runs": [], "over": None})
         if r["status"] == "ok":
             m["runs"].append(r)
         else:
@@ -666,13 +804,13 @@ def summarize() -> None:
             entry["compared_with"] = reference if method != reference else None
             table.append(entry)
     crossovers = crossover(table)
-    with (RESULTS / "methods.json").open("w") as f:
+    with (RESULTS / f"{name}.json").open("w") as f:
         json.dump(
             {"points": table, "disagreements": disagreements, "crossovers": crossovers},
             f,
             indent=1,
         )
-    (RESULTS / "methods_tables.md").write_text(markdown(table, crossovers))
+    (RESULTS / f"{name}_tables.md").write_text(markdown(table, crossovers))
     print(f"{len(table)} entries, {len(disagreements)} disagreements")
 
 
@@ -821,11 +959,27 @@ def markdown(table: list[dict[str, Any]], crossovers: list[dict[str, Any]]) -> s
 
 def main() -> None:
     """Run or summarize."""
+    if sys.argv[1] == "real_counts":
+        real_counts()
+        return
     if sys.argv[1] == "run":
-        extra = [int(x) for x in sys.argv[5].split(",")] if len(sys.argv) > 5 else None
-        run(sys.argv[2].split(","), *(int(x) for x in sys.argv[3:5]), inputs_list=extra)
+        # run SHAPES [STATEMENTS [MIN_I [I,... [METHODS [RESULTS]]]]]; 0 or - for all.
+        extra = (
+            [int(x) for x in sys.argv[5].split(",")]
+            if len(sys.argv) > 5 and sys.argv[5] != "-"
+            else None
+        )
+        methods = sys.argv[6].split(",") if len(sys.argv) > 6 else None
+        results = sys.argv[7] if len(sys.argv) > 7 else "results.jsonl"
+        run(
+            sys.argv[2].split(","),
+            *(int(x) for x in sys.argv[3:5]),
+            inputs_list=extra,
+            methods=methods,
+            results=results,
+        )
     else:
-        summarize()
+        summarize(*sys.argv[2:4])
 
 
 if __name__ == "__main__":
