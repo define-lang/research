@@ -271,13 +271,15 @@ class ProgramChecker {
   // truth tables up to 20 inputs and SAT up to 32, and stops if the two
   // differ.
   bool split = false, check_split = false;
-  // The exact method (`--method`, methods_experiment.py): "tt" (truth tables
-  // over every input, up to input_limit inputs), "chunk" (truth tables
+  // The exact method (`--method`): "auto", the default, is DLP 57's rule
+  // (truth tables up to 16 inputs, OBDDs past them within step_budget); the
+  // others are for methods_experiment.py: "tt" (truth tables over every
+  // input, up to input_limit inputs), "chunk" (truth tables
   // 2^chunk_inputs input assignments at a time), "bdd" (OBDDs, inputs in
   // bdd_order), "sat" (SAT sweeping), or "split" (split.hpp). With
   // measure_executions, each operation's report also gives what an
   // execution of it refers to and what evaluating that costs.
-  std::string method = "tt", bdd_order = "dfs";
+  std::string method = "auto", bdd_order = "dfs";
   uint32_t input_limit = 20, chunk_inputs = 16;
   size_t bdd_node_limit = size_t{1} << 26;
   bool measure_executions = false;

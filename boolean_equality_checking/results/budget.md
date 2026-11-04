@@ -1,6 +1,6 @@
 # DLP 57's Budget
 
-Truth tables up to 16 boolean inputs; past 16, OBDDs with complement edges within a budget of steps (`beq program --method auto`, `StepBudget` in `src/bdd.hpp`): a BDD operation past its trivial cases is 6 steps, a node or candidate of the match search 1, a value evaluated on a new sample 40. The budget is 40,000,000,000 steps. Raw: `budget_real_steps.jsonl` (real code), `budget_runs.jsonl.gz` (generated shapes, run without a budget).
+`beq`'s default. Truth tables up to 16 boolean inputs; past 16, OBDDs with complement edges within a budget of steps (`beq program --method auto`, `StepBudget` in `src/bdd.hpp`): a BDD operation past its trivial cases is 6 steps, a node or candidate of the match search 1, a value evaluated on a new sample 40. The budget is 40,000,000,000 steps. Raw: `budget_real_steps.jsonl` (real code), `budget_runs.jsonl.gz` (generated shapes, run without a budget).
 
 ## Steps against time
 
@@ -33,7 +33,7 @@ At most 256 statements only. Eight more took longer than the 10 s cap; all have 
 | xor_heavy, 64 statements | 51 | 1.72e+06 / 1.69e+07 | 62, 0.10 s | 2.8 |
 | xor_heavy, 256 statements | 15 | 3.14e+08 / 6.29e+08 | 20, 1.26 s | 2.4 |
 
-The middle bit of the product of two 11-bit numbers (22 inputs, 239 statements): 9.1e7 steps, 0.75 s. Nothing measured within 256 statements and the 10 s cap for three value operations reached the budget.
+The middle bit of the product of two 11-bit numbers (22 inputs, 239 statements): 9.1e7 steps, 0.75 s; bits 10 and 11 joined by `and` (241 statements): 1.09e8 steps, 0.96 s. Nothing measured within 256 statements and the 10 s cap for three value operations reached the budget.
 
 ## Exactness
 

@@ -358,7 +358,7 @@ Argued, not measured:
     references, copying, stored patterns, and rechecking after edits.
   - `methods.hpp`: exact methods besides truth tables over every input
     (truth tables in chunks, OBDDs, SAT sweeping), for `beq program
-    --method`; `--method auto` is DLP 57's rule: truth tables up to 16 inputs,
+    --method`; `--method auto`, the default, is DLP 57's rule: truth tables up to 16 inputs,
     OBDDs past 16 within a budget of steps (`StepBudget` in `bdd.hpp`).
   - `diagram.hpp`: the written view's decision diagram that a value operation
     checked with OBDDs records for the ones that execute it.
