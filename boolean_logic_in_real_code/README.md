@@ -1,6 +1,6 @@
 # Boolean Logic in Real Code
 
-DLP 57 limits each value operation to 20 boolean inputs and 256 boolean
+DLP 58 limits each value operation to 20 boolean inputs and 256 boolean
 statements. The numbers behind those limits came from generated programs. This
 study measures how big boolean logic is in eleven large open-source codebases,
 and how much of it would fit under those limits.
@@ -10,7 +10,7 @@ and how much of it would fit under those limits.
 - **Within a function, real code fits.** Of about 144,000 connected pieces of
   boolean logic, 10 have more than 20 inputs, all of them in Go code, and none
   has more than 256 statements. No Python piece has more than 19 inputs. The 99.9th percentile is at most 10 inputs and 13 statements in
-  every codebase. Counted per function, the unit that DLP 57 limits, 0% to 1.7%
+  every codebase. Counted per function, the unit that DLP 58 limits, 0% to 1.7%
   of the functions that have boolean logic go over 20 inputs, and none goes over
   256 statements. The largest has 190.
 - **Across calls, a few percent don't fit.** When every call to a
@@ -178,9 +178,9 @@ A unit that stopped for recursion has at least the size shown.
   argument's parameter becomes one input.
 - Python `match` statements contribute only their guards.
 - Scope 2 writes out every boolean-returning function, not only pure boolean
-  ones. DLP 57 counts only executions of boolean value operations as what they
+  ones. DLP 58 counts only executions of boolean value operations as what they
   compute, and real code has almost no pure boolean functions, so scope 1 is
-  the closer match to how DLP 57 counts a program written the way these
+  the closer match to how DLP 58 counts a program written the way these
   codebases are written. Scope 2 shows how big the logic is when every
   boolean helper counts as what it computes.
 

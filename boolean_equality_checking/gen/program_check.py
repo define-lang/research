@@ -4,7 +4,7 @@ It shares nothing with `beq program` but the format: it computes functions by
 evaluating each executed operation's own statements (never a recorded
 table), finds matches and spellings by trying every tuple of arguments in
 every view order, finds groups of interchangeable views by trying every
-pair, and builds DLP 58's order of statements itself. It's for small
+pair, and builds DLP 59's order of statements itself. It's for small
 programs: at most 12 boolean inputs and a few dozen values per operation.
 
     uv run --frozen --python 3.14 python gen/program_check.py FILE.prog
@@ -229,7 +229,7 @@ class Checker:
         raise KeyError(index)
 
     def key(self, name: str) -> tuple[int, int, int]:
-        """Return a registered operation's key (DLP 59).
+        """Return a registered operation's key (DLP 60).
 
         The fewest `and`s computing its function, then its number of read
         views, then its truth table as a number.
@@ -305,7 +305,7 @@ class Checker:
     # Ranks.
 
     def rank_compare(self, op: Operation, a: int | str, b: int | str) -> int:
-        """Compare two values (or literals) in DLP 58's rank order."""
+        """Compare two values (or literals) in DLP 59's rank order."""
         a, b = self.resolve(op, a), self.resolve(op, b)
         if a == b:
             return 0
@@ -497,7 +497,7 @@ class Checker:
         return None
 
     def order_statements(self, op: Operation) -> int | None:
-        """Return the first position where the order differs from DLP 58's."""
+        """Return the first position where the order differs from DLP 59's."""
         placed: set[int] = set()
         canonical: list[int] = []
 
@@ -624,7 +624,7 @@ class Checker:
             statement = op.statements[i]
             # Every execution of a registered operation, `and` included, is
             # a spelling. A `not` isn't respelled: a value that's the `not`
-            # of another is written as that `not` (DLP 57's opposite values).
+            # of another is written as that `not` (DLP 58's opposite values).
             if statement.kind == "not":
                 continue
             name_of = (
@@ -633,7 +633,7 @@ class Checker:
             if name_of not in follows:
                 continue
             current_args = [self.resolve(op, a) for a in statement.args]
-            # An execution given a literal is DLP 57's error, not a spelling.
+            # An execution given a literal is DLP 58's error, not a spelling.
             if any(isinstance(a, str) for a in current_args):
                 continue
             value = self.first_value(op, i)
@@ -654,7 +654,7 @@ class Checker:
     def spelling_compare(
         self, op: Operation, follows: list[str], a: tuple, b: tuple
     ) -> int:
-        """Compare two spellings by DLP 59's precedence."""
+        """Compare two spellings by DLP 60's precedence."""
         ka = (self.negations(op, a[1]), follows.index(a[0]))
         kb = (self.negations(op, b[1]), follows.index(b[0]))
         if ka != kb:

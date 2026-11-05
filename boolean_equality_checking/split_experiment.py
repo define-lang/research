@@ -304,7 +304,7 @@ class Region:
         self.stmts = len(self.expanded)
 
     def within_limits(self) -> bool:
-        """Whether the check is within DLP 57's limits."""
+        """Whether the check is within DLP 58's limits."""
         return (
             not self.capped
             and self.leaf_count <= INPUT_LIMIT

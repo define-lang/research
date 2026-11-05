@@ -22,11 +22,11 @@ visit infinitely many states of one value operation within a fixed bound on
 its size (`prog_terminates`).
 
 A value operation's boolean statements are given by their terms (`Term`).
-Each statement has one value, its term, which is exact: DLP 57 makes a
+Each statement has one value, its term, which is exact: DLP 58 makes a
 boolean value operation write exactly one view, so no execution has several
 values. An input is a `leaf`, and a statement is a `node` applying an
 operation to the terms of the values it reads. A term's code (`ser`) writes
-it out in DLP 58's rank order: `[1, i]` for leaf `i`, and for a statement
+it out in DLP 59's rank order: `[1, i]` for leaf `i`, and for a statement
 `2`, then the codes of its values in view order, with each group of
 interchangeable views given its group's codes in sorted order (`arrange`),
 then `0` and the operation.
@@ -97,7 +97,7 @@ structure Signature where
   /-- The operation is a registered boolean operation (`and` and `not` are, for
   every value operation). -/
   registered : ℕ → Bool
-  /-- A registered operation's place in the order of keys (DLP 59): the
+  /-- A registered operation's place in the order of keys (DLP 60): the
   fewest `and`s computing its function, then its number of read views,
   then its truth table as a number. -/
   key : ℕ → ℕ
@@ -578,7 +578,7 @@ def argCodes : Term → List (List ℕ)
   | .node o args => arrange sig o (args.map (ser sig))
 
 variable (sig) in
-/-- DLP 59's precedence between spellings: negations, key, then the values
+/-- DLP 60's precedence between spellings: negations, key, then the values
 in rank order. -/
 def KeyLt (v' v : Term) : Prop :=
   pairL sig v' < pairL sig v ∨ (pairL sig v' = pairL sig v ∧ argCodes sig v' < argCodes sig v)

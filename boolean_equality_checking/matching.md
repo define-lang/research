@@ -1,6 +1,6 @@
 # Exact Matching of Registered Operations
 
-DLP 57 forbids writing out a registered boolean operation instead of
+DLP 58 forbids writing out a registered boolean operation instead of
 executing it. Today a _match_ is defined over cuts: a value matches a
 registered operation R if, over some cut of at most four values, its truth
 table equals R's, with the cut's values given to R's views in some order.
@@ -12,7 +12,7 @@ operation already has?
 **Short answer:** it can be decided, but it shouldn't be the rule. Exact
 matching costs 0.75–2.5 s per 200- to 256-statement value operation (against
 2–3 ms for cuts). More importantly, it flags 34–47% of all the values in
-operations that DLP 57's cut rule nearly accepts, almost all of them
+operations that DLP 58's cut rule nearly accepts, almost all of them
 coincidences.
 The cut definition is the defensible one. One cheap extension is worth
 adopting: let a cut's value be given to R as its `not` when the program
@@ -25,7 +25,7 @@ the driver `matching_experiment.py`, and the results `results/matching.jsonl`
 
 ## What Was Compared
 
-Common to every definition, following DLP 57:
+Common to every definition, following DLP 58:
 
 - **Values** are the values the caller's own statements compute, never
   values inside an execution.
@@ -41,7 +41,7 @@ The definitions:
 
 | Name            | A value v matches R(a₁, …, aₖ) when                                                                                                                                                                     |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cuts`          | DLP 57: the aᵢ are the values of a cut of v (at most four), and v's table over the cut equals R's in some view order.                                                                                  |
+| `cuts`          | DLP 58: the aᵢ are the values of a cut of v (at most four), and v's table over the cut equals R's in some view order.                                                                                  |
 | `cuts_negated`  | Like `cuts`, but a cut value can be given as its `not` if the program has that `not`.                                                                                                                   |
 | `cut_values`    | Over a cut of v, the aᵢ can be any available values that are functions of a subset of the cut, and v's table over the cut equals R of their tables.                                                   |
 | `exact_cone`    | v equals R(a₁, …, aₖ) as a function of the operation's inputs, every aᵢ is in v's cone, every aᵢ matters, and the aᵢ are reached by the statements between them and v.                                |
@@ -86,7 +86,7 @@ registered operations `or`, `xor`, `eq`, `implies`, `mux`, and `maj`
 (two and three views), executed as statements, and `and`, `and3`, `or3`
 unregistered. Registered operations are never given negated values, which
 would usually be a match of another one (`or(not a, b)` is `implies(a, b)`),
-so the operations are close to passing DLP 57's cut rule. Redundant
+so the operations are close to passing DLP 58's cut rule. Redundant
 statements are rejected. With probability 0.15, a step plants a written-out
 registered operation on available values:
 
@@ -97,7 +97,7 @@ registered operation on available values:
 
 A third kind, a case split `(c and R(args)) or (not c and R(args))` on an
 unrelated value, was generated and always rejected: its two sides are equal
-values, so it's a redundant value, which DLP 57 reports first. That kind of
+values, so it's a redundant value, which DLP 58 reports first. That kind of
 hidden match can't exist in a value operation that compiles.
 
 Five operations each of 8 and 12 inputs with 64 statements, 12 inputs with
@@ -187,7 +187,7 @@ the exact runs are in `results/matching.jsonl`. They ran before the
 30-second limit per check that's the rule now, alongside other runs, and
 are only meant to show the growth.
 
-DLP 57 needs every match, so every cut has to be enumerated. The number of
+DLP 58 needs every match, so every cut has to be enumerated. The number of
 cuts grows 2–3 times per added view and the time 7–18 times (each cut is
 also compared in every view order, k! of them), so four views costs 2–3 ms
 per operation, five 13–28 ms, and six 0.16–0.51 s. The exact search grows
@@ -199,13 +199,13 @@ compiler.
 
 ## Which Match to Report
 
-DLP 57 reports the largest match, then the one whose last statement comes
+DLP 58 reports the largest match, then the one whose last statement comes
 first. With the cut definition, a match is determined by the program text
 alone (its statements and the registered operations), so this order is
 deterministic and doesn't depend on any solver. To make it total: the size
 of a match is the number of statements between its arguments and its value
 (counting `not` statements); ties go to the value that comes first; then to
-the registered operation's name; then to the arguments in DLP 57's rank
+the registered operation's name; then to the arguments in DLP 58's rank
 order. Every step compares things the program states, so every compiler
 reports the same match.
 

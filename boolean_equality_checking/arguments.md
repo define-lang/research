@@ -14,7 +14,7 @@ checking polynomial in the worst case, unless P = coNP.
 The argument: deciding whether two AIGs compute the same function is
 coNP-complete. Suppose a restriction R keeps every function expressible with
 at most polynomially more code, and suppose the rewriting into R-form can be
-done in polynomial time (DLP 57's statement order and argument order are of
+done in polynomial time (DLP 58's statement order and argument order are of
 that kind: the compiler itself refactors programs into the required form). Then any two AIGs can be
 rewritten into R-form in polynomial time, without changing their functions,
 and an exact equality check on R-form programs decides the original question.
@@ -33,12 +33,12 @@ This leaves three kinds of restriction that do bound the cost:
    are opaque to each other (next point).
 2. **Restrictions on what is compared.** If equality is only guaranteed
    within one value operation, with the outputs of other non-boolean
-   statements treated as inputs (which DLP 57 already does), then a large
+   statements treated as inputs (which DLP 58 already does), then a large
    computation can always be split into several value operations, each small
    enough to check exactly. This keeps every function expressible with linear
    overhead, because it only changes where the boundaries go, but it weakens
    the guarantee: equalities across the boundaries aren't checked.
-3. **Changing what "equal" means.** DLP 57's cut-based redundancy rule is
+3. **Changing what "equal" means.** DLP 58's cut-based redundancy rule is
    exact for a local definition (equal over a cut of at most four values),
    and it's cheap, but it doesn't find equalities that only show up over
    larger parts of the program. The measurements show how many it misses.
@@ -78,13 +78,13 @@ the time.
 
 ## Modular Checking Is Enough for the Rule
 
-DLP 57's rules are about the statements of one value operation, and they
+DLP 58's rules are about the statements of one value operation, and they
 treat an execution of another value operation as one statement. So the
 compiler checks each value operation once, with each executed boolean value
 operation replaced by what it computes. A program executing a library
 operation a million times doesn't make the operation's check any larger.
 The total work is the sum over value operation definitions, and each one is
-bounded by DLP 57's limit of 256 boolean statements.
+bounded by DLP 58's limit of 256 boolean statements.
 
 What the 256-statement limit doesn't bound is the size of the logic, because
 an executed boolean value operation can compute any function of up to twelve
@@ -94,7 +94,7 @@ inputs each) and small adders needs on the order of a hundred statements per
 within 256 statements. Their results are equal, and nothing measured here
 decides that in reasonable time (this construction wasn't built; the 12-bit
 multipliers already don't finish). So, within DLP
-57's limits, exact checking of one value operation still has an exponential
+58's limits, exact checking of one value operation still has an exponential
 worst case. The measured multipliers show where it starts.
 
 ## When the Hard Cases Arise

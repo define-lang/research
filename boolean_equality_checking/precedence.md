@@ -20,7 +20,7 @@ Precedence, in order:
    and `implies`, 3 for `xor`, `eq`, and `mux`, 4 for `maj`.
 3. **Declared order:** two arbitrary orders, A (`or`, `implies`, `xor`,
    `eq`, `mux`, `maj`) and B (the reverse).
-4. **The values in DLP 58's rank order**, for the same operation given
+4. **The values in DLP 59's rank order**, for the same operation given
    different values.
 
 When a fix replaces an ordinary match, it uses the highest-precedence
@@ -47,7 +47,7 @@ The code is the `--spellings` and `--precedence` options of `beq match
 `|prec:B|strict`, and `|strict`), summarized in `results/fixpoint_tables.md`.
 Every check ran under 30 s and 4 GB, and every fix loop under 30 s.
 
-These results use DLP 57's current definition of a redundant value, which
+These results use DLP 58's current definition of a redundant value, which
 includes a value that's always the opposite of an earlier one unless it's
 that value's `not`. The runs before that change are in
 `results/preliminary/fixpoint_before_opposite_values.jsonl.gz`. With the
@@ -80,7 +80,7 @@ adds, so a match with an opposite result has to remove at least three; and a
 precedence fix can't add a statement, so spellings that need a `not` of
 their result don't count.
 
-With it, every one of 2,880 fix loops (720 under each of DLP 57's order,
+With it, every one of 2,880 fix loops (720 under each of DLP 58's order,
 earliest first, and smallest first with declared order A, and 720 with
 order B) ended with a program that compiles, in at most 80 rounds. There's
 also an argument that it always terminates: redundant-value fixes and
@@ -93,7 +93,7 @@ detail.
 
 ## Convergence
 
-Families that reach one program, out of 8, with DLP 57's order of fixes:
+Families that reach one program, out of 8, with DLP 58's order of fixes:
 
 | rewrites | inputs | before | strict only | precedence A, as given | precedence A, strict | precedence B, strict |
 | --- | --- | --- | --- | --- | --- | --- |

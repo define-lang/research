@@ -2,7 +2,7 @@
 
 [matching.md](matching.md) found that an exact definition of "writing out a
 registered operation" flags a large share of ordinary values, and called
-them coincidences. The goal of DLP 57 is that there's only one way to write a
+them coincidences. The goal of DLP 58 is that there's only one way to write a
 program, and under that goal they aren't coincidences: `(not x) and (not y)`,
 where x and y are never both true, really is a second way of writing
 `eq(x, y)`. This study takes that definition seriously:
@@ -12,7 +12,7 @@ where x and y are never both true, really is a second way of writing
 > available values aᵢ that come before v, every aᵢ matters, and v isn't
 > already an execution of R on them.
 
-with DLP 57's other rules: opposite values count (a value whose `not` the
+with DLP 58's other rules: opposite values count (a value whose `not` the
 program computes can be given in its place), opposite results count (a
 group computing `not R` is a match for R and a `not`, unless an operation
 computing `not R` is registered), a match has at least two statements, and
@@ -45,7 +45,7 @@ loop under 30 s in all.
 
 ## The Size of a Match
 
-DLP 57's cut definition counts a match's statements between its arguments
+DLP 58's cut definition counts a match's statements between its arguments
 and its value. With arguments anywhere earlier in the program, many matches'
 arguments aren't in the value's cone at all, and counting the cone made the
 fixes cycle: `implies(a, b)` was a match for `not implies(c, d)` with the
@@ -53,7 +53,7 @@ same function and back again. Here a match's statements are the ones fixing
 it removes: its value's, and every statement that nothing reads once the
 value is computed from the arguments. A match needs two of them, so a single
 statement is never a match, and an execution and a `not` of it are never an
-opposite result of another operation (DLP 57's rule, applied to whatever
+opposite result of another operation (DLP 58's rule, applied to whatever
 arguments). With those two rules, every fix loop here terminated.
 
 ## Cost
@@ -94,7 +94,7 @@ identical on all 25 workloads. The first search missed about 1% of the
 matches (all of them `mux`; three were checked independently in Python).
 
 On the matching workloads of [matching.md](matching.md), which are close
-to passing DLP 57's cut rule and so full of exact matches (best of three
+to passing DLP 58's cut rule and so full of exact matches (best of three
 runs; the first search one run):
 
 | size | cuts | resub, median | resub, slowest | first exact search | matches | opposite results | values matched | values skipped |
@@ -145,7 +145,7 @@ The 20-input loop first took 239 s, almost all of it in the Python fix
 loop: it measured every candidate's size with a walk of the program. With
 the sizes computed in `beq`, it takes 1.5–6.8 s.
 
-Programs much larger than DLP 57's limit are a different matter: a random
+Programs much larger than DLP 58's limit are a different matter: a random
 program of 600 statements over 12 inputs has about 2 million matches, each
 check takes 3 s, and fixing it didn't finish within 30 s.
 
@@ -172,9 +172,9 @@ statements, up to 191 statements in a variant). Each program was fixed until
 it compiled: the first redundant value replaced by the value it equals, or
 by the `not` of the value it's always the opposite of (a constant one
 simplified away), otherwise the reported match replaced by an
-execution, then the program put back in DLP 57's statement and argument
+execution, then the program put back in DLP 58's statement and argument
 order. The results were compared as text in that order. Three ways of
-picking the match were tried: DLP 57's (largest, then earliest, then by
+picking the match were tried: DLP 58's (largest, then earliest, then by
 name and rank), earliest first, and smallest first.
 
 ### Termination
@@ -190,7 +190,7 @@ goes down, but there are cases this argument doesn't cover.
 
 ### Results
 
-With DLP 57's order of fixes (the other orders, which differ little, are in `results/fixpoint_tables.md`):
+With DLP 58's order of fixes (the other orders, which differ little, are in `results/fixpoint_tables.md`):
 
 | rewrites | inputs | policy | families that converge | distinct results per family | variants reaching the base's result | rounds, median / most | statuses |
 | -------- | ------ | ------ | ---------------------- | --------------------------- | ----------------------------------- | --------------------- | -------- |
@@ -231,7 +231,7 @@ With DLP 57's order of fixes (the other orders, which differ little, are in `res
 - **Reassociation and distribution mostly converge**, because the rewrites
   apply to few statements, but not always (4–6 of 8 families at most sizes).
 - **The order of the fixes doesn't matter.** Earliest first and smallest
-  first converge no more often than DLP 57's order (1/8, 1/8, and 2/8
+  first converge no more often than DLP 58's order (1/8, 1/8, and 2/8
   families with `expand` at 8 inputs).
 
 ### How the results differ
@@ -262,7 +262,7 @@ rule the compiler could check either. This is argued, not measured.
 
 ## Recommendations
 
-1. **If DLP 57 adopts the exact definition**, the search here is fast enough
+1. **If DLP 58 adopts the exact definition**, the search here is fast enough
    for value operations that compile (a few milliseconds at 16 inputs, tens
    at 20), with matches counted by the statements fixing them removes, which
    is also what makes the fixes terminate.

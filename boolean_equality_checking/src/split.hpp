@@ -1,4 +1,4 @@
-// The split check (`beq program --split 1`): DLP 57's rules on values,
+// The split check (`beq program --split 1`): DLP 58's rules on values,
 // checked statement by statement instead of with truth tables over every
 // boolean input of the operation.
 //
@@ -49,7 +49,7 @@ class SplitCheck {
   using CallEval = std::function<void(uint32_t node, const std::vector<Lit>& args, size_t words, const Word& word,
                                       uint64_t* row)>;
   static constexpr size_t kInputLimit = 20, kStatementLimit = 256;
-  // The most leaves of one part or group (DLP 57's input limit unless
+  // The most leaves of one part or group (DLP 58's input limit unless
   // methods_experiment.py raises it).
   size_t input_limit = kInputLimit;
 

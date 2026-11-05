@@ -1,5 +1,5 @@
 // The fixes a refactoring tool applies to a whole program until it
-// compiles (DLP 57's refactoring steps, DLP 58's order, DLP 59's matches,
+// compiles (DLP 58's refactoring steps, DLP 59's order, DLP 60's matches,
 // spellings, and wrappers), with every operation fixed after the ones it
 // executes.
 #pragma once
@@ -39,7 +39,7 @@ class ProgramFixer {
     std::map<size_t, size_t> result_of;
     std::vector<size_t> first, rest;
     for (size_t i = 0; i < p_.ops.size(); ++i) {
-      // The fixes may pass DLP 57's statement limit on the way to a smaller
+      // The fixes may pass DLP 58's statement limit on the way to a smaller
       // operation, but an operation written past it is the programmer's.
       const auto& stmts = p_.ops[i].stmts;
       if (std::count_if(stmts.begin(), stmts.end(), [](const PStmt& s) { return is_boolean_statement(s.kind); }) > 256)
@@ -140,7 +140,7 @@ class ProgramFixer {
         break;
       }
       // A literal or a value that never changes is the programmer's to
-      // fix (DLP 57).
+      // fix (DLP 58).
       if (rep.literal_stmt >= 0) {
         res.status = "literal";
         break;
@@ -188,7 +188,7 @@ class ProgramFixer {
         break;
       }
       if (rep.has_match) {
-        // Every match in the order DLP 59 reports them, largest first, each
+        // Every match in the order DLP 60 reports them, largest first, each
         // with the highest-precedence spelling among the matches of the
         // same value and size, as long as its statements and arguments
         // don't overlap a match already chosen: each is then still a match
@@ -391,7 +391,7 @@ class ProgramFixer {
       if (!a.is_literal() && a.id == id) a = with;
   }
 
-  // DLP 58's order, dead statements removed, and copies wherever one value
+  // DLP 59's order, dead statements removed, and copies wherever one value
   // goes to two views of an execution.
   // Returns how many dead boolean statements it removed.
   int canonicalize(size_t index) {
@@ -487,7 +487,7 @@ class ProgramFixer {
     return removed;
   }
 
-  // DLP 57's refactoring step 6: read views that don't matter are removed.
+  // DLP 58's refactoring step 6: read views that don't matter are removed.
   // The written view doesn't depend on them, so their reads can be given
   // any value without changing it: the first read view the operation keeps
   // that makes none of its values constant, which would be an error the
@@ -562,7 +562,7 @@ class ProgramFixer {
   }
 
   // After an operation compiles: if it's a boolean operation that only
-  // names one of its views, or one statement it wraps (DLP 59's wrapper),
+  // names one of its views, or one statement it wraps (DLP 60's wrapper),
   // it's removed and its callers compute that instead. A mixed operation
   // keeps its written views: a caller's values from a `run` are boolean
   // inputs there, and giving the caller the value instead would change

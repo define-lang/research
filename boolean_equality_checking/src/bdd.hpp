@@ -11,7 +11,7 @@
 
 namespace beq {
 
-// DLP 57's budget: a fixed number of steps of the compiler's own work per
+// DLP 58's budget: a fixed number of steps of the compiler's own work per
 // value operation, never time. A BDD operation past its trivial cases is 6
 // steps, a new BDD node 20, a node or a candidate of the match search 1, and
 // a value evaluated on a new sample 30: those weights make steps follow time

@@ -1,6 +1,6 @@
 # The Full Algorithm on Whole Programs
 
-The earlier studies measured each rule of DLPs 57–59 on its own, on
+The earlier studies measured each rule of DLPs 58–60 on its own, on
 workloads that were simpler than Define programs in several ways. This study
 first makes the workloads and tools follow the rules as they now stand,
 then runs every check together on whole generated programs: order
@@ -28,7 +28,7 @@ of the program it writes), 120 s for generating a program and for the
 independent checker, 4 GB for `beq` (8 GB for the tools), and 20 minutes
 for a whole run. Generating took 8.7 s, 85.7 s, and 69.9 s. Every step
 uses the current `beq`, and the check is truth tables up to 20 inputs
-(`auto`, DLP 57's limit), so there's no SAT in any row.
+(`auto`, DLP 58's limit), so there's no SAT in any row.
 
 #### The programs, fixed until they compile
 
@@ -162,7 +162,7 @@ SAT sweeping for redundant values with no stored patterns took 69 s on
 this program, uncapped, against 1.5 s with truth tables, and matching
 needs every value's truth table anyway, so SAT saves only the grouping of
 tables by function. So the compiler's default uses truth tables up to 20
-inputs, and SAT only past them, where DLP 57's limit makes an operation an
+inputs, and SAT only past them, where DLP 58's limit makes an operation an
 error anyway. The truth tables of every value aren't stored for a recheck
 (about 9 MB per operation here); each operation's recorded table is, and
 an unchanged operation isn't checked.
@@ -252,14 +252,14 @@ under 1.2).
 ## What Changed to Match Define
 
 1. **One written view.** `gen/hierarchy.py` made operations that write one or
-   two views. DLP 57 now allows exactly one for a boolean value operation, so
+   two views. DLP 58 now allows exactly one for a boolean value operation, so
    it writes one. The new programs follow the same rule: a boolean value
    operation writes one view, and only mixed operations (below) write several.
 2. **Programs that compile follow every rule.** A program counted as
    compiling only had no redundant values before. Here a program is
    generated as a programmer might first write it, then fixed until it
    compiles (`beq program --mode fix`), and checked again as written. The
-   fixes are DLP 57's refactoring steps, DLP 58's order, and DLP 59's
+   fixes are DLP 58's refactoring steps, DLP 59's order, and DLP 60's
    matches (with the restriction that no fix grows the program), first
    spellings, and wrappers. An independent checker (`gen/program_check.py`),
    which shares no code with `beq`, confirms the result (Verification,
@@ -268,7 +268,7 @@ under 1.2).
    aren't purely boolean: comparisons (`cmp`) turn numeric views into
    boolean inputs, numeric statements (`num`) read boolean values, and
    operations execute other mixed operations (`run`), whose boolean written
-   views are boolean inputs of the caller. Statement order follows DLP 58:
+   views are boolean inputs of the caller. Statement order follows DLP 59:
    before each statement that isn't boolean come the boolean statements it
    needs, in view order, and the written views' come last.
 4. **Matching through references.** Operations execute user-defined boolean
@@ -295,7 +295,7 @@ under 1.2).
    uses the current `beq`.
 8. **Constants are errors.** A literal given to a boolean statement, a
    value that never changes, and a written view that never changes are
-   reported (DLP 57), and the fix loop stops at them: the programmer fixes
+   reported (DLP 58), and the fix loop stops at them: the programmer fixes
    them. The generator makes none. A statement that isn't boolean can still
    be given a literal. A boolean value operation that only names one of its
    views or wraps one statement is removed, and each caller gets the
@@ -304,7 +304,7 @@ under 1.2).
    giving the caller the value instead would change its functions, and
    could make one never change.
 9. **Dead statements and read views that don't matter** are errors (DLP
-   57). The fix loop removes dead statements, and removes a read view that
+   58). The fix loop removes dead statements, and removes a read view that
    doesn't matter from the operation and from every execution of it, which
    can leave statements dead in the callers. Its reads in the operation get
    the first read view the operation keeps that makes none of its values
@@ -318,8 +318,8 @@ under 1.2).
 10. **`and` and `not` are registered** for every value operation, before
     the others, so matches can be `and`s and `not`s and every `and` is a
     spelling (a `not` isn't respelled: a value that's the opposite of an
-    earlier one has to be its `not`, DLP 57). The other registered
-    operations are ordered by **key** (DLP 59): the fewest `and`s in any
+    earlier one has to be its `not`, DLP 58). The other registered
+    operations are ordered by **key** (DLP 60): the fewest `and`s in any
     and-inverter graph computing the function, then fewer read views, then
     the truth table as a number. A registered operation's own definition
     follows `and`, `not`, and the ones with smaller keys; spellings come
@@ -393,7 +393,7 @@ The independent checker agrees with `beq` everywhere it was run:
 
 - **The independent checker** computes every function by copying executed
   operations' statements, finds matches and spellings by trying every tuple
-  of arguments, and builds DLP 58's order, ranks, and groups from the
+  of arguments, and builds DLP 59's order, ranks, and groups from the
   definitions. Over its self-tests and 30 random programs (10 of them
   with booleans.defcl listed in another order, which changes nothing),
   each raw and fixed, its reports and `beq`'s agree on all 1,922
@@ -438,10 +438,10 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
    Fixing now ends by reading the written program back and checking it.
 5. **An execution given a literal** (`mux(a, T, b)`) was taken as a
    spelling to compare, which crashed both checkers on the 150k program.
-   It's DLP 57's literal error, not a spelling, in both now.
+   It's DLP 58's literal error, not a spelling, in both now.
 
 
-## What DLPs 57–59 Do Here That the Earlier Studies Didn't Show
+## What DLPs 58–60 Do Here That the Earlier Studies Didn't Show
 
 - **Registered operations' definitions are forced into each other.**
   Each definition follows only `and`, `not`, and the registered operations
@@ -472,7 +472,7 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
   then `spelling`). A compiler has to check every operation again for them, which is
   linear in the program (below).
 - **Views a function doesn't depend on are interchangeable** with each
-  other, so DLP 58's argument order applies to the values given to them.
+  other, so DLP 59's argument order applies to the values given to them.
   A fix that removes a value's last use of a view can make that happen in
   every operation that executes it.
 - **Two readings the DLPs leave open**, both chosen to match the
@@ -488,7 +488,7 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
   is 2^I times the executed operation's views when it's too big to write
   out, so a caller at 20 inputs that executes several 16–20-view operations
   takes 25–80 ms, against well under 1 ms for an operation of 8 inputs.
-  That's within DLP 57's limits but sets the cost of the largest
+  That's within DLP 58's limits but sets the cost of the largest
   operations, and writing out larger operations makes it slower, not
   faster.
 - **SAT for redundant values with no stored patterns**, on operations that
@@ -497,7 +497,7 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
 - **The table of fewest `and`s stops at four views**: five views have
   616,126 NPN classes, and the hardest four-view classes already take
   minutes of exact synthesis, so registered operations stay at four views
-  (DLP 59).
+  (DLP 60).
 - **An edit to booleans.defcl is linear in the whole project**, not in what
   the edit touches: the registered operations apply to every value
   operation, so each one's tables are computed again and searched for the

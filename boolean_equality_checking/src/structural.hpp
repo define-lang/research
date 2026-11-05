@@ -1,5 +1,5 @@
 // Methods that only look at structure: structural hashing, the normalized
-// AND-of-literal-sets form, and DLP 57's cuts of at most four values.
+// AND-of-literal-sets form, and DLP 58's cuts of at most four values.
 #pragma once
 
 #include <algorithm>
@@ -127,7 +127,7 @@ inline Classes run_normalize(const Aig& g, bool flatten_all, size_t literal_budg
   return classes;
 }
 
-// DLP 57's cuts: every union of one cut of each input with at most four values,
+// DLP 58's cuts: every union of one cut of each input with at most four values,
 // plus the cut holding only the node. A node is redundant if, over one of its
 // cuts, it is constant, equals one of the cut's values, or equals an earlier
 // node over the same cut.

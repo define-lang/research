@@ -3,7 +3,7 @@
 The earlier workloads copied (inlined) every executed boolean value operation
 into the caller's graph. The design now refers to them instead: an execution
 is one node that names the executed value operation and the values it was
-given. That's possible because DLP 57's rules only look at the values the
+given. That's possible because DLP 58's rules only look at the values the
 caller's own statements compute, and the executed value operation was
 already checked where it's defined. This compares the two.
 
@@ -173,7 +173,7 @@ in Python and was replaced by the 12-view one.
 What the earlier check saves:
 
 - **The executed operation's other values are never the caller's
-  concern.** DLP 57 asks only about the values the caller's statements
+  concern.** DLP 58 asks only about the values the caller's statements
   compute, and an execution's results are the only ones of its values the
   caller has. With references, the check never sees the rest; the recorded
   table or OBDD stands in for them. With copying, they're in the graph, and

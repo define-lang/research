@@ -108,7 +108,7 @@ class Builder:
     def reorder_first_need(
         self, roots: Iterable[int], *, keep_unneeded: bool = True
     ) -> Builder:
-        """Return a copy in DLP 57's statement order, with literals remapped.
+        """Return a copy in DLP 58's statement order, with literals remapped.
 
         Each value comes right before the statement that first needs it, with
         a statement's inputs in order, starting from the roots in order. Nodes

@@ -1,9 +1,9 @@
 # Fixing a Value Operation Always Terminates
 
-DLP 59 adopts a precedence rule between spellings of a value, with the
+DLP 60 adopts a precedence rule between spellings of a value, with the
 restriction from [precedence.md](../precedence.md) that no fix grows the
 program, and orders registered operations by a key computed from what they
-compute. DLP 57 makes a value that's always the opposite of an earlier one
+compute. DLP 58 makes a value that's always the opposite of an earlier one
 redundant, unless it's that value's `not`, and makes literals given to
 boolean statements, values that never change, and written views that never
 change errors that the programmer fixes, not the refactoring tool. This
@@ -15,7 +15,7 @@ proves that fixing a program, one reported error at a time, always ends.
 
 Fix a finite set of **inputs** (the value operation's boolean inputs), the
 primitive operations `and` (two views) and `not` (one view), and a finite
-set of **registered operations**. DLP 59 makes `and` and `not` registered
+set of **registered operations**. DLP 60 makes `and` and `not` registered
 for every value operation, before the others, so an `and` is an execution
 of a registered operation like any other (it has a pair, below, and can be
 respelled), and a match can be written with an `and` or a `not`; `not`
@@ -35,22 +35,22 @@ A value operation's boolean part is a list of **statements** s₁ … sₙ and a
 list of **exits**: its written views, and the values its non-boolean
 statements read. Each statement executes an operation on **values**: inputs
 or earlier statements, never a literal. A statement's value is the
-statement itself: DLP 57 makes a boolean value operation write exactly one
+statement itself: DLP 58 makes a boolean value operation write exactly one
 view, so an execution of one has one value. It's **canonical** when:
 
 - every statement is read, directly or through other statements, by an
   exit (there are no **dead** statements), and
-- the statements are in DLP 58's order, and every statement gives the
+- the statements are in DLP 59's order, and every statement gives the
   values of each interchangeable group in rank order.
 
 Every program is turned into a canonical one by **canonicalizing**: removing
 dead statements and re-sorting. All programs the fixes see are canonical.
 
-**Ranks** are DLP 58's. A value's **term** is its expression: an input is
+**Ranks** are DLP 59's. A value's **term** is its expression: an input is
 itself, and a statement is its operation applied to the terms of the values
 it reads, with each interchangeable group sorted by rank. The rank order <ᵣ
 compares terms: inputs first, in a fixed order; a statement's term after
-them; two statement terms by their argument terms, in order, as DLP 58
+them; two statement terms by their argument terms, in order, as DLP 59
 defines, with a shorter list first, and then by operation. It's a strict
 total order on terms, by induction on their size. Terms don't depend on the
 program, so values of different programs can be compared.
@@ -69,7 +69,7 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
 
 1. **Redundant value.** A statement v whose function equals an input's or
    an earlier statement's, w. The fix replaces every read of v (by
-   statements and exits) with w, then canonicalizes. (DLP 57 reports the
+   statements and exits) with w, then canonicalizes. (DLP 58 reports the
    first such v, but any will do here.)
 2. **Opposite value.** A statement v whose function is the opposite of an
    input's or an earlier statement's, w, when v's statement isn't
@@ -99,13 +99,13 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
    statements executing `not`.
 
 5. **Dead statements.** Boolean statements whose values reach no exit
-   (DLP 57 makes them an error). They're removed; every other statement
+   (DLP 58 makes them an error). They're removed; every other statement
    stays as it is.
 
 A value that never changes is an error, reported before matches, which the
-fixes leave to the programmer: DLP 57 reports redundant values, those that
+fixes leave to the programmer: DLP 58 reports redundant values, those that
 never change included, first, and a fix only applies while there's none. So
-**the value of a match or a spelling never changes**. DLP 57 also reports
+**the value of a match or a spelling never changes**. DLP 58 also reports
 the first redundant value, so **the value of an opposite-value fix isn't a
 `not`**: if v were `not x`, with x not w, then x and w would have the same
 function, and since both come before v and inputs have different functions,
@@ -125,7 +125,7 @@ graph is acyclic. Besides the fixes above inside any one value operation,
 there are two more:
 
 6. **A read view that doesn't matter.** A read view of a boolean value
-   operation A that A's written view doesn't depend on (DLP 57 makes it an
+   operation A that A's written view doesn't depend on (DLP 58 makes it an
    error). Its reads in A are given the first read view A keeps that makes
    none of A's values one that never changes, and then the view is removed;
    when no kept read view will do, the fix doesn't apply and the error
@@ -227,7 +227,7 @@ every value an earlier one, has finitely many states.
 do except these, which the programmer has to fix: a literal given to a
 boolean statement, a value or written view that never changes, a read view
 that doesn't matter whose removal would make a value that never changes
-(fix 6), an operation past DLP 57's limits as written (the fixes may pass
+(fix 6), an operation past DLP 58's limits as written (the fixes may pass
 the statement limit on the way to a smaller operation, and the fix loop
 checks past it), an execution cycle in the program as written (DLP 9; the
 fixes never make one), a registered operation whose definition is a
@@ -375,7 +375,7 @@ a cycle. ∎
 - **Other values' keys changing.** A spelling fix can change other values'
   terms, and so their rank order, but only downward (Lemma 7), and it never
   changes another value's pair (Lemma 4), because a spelling fix never
-  turns a value into a `not` or out of one. That's why DLP 59's rule that
+  turns a value into a `not` or out of one. That's why DLP 60's rule that
   only single executions are respelled matters: respelling a `not` of an
   execution as an execution would turn a `not` into an execution, adding a
   pair, and could make other values' negation counts go down while their
@@ -383,7 +383,7 @@ a cycle. ∎
 
 ## What This Covers and What It Doesn't
 
-- **Order of fixes.** The only things assumed about DLP 57's order of
+- **Order of fixes.** The only things assumed about DLP 58's order of
   reports are that no fix applies while a value never changes, and that an
   opposite value is the first redundant value. Nothing assumes the largest match first, or the highest-precedence
   spelling for an ordinary fix. The opposite value only matters in that it
@@ -404,7 +404,7 @@ a cycle. ∎
 ## Checked Against the Fix Loop
 
 `measure_check.py` runs the Python fix loop of `gen/fixpoint.py`, which
-handles one value operation at a time, with an earlier form of DLP 59's
+handles one value operation at a time, with an earlier form of DLP 60's
 precedence (declared orders, and AIG nodes in place of the key), on all 144
 families of [precedence.md](../precedence.md), and computes the measure
 after every fix (statements, then statements that aren't a `not`, then the
@@ -422,7 +422,7 @@ them keep the number of statements, and in 40 of those, the negations
 and precedence go up.
 
 The Python loop also respelled a `not` of an execution as an execution
-until this check; that isn't part of DLP 59, and it was removed.
+until this check; that isn't part of DLP 60, and it was removed.
 
 ## The Lean Proof
 
@@ -470,7 +470,7 @@ which the rank order on all terms isn't (point 7 below), so it isn't used.
 What the Lean model leaves out, or states differently:
 
 1. **A value operation is its statements' terms**, a list of `Term`,
-   rather than a graph in DLP 58's order. Re-sorting isn't modeled: the
+   rather than a graph in DLP 59's order. Re-sorting isn't modeled: the
    measure doesn't depend on the order (Lemma 1), and "earlier" only
    decides which fixes exist. Values that never change aren't modeled
    (Lemma 0): no part of the measure counts them.
@@ -501,12 +501,12 @@ What the Lean model leaves out, or states differently:
    keeps the codes, and it keeps a position-by-position order.
 6. **The rank order is the lexicographic order of codes** (`ser`): `[1, i]`
    for an input, and for a statement 2, its values' codes in view order
-   (each group's codes sorted among its views), 0, and the operation. That this is DLP 58's rank
+   (each group's codes sorted among its views), 0, and the operation. That this is DLP 59's rank
    order rests on codes being prefix-free (`ser_prefix_free`), so that
    comparing codes compares the values first, then a shorter list first,
-   then the operation; the correspondence with DLP 58's wording is argued
+   then the operation; the correspondence with DLP 59's wording is argued
    here, not formalized. A registered operation has one written view, so
-   DLP 58's last tie (which written view) doesn't arise.
+   DLP 59's last tie (which written view) doesn't arise.
 7. **The counting fact is a hypothesis.** `prog_terminates` assumes that
    the states each value operation takes in the sequence, within any bound
    on its number of statements, are finitely many. That's the counting
@@ -516,9 +516,9 @@ What the Lean model leaves out, or states differently:
    terms isn't well-founded (for example `f(x₁, x₁) > f(x₀, f(x₁, x₁)) >
    f(x₀, f(x₀, f(x₁, x₁))) > …`).
 8. **A spelling requires that no other statement has v's term**, which holds
-   because DLP 57 reports redundant values before matches. An opposite
-   value requires that v isn't a `not`, which holds because DLP 57 reports
+   because DLP 58 reports redundant values before matches. An opposite
+   value requires that v isn't a `not`, which holds because DLP 58 reports
    the first redundant value.
-9. **A statement has one value**, which is exact: DLP 57 makes writing more
+9. **A statement has one value**, which is exact: DLP 58 makes writing more
    than one view an error for a boolean value operation, so no boolean
    statement is an execution with several values.

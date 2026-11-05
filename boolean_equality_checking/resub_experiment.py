@@ -1,7 +1,7 @@
 """Time exact matching over earlier values, searched like Boolean resubstitution.
 
 On the matching workloads of `matching_experiment.py` (regenerated
-deterministically), runs `beq match --how resub`, DLP 57's cuts, and the
+deterministically), runs `beq match --how resub`, DLP 58's cuts, and the
 first exact search (`--how exact --anchor any`, whose arguments are also
 earlier values), and checks that the two exact searches find the same
 matches, apart from the opposite results that only `resub` looks for. Run

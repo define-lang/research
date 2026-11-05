@@ -1,6 +1,6 @@
 """Check the termination measure against the Python fix loop.
 
-Runs `gen/fixpoint.py`'s fix loop, with DLP 59's rules (precedence with the
+Runs `gen/fixpoint.py`'s fix loop, with DLP 60's rules (precedence with the
 restriction that no fix grows the program), on the families of
 `fixpoint_experiment.py`, and checks after every fix that the measure of
 termination.md went down: the number of statements, then the number of

@@ -1,11 +1,11 @@
-"""Boolean value operations as programs, and applying DLP 57's fixes to them.
+"""Boolean value operations as programs, and applying DLP 58's fixes to them.
 
 A program has `inputs` boolean inputs and a list of statements, each an
 operation (`and`, `not`, or a registered operation) and the values it reads:
 an input `i` is value `i`, and statement `k` is value `inputs + k`. Statements
 only read earlier values. The written views are `outputs`.
 
-`canonical` puts a program in DLP 57's one order: values that are given to
+`canonical` puts a program in DLP 58's one order: values that are given to
 interchangeable views go in rank order, and each statement comes right
 before the statement that first reads it, starting from the written views
 in order. Two programs are the same program when their canonical forms are
@@ -130,7 +130,7 @@ def first_redundant(p: Program) -> tuple[int, int | str, bool] | None:
 
 
 def rank_keys(p: Program) -> list[tuple]:
-    """Return a key per value whose order is DLP 57's rank order."""
+    """Return a key per value whose order is DLP 58's rank order."""
     keys: list[tuple] = [(0, i) for i in range(p.inputs)]
     for op, args in p.statements:
         ordered = ordered_args(op, args, keys)
@@ -149,7 +149,7 @@ def ordered_args(op: str, args: tuple[int, ...], keys: list[tuple]) -> tuple[int
 
 
 def canonical(p: Program) -> Program:
-    """Return the program in DLP 57's statement order and argument order."""
+    """Return the program in DLP 58's statement order and argument order."""
     keys = rank_keys(p)
     out = Program(p.inputs)
     new: dict[int, int] = {i: i for i in range(p.inputs)}
@@ -345,7 +345,7 @@ class Match:
 
 
 def reported(p: Program, matches: list[Match], policy: str = "largest") -> Match | None:
-    """Return the match DLP 57 reports: largest, earliest, by name, by rank.
+    """Return the match DLP 58 reports: largest, earliest, by name, by rank.
 
     A match's size is the number of statements fixing it removes, as `beq`
     reports it; `beq` reports only matches of at least two statements, and
@@ -403,7 +403,7 @@ def plain_argument(p: Program) -> Program | None:
     An execution of a registered operation given `not y` is rewritten to
     execute a registered operation that computes the same thing from y, as
     `or(x, not y)` becomes `implies(y, x)`. This is a candidate rule, not
-    DLP 57's: it makes the polarity of arguments canonical.
+    DLP 58's: it makes the polarity of arguments canonical.
     """
     import itertools
 
@@ -473,7 +473,7 @@ def precedence_match(
     The value is an execution of a registered operation, or a `not` of one,
     and another execution (or a `not` of one) over earlier values computes
     it with higher precedence. Returns the highest-precedence spelling.
-    With `strict`, as DLP 59 adopted it, only single executions are
+    With `strict`, as DLP 60 adopted it, only single executions are
     respelled, and only by single executions.
     """
     keys = rank_keys(p)
@@ -490,7 +490,7 @@ def precedence_match(
     for v in sorted(by_value):
         op, args = p.statements[v - p.inputs]
         opposite = op == "not"
-        # DLP 59 respells only single executions, never a `not` of one.
+        # DLP 60 respells only single executions, never a `not` of one.
         if opposite and strict:
             continue
         if opposite:

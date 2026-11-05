@@ -1,6 +1,6 @@
 // The fewest `and`s in any and-inverter graph computing a boolean function
 // of up to four views: the first part of a registered operation's key
-// (DLP 59). Every function of four views is in one of 222 NPN classes
+// (DLP 60). Every function of four views is in one of 222 NPN classes
 // (permuting and negating views, negating the result), which share it;
 // min_ands_table.hpp lists each class's smallest truth table and its count,
 // found by exact synthesis (min_ands_experiment.py).
