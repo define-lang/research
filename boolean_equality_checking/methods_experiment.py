@@ -138,7 +138,7 @@ def clean(make: Any, inputs: int, max_statements: int = 0) -> str:
 def dense(name: str, rng: random.Random, inputs: int, statements: int) -> str:
     """Return a random operation like the wide program's."""
     # gen/program.py's mix of statements; closing the operation adds some,
-    # and DLP 58 allows 256.
+    # and DLP 59 allows 256.
     target = min(statements, MAX_STATEMENTS - 16)
     kinds = [
         ("and", 45),
@@ -480,7 +480,7 @@ def unit_op(dag: Any, roots: list[int], name: str) -> tuple[str, int, int] | Non
 
 
 def real_steps() -> None:
-    """Check every real-code unit past the study's limits with DLP 58's rule, without a budget, counting its steps."""
+    """Check every real-code unit past the study's limits with DLP 59's rule, without a budget, counting its steps."""
     se: Any = importlib.import_module("split_experiment")
     analyze: Any = importlib.import_module("analyze")
     folder = WORK / "real_units"

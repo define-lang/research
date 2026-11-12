@@ -1,4 +1,4 @@
-"""Whether applying DLP 58's fixes to equivalent programs reaches one program.
+"""Whether applying DLP 59's fixes to equivalent programs reaches one program.
 
 Generates families of value operations (`gen/fixpoint.py`): a random base
 program and variants that compute the same functions written differently
@@ -216,7 +216,7 @@ def fix_program(
     "--large-only",
     is_flag=True,
     help="Only fix random programs of 600 statements, for programs near DLP "
-    "58's limit of 256 once they compile.",
+    "59's limit of 256 once they compile.",
 )
 @click.option(
     "--plain-arguments",
@@ -283,7 +283,7 @@ def main(
                     print("large", inputs, k, row.get("status"), flush=True)
             return
 
-        # Programs at DLP 58's limit of 256 statements, fixed until they
+        # Programs at DLP 59's limit of 256 statements, fixed until they
         # compile, for the cost of checking a program that compiles.
         steady = not plain_arguments and (
             not precedence or (strict and precedence == "A")
@@ -303,7 +303,7 @@ def main(
         if steady_only:
             return
         policies = ["largest+plain"] if plain_arguments else POLICIES
-        # Every order of fixes for the main configurations, DLP 58's for the
+        # Every order of fixes for the main configurations, DLP 59's for the
         # others.
         if (precedence or strict) and not (strict and precedence == "A"):
             policies = ["largest"]

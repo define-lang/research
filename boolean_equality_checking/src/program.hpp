@@ -1,4 +1,4 @@
-// Whole Define programs (gen/program.py's format): every rule of DLPs 58-60
+// Whole Define programs (gen/program.py's format): every rule of DLPs 59-61
 // checked per value operation with executions as references, the fixes a
 // refactoring tool applies, and incremental rechecking.
 #pragma once
@@ -155,7 +155,7 @@ struct Recorded {
   Lit aig_out = 0;
   bool has_aig = false;
   // Past twenty boolean inputs, the written view's decision diagram (DLP
-  // 58) instead of a table.
+  // 59) instead of a table.
   std::shared_ptr<RecordedDiagram> diagram;
   // A table of more than six views as a diagram, made the first time an
   // operation checked with BDDs executes it: each execution then follows
@@ -249,7 +249,7 @@ class ProgramChecker {
  public:
   explicit ProgramChecker(Program& p) : p_(p) { rebuild_index(); }
 
-  // DLP 58's limit of 256 boolean statements. The fix loop checks past it:
+  // DLP 59's limit of 256 boolean statements. The fix loop checks past it:
   // writing out an execution given a constant can pass it on the way to a
   // smaller operation.
   bool statement_limit = true;
@@ -271,7 +271,7 @@ class ProgramChecker {
   // truth tables up to 20 inputs and SAT up to 32, and stops if the two
   // differ.
   bool split = false, check_split = false;
-  // The exact method (`--method`): "auto", the default, is DLP 58's rule
+  // The exact method (`--method`): "auto", the default, is DLP 59's rule
   // (truth tables up to 16 inputs, OBDDs past them within step_budget); the
   // others are for methods_experiment.py: "tt" (truth tables over every
   // input, up to input_limit inputs), "chunk" (truth tables
@@ -611,7 +611,7 @@ class ProgramChecker {
     return recorded_.at(s.name).group;
   }
 
-  // DLP 59's rank order. Returns <0, 0, >0.
+  // DLP 60's rank order. Returns <0, 0, >0.
   struct Ranker {
     const POp& op;
     const OpInfo& info;
@@ -651,7 +651,7 @@ class ProgramChecker {
     }
   };
 
-  // The canonical order of the statements other than copies (DLP 59).
+  // The canonical order of the statements other than copies (DLP 60).
   std::vector<int> canonical_order(const POp& op, const OpInfo& info) const {
     std::vector<int> order;
     std::set<int> placed;
@@ -678,7 +678,7 @@ class ProgramChecker {
 
   // Checks one operation. With `record`, also records what it computes for
   // the operations that execute it. `how`: "auto" (truth tables up to 20
-  // inputs, DLP 58's limit, since matches need every value's table anyway;
+  // inputs, DLP 59's limit, since matches need every value's table anyway;
   // SAT with stored patterns for redundant values only past it) or "tt". `registry_only` skips the rules a booleans.defcl edit can't change.
   Report check(size_t index, bool record, const std::string& how = "auto", bool registry_only = false) {
     const POp& op = p_.ops[index];
@@ -722,7 +722,7 @@ class ProgramChecker {
     }
     rep.times.structure = now() - t0;
     if (rep.errors.count("limits") || reaches_cycle_[index]) return rep;
-    // auto is DLP 58's rule: truth tables up to 16 inputs, and up to 20 for
+    // auto is DLP 59's rule: truth tables up to 16 inputs, and up to 20 for
     // a value operation that executes one of more than six views, which
     // tables look up where BDDs would have to apply it node by node; BDDs
     // otherwise. Past the old limits (256 statements, 20 inputs), checking
@@ -986,7 +986,7 @@ class ProgramChecker {
     return r.table_diagram.get();
   }
 
-  // DLP 58's budget, in steps (StepBudget), for each value operation past
+  // DLP 59's budget, in steps (StepBudget), for each value operation past
   // the old limits (`--step_budget`; 0 is no budget).
   uint64_t step_budget = 1'000'000'000ULL;
 
@@ -1132,7 +1132,7 @@ class ProgramChecker {
     const MethodGraph g = method_graph(op, info);
     const uint32_t I = g.inputs;
     rep.how = method;
-    // DLP 58's rule counts its BDDs' and its search's steps.
+    // DLP 59's rule counts its BDDs' and its search's steps.
     const bool rule = this->method == "auto";
     StepBudget budget;
     if (rule && step_budget) budget.limit = step_budget;
@@ -1289,7 +1289,7 @@ class ProgramChecker {
   }
 
   // Boolean statements whose value doesn't reach a written view or a
-  // statement that isn't boolean (DLP 58), in statement order.
+  // statement that isn't boolean (DLP 59), in statement order.
   static std::vector<int> dead_statements(const POp& op, const OpInfo& info) {
     std::set<int> live;
     std::vector<int> stack;
@@ -1605,7 +1605,7 @@ class ProgramChecker {
     }
   }
 
-  // A registered operation's key (DLP 60): the fewest `and`s computing its
+  // A registered operation's key (DLP 61): the fewest `and`s computing its
   // function, then its number of read views, then its truth table as a
   // number. Only operations of up to four read views can be registered.
   std::tuple<int, int, uint64_t> key_of(const std::string& name) const {
@@ -1616,7 +1616,7 @@ class ProgramChecker {
 
   // The registered operations an operation follows, in their order: `and`
   // and `not`, then the others by key; a registered operation's own
-  // definition follows only the ones with smaller keys (DLP 60).
+  // definition follows only the ones with smaller keys (DLP 61).
   std::vector<std::string> follows(const POp& op) const {
     std::vector<std::pair<std::tuple<int, int, uint64_t>, std::string>> keyed;
     for (const std::string& name : p_.registered)
@@ -1843,12 +1843,12 @@ class ProgramChecker {
     for (const PStmt& s : op.stmts) {
       // Every execution of a registered operation is a spelling, `and`
       // included. A `not` isn't respelled: a value that's the `not` of
-      // another is written as that `not` (DLP 58's opposite values).
+      // another is written as that `not` (DLP 59's opposite values).
       const std::string name = s.kind == "call" ? s.name : s.kind;
       if (!is_boolean_statement(s.kind) || s.kind == "not" ||
           place(name) == static_cast<std::ptrdiff_t>(order.size()))
         continue;
-      // An execution given a literal is DLP 58's error, not a spelling.
+      // An execution given a literal is DLP 59's error, not a spelling.
       if (std::any_of(s.args.begin(), s.args.end(), [](const PArg& a) { return a.is_literal(); })) continue;
       const int v = s.ids[0];
       Report::Found self;
@@ -1880,7 +1880,7 @@ class ProgramChecker {
     return o.str();
   }
 
-  // Configuration rules for booleans.defcl (DLP 60): at most four read
+  // Configuration rules for booleans.defcl (DLP 61): at most four read
   // views and one written view, and no two that compute the same thing.
   std::vector<std::string> check_registry() const {
     std::vector<std::string> out;

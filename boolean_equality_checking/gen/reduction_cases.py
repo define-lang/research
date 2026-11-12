@@ -39,8 +39,8 @@ LIBRARY_NAMES = list(program.DEFINITIONS)
 
 HEADER = """\
 # Boolean reduction cases: a program, and the program it reduces to once
-# every fix of DLPs 58-60 is applied (DLP 58's refactoring steps, DLP 59's
-# order, DLP 60's matches, spellings, and wrappers), as the research
+# every fix of DLPs 59-61 is applied (DLP 59's refactoring steps, DLP 60's
+# order, DLP 61's matches, spellings, and wrappers), as the research
 # repository's fix loop applies them: one reported error at a time, the
 # first redundant value before the largest match, each match with its first
 # spelling, until the program compiles.
@@ -50,7 +50,7 @@ HEADER = """\
 #     [REGISTERED] PROGRAM => REDUCED
 #
 # REGISTERED is booleans.defcl, in order. `and` and `not` are registered
-# for every value operation without being listed, and come first (DLP 60).
+# for every value operation without being listed, and come first (DLP 61).
 # Every case also has the library of `or`, `implies`, `xor`, `eq`, `mux`,
 # and `maj`, defined as the fixes leave them when they're registered in
 # that order, each following `and`, `not`, and the ones before it: `or` is
@@ -82,14 +82,14 @@ HEADER = """\
 # Every operator and execution is one statement. A value used more than
 # once is a `let`; a value used once is written where it's used. A boolean
 # `let`'s statements come right before its first use, so the statement
-# order is DLP 59's: each boolean statement right before the statement that
+# order is DLP 60's: each boolean statement right before the statement that
 # first reads it, in view order, and the written views' last. A `let` of a
 # statement that isn't boolean stays where it is. A `let` nothing reads is
 # still a statement: a dead one, written after the written views'. A name
 # given to two views of one execution stands for the value and a copy of
 # it (DLP 55).
 #
-# REDUCED is the program after every fix, in the same form, in DLP 59's
+# REDUCED is the program after every fix, in the same form, in DLP 60's
 # statement and argument order. It also shows each registered library
 # operation whose definition the fixes changed: another order in
 # booleans.defcl changes what it has to be, and when a match's fix would
@@ -98,11 +98,11 @@ HEADER = """\
 # that lead back are written out in that definition first.
 # `removed NAME = EXPR` means a fix removed
 # the operation, and its callers compute EXPR (over its views) instead: a
-# wrapper (EXPR is the statement it wraps, DLP 60), or an operation whose
-# written view is a constant or one of its views (DLP 58's refactoring step
+# wrapper (EXPR is the statement it wraps, DLP 61), or an operation whose
+# written view is a constant or one of its views (DLP 59's refactoring step
 # 4). `removed NAME view K = EXPR` is the same for one written view of a
 # mixed operation. `dropped NAME VIEW, ...` means those read views didn't
-# matter (DLP 58), so they're gone from the operation and from every
+# matter (DLP 59), so they're gone from the operation and from every
 # execution of it, which shows NAME's remaining views. Dead statements are
 # gone too. `error limits` instead means the fixes can't make the
 # program compile: it has more than 256 boolean statements or 20 boolean
@@ -166,7 +166,7 @@ class Parser:
 
     Expressions are read into trees first. A boolean `let`'s statements are
     written at its first use, so every boolean statement comes right before
-    the statement that first reads it, in view order: DLP 59's order. A
+    the statement that first reads it, in view order: DLP 60's order. A
     `let` of a statement that isn't boolean is written where it stands.
     """
 
@@ -763,7 +763,7 @@ CASES: list[tuple[list[str], str]] = [
     ([], "w(a, b) = a ;; f(a, b, c) = w(a, b) and c and b"),
     (["or"], "g(a, b) = a and b ;; f(a, b, c) = g(a, b) and not c"),
     (["or"], "g(a, b, c) = (a and b) and c ;; f(a, b, c, d) = g(a, b, c) and not d"),
-    # Argument order and statement order (DLP 59).
+    # Argument order and statement order (DLP 60).
     ([], "f(a, b, c) = (b and a) and c"),
     ([], "f(a, b, c) = let x = a and b; c and x"),
     ([], "f(a, b, c) = let x = b and c; let y = a and c; x and y"),
@@ -792,7 +792,7 @@ CASES: list[tuple[list[str], str]] = [
         ALL,
         "m(a, x: number) = (num.add(x, 1), (a and cmp.lt(x, 2)) and not cmp.eq(x, 0)) ;; f(b, y: number) = let (p, q) = m(b, y); (num.sel(q and b, p, y))",
     ),
-    # Constants across value operations (DLP 58's step 4).
+    # Constants across value operations (DLP 59's step 4).
     (
         ALL,
         "g(a, b) = (a and b) and not (a and b) ;; f(a, b, c, d) = (not g(a, b) and c) and d",
@@ -815,7 +815,7 @@ CASES: list[tuple[list[str], str]] = [
     ),
 ]
 
-# The rules DLPs 58 and 60 added: a registered operation's own definition
+# The rules DLPs 59 and 61 added: a registered operation's own definition
 # follows only `and`, `not`, and the ones listed before it; `and` and `not`
 # are registered everywhere and come first; read views that don't matter;
 # dead statements; and, for the fix loop, writing out the executions that
@@ -878,7 +878,7 @@ def generated_cases(rng: random.Random) -> list[tuple[list[str], str]]:
         out.append((ALL, render_program(text + "\n", ["f"])))
     # Programs that already compile at the limits: an `xor` chain of `and`s
     # of pairs of inputs has no redundant value, match, or spelling, so it
-    # reduces to itself in DLP 59's order. 128 pairs over 20 inputs is 255
+    # reduces to itself in DLP 60's order. 128 pairs over 20 inputs is 255
     # statements; 129 is 257, and 21 inputs is one too many.
     for pairs, inputs in ((128, 20), (129, 20), (20, 21)):
         names = [view_name(i, "abcdefghijklmnopqrstuvwxyz") for i in range(inputs)]

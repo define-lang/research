@@ -2,7 +2,7 @@
 
 What is the most efficient way for the Define compiler to find, exactly, which
 boolean values in a program always equal each other, which are constant, and
-which equal one of their inputs? This is what DLP 58's rules against
+which equal one of their inputs? This is what DLP 59's rules against
 "redundant values" and "writing the same logic twice" need. This directory
 answers it by experiment: it implements the candidate methods in C++, runs
 them on generated workloads from tens of statements to seven million nodes,
@@ -17,9 +17,9 @@ and how many planted equalities each one finds.
 - [arguments.md](arguments.md): the conclusions that come from reasoning
   instead of measurement.
 - [related_work.md](related_work.md): a literature search on how close
-  existing systems and papers come to DLPs 58–60 and these algorithms.
+  existing systems and papers come to DLPs 59–61 and these algorithms.
 - Follow-up studies:
-  - [matching.md](matching.md): whether DLP 58's rule against writing out a
+  - [matching.md](matching.md): whether DLP 59's rule against writing out a
     registered operation could be exact.
   - [references.md](references.md): checking value operations that execute
     others by referring to each execution instead of copying it.
@@ -30,15 +30,15 @@ and how many planted equalities each one finds.
     programs until they compile makes them the same program.
   - [precedence.md](precedence.md): a precedence rule between equivalent
     spellings of a value, and whether it makes the fixes converge.
-  - [full_algorithm.md](full_algorithm.md): every check of DLPs 58–60 at
+  - [full_algorithm.md](full_algorithm.md): every check of DLPs 59–61 at
     once on whole generated programs that follow the rules, with the fix
     loop that makes them compile, and the fewest `and`s of every function
-    of up to four views, which orders registered operations (DLP 60).
+    of up to four views, which orders registered operations (DLP 61).
     Checking and fixing are linear: 18.1 s to check 150,000 operations
     and 164 s to fix them.
   - [proof/termination.md](proof/termination.md): a proof, in English and
     in Lean (`proof/fixing_termination.lean`), that fixing a program under
-    DLP 58's and DLP 60's rules always terminates, including removing read
+    DLP 59's and DLP 61's rules always terminates, including removing read
     views that don't matter and writing out the executions that would make
     a match's fix an execution cycle.
 
@@ -46,17 +46,17 @@ and how many planted equalities each one finds.
 
 ### Within One Value Operation
 
-This is what DLP 58's rules need, and it's the case to optimize.
+This is what DLP 59's rules need, and it's the case to optimize.
 
 **Decide equality exactly, over the whole value operation, with truth
 tables** ([algorithm.md](algorithm.md)):
 
 1. Structural hashing as statements are read.
-2. With at most 20 inputs (DLP 58's limit), truth tables of every value,
+2. With at most 20 inputs (DLP 59's limit), truth tables of every value,
    executions looked up in the executed operation's recorded table or
    written out when that's small. Done.
 
-DLP 60's matches need every value's truth table anyway, so at 13–20 inputs
+DLP 61's matches need every value's truth table anyway, so at 13–20 inputs
 the SAT sweeping the earlier studies recommended there saves at most the
 time of grouping tables by function, and costs much more on a first check
 with no stored patterns: on whole programs of 16–20-input operations, 44 s
@@ -99,16 +99,16 @@ than CaDiCaL on multiplier bits and up to 25× on parity, which is why it's
 the last rung. SDDs give 2.1× fewer nodes than OBDDs in the median but take
 6.4× longer, and fail on the smallest program, so they aren't a contender.
 
-**What the cheaper methods miss.** DLP 58 currently defines a redundant value
+**What the cheaper methods miss.** DLP 59 currently defines a redundant value
 over cuts of at most four values. On the generated operations of up to 256
 statements, that finds 58% of the planted redundancies. It misses most of
 the ones that aren't local: 62% of whole-cone rewrites, 70% of case splits,
 86% of absorptions of a rewritten value, 71% of contradictions with one.
 Structural hashing finds 29%, and the normalized AND-of-literal-sets form
 31–34%. Exact checking finds all of them, and is faster than enumerating DLP
-58's cuts past a few dozen statements.
+59's cuts past a few dozen statements.
 
-**The worst case.** Exact checking is coNP-hard, and DLP 58's limits don't
+**The worst case.** Exact checking is coNP-hard, and DLP 59's limits don't
 bound it, because an executed boolean value operation can be any function of
 twelve views (see [arguments.md](arguments.md)). The combined algorithm
 handles every adversarial family measured here in at most seconds except
@@ -241,7 +241,7 @@ stored patterns.
 
 ### Across a Whole Program
 
-**DLP 58 doesn't need it.** Its rules are about one value operation, with an
+**DLP 59 doesn't need it.** Its rules are about one value operation, with an
 execution of another value operation counted as one statement, so the
 compiler checks each definition once. All 200 operations of the program
 library checked exactly in 1–4 ms in total, while the programs that execute
@@ -272,11 +272,11 @@ needs it.
 
 ## Decisions
 
-1. **What DLP 58 guarantees.** Decided: a redundant value is one that's
+1. **What DLP 59 guarantees.** Decided: a redundant value is one that's
    equal, as a function of the value operation's inputs, to a constant, an
    input, or an earlier value. This is exact, finds every planted redundancy,
    and the portfolio took at most 1 ms on the generated operations within DLP
-   58's limits. The rejected alternative kept the current definition over cuts
+   59's limits. The rejected alternative kept the current definition over cuts
    of at most four values, which misses 42% of planted redundancies and took
    1–3 ms.
 2. **Bounding the worst case.** Decided: the boolean statements of one value
@@ -327,12 +327,12 @@ Verified by experiment, on generated workloads:
 Argued, not measured:
 
 - That the generated value operations resemble real Define code. They follow
-  DLP 58's statement order, reuse standard compositions, and contain no
+  DLP 59's statement order, reuse standard compositions, and contain no
   redundancy except what was planted, but they're random. How many boolean
   inputs real value operations have, which decides whether a limit of 20
   is comfortable, is unknown, and so is how many near misses real code has.
 - That exact checking has no polynomial worst case under any restriction
-  that keeps succinctness, and that DLP 58's limits don't bound it (the
+  that keeps succinctness, and that DLP 59's limits don't bound it (the
   multiplier-from-blocks construction in [arguments.md](arguments.md) wasn't
   built).
 - That exclusive or, majority, or if-then-else primitives wouldn't help.
@@ -349,7 +349,7 @@ Argued, not measured:
   - `aig.hpp`: graphs, AIGER, width, the union-find every method reports
     through.
   - `sat.hpp`: the CDCL solver. `bdd.hpp`: OBDDs with complement edges.
-  - `structural.hpp`: structural hashing, the normalized form, DLP 58's
+  - `structural.hpp`: structural hashing, the normalized form, DLP 59's
     cuts. `functional.hpp`: truth tables, OBDD equality.
   - `sweep.hpp`: SAT sweeping with the combined algorithm's ladder.
   - `match.hpp`: registered-operation matching (cuts, the first exact
@@ -358,11 +358,11 @@ Argued, not measured:
     references, copying, stored patterns, and rechecking after edits.
   - `methods.hpp`: exact methods besides truth tables over every input
     (truth tables in chunks, OBDDs, SAT sweeping), for `beq program
-    --method`; `--method auto`, the default, is DLP 58's rule: truth tables up to 16 inputs,
+    --method`; `--method auto`, the default, is DLP 59's rule: truth tables up to 16 inputs,
     OBDDs past 16 within a budget of steps (`StepBudget` in `bdd.hpp`).
   - `diagram.hpp`: the written view's decision diagram that a value operation
     checked with OBDDs records for the ones that execute it.
-  - `split.hpp`: the split check (`beq program --split 1`): DLP 58's rules
+  - `split.hpp`: the split check (`beq program --split 1`): DLP 59's rules
     on values checked statement by statement, exactly, past 20 inputs.
   - `main.cpp`: the `beq` command.
 - `gen/`: workload generators and helpers. `aig_builder.py`, `workloads.py`,
@@ -371,7 +371,7 @@ Argued, not measured:
   `cadical_miter.py` times CaDiCaL on planted pairs; `sdd_compile.py`
   compiles with SDDs; `caller_redundancy.py` counts executed operations'
   values that are redundant in their callers; `fixpoint.py` represents
-  value operations as programs and applies DLP 58's fixes until they
+  value operations as programs and applies DLP 59's fixes until they
   compile; `aiger.py` reads AIGER.
 - Drivers: `experiments.py` (Experiments 1, 2, 4, 5, and 10),
   `check_methods.py` (compares all methods), `dispatch_budget.py`,
@@ -384,7 +384,7 @@ Argued, not measured:
   against checks over every input; results in `results/split.json`),
   `methods_experiment.py` (where truth tables over every input stop being
   the fastest exact check, against the other methods; tables in
-  `results/methods_tables.md`; with `real_steps`, DLP 58's rule on every
+  `results/methods_tables.md`; with `real_steps`, DLP 59's rule on every
   real-code unit past the study's limits; the budget's measurements are in
   `results/budget.md`), `cadical_adversarial.sh`, and
   `run_everything.sh`. Every driver runs each check through

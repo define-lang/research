@@ -1,7 +1,7 @@
-"""Compare ways of finding written-out registered operations (DLP 58 matches).
+"""Compare ways of finding written-out registered operations (DLP 59 matches).
 
 Generates value operations with planted matches (`gen/matching.py`), then
-runs `beq match` with DLP 58's cuts, cuts with available values as
+runs `beq match` with DLP 59's cuts, cuts with available values as
 arguments, and the exact definition with three anchorings; and, for the
 arity limit, cuts and the exact search with extra random registered
 operations of arity 4, 5, and 6. Run with `uv run --frozen --python 3.14

@@ -78,7 +78,7 @@ The full table, with 64-statement operations, is in
 
 ## 2. Stopping at the First Redundant Value
 
-DLP 58 reports the first redundant value of an operation, so the check can
+DLP 59 reports the first redundant value of an operation, so the check can
 stop there. Totals for whole libraries:
 
 | library      | every value | stop at the first | operations with a redundant value |

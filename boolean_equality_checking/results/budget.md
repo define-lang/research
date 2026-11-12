@@ -1,4 +1,4 @@
-# DLP 58's Budget
+# DLP 59's Budget
 
 `beq`'s default, `--method auto`:
 

@@ -42,7 +42,7 @@ Statements:
                    are boolean inputs where they're boolean
 
 A boolean value operation has only `and`, `not`, `call`, and `copy`
-statements, reads only boolean views, and writes exactly one view (DLP 58).
+statements, reads only boolean views, and writes exactly one view (DLP 59).
 A mixed operation writes any number of views, boolean or numeric.
 
 Semantics, per operation:
@@ -57,7 +57,7 @@ Semantics, per operation:
   `run` statements read. A statement nothing reads, directly or through
   other boolean statements, from an exit is dead.
 
-The rules (DLPs 58, 59, and 60), each reported at its first violation:
+The rules (DLPs 59, 60, and 61), each reported at its first violation:
 
 - `limits`: more than 256 boolean statements, or more than 20 boolean inputs.
 - `cycle`: an execution that leads, through other value operations, back to
@@ -78,7 +78,7 @@ The rules (DLPs 58, 59, and 60), each reported at its first violation:
   defined first. Two views of an operation are interchangeable when swapping
   them doesn't change its written view's function; groups are the classes
   of that relation (it's transitive). `and`'s two views are one group.
-- `order_statements`: the statements aren't in DLP 59's order: for each
+- `order_statements`: the statements aren't in DLP 60's order: for each
   statement that isn't boolean, in order, the boolean statements computing
   the boolean values it reads that haven't come yet, each preceded by the
   same for its own arguments (in view order), then the statement itself;
@@ -105,13 +105,13 @@ The rules (DLPs 58, 59, and 60), each reported at its first violation:
   then by key, the arguments' ranks in view order). `and` and `not`
   statements are spellings too.
 
-A registered operation's key (DLP 60) is the fewest `and`s in any
+A registered operation's key (DLP 61) is the fewest `and`s in any
 and-inverter graph computing its function (`src/min_ands.hpp`, found by
 `min_ands_experiment.py`), then its number of read views, then its truth
 table as a number, view 1 the lowest bit of the row. No two registered
 operations compute the same function, so keys are distinct.
 
-Ranks (DLP 59): read views first, in order; then literals, by value quality
+Ranks (DLP 60): read views first, in order; then literals, by value quality
 (`boolean` before `number`) and text; then statement values, compared by
 their arguments' ranks in view order, a shorter list first, then by the
 executed operation's name (`standard:/boolean/and`, `standard:/boolean/not`,
@@ -128,7 +128,7 @@ import functools
 import random
 from dataclasses import dataclass, field
 
-# booleans.defcl, a set: the order is by key (DLP 60).
+# booleans.defcl, a set: the order is by key (DLP 61).
 REGISTERED = ["implies", "or", "xor", "eq", "mux", "maj"]
 # The registered operations' definitions, each after the ones it executes:
 # (views, statements, written view). These are the forms the fix loop
@@ -177,7 +177,7 @@ class Settings:
     tracked: bool = True
     # The rate of a deliberate error in the programs the fix loop starts
     # from. Literals and values that never change are the programmer's to
-    # fix (DLP 58), so the programs have none.
+    # fix (DLP 59), so the programs have none.
     wrapper_rate: float = 0.005
     copy_rate: float = 0.05
 
@@ -462,7 +462,7 @@ def _close(b: Builder) -> int:
                 tables[name] = b.tables[x] & b.tables[y]
             else:
                 tables[name] = FUNCTIONS[name](b.tables[x], b.tables[y])
-        # A value that never changes is the programmer's to fix (DLP 58), so
+        # A value that never changes is the programmer's to fix (DLP 59), so
         # none is made; if no other combination is new, the last one that
         # changes is a redundant value.
         changing = [n for n in names if tables[n] & b.mask not in (0, b.mask)] or names
@@ -553,7 +553,7 @@ def mixed_operation(
     nnum = rng.randint(1, 4)
     runs = [rng.choice(mixed)] if mixed and rng.random() < 0.5 else []
     run_inputs = sum(sum(m.outs) for m in runs)
-    # DLP 58's limit of twenty boolean inputs.
+    # DLP 59's limit of twenty boolean inputs.
     comparisons = min(rng.randint(*s.comparisons), 20 - nbool - run_inputs)
     inputs = nbool + comparisons + run_inputs
     b = Builder(name, f"op {name} mixed {nbool} {nnum}", inputs, tracked=s.tracked)

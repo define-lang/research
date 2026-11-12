@@ -862,7 +862,7 @@ def program(
                 sig in signatures or sig ^ b.sim_mask in signatures for sig in new
             ):
                 # A redundant call: drop its nodes, as a program that passes
-                # DLP 58 would not have it.
+                # DLP 59 would not have it.
                 b.truncate(before)
                 call_outputs.append([])
                 value_lits.extend([-1] * num_outs)

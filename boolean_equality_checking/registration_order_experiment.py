@@ -3,7 +3,7 @@
 For every order of the standard registrations, this fixes the six
 definitions, each first written with `and` and `not` only, with `beq program
 --mode fix`, and counts each one's different `and`s with every execution
-written out, structurally hashed. With DLP 60's key, what a definition
+written out, structurally hashed. With DLP 61's key, what a definition
 follows doesn't depend on the order, so every order gives the same
 definitions (`results/registration_order.json`). With the order taken from
 the list, as `beq` did at commit 28daf75, a definition followed the

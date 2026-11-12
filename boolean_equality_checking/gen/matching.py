@@ -2,11 +2,11 @@
 
 The registered operations are small standard compositions. A value operation
 executes them (an execution is legitimate) and also writes some of them out
-with `and` and `not` statements (a match, which DLP 58 forbids). Three ways of
+with `and` and `not` statements (a match, which DLP 59 forbids). Three ways of
 writing one out are planted:
 
 - `local`: another way of writing the operation directly on its arguments,
-  which DLP 58's cuts of at most four values can see.
+  which DLP 59's cuts of at most four values can see.
 - `sop`: a sum of products over the inputs of the arguments' cones, so one
   argument that the operation already has is never computed again. Cuts see
   the inputs, not the argument.
@@ -243,7 +243,7 @@ def matching_operation(
             if a not in args:
                 args.append(a)
         # Giving a negated value to a registered operation is usually a match
-        # of another one (`or(not a, b)` is `implies(a, b)`), which DLP 58
+        # of another one (`or(not a, b)` is `implies(a, b)`), which DLP 59
         # rejects, so only unregistered ones get negated values.
         negate = [op not in REGISTERED and rng.random() < 0.25 for _ in args]
         variants = OPS[op][1]
@@ -336,7 +336,7 @@ def _plant(p: Program, rec: Recorder) -> bool:
 
 
 def write(b: Builder, rec: Recorder, path: str) -> None:
-    """Write the AIG in DLP 58's statement order, with its statements and plants."""
+    """Write the AIG in DLP 59's statement order, with its statements and plants."""
     order = b.reorder_first_need(b.outputs + [p[0] for p in rec.planted])
     mapping = order.node_map
     assert mapping is not None  # noqa: S101 - Set by reorder_first_need.

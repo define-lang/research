@@ -1,6 +1,6 @@
-// Finding written-out registered operations ("matches", DLP 58) two ways:
+// Finding written-out registered operations ("matches", DLP 59) two ways:
 //
-// - cuts: DLP 58's definition. Every cut of at most K values of each
+// - cuts: DLP 59's definition. Every cut of at most K values of each
 //   statement's value, at the level of statements, with its truth table
 //   compared with the registered operations up to view order.
 // - exact: a value matches a registered operation R when, as a function of
@@ -200,7 +200,7 @@ class Matcher {
   // (in its statement-level cone), "support" (any available value whose
   // inputs are among the value's), or "any" (any available value).
   void set_anchor(const std::string& anchor) { anchor_ = anchor; }
-  // The largest cut, in values (DLP 58: four).
+  // The largest cut, in values (DLP 59: four).
   void set_cut_size(uint32_t k) { cut_size_ = k; }
 
   // Rewrites each match's arguments to the first available literal with the
@@ -224,7 +224,7 @@ class Matcher {
     return out;
   }
 
-  // DLP 58's cut definition, at the level of statements. With with_values,
+  // DLP 59's cut definition, at the level of statements. With with_values,
   // the arguments of R can also be any available values that are functions
   // of a subset of the cut's values: v's table over the cut must equal R of
   // their tables over the cut.
@@ -1498,7 +1498,7 @@ class Matcher {
   size_t signature_samples_ = 0, signature_pool_ = 0;
   // Without the shortcuts, to check that they change nothing.
   bool plain_ = false;
-  // Only the match DLP 58 reports: candidates are verified largest first.
+  // Only the match DLP 59 reports: candidates are verified largest first.
   bool first_only_ = false;
   bool spellings_ = false, spelling_ = false;
   std::set<Match> spelled_;
@@ -1563,7 +1563,7 @@ class Matcher {
   // fanins.
   // Values' functions from an oracle instead of truth tables.
   void set_oracle(MatchOracle* oracle) { oracle_ = oracle; }
-  // Steps of the search count against DLP 58's budget.
+  // Steps of the search count against DLP 59's budget.
   void set_budget(StepBudget* budget) { budget_ = budget; }
   void set_tables(std::vector<uint64_t> tables, std::vector<uint32_t> support) {
     given_tables_ = std::move(tables);
@@ -1575,7 +1575,7 @@ class Matcher {
   // Each registered operation's number of different `and`s, for the
   // precedence between spellings.
   void set_nodes(std::map<std::string, int> nodes) { nodes_ = std::move(nodes); }
-  // DLP 60's restriction that an opposite result removes at least three
+  // DLP 61's restriction that an opposite result removes at least three
   // statements.
   void set_min_opposite_removed(size_t n) { min_opposite_removed_ = n; }
   // Whether to search for matches; off, only spellings are listed.
@@ -1585,7 +1585,7 @@ class Matcher {
   std::vector<uint64_t> take_hashes() { return std::move(hash_cache_); }
   void set_hashes(std::vector<uint64_t> hashes) { hash_cache_ = std::move(hashes); }
   // Dead statements (by index) don't read anything: a match's statements are
-  // the ones nothing else that's live reads (DLP 58 makes the dead ones an
+  // the ones nothing else that's live reads (DLP 59 makes the dead ones an
   // error of their own).
   void set_dead(const std::vector<char>& dead) {
     uses_.assign(statements_.size(), 0);

@@ -1,12 +1,12 @@
 """Libraries of boolean value operations that execute each other.
 
-Each operation reads up to `views` views and writes one view (DLP 58). It has
+Each operation reads up to `views` views and writes one view (DLP 59). It has
 `and` statements (with `not` as negated literals) and executions of
 operations from the level below, so copying every execution into its caller
 multiplies the size by the number of executions at each level. Every value is
 tracked by its exact truth table over the operation's views, and statements
 whose value is constant, a view, or an earlier value (or the negation of one)
-are rejected, so the libraries compile under DLP 58.
+are rejected, so the libraries compile under DLP 59.
 
 Some operations have a twin: the same function written as an irredundant sum
 of products of its truth table. A `planted` statement executes the twin on

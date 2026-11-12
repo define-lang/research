@@ -2,7 +2,7 @@
 // instead of copying them (see gen/hierarchy.py for the library format).
 //
 // Each operation is checked once, in dependency order, for redundant values
-// among the values its own statements compute (DLP 58), and records the
+// among the values its own statements compute (DLP 59), and records the
 // truth table of each view it writes. Four ways:
 //
 // - copy: every execution is inlined, recursively, into one flat graph, which
@@ -313,7 +313,7 @@ class Hierarchy {
         fresh.push_back(evaluate(op, assignment));
       }
       if (!merged) group.push_back(v);
-      // DLP 58 reports the first redundant value of an operation.
+      // DLP 59 reports the first redundant value of an operation.
       if (merged && stop_first && v > op.views) {
         stats.emplace_back("stopped_at", static_cast<double>(v));
         break;

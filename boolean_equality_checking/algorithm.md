@@ -3,8 +3,8 @@
 This is the algorithm the measurements recommend, written so it could be
 implemented in the compiler.
 
-**Within DLP 58's limit of 20 inputs, the compiler should use truth tables
-for every value operation** (step 2's first case, with I ≤ 20). DLP 60's
+**Within DLP 59's limit of 20 inputs, the compiler should use truth tables
+for every value operation** (step 2's first case, with I ≤ 20). DLP 61's
 matches need every value's truth table anyway, so SAT sweeping at 13–20
 inputs saves at most the time of grouping the tables by function, and on a
 first check with no stored patterns it costs far more: 44 s against 1.5 s
@@ -24,11 +24,11 @@ measured performance is in [experiments.md](experiments.md), Experiment 10.
 ## Input and Output
 
 The input is the boolean statements of one value operation as an
-And-Inverter Graph in DLP 58's statement order: one `and` node per `and`
+And-Inverter Graph in DLP 59's statement order: one `and` node per `and`
 statement, `not` as a complemented edge, executed boolean value operations
 inlined (or replaced by what they compute), and every input (interface view
 or result of a non-boolean statement) as a graph input. The same algorithm
-runs on a whole program, but DLP 58 only needs it per value operation.
+runs on a whole program, but DLP 59 only needs it per value operation.
 
 The output is the partition of the nodes into classes of equal functions,
 modulo complement, with a phase for each node. A node's representative is

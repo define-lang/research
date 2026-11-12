@@ -1,4 +1,4 @@
-"""The full algorithm on whole programs that follow DLPs 58-60.
+"""The full algorithm on whole programs that follow DLPs 59-61.
 
 Each program (`gen/program.py`) is generated as a programmer might first
 write it, then fixed until it compiles (`beq program --mode fix`), which is

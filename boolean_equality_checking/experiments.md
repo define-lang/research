@@ -33,7 +33,7 @@ the nodes whose class has an earlier member.
 | `strash`              | Structural hashing with the trivial rules (`a and a`, `a and not a`, constants).                                                                                                                                                                   | No     |
 | `norm_single`         | The normalized AND-of-literal-sets form from the background survey, hash-consed, flattening only inputs with one user.                                                                                                                             | No     |
 | `norm_all`            | The same form, flattening through every non-inverted `and`.                                                                                                                                                                                       | No     |
-| `cuts4`               | DLP 58's redundant-value rule: every cut of at most four values, with no pruning, and a 16-bit truth table for each; a node is redundant when, over one of its cuts, it's constant, equals a cut value, or equals an earlier node over that cut. | No     |
+| `cuts4`               | DLP 59's redundant-value rule: every cut of at most four values, with no pruning, and a 16-bit truth table for each; a node is redundant when, over one of its cuts, it's constant, equals a cut value, or equals an earlier node over that cut. | No     |
 | `tt`                  | Truth tables over every input, 2^I bits per node, freed after the last use except for one per class.                                                                                                                                              | Yes    |
 | `bdd_first_use`       | A shared reduced OBDD with complement edges, inputs ordered by first use in statement order.                                                                                                                                                      | Yes    |
 | `bdd_natural`         | The same OBDD with inputs in their numbered order.                                                                                                                                                                                                | Yes    |
@@ -76,7 +76,7 @@ different. It passed on a 16,735-node program used while developing.
 All generators are in `gen/workloads.py` and write AIGER files with a list of
 _planted_ pairs: two literals that are equal by construction.
 
-- **Value operations** (`value_operation`) imitate DLP 58's boolean
+- **Value operations** (`value_operation`) imitate DLP 59's boolean
   statements. Inputs stand for comparisons and interface views. Each
   statement calls `and`, `or`, `implies`, exclusive or, equality, a
   multiplexer, majority, or a three-way `and` or `or`, weighted the way
@@ -84,11 +84,11 @@ _planted_ pairs: two literals that are equal by construction.
   last eight statements and on inputs, preferring inputs not read yet. A
   quarter of the arguments are negated. Every composition has two to four
   equivalent ways of writing it (for example four ways to write exclusive
-  or), and each call picks one at random. Statements are emitted in DLP 58's
+  or), and each call picks one at random. Statements are emitted in DLP 59's
   statement order (each value right before the statement that first needs
   it). The generator rejects any statement whose value is constant, equal
   to an input, or equal to an earlier value on 256 random patterns, so the
-  operations are ones DLP 58 would accept apart from the planted violations.
+  operations are ones DLP 59 would accept apart from the planted violations.
   With probability 0.08, a step plants one instead:
   - `duplicate`: the same call on the same values again.
   - `shallow`: the same call written a different way.
@@ -122,7 +122,7 @@ _planted_ pairs: two literals that are equal by construction.
   most of the time. 2% of calls repeat an earlier call's operation and
   arguments exactly (`call_repeat`), and 2% repeat it written a different way
   (`call_rewrite`). Calls whose outputs look redundant on 64 random patterns
-  are dropped, the way DLP 58 would reject them. Two shapes: one long
+  are dropped, the way DLP 59 would reject them. Two shapes: one long
   dataflow, where any call can read the last 64 values, and _regions_ of 50
   calls, like separate actions, where a call reads only values of its own
   region and half of its comparisons are shared with the rest of the program.
@@ -130,7 +130,7 @@ _planted_ pairs: two literals that are equal by construction.
 ## Experiment 1: Realistic Value Operations
 
 220 value operations: 4 to 128 inputs, 16 to 1,024 statements, five of each.
-DLP 58 allows at most 256 boolean statements, so the 1,024-statement ones show
+DLP 59 allows at most 256 boolean statements, so the 1,024-statement ones show
 what happens past that limit.
 
 ### What each method finds
@@ -158,7 +158,7 @@ By kind of planted pair, over all 220 operations:
 (`norm_all` finds fewer contradictions than `strash` because flattening
 merges `v`'s and `w`'s structure into different sets.)
 
-DLP 58's cuts find what's local: a call written another way, a duplicate,
+DLP 59's cuts find what's local: a call written another way, a duplicate,
 an absorption by an input. They miss most of what the proposal calls
 "writing the same logic twice" when it's written over more than four
 values: 70% of whole-cone rewrites, 72% of case splits, 85% of absorptions
@@ -167,7 +167,7 @@ structural forms find even less.
 
 ### Time
 
-Median and slowest of five, for 16, 256 (DLP 58's limit), and 1,024
+Median and slowest of five, for 16, 256 (DLP 59's limit), and 1,024
 statements. "—" means the method can't run (truth tables past 24 inputs).
 
 16 statements:
@@ -220,10 +220,10 @@ statements. "—" means the method can't run (truth tables past 24 inputs).
 
 (The OBDD that fails reached the 30M-node limit.)
 
-- **Exact checking is cheap for this kind of logic.** Within DLP 58's limit,
+- **Exact checking is cheap for this kind of logic.** Within DLP 59's limit,
   the portfolio's slowest run of 165 operations was 1.0 ms, and its median
   55 µs. Even at 1,024 statements the slowest was 7.6 ms.
-- **DLP 58's cuts are slower than exact checking** past a few dozen
+- **DLP 59's cuts are slower than exact checking** past a few dozen
   statements: 1–3 ms at 256 statements against 0.3 ms for the portfolio,
   because enumerating every cut with no pruning gives hundreds of cuts per
   node.
@@ -381,7 +381,7 @@ file's remaining pairs weren't decided in that time (`results/cadical_tables.md`
 
 ## Experiment 4: Checking Each Value Operation Once
 
-DLP 58's rules apply to one value operation at a time, so a compiler checks
+DLP 59's rules apply to one value operation at a time, so a compiler checks
 each definition once, no matter how many times it's executed. This checks
 each of the 200 operations of the program library by itself, with its three
 ways of writing it side by side, so the planted pairs are its outputs written
@@ -403,7 +403,7 @@ inlined into programs is what Experiment 5 checks.
 ## Experiment 5: Whole Programs
 
 These are rough figures, relevant only to optional program-wide
-optimization: DLP 58 checks one value operation at a time (Experiment 4).
+optimization: DLP 59 checks one value operation at a time (Experiment 4).
 They are single runs that took up to several minutes on one graph, made
 before the rule that no check may take more than about 30 seconds, and they
 weren't rerun.
@@ -586,7 +586,7 @@ were found; "timeout" means more than 300 s):
 Whole programs (Experiment 5's), with every call copied in. These are
 rough figures: each was one run, alongside other runs, before the 30-second
 limit per check that's the rule now, and they matter only for optional
-program-wide optimization, which DLP 58 doesn't need. ABC had 1,800 s and,
+program-wide optimization, which DLP 59 doesn't need. ABC had 1,800 s and,
 for the last runs, 16 GB; "out of memory" means it crashed at that limit.
 
 | Program                    | `and` nodes | `auto` | `&fraig` | `&fraig -x` | `fraig`  | `&cec -m`     |
@@ -608,7 +608,7 @@ for the last runs, 16 GB; "out of memory" means it crashed at that limit.
 
 So if the compiler ever does program-wide optimization by SAT sweeping,
 ABC's `&fraig -x` approach is the one to start from. It isn't needed for
-DLP 58's rules, which are checked one value operation at a time.
+DLP 59's rules, which are checked one value operation at a time.
 
 ## Experiment 8: Native CaDiCaL and Kissat
 

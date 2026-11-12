@@ -1,6 +1,6 @@
 # Test Cases for the Compiler's Boolean Checks
 
-A complete set of test cases for the boolean checks of DLPs 58–60, as the
+A complete set of test cases for the boolean checks of DLPs 59–61, as the
 DLPs stand now: what each case tests and what the compiler must report.
 Each case is small enough to write by hand unless it says otherwise. The
 programs are written in the expression form of
@@ -14,9 +14,9 @@ Unless a case says otherwise, booleans.defcl registers `or`, `implies`,
 `xor`, `eq`, `mux`, and `maj`, with the definitions of `gen/program.py`
 (`DEFINITIONS`), which compile. `and` and `not` are registered for every
 value operation without being listed, before the rest, which are ordered by
-key (DLP 60): `implies`, `or`, `xor`, `eq`, `mux`, `maj`.
+key (DLP 61): `implies`, `or`, `xor`, `eq`, `mux`, `maj`.
 
-## 1. Boolean Value Operations and One Written View (DLP 58)
+## 1. Boolean Value Operations and One Written View (DLP 59)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -29,7 +29,7 @@ key (DLP 60): `implies`, `or`, `xor`, `eq`, `mux`, `maj`.
 | V7 | a View Setting copy inside a boolean value operation | copies are allowed statements | still boolean |
 | V8 | a boolean value operation executing another one | executions are boolean statements | it counts as one statement |
 
-## 2. Redundant Values (DLP 58)
+## 2. Redundant Values (DLP 59)
 
 The first redundant value, by statement order, is the one reported, with
 the value it's the same as or the opposite of.
@@ -39,14 +39,14 @@ the value it's the same as or the opposite of.
 | R1 | `t = a and not a` | always false | error redundant at t: always false |
 | R2 | `t = not(a and not a)` | always true, through a `not` | error at `a and not a` (the first), always false |
 | R3 | `f(a, b) = mux(a, b, b)` written out | always the same as an input | error at the value: same as b |
-| R4 | `x = a and b; y = b and a` | same as an earlier value, argument order | error at y: same as x (and DLP 59 also reports y's order; see O-cases) |
+| R4 | `x = a and b; y = b and a` | same as an earlier value, argument order | error at y: same as x (and DLP 60 also reports y's order; see O-cases) |
 | R5 | `x = a and b; y = x and b` | same as an earlier value by absorption | error at y: same as x |
 | R6 | `x = a and b; y = or(not a, not b)` | opposite of an earlier value | error at y: opposite of x, written `not x` |
 | R7 | `x = a and b; y = not x` | the `not` exemption | no error |
 | R8 | `x = a and b; n = not a; y = not n` | `not` of a `not` | error at y: same as a |
 | R9 | `y = not a; z = not a` | a second `not` of one value | error at z: same as y |
 | R10 | `w = not a; v = <something always equal to a>` (v after w) | same as one, opposite of another | error at v: same as a (same is reported over opposite) |
-| R11 | `w = not y` where y is earlier, then `v` always equal to y | DLP 58's "same as one value and the opposite of its `not`" | error at v: same as y |
+| R11 | `w = not y` where y is earlier, then `v` always equal to y | DLP 59's "same as one value and the opposite of its `not`" | error at v: same as y |
 | R12 | `x = a and b; v = not(xor-written-out of x, c)` with an opposite earlier than an equal | the first redundant value | the earlier statement is reported, not the later |
 | R13 | two redundant values | reporting only the first | only the first is reported |
 | R14 | redundant against a boolean input from a comparison | inputs include non-boolean results | error: same as that input |
@@ -54,12 +54,12 @@ the value it's the same as or the opposite of.
 | R16 | `x = g(a, b); y = g(b, a)` where g is symmetric | executions are whole, through references | error at y: same as x |
 | R17 | `x = g(a, b); y = h(a, b)` where h is a second way to write g | two user operations with one function | error at y: same as x |
 | R18 | g's own statements have a value equal to f's value | only the operation's own values count | no error in f |
-| R19 | two inputs from comparisons that happen to be equal (`x < 3`, `x < 3`) | inputs are independent | no error from DLP 58 (only the comparisons know) |
+| R19 | two inputs from comparisons that happen to be equal (`x < 3`, `x < 3`) | inputs are independent | no error from DLP 59 (only the comparisons know) |
 | R20 | 20 inputs, a value equal to an earlier one only on 1 of 2^20 combinations | exactness | no error; changing it to equal on all of them gives the error |
 | R21 | `v` always equal to `not w` where w is an input, with no `not w` statement | opposite of an input | error at v: opposite of w |
 | R22 | a value always the opposite of a constant | constants count | error: always true or false |
 
-## 3. Literals (DLPs 56 and 58)
+## 3. Literals (DLPs 56 and 59)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ the value it's the same as or the opposite of.
 | L5 | a mixed operation executed with a literal for a boolean view | executions that aren't boolean statements | no error |
 | L6 | an action giving a literal to a boolean value operation | actions | no error |
 
-## 4. Statement Order and Argument Order (DLP 59)
+## 4. Statement Order and Argument Order (DLP 60)
 
 ### Argument order
 
@@ -103,9 +103,9 @@ the value it's the same as or the opposite of.
 | S6 | a written view computed early | written views last, in view order | error |
 | S7 | two written views of a mixed operation | the order of written views | the first view's statements first |
 | S8 | a copy placed away from its execution | copies stay next to their execution | error (DLP 55) |
-| S9 | non-boolean statements in any order | only boolean statements move | no error from DLP 59 |
+| S9 | non-boolean statements in any order | only boolean statements move | no error from DLP 60 |
 
-## 5. Matches (DLP 60)
+## 5. Matches (DLP 61)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -138,7 +138,7 @@ the value it's the same as or the opposite of.
 | M28 | `mux(not c, c, b)` | `and` counts as registered | error match: `b and c` (removes the execution and `not c`) |
 | M29 | `or(not a, not b)` with `or` registered, where that removes at least 3 statements | opposite results of `and` | error match: `not (a and b)` |
 | M30 | `or(not a, not b)` where `not a` is read elsewhere | the 3-statement rule for an opposite of `and` | no error (it would remove only 2) |
-| M31 | a value equal to `not x` for an earlier x | a match for `not` | never reported: it's an opposite value first (DLP 58) |
+| M31 | a value equal to `not x` for an earlier x | a match for `not` | never reported: it's an opposite value first (DLP 59) |
 | M20 | equal size, value, and operation, different arguments | rank order of arguments | the lower-ranked arguments |
 | M21 | a match whose reported fix uses the first spelling | "names the spelling that comes first" | the message names the highest-precedence spelling of that match |
 | M22 | a match of four arguments (a registered four-view operation) | the four-argument limit | found |
@@ -148,7 +148,7 @@ the value it's the same as or the opposite of.
 | M26 | a value equal to a registered operation applied to a value and its copy | copies are one value | not a match with the same value twice (views may not alias; a copy is the same value) |
 | M27 | a value operation whose whole set of statements is a registered operation | "can't compute the same thing" | error match at its written view |
 
-## 6. Spellings (DLP 60)
+## 6. Spellings (DLP 61)
 
 A spelling is a single execution of a registered operation computing a
 value from earlier values. Only the first spelling is allowed.
@@ -163,12 +163,12 @@ value from earlier values. Only the first spelling is allowed.
 | P4 | equal in all three, different arguments | rank order | the lower-ranked arguments |
 | P5 | a registered operation's count of `and`s | the fewest in any and-inverter graph computing its function, not its definition | `or` has 1 whether defined as `not (not a and not b)` or as `implies(not a, b)`; `maj` has 4 |
 | P6 | a registered operation from the standard library and one from the project with otherwise equal keys | project's, then the standard library's | the project's |
-| P7 | a `not` of an execution that another execution could compute, or a `not` that an `and` could compute | a `not` isn't respelled: a value that's the opposite of an earlier one is its `not` (DLP 58) | no spelling error; with w = `x implies (not y)`, `not w` stays though `x and y` computes it |
+| P7 | a `not` of an execution that another execution could compute, or a `not` that an `and` could compute | a `not` isn't respelled: a value that's the opposite of an earlier one is its `not` (DLP 59) | no spelling error; with w = `x implies (not y)`, `not w` stays though `x and y` computes it |
 | P8 | swapping two operations in booleans.defcl | the order is the precedence | values that were first spellings may become errors, everywhere in the project |
 | P9 | a spelling over values after v | only earlier values | not a spelling |
 | P10 | a user operation (not registered) whose execution computes R(a, b) | spellings are executions of registered operations | no error (one statement isn't a match) |
 
-## 7. Wrappers (DLP 60)
+## 7. Wrappers (DLP 61)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -182,7 +182,7 @@ value from earlier values. Only the first spelling is allowed.
 | W8 | `f(a) = or(a, copy_of_a)` | a would-be wrapper given one value twice | redundant (same as a), reported before the wrapper |
 | W9 | an action executing `operation<standard:/boolean/and>` | allowed use | no error |
 
-## 8. Registration (DLP 60)
+## 8. Registration (DLP 61)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -199,7 +199,7 @@ value from earlier values. Only the first spelling is allowed.
 | G10 | a name that doesn't resolve | missing operation | error |
 | G11 | changing booleans.defcl | which operations are rechecked | every value operation of the project, for matches and spellings (the standard library's change rechecks every project) |
 
-## 9. Limits (DLP 58)
+## 9. Limits (DLP 59)
 
 Generated, not written by hand.
 
@@ -247,7 +247,7 @@ past them or as one graph.
 | I7 | a dependency's operation changes function | across projects | callers in this project rechecked |
 | I8 | an edit introducing an error in a callee | callee errors | the callee reports it; callers use its recorded function |
 
-## 12. The Refactoring Steps (DLP 58's Refactoring Existing Systems)
+## 12. The Refactoring Steps (DLP 59's Refactoring Existing Systems)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -258,7 +258,7 @@ past them or as one graph.
 | F5 | `x and not x` | values that never change are errors the programmer fixes | error redundant (constant); the tool stops |
 | F7 | a literal given to a statement that isn't boolean | only boolean statements can't take literals | no error |
 | F9 | a boolean value operation whose written view is constant | a value that never changes | error; the tool stops |
-| F12 | a wrapper | DLP 60's wrapper rule as a fix | callers execute the wrapped operation directly; the wrapper is removed |
+| F12 | a wrapper | DLP 61's wrapper rule as a fix | callers execute the wrapped operation directly; the wrapper is removed |
 | F13 | an operation that only writes one of its views | a projection | callers use the argument |
 | F14 | the largest match | matches as fixes | replaced by an execution with its first spelling |
 | F15 | an opposite match | adds two statements | execution and `not` |
@@ -271,7 +271,7 @@ past them or as one graph.
 | F23 | F22 where the value given to the view was computed only for it | step 6 makes callers' statements dead | they're removed too |
 | F24 | F22 where removing the view makes a caller's own view not matter | steps cascade | the caller loses that view in turn |
 
-## 13. Dead Statements and Read Views That Don't Matter (DLP 58)
+## 13. Dead Statements and Read Views That Don't Matter (DLP 59)
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
