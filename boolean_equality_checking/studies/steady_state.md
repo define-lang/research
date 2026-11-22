@@ -1,5 +1,9 @@
 # Checking Programs That Compile
 
+> **Historical study note:** This document records an earlier component study.
+> For the current combined reference algorithm, see
+> [../algorithm.md](../algorithm.md) and [../README.md](../README.md).
+
 Most of the time, the compiler checks value operations that compile: every
 value is distinct from every other, from the constants, and from the views.
 Showing that is the whole cost, because nothing can stop early. This study

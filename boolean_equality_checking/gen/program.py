@@ -129,17 +129,18 @@ import random
 from dataclasses import dataclass, field
 
 # booleans.defcl, a set: the order is by key (DLP 61).
-REGISTERED = ["implies", "or", "xor", "eq", "mux", "maj"]
+REGISTERED = ["or", "implies", "xor", "eq", "mux", "maj"]
 # The registered operations' definitions, each after the ones it executes:
 # (views, statements, written view). These are the forms the fix loop
 # reaches from definitions written with `and` and `not` only: each one
 # follows `and`, `not`, and the registered operations with smaller keys
-# (implies, or, xor, eq, mux, maj: the fewest `and`s, then views, then
-# the truth table), so `or` is written with `implies`, `xor` with `or`,
-# `eq` is the `not` of `xor`, and `maj` is a `mux`.
+# (or, implies, xor, eq, mux, maj: fewest `and`s, then views, then project
+# before stdlib, then more symmetric first, then truth table in counting
+# order), so `or` is written with `and`/`not`, `implies` with `or`, `xor`
+# with `or`, `eq` is the `not` of `xor`, and `maj` is a `mux`.
 DEFINITIONS = {
-    "implies": (2, ["not 2", "and 1 3", "not 4"], 5),
-    "or": (2, ["not 1", "call implies 3 2"], 4),
+    "or": (2, ["not 1", "not 2", "and 3 4", "not 5"], 6),
+    "implies": (2, ["not 1", "call or 2 3"], 4),
     "xor": (2, ["not 2", "and 1 3", "not 1", "and 2 5", "call or 4 6"], 7),
     "eq": (2, ["call xor 1 2", "not 3"], 4),
     "mux": (3, ["and 1 2", "not 1", "and 3 5", "call or 4 6"], 7),

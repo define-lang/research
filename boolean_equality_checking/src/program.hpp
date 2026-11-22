@@ -52,6 +52,7 @@ struct POp {
 
 struct Program {
   std::vector<std::string> registered;
+  std::set<std::string> std_registered;
   std::vector<POp> ops;
 };
 
@@ -82,6 +83,8 @@ inline Program read_program(const std::string& path) {
     if (!(words >> kind)) continue;
     if (kind == "registered") {
       for (std::string name; words >> name;) p.registered.push_back(name);
+    } else if (kind == "std_registered") {
+      for (std::string name; words >> name;) p.std_registered.insert(name);
     } else if (kind == "op") {
       p.ops.emplace_back();
       op = &p.ops.back();
@@ -117,6 +120,11 @@ inline void write_program(const Program& p, const std::string& path) {
   out << "registered";
   for (const std::string& r : p.registered) out << " " << r;
   out << "\n";
+  if (!p.std_registered.empty()) {
+    out << "std_registered";
+    for (const std::string& r : p.std_registered) out << " " << r;
+    out << "\n";
+  }
   for (const POp& op : p.ops) {
     std::unordered_map<int, int> number;
     int next = 1;
@@ -145,7 +153,7 @@ struct Recorded {
   std::vector<uint64_t> table;  // a boolean operation's written view, 2^views bits
   std::vector<int> group;       // a label per read view: equal labels are interchangeable
   std::vector<char> out_boolean;  // a mixed operation: which written views are boolean
-  uint64_t hash = 0;
+  uint64_t hash = 0, hash2 = 0;
   // The written view's function also as an and-inverter graph over the read
   // views (nodes from views + 1), with every execution written out and
   // structural hashing, when that's smaller than looking each minterm up in
@@ -281,13 +289,18 @@ class ProgramChecker {
   // execution of it refers to and what evaluating that costs.
   std::string method = "auto", bdd_order = "dfs";
   uint32_t input_limit = 20, chunk_inputs = 16;
-  size_t bdd_node_limit = size_t{1} << 26;
+  // Canonical shared ROBDD reachable-node limit past the guaranteed
+  // (256 statements, 20 inputs) envelope. Compiler-independent and deterministic.
+  size_t bdd_node_limit = 4'000'000;
   bool measure_executions = false;
   // Without search_matches (`--matches 0`), no matches or spellings are
   // searched: the other parts of a method that can't search in time.
   bool search_matches = true;
+  // With plain_matcher (`--plain 1`), disable Matcher shortcuts and best-match
+  // pruning to cross-check exact agreement against brute-force Matcher.
+  bool plain_matcher = false;
   size_t split_compared_tt = 0, split_compared_sat = 0;
-  mutable std::map<std::string, std::pair<uint64_t, bool>> views_matter_;
+  mutable std::map<std::string, std::pair<std::pair<uint64_t, uint64_t>, bool>> views_matter_;
   // Values whose kept search was used, and searched again, so far (with
   // the ones in search_cache_).
   size_t search_hits = 0, search_misses = 0;
@@ -527,6 +540,19 @@ class ProgramChecker {
     }
   }
 
+  // Transposes an 8x8 bit matrix stored as 8 bytes in a uint64_t:
+  // input bit (r*8 + c) moves to output bit (c*8 + r).
+  static uint64_t transpose8x8(uint64_t x) {
+    uint64_t t;
+    t = (x ^ (x >> 7)) & 0x00AA00AA00AA00AAULL;
+    x = x ^ t ^ (t << 7);
+    t = (x ^ (x >> 14)) & 0x0000CCCC0000CCCCULL;
+    x = x ^ t ^ (t << 14);
+    t = (x ^ (x >> 28)) & 0x00000000F0F0F0F0ULL;
+    x = x ^ t ^ (t << 28);
+    return x;
+  }
+
   template <typename Word>
   static void lookup(const std::vector<uint64_t>& table, const std::vector<Lit>& args, size_t words, Word word,
                      uint64_t* row) {
@@ -547,14 +573,25 @@ class ProgramChecker {
       }
       return;
     }
+    // Wide lookup (k > 6): 8x8 bit-matrix transpose extracts 8 minterm indices
+    // at a time in O(k) bitwise operations per byte instead of 64*k bit gathers.
     std::vector<uint64_t> a(k);
     for (size_t w = 0; w < words; ++w) {
       for (size_t j = 0; j < k; ++j) a[j] = word(args[j], w);
       uint64_t out = 0;
-      for (int b = 0; b < 64; ++b) {
-        uint64_t m = 0;
-        for (size_t j = 0; j < k; ++j) m |= ((a[j] >> b) & 1) << j;
-        out |= bit(m) << b;
+      for (int byte_idx = 0; byte_idx < 8; ++byte_idx) {
+        uint32_t idx[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+        const int shift = byte_idx * 8;
+        for (size_t g = 0; g < k; g += 8) {
+          uint64_t pack = 0;
+          const size_t lim = std::min<size_t>(8, k - g);
+          for (size_t r = 0; r < lim; ++r) pack |= ((a[g + r] >> shift) & 0xFFULL) << (r * 8);
+          const uint64_t tr = transpose8x8(pack);
+          for (int b = 0; b < 8; ++b) idx[b] |= static_cast<uint32_t>((tr >> (b * 8)) & 0xFFULL) << g;
+        }
+        uint64_t byte_out = 0;
+        for (int b = 0; b < 8; ++b) byte_out |= bit(idx[b]) << b;
+        out |= byte_out << shift;
       }
       row[w] = out;
     }
@@ -737,7 +774,7 @@ class ProgramChecker {
       if (use != "tt" && !in_registered_reach(op.name) && (op.boolean || method == "auto")) {
         const Report before = rep;
         bool fell_back = false;
-        Report r = check_with_method(op, info, record, rep, use, old_limits, fell_back);
+        Report r = check_with_method(op, info, record, rep, use, old_limits, registry_only, fell_back);
         if (!fell_back) return r;
         rep = before;
         rep.stats.emplace_back("budget_fallback", 1);
@@ -793,7 +830,7 @@ class ProgramChecker {
         for (size_t w = 0; w < words; ++w) written.push_back(t[size_t{node_of(o)} * words + w] ^ (is_compl(o) ? ~0ULL : 0));
         table_unused = unused_views(written, op.nbool);
       }
-      if (op.boolean) {
+      if (op.boolean && !registry_only) {
         if (split) {
           const Lit o = arg_lit(info, op.outs[0]);
           for (int v = 1; v <= op.nbool; ++v)
@@ -816,6 +853,7 @@ class ProgramChecker {
     }
     if (measure_executions && op.boolean && record && full && !in_registered_reach(op.name))
       measure_table_executions(op, rep);
+    std::vector<uint64_t> tt_class_ids;
     if (!registry_only) {
       double to = now();
       check_order(op, info, rep);
@@ -830,12 +868,14 @@ class ProgramChecker {
       } else {
         keys = rep.how == "sat" ? hier_->check_sat(index, rep.stats, 4) : keys_of(op, info, t, words);
       }
+      if (rep.how == "tt") tt_class_ids = keys;
       find_redundant(op, info, keys, rep);
       rep.times.redundant = now() - tr;
     } else {
       // The registered operations only change matches and spellings; the
       // redundant-value rule still decides whether they're checked.
       std::vector<uint64_t> keys = split ? sc->keys : keys_of(op, info, t, words);
+      if (!split) tt_class_ids = keys;
       find_redundant(op, info, keys, rep);
       rep.errors.erase("redundant");
     }
@@ -843,7 +883,8 @@ class ProgramChecker {
     // Matches and spellings need every value's function.
     if (rep.redundant_kind.empty() && !fixed_first && full && search_matches) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
-      find_matches(op, info, std::move(t), dead, rep, nullptr, budgeted ? &budget : nullptr);
+      find_matches(op, info, std::move(t), dead, rep, nullptr, budgeted ? &budget : nullptr,
+                   tt_class_ids.empty() ? nullptr : &tt_class_ids);
       if (measure_executions) rep.stats.emplace_back("matches_found", static_cast<double>(rep.matches.size()));
     }
     } catch (const BudgetExceeded&) {
@@ -905,11 +946,12 @@ class ProgramChecker {
   }
 
   bool all_views_matter(const std::string& name, const Recorded& r) const {
+    const std::pair<uint64_t, uint64_t> fp{r.hash, r.hash2};
     auto it = views_matter_.find(name);
-    if (it != views_matter_.end() && it->second.first == r.hash) return it->second.second;
+    if (it != views_matter_.end() && it->second.first == fp) return it->second.second;
     const POp& callee = p_.ops[static_cast<size_t>(index_.at(name))];
     const bool all = unused_views(r.table, callee.nbool).empty();
-    views_matter_[name] = {r.hash, all};
+    views_matter_[name] = {fp, all};
     return all;
   }
 
@@ -986,9 +1028,10 @@ class ProgramChecker {
     return r.table_diagram.get();
   }
 
-  // DLP 59's budget, in steps (StepBudget), for each value operation past
-  // the old limits (`--step_budget`; 0 is no budget).
-  uint64_t step_budget = 1'000'000'000ULL;
+  // Optional step budget (`--step_budget`; 0 = disabled, the default).
+  // The default rule uses only the canonical shared ROBDD node limit past
+  // the guaranteed (256 statements, 20 inputs) envelope, with no step budget.
+  uint64_t step_budget = 0;
 
   // The order of the boolean inputs for BDDs (a level per input, from 1):
   // as first reached depth-first from each value no boolean statement reads,
@@ -1039,30 +1082,71 @@ class ProgramChecker {
     r.table.clear();
     r.table_diagram.reset();
     r.hash = rd->dd.hash(rd->root);
+    r.hash2 = mix64(r.hash ^ (static_cast<uint64_t>(rd->dd.size()) * 0x9E3779B97F4A7C15ULL) ^ rd->root);
     r.diagram = rd;
     r.group = diagram_groups(*rd, op.nbool, bm);
     update_hierarchy(index_.at(op.name), info);
   }
 
-  // Interchangeable views of a recorded diagram: swapping views i and j
-  // leaves it the same when it's the same with i false and j true as with
-  // i true and j false.
+  // Interchangeable views of a recorded diagram: pre-partitioned in O(|Diagram|)
+  // using exact mod-(2^61-1) biased Chow/Walsh level signatures, then verified
+  // with restrict2 only within matching signature buckets.
   static std::vector<int> diagram_groups(RecordedDiagram& rd, int views, MethodBase& dm) {
     std::vector<uint32_t> level_of(static_cast<size_t>(views), 0);
     for (uint32_t l = 0; l < rd.view_of_level.size(); ++l) level_of[rd.view_of_level[l]] = l;
+    const std::vector<Diagram::LevelSig> sigs = rd.dd.level_signatures(rd.root);
     std::vector<int> parent(static_cast<size_t>(views));
     std::iota(parent.begin(), parent.end(), 0);
     std::function<int(int)> find = [&](int x) {
       int& p = parent[static_cast<size_t>(x)];
       return p == x ? x : p = find(p);
     };
-    for (int i = 0; i < views; ++i)
-      for (int j = i + 1; j < views; ++j) {
-        if (find(i) == find(j) || !dm.may_be_interchangeable(static_cast<uint32_t>(i), static_cast<uint32_t>(j))) continue;
-        const uint32_t li = level_of[static_cast<size_t>(i)], lj = level_of[static_cast<size_t>(j)];
-        if (rd.dd.restrict2(rd.root, li, false, lj, true) == rd.dd.restrict2(rd.root, li, true, lj, false))
-          parent[static_cast<size_t>(find(j))] = find(i);
+    // All views not in the diagram's support are immediately interchangeable with each other.
+    int first_absent = -1;
+    std::map<std::pair<uint64_t, uint64_t>, std::vector<int>> buckets;
+    for (int v = 0; v < views; ++v) {
+      const Diagram::LevelSig& s = sigs[level_of[static_cast<size_t>(v)]];
+      if (!s.in_support) {
+        if (first_absent < 0)
+          first_absent = v;
+        else
+          parent[static_cast<size_t>(find(v))] = find(first_absent);
+      } else {
+        buckets[{s.w1, s.w2}].push_back(v);
       }
+    }
+    bool seeded_sym = false;
+    for (const auto& [sig, bucket] : buckets) {
+      if (bucket.size() < 2) continue;
+      if (!seeded_sym) {
+        seeded_sym = true;
+        Rng rng(13);
+        std::vector<Assignment> samples;
+        samples.reserve(128);
+        auto add_paths = [&](bool want_true, size_t cnt) {
+          for (const auto& at : rd.dd.sample_paths(rd.root, want_true, cnt, rng)) {
+            Assignment a = Assignment::zeros(static_cast<uint32_t>(views));
+            for (size_t l = 0; l < rd.view_of_level.size(); ++l)
+              if (at[l]) a.set(rd.view_of_level[l]);
+            samples.push_back(std::move(a));
+          }
+        };
+        add_paths(true, 64);
+        add_paths(false, 64);
+        if (!samples.empty()) dm.seed_symmetry_samples(samples);
+      }
+      for (size_t a = 0; a < bucket.size(); ++a) {
+        const int i = bucket[a];
+        for (size_t b = a + 1; b < bucket.size(); ++b) {
+          const int j = bucket[b];
+          if (find(i) == find(j) || !dm.may_be_interchangeable(static_cast<uint32_t>(i), static_cast<uint32_t>(j)))
+            continue;
+          const uint32_t li = level_of[static_cast<size_t>(i)], lj = level_of[static_cast<size_t>(j)];
+          if (rd.dd.are_symmetric(rd.root, li, lj))
+            parent[static_cast<size_t>(find(j))] = find(i);
+        }
+      }
+    }
     std::vector<int> label(static_cast<size_t>(views));
     for (int v = 0; v < views; ++v) label[static_cast<size_t>(v)] = find(v);
     return label;
@@ -1128,7 +1212,7 @@ class ProgramChecker {
   // With may_fall_back, a value operation within the old limits that goes
   // over the budget sets fell_back instead of getting the error.
   Report check_with_method(const POp& op, const OpInfo& info, bool record, Report& rep, const std::string& method,
-                           bool may_fall_back, bool& fell_back) {
+                           bool may_fall_back, bool registry_only, bool& fell_back) {
     const MethodGraph g = method_graph(op, info);
     const uint32_t I = g.inputs;
     rep.how = method;
@@ -1159,25 +1243,48 @@ class ProgramChecker {
       rep.times.tables = now() - t1 + (method == "split" ? rep.times.split : 0);
       rep.times.split = 0;
       const double tu = now();
-      if (op.boolean) m->find_unused();
-      rep.times.structure += now() - tu;
-      rep.unused_views = m->unused_views;
-      if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
       rep.dead = dead_statements(op, info);
       if (!rep.dead.empty()) rep.errors["dead"] = list_json(rep.dead);
-      const double to = now();
-      check_order(op, info, rep);
-      rep.times.order = now() - to;
-      const double tr = now();
-      find_redundant(op, info, m->keys, rep);
-      rep.times.redundant = now() - tr;
+      if (!registry_only) {
+        if (op.boolean) m->find_unused();
+        rep.unused_views = m->unused_views;
+        if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
+      }
+      rep.times.structure += now() - tu;
+      if (!registry_only) {
+        const double to = now();
+        check_order(op, info, rep);
+        rep.times.order = now() - to;
+        const double tr = now();
+        find_redundant(op, info, m->keys, rep);
+        rep.times.redundant = now() - tr;
+      } else {
+        find_redundant(op, info, m->keys, rep);
+        rep.errors.erase("redundant");
+      }
       const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
       if (rep.redundant_kind.empty() && !fixed_first && search_matches) {
         const std::set<int> dead(rep.dead.begin(), rep.dead.end());
         find_matches(op, info, {}, dead, rep, m.get(), rule ? &budget : nullptr);
       }
+      if (record) {
+        const double tg = now();
+        auto* b = dynamic_cast<BddMethod*>(m.get());
+        if (b)
+          record_bdd(op, info, *b);
+        else if (op.boolean)
+          forget(op.name);
+        else
+          record_op(op, info, {}, 0);
+        rep.times.groups = now() - tg;
+      }
     } catch (const BddLimit&) {
+      if (may_fall_back) {
+        fell_back = true;
+        return rep;
+      }
       rep.errors["limits"] = "\"bdd nodes\"";
+      if (record && op.boolean) forget(op.name);
       return rep;
     } catch (const BudgetExceeded&) {
       if (may_fall_back) {
@@ -1195,21 +1302,11 @@ class ProgramChecker {
       return rep;
     }
     add_steps(rep, budget);
-    if (record) {
-      const double tg = now();
-      auto* b = dynamic_cast<BddMethod*>(m.get());
-      if (rule && b)
-        record_bdd(op, info, *b);
-      else if (op.boolean)
-        forget(op.name);
-      else
-        record_op(op, info, {}, 0);
-      rep.times.groups = now() - tg;
-    }
     rep.stats.emplace_back("undecided", static_cast<double>(m->undecided));
     rep.stats.emplace_back("matches_found", static_cast<double>(rep.matches.size()));
     if (auto* b = dynamic_cast<BddMethod*>(m.get())) {
-      rep.stats.emplace_back("bdd_nodes", static_cast<double>(b->nodes()));
+      rep.stats.emplace_back("bdd_nodes", static_cast<double>(b->canonical_nodes()));
+      rep.stats.emplace_back("bdd_allocated_nodes", static_cast<double>(b->nodes()));
       rep.stats.emplace_back("bdd_bytes", static_cast<double>(b->memory_bytes()));
     }
     if (auto* st = dynamic_cast<SatMethod*>(m.get())) rep.stats.emplace_back("sat_calls", static_cast<double>(st->sat_calls));
@@ -1217,14 +1314,13 @@ class ProgramChecker {
       // An execution refers to the written view's OBDD, or else to the
       // operation's statements written out.
       Rng rng(3);
-      const uint64_t mask = I >= 64 ? ~0ULL : ((uint64_t{1} << I) - 1);
-      std::vector<uint64_t> minterms(kExecutionSamples);
-      for (uint64_t& x : minterms) x = rng.next() & mask;
+      std::vector<Assignment> samples(kExecutionSamples);
+      for (Assignment& x : samples) x = Assignment::random(I, rng);
       if (auto* b = dynamic_cast<BddMethod*>(m.get())) {
         rep.stats.emplace_back("exec_record_bytes", static_cast<double>(b->out_nodes() * 12));
         const double te = now();
         uint64_t ones = 0;
-        for (uint64_t x : minterms) ones += b->evaluate_out(x);
+        for (const Assignment& x : samples) ones += b->evaluate_out(x);
         rep.stats.emplace_back("exec_ns_per_assignment", (now() - te) * 1e9 / kExecutionSamples);
         sink_ ^= ones;
       } else {
@@ -1239,7 +1335,8 @@ class ProgramChecker {
               v[x] = 0;
             } else if (x <= I) {
               uint64_t bits = 0;
-              for (int k = 0; k < 64; ++k) bits |= ((minterms[w * 64 + static_cast<size_t>(k)] >> (x - 1)) & 1) << k;
+              for (int k = 0; k < 64; ++k)
+                if (samples[w * 64 + static_cast<size_t>(k)].get(x - 1)) bits |= 1ULL << k;
               v[x] = bits;
             } else {
               const MethodGraph::Node& node = g.node(x);
@@ -1277,15 +1374,75 @@ class ProgramChecker {
   }
 
   // Whether one of the operation's boolean values never changes.
+  // Dispatches to BDDs past the truth-table envelope so drop_views never OOMs on I > 20.
   bool has_constant_value(size_t index) const {
     const POp& op = p_.ops[index];
     const OpInfo info = analyze(op);
-    size_t words = 1;
-    const std::vector<uint64_t> t = tables(op, info, words);
-    const std::vector<uint64_t> keys = tt_keys(info, t, words);
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    bool wide_execution = false;
+    for (const PStmt& s : op.stmts) wide_execution |= s.kind == "call" && s.args.size() > 6;
+    if (I <= 16 || (I <= 20 && wide_execution)) {
+      size_t words = 1;
+      const std::vector<uint64_t> t = tables(op, info, words);
+      const uint64_t valid = I >= 6 ? ~0ULL : ((1ULL << (1u << I)) - 1);
+      for (const PStmt& s : op.stmts) {
+        if (!is_boolean_statement(s.kind)) continue;
+        const uint32_t node = node_of(info.lit.at(s.ids[0]));
+        const uint64_t* row = &t[size_t{node} * words];
+        bool all0 = true, all1 = true;
+        for (size_t w = 0; w < words && (all0 || all1); ++w) {
+          const uint64_t v = row[w] & valid;
+          all0 &= (v == 0);
+          all1 &= (v == valid);
+        }
+        if (all0 || all1) return true;
+      }
+      return false;
+    }
+    const MethodGraph g = method_graph(op, info);
+    BddMethod bm(g, input_order(op, info), bdd_node_limit);
+    try {
+      bm.run();
+    } catch (const BddLimit&) {
+      return true;
+    }
     for (const PStmt& s : op.stmts)
-      if (is_boolean_statement(s.kind) && (keys[node_of(info.lit.at(s.ids[0]))] >> 1) == (keys[0] >> 1)) return true;
+      if (is_boolean_statement(s.kind) && (bm.keys[node_of(info.lit.at(s.ids[0]))] >> 1) == (bm.keys[0] >> 1))
+        return true;
     return false;
+  }
+
+  // Diagnostic helpers for truth-table mode (care sets and pairwise relations).
+  static uint64_t care_set_mask_tt(const std::vector<uint64_t>& t, size_t words, uint32_t inputs,
+                                   const std::vector<Lit>& args) {
+    if (args.size() > 4) return 0;
+    const uint64_t valid = inputs >= 6 ? ~0ULL : ((1ULL << (1u << inputs)) - 1);
+    uint64_t mask = 0;
+    const uint32_t rows = 1u << args.size();
+    for (uint32_t m = 0; m < rows; ++m) {
+      bool sat = false;
+      for (size_t w = 0; w < words && !sat; ++w) {
+        uint64_t conj = valid;
+        for (size_t i = 0; i < args.size(); ++i) {
+          const uint64_t x = t[size_t{node_of(args[i])} * words + w] ^ (is_compl(args[i]) ? ~0ULL : 0);
+          conj &= ((m >> i) & 1) ? x : ~x;
+        }
+        sat = conj != 0;
+      }
+      if (sat) mask |= uint64_t{1} << m;
+    }
+    return mask;
+  }
+  static bool implies_tt(const std::vector<uint64_t>& t, size_t words, uint32_t inputs, Lit a, Lit b) {
+    const uint64_t valid = inputs >= 6 ? ~0ULL : ((1ULL << (1u << inputs)) - 1);
+    const uint64_t fa = is_compl(a) ? ~0ULL : 0, fb = is_compl(b) ? ~0ULL : 0;
+    for (size_t w = 0; w < words; ++w)
+      if (((t[size_t{node_of(a)} * words + w] ^ fa) & ~(t[size_t{node_of(b)} * words + w] ^ fb) & valid) != 0)
+        return false;
+    return true;
+  }
+  static bool mutually_exclusive_tt(const std::vector<uint64_t>& t, size_t words, uint32_t inputs, Lit a, Lit b) {
+    return implies_tt(t, words, inputs, a, b ^ 1);
   }
 
   // Boolean statements whose value doesn't reach a written view or a
@@ -1420,19 +1577,25 @@ class ProgramChecker {
       const Lit o = arg_lit(info, op.outs[0]);
       for (size_t w = 0; w < words; ++w) r.table[w] = t[size_t{node_of(o)} * words + w] ^ (is_compl(o) ? ~0ULL : 0);
       if (I < 6) r.table[0] &= (1ULL << (1u << I)) - 1;
-      uint64_t h = 0x77;
-      for (uint64_t w : r.table) h = mix64(h ^ w);
-      r.hash = h;
+      uint64_t h1 = 0x77, h2 = 0x9E3779B97F4A7C15ULL;
+      for (uint64_t w : r.table) {
+        h1 = mix64(h1 ^ w);
+        h2 = mix64((h2 ^ w) + 0xBF58476D1CE4E5B9ULL);
+      }
+      r.hash = h1;
+      r.hash2 = h2;
       record_aig(op, info, r);
     } else {
       r.out_boolean.clear();
-      uint64_t h = 0x55;
+      uint64_t h1 = 0x55, h2 = 0x9E3779B97F4A7C15ULL;
       for (const PArg& a : op.outs) {
         const bool b = a.is_literal() ? a.literal[0] != '#' : info.values.at(info.resolve(a.id)).kind == 'b';
         r.out_boolean.push_back(b);
-        h = mix64(h ^ static_cast<uint64_t>(b));
+        h1 = mix64(h1 ^ static_cast<uint64_t>(b));
+        h2 = mix64((h2 ^ static_cast<uint64_t>(b)) + 0xBF58476D1CE4E5B9ULL);
       }
-      r.hash = h;
+      r.hash = h1;
+      r.hash2 = h2;
     }
   }
 
@@ -1472,48 +1635,41 @@ class ProgramChecker {
     return out;
   }
 
-  // tt_keys, with each value's key kept while `reuse_values` holds.
-  std::vector<uint64_t> keys_of(const POp& op, const OpInfo& info, const std::vector<uint64_t>& t, size_t words) {
-    if (!reuse_values || reuse_name_ != op.name) return tt_keys(info, t, words);
-    const std::vector<int> value = node_values(op, info);
-    bool all = true;
-    for (uint32_t n = 1; n < info.num_nodes && all; ++n) all = key_of_value_.count(value[n]) > 0;
-    if (!all) {
-      std::vector<uint64_t> keys = tt_keys(info, t, words);
-      for (uint32_t n = 1; n < info.num_nodes; ++n) key_of_value_[value[n]] = keys[n];
-      return keys;
-    }
-    std::vector<uint64_t> keys = tt_keys_of_constant(info, t, words);
-    for (uint32_t n = 1; n < info.num_nodes; ++n) keys[n] = key_of_value_.at(value[n]);
-    return keys;
+  // Exact canonical class IDs per node: (2 * rep_node) | phase.
+  std::vector<uint64_t> keys_of(const POp& /*op*/, const OpInfo& info, const std::vector<uint64_t>& t, size_t words) {
+    return tt_keys(info, t, words);
   }
 
-  // tt_keys for node 0 alone, the rest left 0.
-  static std::vector<uint64_t> tt_keys_of_constant(const OpInfo& info, const std::vector<uint64_t>& t, size_t words) {
-    std::vector<uint64_t> keys(info.num_nodes, 0);
-    OpInfo one;
-    one.num_nodes = 1;
-    one.inputs = info.inputs;
-    keys[0] = tt_keys(one, t, words)[0];
-    return keys;
-  }
-
+  // Exact bucket-verified truth-table classes: two nodes get the same
+  // high bits iff their truth tables are identical or exact complements.
   static std::vector<uint64_t> tt_keys(const OpInfo& info, const std::vector<uint64_t>& t, size_t words) {
-    std::vector<uint64_t> keys(info.num_nodes);
+    const uint64_t valid = info.inputs.size() >= 6 ? ~0ULL : ((1ULL << (1u << info.inputs.size())) - 1);
+    std::vector<uint64_t> keys(info.num_nodes, 0);
+    std::unordered_map<uint64_t, std::vector<std::pair<uint32_t, uint64_t>>> buckets;
+    buckets.reserve(info.num_nodes);
     for (uint32_t n = 0; n < info.num_nodes; ++n) {
       const uint64_t* row = &t[size_t{n} * words];
       const uint64_t phase = row[0] & 1;
+      const uint64_t flip = phase ? ~0ULL : 0;
       uint64_t h = 0x77;
-      for (size_t w = 0; w < words; ++w) h = mix64(h ^ (row[w] ^ (phase ? ~0ULL : 0)));
-      keys[n] = (h & ~1ULL) | phase;
-    }
-    // Truth tables of up to six inputs only use the low bits of a word.
-    if (info.inputs.size() < 6) {
-      const uint64_t mask = (1ULL << (1u << info.inputs.size())) - 1;
-      for (uint32_t n = 0; n < info.num_nodes; ++n) {
-        const uint64_t row = t[n] & mask, phase = row & 1;
-        keys[n] = (mix64(0x77 ^ ((row ^ (phase ? mask : 0)))) & ~1ULL) | phase;
+      for (size_t w = 0; w < words; ++w) h = mix64(h ^ ((row[w] ^ flip) & valid));
+      auto& bucket = buckets[h];
+      uint32_t rep = UINT32_MAX;
+      for (const auto& [cand, cphase] : bucket) {
+        const uint64_t* crow = &t[size_t{cand} * words];
+        const uint64_t xor_mask = (phase ^ cphase) ? ~0ULL : 0;
+        bool eq = true;
+        for (size_t w = 0; w < words && eq; ++w) eq = ((row[w] ^ crow[w] ^ xor_mask) & valid) == 0;
+        if (eq) {
+          rep = cand;
+          break;
+        }
       }
+      if (rep == UINT32_MAX) {
+        rep = n;
+        bucket.push_back({n, phase});
+      }
+      keys[n] = (static_cast<uint64_t>(rep) << 1) | phase;
     }
     return keys;
   }
@@ -1605,23 +1761,50 @@ class ProgramChecker {
     }
   }
 
-  // A registered operation's key (DLP 61): the fewest `and`s computing its
-  // function, then its number of read views, then its truth table as a
-  // number. Only operations of up to four read views can be registered.
-  std::tuple<int, int, uint64_t> key_of(const std::string& name) const {
+  // Truth-table results in counting order: view 1 changing least often,
+  // comparing from row (0, ..., 0) upward with false < true (packed MSB-first).
+  static uint64_t counting_order_key(uint64_t table, int views) {
+    const uint32_t rows = 1u << views;
+    uint64_t key = 0;
+    for (uint32_t c = 0; c < rows; ++c) {
+      uint32_t m = 0;
+      for (int i = 0; i < views; ++i)
+        if ((c >> (views - 1 - i)) & 1) m |= 1u << i;
+      key = (key << 1) | ((table >> m) & 1);
+    }
+    return key;
+  }
+
+  // A registered operation's key (DLP 61), ordered for human readability:
+  // 1. fewest `and`s computing its function,
+  // 2. fewest read views,
+  // 3. project-registered before standard-library-registered,
+  // 4. more symmetric first (fewer interchangeable-view groups),
+  // 5. truth table in counting order (view 1 changing least often, false < true).
+  // Only operations of up to four read views can be registered.
+  std::tuple<int, int, int, int, uint64_t> key_of(const std::string& name) const {
     const POp& op = p_.ops[static_cast<size_t>(index_.at(name))];
-    const uint64_t table = recorded_.at(name).table[0];
-    return {op.nbool <= 4 ? min_ands(table, op.nbool) : std::numeric_limits<int>::max(), op.nbool, table};
+    const Recorded& rec = recorded_.at(name);
+    const uint64_t table = rec.table[0];
+    const int is_stdlib = p_.std_registered.count(name) ? 1 : 0;
+    std::set<int> uniq(rec.group.begin(), rec.group.end());
+    const int num_groups = static_cast<int>(uniq.size());
+    return {op.nbool <= 4 ? min_ands(table, op.nbool) : std::numeric_limits<int>::max(), op.nbool, is_stdlib,
+            num_groups, counting_order_key(table, op.nbool)};
   }
 
   // The registered operations an operation follows, in their order: `and`
   // and `not`, then the others by key; a registered operation's own
-  // definition follows only the ones with smaller keys (DLP 61).
+  // definition follows only the ones with smaller keys, and standard-library
+  // registered operations only follow earlier standard-library ones (DLP 61).
   std::vector<std::string> follows(const POp& op) const {
-    std::vector<std::pair<std::tuple<int, int, uint64_t>, std::string>> keyed;
-    for (const std::string& name : p_.registered)
+    const bool op_is_std = p_.std_registered.count(op.name) > 0;
+    std::vector<std::pair<std::tuple<int, int, int, int, uint64_t>, std::string>> keyed;
+    for (const std::string& name : p_.registered) {
+      if (op_is_std && !p_.std_registered.count(name)) continue;
       // One in or executing a cycle has no function to match (DLP 9).
       if (!reaches_cycle_[static_cast<size_t>(index_.at(name))]) keyed.push_back({key_of(name), name});
+    }
     std::sort(keyed.begin(), keyed.end());
     const bool registered = is_registered(op.name) && recorded_.count(op.name);
     std::vector<std::string> out{"and", "not"};
@@ -1646,13 +1829,16 @@ class ProgramChecker {
   }
 
   void find_matches(const POp& op, const OpInfo& info, std::vector<uint64_t> t, const std::set<int>& dead,
-                    Report& rep, MatchOracle* oracle = nullptr, StepBudget* budget = nullptr) {
+                    Report& rep, MatchOracle* oracle = nullptr, StepBudget* budget = nullptr,
+                    const std::vector<uint64_t>* tt_class_ids = nullptr) {
     const std::vector<std::string> order = follows(op);
     std::vector<Registered> registered;
     std::map<std::string, int> nodes;
+    std::map<std::string, std::vector<int>> op_groups;
     for (const std::string& name : order) {
       registered.push_back(registered_of(name));
       nodes[name] = 0;
+      op_groups[name] = groups_of_name(name);
     }
     auto place = [&](const std::string& name) { return std::find(order.begin(), order.end(), name) - order.begin(); };
     // The graph the matcher sees: inputs, then a node per `and` or `call`.
@@ -1694,79 +1880,90 @@ class ProgramChecker {
       a.id = value_of.at(l);
       return a;
     };
+    // Precompute dense integer rank for every boolean literal in O(S log S).
+    std::vector<int> rank_of(2 * size_t{info.num_nodes} + 2, 0);
+    {
+      std::vector<Lit> all_lits;
+      all_lits.reserve(value_of.size());
+      for (const auto& [lit_k, val_id] : value_of) {
+        (void)val_id;
+        all_lits.push_back(lit_k);
+      }
+      std::sort(all_lits.begin(), all_lits.end(), [&](Lit a, Lit b) {
+        return ranker.compare(value_arg(a), value_arg(b)) < 0;
+      });
+      for (size_t i = 0; i < all_lits.size(); ++i) rank_of[all_lits[i]] = static_cast<int>(i);
+    }
     std::vector<Report::Found> matches, spellings;
-    std::vector<uint64_t> hashes;
-    // The kept hashes are of truth tables; an oracle's function ids aren't
-    // those, so a check with an oracle keeps nothing.
     const bool reuse = reuse_values && reuse_name_ == op.name && !oracle;
     const std::vector<int> node_value = reuse ? node_values(op, info) : std::vector<int>{};
-    if (reuse) {
-      hashes.assign(2 * size_t{info.num_nodes} + 2, 0);
-      for (uint32_t n = 1; n < info.num_nodes; ++n)
-        for (uint32_t c = 0; c < 2; ++c) {
-          auto it = hash_of_value_.find(2 * node_value[n] + static_cast<int>(c));
-          if (it != hash_of_value_.end()) hashes[2 * size_t{n} + c] = it->second;
-        }
-    }
     bool focused = !changed_.empty();
     for (const PStmt& s : op.stmts)
       if (s.kind == "call" && added_.count(s.name)) focused = false;
-    // The match search, then the spelling search, with the kept searches
-    // when `use_cache`.
     const bool cached = reuse && reuse_search && !in_registered_reach(op.name);
+    // Unified single-pass search: one Matcher handles both matches and spellings
+    // without copying tables, sharing refined samples and literal bitsets.
     auto search = [&](bool use_cache, std::vector<uint64_t> tables, std::vector<Report::Found>& found_matches,
                       std::vector<Report::Found>& found_spellings, bool timed) {
-      for (int pass = 0; pass < 2; ++pass) {
-        if (pass == 0 && focused && !edit_matches_) continue;
-        if (pass == 1 && first_fix_only && !found_matches.empty()) break;
-        double tp = now();
-        Matcher m(g, statements, registered);
-        m.set_hashes(std::move(hashes));
-        m.set_budget(budget);
-        if (oracle)
-          m.set_oracle(oracle);
-        else
-          m.set_tables(pass == 0 ? tables : std::move(tables), support);
-        m.set_late_inputs(late);
-        m.set_anchor("any");
-        m.set_nodes(nodes);
-        m.set_min_opposite_removed(3);
-        m.set_spellings(pass == 1);
-        m.set_matches(pass == 0);
-        m.set_precedence(order, true);
-        m.set_dead(dead_flags);
-        if (focused) m.set_only(changed_);
-        if (reuse) m.set_holds_cache(&holds_cache_, node_value);
-        if (use_cache) m.set_search_cache(&search_cache_);
-        Stats st;
-        std::set<Match> found = m.run_resub(st);
-        for (const Match& x : pass == 0 ? found : m.spelled()) {
-          Report::Found f;
-          f.value = value_of.at(x.value);
-          f.op = x.op;
-          if (pass == 0) {
-            for (size_t i : m.match_statements(x)) f.removed_values.push_back(value_of.at(statements[i].lit));
-            f.removed = f.removed_values.size();
-          }
-          for (Lit a : x.args) f.args.push_back(value_of.at(a));
-          (pass == 0 ? found_matches : found_spellings).push_back(std::move(f));
-        }
-        hashes = m.take_hashes();
-        if (!timed) continue;
-        for (auto& [k, v] : st) rep.stats.emplace_back((pass == 0 ? "match_" : "spell_") + k, v);
-        (pass == 0 ? rep.times.matches : rep.times.spellings) = now() - tp;
+      Matcher m(g, statements, registered);
+      m.set_plain(plain_matcher);
+      m.set_budget(budget);
+      if (oracle) {
+        m.set_oracle(oracle);
+      } else {
+        m.set_tables(std::move(tables), support);
+        if (tt_class_ids) m.set_class_ids(*tt_class_ids);
       }
+      m.set_late_inputs(late);
+      m.set_anchor("any");
+      m.set_nodes(nodes);
+      m.set_min_opposite_removed(3);
+      m.set_matches(!(focused && !edit_matches_));
+      m.set_spellings(true);
+      m.set_precedence(order, true);
+      m.set_dead(dead_flags);
+      m.set_rank_of(rank_of);
+      m.set_groups(op_groups);
+      m.set_skip_not(!plain_matcher);
+      m.set_first_fix_only(first_fix_only);
+      m.set_stop_on_first_spelling(!plain_matcher && !cached);
+      if (plain_matcher)
+        m.set_search_mode(Matcher::SearchMode::kAll);
+      else if (first_fix_only)
+        m.set_search_mode(Matcher::SearchMode::kBestPerValue);
+      else
+        m.set_search_mode(Matcher::SearchMode::kBestOverall);
+      if (focused) m.set_only(changed_);
+      if (reuse) m.set_holds_cache(&holds_cache_, node_value);
+      if (use_cache) m.set_search_cache(&search_cache_);
+      Stats st;
+      std::set<Match> found = m.run_resub(st);
+      for (const Match& x : found) {
+        Report::Found f;
+        f.value = value_of.at(x.value);
+        f.op = x.op;
+        for (size_t i : m.match_statements(x)) f.removed_values.push_back(value_of.at(statements[i].lit));
+        f.removed = f.removed_values.size();
+        for (Lit a : x.args) f.args.push_back(value_of.at(a));
+        found_matches.push_back(std::move(f));
+      }
+      for (const Match& x : m.spelled()) {
+        Report::Found f;
+        f.value = value_of.at(x.value);
+        f.op = x.op;
+        for (Lit a : x.args) f.args.push_back(value_of.at(a));
+        found_spellings.push_back(std::move(f));
+      }
+      if (!timed) return;
+      for (auto& [k, v] : st) rep.stats.emplace_back("match_" + k, v);
+      rep.times.matches = m.match_time_s();
+      rep.times.spellings = m.spell_time_s();
     };
     std::vector<uint64_t> tables_copy;
     if (cached && check_search) tables_copy = t;
     search(cached, std::move(t), matches, spellings, true);
     std::vector<Report::Found> full_matches, full_spellings;
     if (cached && check_search) search(false, std::move(tables_copy), full_matches, full_spellings, false);
-    if (reuse)
-      for (uint32_t n = 1; n < info.num_nodes; ++n)
-        for (uint32_t c = 0; c < 2; ++c)
-          if (2 * size_t{n} + c < hashes.size() && hashes[2 * size_t{n} + c])
-            hash_of_value_[2 * node_value[n] + static_cast<int>(c)] = hashes[2 * size_t{n} + c];
     // Arguments in view order, each interchangeable group sorted by rank.
     auto canonical_args = [&](Report::Found& f) {
       const std::string name = f.op.rfind("not:", 0) == 0 ? f.op.substr(4) : f.op;

@@ -128,9 +128,10 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
   if (opt.count("bdd_order")) c.bdd_order = opt["bdd_order"];
   c.input_limit = static_cast<uint32_t>(get("input_limit", 20));
   c.chunk_inputs = static_cast<uint32_t>(get("chunk_inputs", 16));
-  c.bdd_node_limit = static_cast<size_t>(get("bdd_nodes", static_cast<double>(size_t{1} << 26)));
+  c.bdd_node_limit = static_cast<size_t>(get("bdd_nodes", 4'000'000.0));
   c.measure_executions = get("measure_executions", 0) != 0;
   c.search_matches = get("matches", 1) != 0;
+  c.plain_matcher = get("plain", 0) != 0;
   if (opt.count("step_budget")) c.step_budget = std::stoull(opt["step_budget"]);
   c.statement_limit = get("statement_limit", 1) != 0;
   if (opt.count("patterns_in")) read_patterns(c, opt["patterns_in"]);
@@ -329,11 +330,13 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
         pending.erase(pending.begin());
         const POp& op = p.ops[i];
         const uint64_t hash = c.recorded(op.name).hash;
+        const uint64_t hash2 = c.recorded(op.name).hash2;
         const std::vector<int> group = c.recorded(op.name).group;
         Report r = c.check(i, true, how);
         times.add(r.times);
         ++checked;
-        if (c.recorded(op.name).hash == hash && c.recorded(op.name).group == group) continue;
+        if (c.recorded(op.name).hash == hash && c.recorded(op.name).hash2 == hash2 && c.recorded(op.name).group == group)
+          continue;
         ++changed;
         for (size_t k : callers[i]) pending.insert(k);
       }

@@ -462,23 +462,13 @@ class Sweeper {
     }
     Bdd::Edge ex = edge[node_of(x)] ^ is_compl(x), ey = edge[node_of(y)] ^ is_compl(y);
     if (ex == ey) return 1;
-    // Different: find a distinguishing pattern with SAT, which is easy now that
-    // the answer is known to be satisfiable, but can still be slow; instead walk
-    // the BDD of x xor y.
-    Bdd::Edge d;
-    try {
-      d = bdd.land(ex, ey ^ 1);
-      if (d == Bdd::kFalse) d = bdd.land(ex ^ 1, ey);
-    } catch (const BddLimit&) {
-      // Known to differ, but building the difference hit the limit; SAT will
-      // find the counterexample.
-      return -1;
-    }
+    // Different: extract a distinguishing assignment in O(inputs) time with
+    // zero new BDD nodes.
     std::vector<char> pattern(g_.num_inputs + 1, 0);
     for (uint32_t i = 1; i <= g_.num_inputs; ++i) pattern[i] = rng_.next() & 1;
     std::vector<uint32_t> input_at_level(next_level);
     for (uint32_t w : inputs) input_at_level[level[w]] = w;
-    bdd.satisfying_path(d, [&](uint32_t lv, bool value) { pattern[input_at_level[lv]] = value; });
+    bdd.distinguishing_path(ex, ey, [&](uint32_t lv, bool value) { pattern[input_at_level[lv]] = value; });
     add_pattern(std::move(pattern));
     return 0;
   }

@@ -6,6 +6,9 @@ import Mathlib.Data.Multiset.Filter
 import Mathlib.Data.Multiset.UnionInter
 import Mathlib.Data.Finset.Max
 import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Data.Fintype.Pi
+import Mathlib.Data.Fintype.Option
+import Mathlib.Data.Fintype.Prod
 import Mathlib.Order.WellFoundedSet
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Algebra.Order.BigOperators.Group.List
@@ -76,8 +79,10 @@ so executions of `and` have pairs and can be respelled.
 The semantics (which fixes exist) never matter: the theorems hold for every
 fix of these shapes.
 
-`opFix_lt`, `progStep_lt`, `prog_no_cycle`, and `prog_terminates` state the
-result; the last two are about `ProgFix`.
+`opFix_lt`, `progStep_lt`, `prog_no_cycle`, `prog_terminates`, and
+`dag_prog_terminates` state the result; the last three are about `ProgFix`,
+and `dag_prog_terminates` discharges `prog_terminates`'s finiteness hypothesis
+directly from Define's static finite DAG computation graphs.
 -/
 
 namespace Define.BooleanEqualityChecking.Termination
@@ -97,9 +102,10 @@ structure Signature where
   /-- The operation is a registered boolean operation (`and` and `not` are, for
   every value operation). -/
   registered : ℕ → Bool
-  /-- A registered operation's place in the order of keys (DLP 61): the
-  fewest `and`s computing its function, then its number of read views,
-  then its truth table as a number. -/
+  /-- A registered operation's place in the order of keys (DLP 61): fewest
+  `and`s computing its function, then fewest read views, then project-registered
+  before standard-library-registered, then fewer interchangeable-view groups,
+  then its truth table in counting order. -/
   key : ℕ → ℕ
   key_injective : ∀ o p, registered o = true → registered p = true →
     key o = key p → o = p
@@ -1263,5 +1269,202 @@ theorem prog_no_cycle {n : ℕ} (rank : Fin n → ℕ) {p : Program n}
   · refine (Set.finite_range (fun i : Fin (m + 1) => s i a)).subset ?_
     rintro A ⟨⟨k, rfl⟩, -⟩
     exact ⟨⟨k % (m + 1), Nat.mod_lt _ (by omega : 0 < m + 1)⟩, rfl⟩
+
+/-! ### Discharging finiteness from Define's finite DAG computation graphs -/
+
+/-- One boolean statement at topological index `idx` of a finite DAG:
+an operation from `Fin O`, and up to `A` arguments each referencing either
+one of `I` boolean inputs (`0 .. I - 1`) or an earlier statement
+(`I .. I + idx - 1`). -/
+structure DagStmt (I O A idx : ℕ) where
+  op : Fin O
+  args : Fin A → Option (Fin (I + idx))
+
+noncomputable instance (I O A idx : ℕ) : Fintype (DagStmt I O A idx) :=
+  Fintype.ofEquiv (Fin O × (Fin A → Option (Fin (I + idx))))
+    { toFun := fun p => ⟨p.1, p.2⟩
+      invFun := fun s => (s.op, s.args)
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
+
+/-- A finite DAG of `m` boolean statements over `I` inputs, `O` operations,
+and maximum arity `A`. Every statement reads only inputs or strictly earlier
+statements (reflecting Define's acyclic computation graphs). -/
+abbrev DagOp (I O A m : ℕ) := (i : Fin m) → DagStmt I O A i.1
+
+noncomputable instance (I O A m : ℕ) : Finite (DagOp I O A m) :=
+  letI : Fintype (DagOp I O A m) := Pi.instFintype
+  Finite.of_fintype _
+
+/-- Unfolds statement `i` of a finite DAG into its `Term` expression. -/
+def DagOp.evalNode {I O A m : ℕ} (d : DagOp I O A m) (i : Fin m) : Term :=
+  let st := d i
+  let argList := (List.finRange A).filterMap fun slot =>
+    match st.args slot with
+    | none => none
+    | some ref =>
+      if _h : ref.1 < I then some (Term.leaf ref.1)
+      else some (d.evalNode ⟨ref.1 - I, by have := ref.2; omega⟩)
+  Term.node st.op.1 argList
+termination_by i.1
+decreasing_by
+  have := ref.2
+  omega
+
+/-- The list of unfolded `Term`s of all `m` statements in a finite DAG. -/
+def DagOp.toTerms {I O A m : ℕ} (d : DagOp I O A m) : List Term :=
+  (List.finRange m).map d.evalNode
+
+theorem DagOp.toTerms_length {I O A m : ℕ} (d : DagOp I O A m) :
+    d.toTerms.length = m := by
+  simp [DagOp.toTerms]
+
+/-- A value operation's state is DAG-backed over `(I, O, A)` when its
+statements unfold from some finite DAG over `I` inputs, `O` operations, and
+maximum arity `A`. -/
+def IsDagState (I O A : ℕ) : Option OpState → Prop
+  | none => True
+  | some st => ∃ (m : ℕ) (d : DagOp I O A m), d.toTerms = st.stmts
+
+/-- Every `ProgFix` preserves an operation's written-view count (when present)
+and never increases its read-view count. -/
+theorem progFix_views_reads {n : ℕ} {rank : Fin n → ℕ} {p q : Program n}
+    (h : ProgFix sig rank p q) (b : Fin n) :
+    (∀ P Q, p b = some P → q b = some Q → Q.views = P.views ∧ Q.reads ≤ P.reads) ∧
+    (p b = none → q b = none) := by
+  cases h with
+  | step h =>
+    cases h with
+    | «local» a A A' ha hqa _ hviews hreads hrest =>
+      constructor
+      · intro P Q hp hq
+        by_cases hb : b = a
+        · subst hb
+          rw [ha] at hp; rw [hqa] at hq
+          cases Option.some.inj hp; cases Option.some.inj hq
+          exact ⟨hviews, le_of_eq hreads⟩
+        · rw [hrest b hb, hp] at hq
+          cases Option.some.inj hq
+          exact ⟨rfl, le_refl _⟩
+      · intro hp
+        by_cases hb : b = a
+        · subst hb; rw [ha] at hp; cases hp
+        · rw [hrest b hb, hp]
+    | dropRead a A A' ha hqa hreads hviews callers _ hcallers hrest =>
+      constructor
+      · intro P Q hp hq
+        by_cases hb : b = a
+        · subst hb
+          rw [ha] at hp; rw [hqa] at hq
+          cases Option.some.inj hp; cases Option.some.inj hq
+          exact ⟨hviews, by omega⟩
+        · by_cases hc : b ∈ callers
+          · obtain ⟨B, B', hpb, hqb, hbv, hbr⟩ := hcallers b hc
+            rw [hpb] at hp; rw [hqb] at hq
+            cases Option.some.inj hp; cases Option.some.inj hq
+            exact ⟨hbv, le_of_eq hbr⟩
+          · rw [hrest b hb hc, hp] at hq
+            cases Option.some.inj hq
+            exact ⟨rfl, le_refl _⟩
+      · intro hp
+        by_cases hb : b = a
+        · subst hb; rw [ha] at hp; cases hp
+        · by_cases hc : b ∈ callers
+          · obtain ⟨B, _, hpb, -⟩ := hcallers b hc
+            rw [hpb] at hp; cases hp
+          · rw [hrest b hb hc, hp]
+  | writeOut a r _ A A' R R' ha hqa _ hviews hreads hr hqr hRviews hRreads hrest =>
+    constructor
+    · intro P Q hp hq
+      by_cases hb : b = a
+      · subst hb
+        rw [ha] at hp; rw [hqa] at hq
+        cases Option.some.inj hp; cases Option.some.inj hq
+        exact ⟨hviews, le_of_eq hreads⟩
+      · by_cases hbr : b = r
+        · subst hbr
+          rw [hr] at hp; rw [hqr] at hq
+          cases Option.some.inj hp; cases Option.some.inj hq
+          exact ⟨hRviews, le_of_eq hRreads⟩
+        · rw [hrest b hb hbr, hp] at hq
+          cases Option.some.inj hq
+          exact ⟨rfl, le_refl _⟩
+    · intro hp
+      by_cases hb : b = a
+      · subst hb; rw [ha] at hp; cases hp
+      · by_cases hbr : b = r
+        · subst hbr; rw [hr] at hp; cases hp
+        · rw [hrest b hb hbr, hp]
+
+/-- For fixed `(I, O, A, v₀, r₀, bound)`, there are only finitely many
+DAG-backed `Option OpState` values with `views = v₀`, `reads ≤ r₀`, and at
+most `bound` statements. -/
+theorem dag_states_finite (I O A v₀ r₀ bound : ℕ) :
+    {s : Option OpState |
+      IsDagState I O A s ∧ size s ≤ bound ∧
+      ∀ st, s = some st → st.views = v₀ ∧ st.reads ≤ r₀}.Finite := by
+  have hfin_some :
+      (⋃ m : Fin (bound + 1), ⋃ r : Fin (r₀ + 1),
+        Set.range (fun d : DagOp I O A m.1 =>
+          (some { stmts := d.toTerms, views := v₀, reads := r.1 } : Option OpState))).Finite := by
+    refine Set.finite_iUnion fun m => Set.finite_iUnion fun r => ?_
+    exact Set.finite_range _
+  refine (hfin_some.union (Set.finite_singleton none)).subset ?_
+  intro s ⟨hdag, hsize, hvr⟩
+  cases s with
+  | none => exact Or.inr rfl
+  | some st =>
+    left
+    obtain ⟨m, d, hdm⟩ := hdag
+    obtain ⟨hv, hr⟩ := hvr st rfl
+    have hm : m ≤ bound := by
+      have hl : st.stmts.length ≤ bound := hsize
+      rw [← hdm, DagOp.toTerms_length] at hl
+      exact hl
+    refine Set.mem_iUnion.2 ⟨⟨m, Nat.lt_succ_of_le hm⟩, Set.mem_iUnion.2 ⟨⟨st.reads, Nat.lt_succ_of_le hr⟩, ?_⟩⟩
+    refine ⟨d, ?_⟩
+    cases st
+    simp [hv.symm, hdm]
+
+/-- Fixing a program of DAG-backed value operations always terminates, with no
+external finiteness hypothesis (`hfin` is discharged directly from Define's
+finite DAG computation graphs). -/
+theorem dag_prog_terminates {n : ℕ} (rank : Fin n → ℕ) (I O A : ℕ) (f : ℕ → Program n)
+    (hstep : ∀ k, ProgFix sig rank (f k) (f (k + 1)))
+    (hdag : ∀ k (a : Fin n), IsDagState I O A (f k a)) : False := by
+  refine prog_terminates (sig := sig) rank f hstep fun a bound => ?_
+  have hvr_all : ∀ k,
+      (∀ P Q, f 0 a = some P → f k a = some Q → Q.views = P.views ∧ Q.reads ≤ P.reads) ∧
+      (f 0 a = none → f k a = none) := by
+    intro k
+    induction k with
+    | zero =>
+      refine ⟨fun P Q hp hq => ?_, id⟩
+      rw [hp] at hq
+      cases Option.some.inj hq
+      exact ⟨rfl, le_refl _⟩
+    | succ k ih =>
+      have hs := progFix_views_reads (sig := sig) (hstep k) a
+      constructor
+      · intro P Q hp hq
+        cases hfk : f k a with
+        | none =>
+          rw [hs.2 hfk] at hq
+          cases hq
+        | some M =>
+          obtain ⟨hv1, hr1⟩ := ih.1 P M hp hfk
+          obtain ⟨hv2, hr2⟩ := hs.1 M Q hfk hq
+          exact ⟨hv2.trans hv1, le_trans hr2 hr1⟩
+      · intro hp
+        exact hs.2 (ih.2 hp)
+  cases h0 : f 0 a with
+  | none =>
+    refine (Set.finite_singleton none).subset ?_
+    rintro st ⟨⟨k, rfl⟩, -⟩
+    exact (hvr_all k).2 h0
+  | some init =>
+    refine (dag_states_finite I O A init.views init.reads bound).subset ?_
+    rintro st ⟨⟨k, rfl⟩, hsize⟩
+    refine ⟨hdag k a, hsize, fun cur hcur => (hvr_all k).1 init cur h0 hcur⟩
 
 end Define.BooleanEqualityChecking.Termination

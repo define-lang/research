@@ -1,5 +1,9 @@
 # Exact Matching of Registered Operations
 
+> **Historical study note:** This document records an earlier component study.
+> For the current combined reference algorithm, see
+> [../algorithm.md](../algorithm.md) and [../README.md](../README.md).
+
 DLP 59 forbids writing out a registered boolean operation instead of
 executing it. Today a _match_ is defined over cuts: a value matches a
 registered operation R if, over some cut of at most four values, its truth

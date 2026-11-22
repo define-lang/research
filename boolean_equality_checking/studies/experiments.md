@@ -1,9 +1,14 @@
 # Experiments
 
-Every number here comes from `results/*.jsonl`, produced by
+> **Historical study note:** This document records an earlier component study
+> (Experiments 1–11). For the current combined reference algorithm and
+> recommendations, see [../algorithm.md](../algorithm.md) and
+> [../README.md](../README.md).
+
+Every number here comes from `../results/*.jsonl`, produced by
 `run_everything.sh` and `cadical_adversarial.sh`, and summarized by
-`summarize.py` (whose full output is in `results/*_tables.md`). The arguments
-that go with these results are in [arguments.md](arguments.md).
+`summarize.py` (whose full output is in `../results/*_tables.md`). The arguments
+that go with these results are in [../arguments.md](../arguments.md).
 
 ## Setup
 
@@ -43,7 +48,7 @@ the nodes whose class has an earlier member.
 | `sweep_exhaustive`    | `sweep`, but a pair whose cones read at most 12 inputs is decided by simulating every assignment of them.                                                                                                                                          | Yes    |
 | `sweep_bdd_rescue`    | `sweep`, but a SAT call that reaches 1,000 conflicts is retried with OBDDs of the two cones (first-use order, up to 4M nodes), then with SAT without a limit.                                                                                       | Yes    |
 | `portfolio`           | `sweep_exhaustive` and `sweep_bdd_rescue` together, with no dispatch.                                                                                                                                                                              | Yes    |
-| `auto`                | The combined algorithm of [algorithm.md](algorithm.md): truth tables up to 12 inputs, otherwise `portfolio` with a truth-table switch at up to 20 inputs.                                                                                          | Yes    |
+| `auto`                | The combined algorithm of [../algorithm.md](../algorithm.md): truth tables up to 12 inputs, otherwise `portfolio` with a truth-table switch at up to 20 inputs.                                                                                          | Yes    |
 | `auto_kissat`         | `auto` with Kissat 4.0.4 as the last step for a pair.                                                                                                                                                                                              | Yes    |
 
 The SAT solver is `src/sat.hpp`, a MiniSat-style CDCL solver written for this
@@ -500,7 +505,7 @@ Undecided pairs by family, as instances affected / undecided pairs:
   workloads, not a guarantee.
 - **On the adversarial cases, the answer depends on the limit**, and which
   pairs are missed moves as the limit moves. That's why a limit can't be the
-  language's rule (see [arguments.md](arguments.md)).
+  language's rule (see [../arguments.md](../arguments.md)).
 - **Seeds don't change anything.** With no limit, all 113 instances that
   finished (the other four are the 11- and 12-bit multipliers) got identical
   classes with all three seeds. The seed changes only the random simulation
@@ -761,7 +766,7 @@ Over the 41 instances where everything finished, against `beq`'s OBDDs:
 
 ## Experiment 10: The Combined Algorithm End to End
 
-`auto` ([algorithm.md](algorithm.md)) on every workload, compared per
+`auto` ([../algorithm.md](../algorithm.md)) on every workload, compared per
 instance with the fastest of the seven other exact configurations on that
 same instance (`summarize.py auto`, `results/auto_tables.md`). That's a hard
 baseline: it's the best of seven measurements, chosen after the fact, so a
@@ -865,7 +870,7 @@ Every exact configuration gives the same classes (Correctness, above,
 including `auto` and `auto` forced through its truth-table switch on every
 hard pair), three seeds give the same classes, and every OBDD-first budget
 gives the same classes. So which rung decides a pair is invisible in the
-result. [algorithm.md](algorithm.md) explains why.
+result. [../algorithm.md](../algorithm.md) explains why.
 
 ### Whole programs
 

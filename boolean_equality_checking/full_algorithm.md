@@ -1,5 +1,25 @@
 # The Full Algorithm on Whole Programs
 
+> **Current reference implementation updates:** The tables below preserve the
+> original whole-program benchmark run (`results/full_algorithm.jsonl`). Since
+> that run, the reference implementation (`src/`) was updated to:
+>
+> - use the budget-free canonical acceptance rule (`≤ 256` statements and
+>   `≤ 20` inputs always compile; past that, at most 4,000,000 canonical shared
+>   ROBDD nodes under first-reached DFS input order, with no step budget);
+> - order registered operations for human readability (`and`, `not`, then
+>   `(fewest_ands, read_views, project_before_stdlib, fewer_interchangeable_groups, counting_order_truth_table)`,
+>   putting `or` before `implies` and `xor` before `eq`);
+> - replace the two-pass `Matcher` with a unified single-pass search
+>   (`kBestOverall` in check mode, `kBestPerValue` in fix mode) and replace
+>   scalar `k > 6` table lookups with an `8 × 8` bit-matrix transpose.
+>
+> Re-measured with the updated `beq program --mode check --method auto` (no
+> step budget): `ops_15k` checks in **1.34 s** (84 MB RSS; `matches + spellings`
+> 0.63 s vs. 1.45 s) and `ops_2k_wide` checks in **12.26 s** (188 MB RSS;
+> `tables_lookups` 4.90 s vs. 10.0 s, `matches + spellings` 1.02 s vs. 4.78 s).
+> See [algorithm.md](algorithm.md) and [results/budget.md](results/budget.md).
+
 The earlier studies measured each rule of DLPs 59–61 on its own, on
 workloads that were simpler than Define programs in several ways. This study
 first makes the workloads and tools follow the rules as they now stand,

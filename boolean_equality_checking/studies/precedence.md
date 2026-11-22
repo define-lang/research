@@ -1,5 +1,9 @@
 # A Precedence Rule Between Spellings
 
+> **Historical study note:** This document records an earlier component study.
+> For the current combined reference algorithm, see
+> [../algorithm.md](../algorithm.md) and [../README.md](../README.md).
+
 [earlier_values.md](earlier_values.md) found that fixing equivalent programs
 until they compile almost never reaches one program, and that the results
 differ partly in which registered operation spells a value: `or(i3, not s2)`

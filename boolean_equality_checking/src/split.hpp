@@ -436,7 +436,7 @@ class SplitCheck {
   void group_values() {
     const size_t n = nodes_.size();
     keys.assign(n, 0);
-    const uint64_t constant_key = mix64(0xC0157A47ULL) & ~1ULL;
+    const uint64_t constant_key = 0;
     std::map<std::vector<uint64_t>, std::vector<uint32_t>> by_supp;
     for (uint32_t x = 0; x < n; ++x) {
       if (konst_[x] >= 0) {
@@ -445,11 +445,9 @@ class SplitCheck {
       }
       by_supp[std::vector<uint64_t>(supp(x), supp(x) + words_)].push_back(x);
     }
-    uint64_t group_id = 0;
     for (const auto& [s, members] : by_supp) {
-      ++group_id;
       if (members.size() == 1) {
-        keys[members[0]] = mix64(0xD15ULL + 2 * members[0]) & ~1ULL;
+        keys[members[0]] = static_cast<uint64_t>(members[0]) << 1;
         continue;
       }
       ++groups;
@@ -463,9 +461,50 @@ class SplitCheck {
       groups_max_leaves = std::max(groups_max_leaves, r.leaf_count());
       if (!within(r) && all_read_once) {
         ++groups_fixed_form;
+        // Exact canonical tree comparison for read-once groups (no hash collision assumption).
+        std::map<std::pair<bool, std::vector<uint64_t>>, uint32_t> canon_rep;
+        std::function<uint64_t(uint32_t, int&)> tree_id;
+        std::unordered_map<uint32_t, std::pair<uint64_t, int>> tree_memo;
+        std::map<std::vector<uint64_t>, uint64_t> or_intern;
+        std::unordered_map<uint32_t, std::vector<uint64_t>> or_terms;
+        uint64_t next_tid = inputs_ + 1;
+        tree_id = [&](uint32_t x, int& phase) -> uint64_t {
+          auto mit = tree_memo.find(x);
+          if (mit != tree_memo.end()) {
+            phase = mit->second.second;
+            return mit->second.first;
+          }
+          if (x <= inputs_) {
+            phase = 0;
+            tree_memo[x] = {x, 0};
+            return x;
+          }
+          phase = 1;
+          std::vector<uint64_t> terms;
+          for (Lit a : nodes_[x].args) {
+            int kp = 0;
+            const uint64_t kid = tree_id(node_of(a), kp);
+            const int p = kp ^ static_cast<int>(is_compl(a)) ^ 1;
+            if (p == 0 && node_of(a) > inputs_) {
+              const auto& sub = or_terms.at(node_of(a));
+              terms.insert(terms.end(), sub.begin(), sub.end());
+            } else {
+              terms.push_back((kid << 1) | static_cast<uint64_t>(p));
+            }
+          }
+          std::sort(terms.begin(), terms.end());
+          auto [it, ins] = or_intern.try_emplace(terms, next_tid);
+          if (ins) ++next_tid;
+          or_terms[x] = std::move(terms);
+          tree_memo[x] = {it->second, 1};
+          return it->second;
+        };
+        std::unordered_map<uint64_t, uint32_t> rep_of_tid;
         for (uint32_t m : members) {
-          const Canon& c = canon(m);
-          keys[m] = (mix64(group_id * 0x100000001B3ULL ^ c.hash) & ~1ULL) | static_cast<uint64_t>(c.phase);
+          int phase = 0;
+          const uint64_t tid = tree_id(m, phase);
+          auto [it, ins] = rep_of_tid.try_emplace(tid, m);
+          keys[m] = (static_cast<uint64_t>(it->second) << 1) | static_cast<uint64_t>(phase);
         }
         continue;
       }
@@ -479,13 +518,30 @@ class SplitCheck {
       size_t words = 1;
       const Values& value = evaluate(r, words);
       const uint64_t valid = valid_bits(static_cast<uint32_t>(r.leaf_count()));
+      // Group by hash, then verify exact word-by-word equality modulo phase.
+      std::unordered_map<uint64_t, std::vector<std::pair<uint32_t, uint64_t>>> buckets;
       for (uint32_t m : members) {
-        // An input in a group is its group's one input, the one leaf.
         const std::vector<uint64_t>& t = value.at(m);
         const uint64_t phase = t[0] & 1;
-        uint64_t h = mix64(0x77 ^ group_id);
+        uint64_t h = 0x77;
         for (uint64_t w : t) h = mix64(h ^ ((w ^ (phase ? ~0ULL : 0)) & valid));
-        keys[m] = (h & ~1ULL) | phase;
+        auto& b = buckets[h];
+        uint32_t rep = UINT32_MAX;
+        for (const auto& [cand, cphase] : b) {
+          const std::vector<uint64_t>& ct = value.at(cand);
+          const uint64_t xor_mask = (phase ^ cphase) ? ~0ULL : 0;
+          bool eq = true;
+          for (size_t w = 0; w < words && eq; ++w) eq = ((t[w] ^ ct[w] ^ xor_mask) & valid) == 0;
+          if (eq) {
+            rep = cand;
+            break;
+          }
+        }
+        if (rep == UINT32_MAX) {
+          rep = m;
+          b.push_back({m, phase});
+        }
+        keys[m] = (static_cast<uint64_t>(rep) << 1) | phase;
       }
     }
   }

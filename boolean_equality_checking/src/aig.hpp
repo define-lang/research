@@ -230,4 +230,77 @@ struct Rng {
   }
 };
 
+// An assignment of values to arbitrarily many boolean inputs (0-based bit indices).
+struct Assignment {
+  std::vector<uint64_t> words;
+
+  Assignment() = default;
+  explicit Assignment(uint32_t inputs) : words((static_cast<size_t>(inputs) + 63) / 64, 0) {}
+
+  static Assignment zeros(uint32_t inputs) { return Assignment(inputs); }
+
+  static Assignment ones(uint32_t inputs) {
+    Assignment a(inputs);
+    std::fill(a.words.begin(), a.words.end(), ~0ULL);
+    a.mask_to(inputs);
+    return a;
+  }
+
+  static Assignment random(uint32_t inputs, Rng& rng) {
+    Assignment a(inputs);
+    for (uint64_t& w : a.words) w = rng.next();
+    a.mask_to(inputs);
+    return a;
+  }
+
+  static Assignment from_u64(uint64_t v, uint32_t inputs) {
+    Assignment a(inputs);
+    if (!a.words.empty()) a.words[0] = v;
+    a.mask_to(inputs);
+    return a;
+  }
+
+  uint64_t to_u64() const { return words.empty() ? 0ULL : words[0]; }
+
+  bool get(uint32_t b) const {
+    const size_t w = b >> 6;
+    return w < words.size() && ((words[w] >> (b & 63)) & 1);
+  }
+
+  void set(uint32_t b) {
+    const size_t w = b >> 6;
+    if (w >= words.size()) words.resize(w + 1, 0);
+    words[w] |= uint64_t{1} << (b & 63);
+  }
+
+  void clear(uint32_t b) {
+    const size_t w = b >> 6;
+    if (w < words.size()) words[w] &= ~(uint64_t{1} << (b & 63));
+  }
+
+  void flip(uint32_t b) {
+    const size_t w = b >> 6;
+    if (w >= words.size()) words.resize(w + 1, 0);
+    words[w] ^= uint64_t{1} << (b & 63);
+  }
+
+  void mask_to(uint32_t inputs) {
+    const size_t need = (static_cast<size_t>(inputs) + 63) / 64;
+    words.resize(need, 0);
+    if (inputs % 64 != 0 && !words.empty()) {
+      words.back() &= (uint64_t{1} << (inputs % 64)) - 1;
+    }
+  }
+
+  bool operator==(const Assignment& o) const { return words == o.words; }
+};
+
+struct AssignmentHash {
+  size_t operator()(const Assignment& a) const {
+    uint64_t h = 0x517cc1b727220a95ULL;
+    for (uint64_t w : a.words) h = mix64(h ^ w);
+    return static_cast<size_t>(h);
+  }
+};
+
 }  // namespace beq

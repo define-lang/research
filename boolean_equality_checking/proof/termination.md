@@ -1,7 +1,7 @@
 # Fixing a Value Operation Always Terminates
 
 DLP 61 adopts a precedence rule between spellings of a value, with the
-restriction from [precedence.md](../precedence.md) that no fix grows the
+restriction from [studies/precedence.md](../studies/precedence.md) that no fix grows the
 program, and orders registered operations by a key computed from what they
 compute. DLP 59 makes a value that's always the opposite of an earlier one
 redundant, unless it's that value's `not`, and makes literals given to
@@ -20,13 +20,14 @@ for every value operation, before the others, so an `and` is an execution
 of a registered operation like any other (it has a pair, below, and can be
 respelled), and a match can be written with an `and` or a `not`; `not`
 statements are still left out of the executions that are respelled. Each
-registered operation R has an arity of at most four, a **key** key(R) (the
-fewest `and`s in any and-inverter graph computing its function, then fewer
-read views, then its truth table as a number; distinct operations have
-distinct keys, and `and` and `not` come before every other), and a
-partition of its views into **interchangeable groups**, which need not be
-consecutive views: in `(a and b) or c` as one operation, a and b are one
-group and c is another. `and` has one group of both views. Which
+registered operation R has an arity of at most four, a **key** key(R)
+(fewest `and`s in any and-inverter graph computing its function, then fewest
+read views, then project-registered before standard-library-registered, then
+fewer interchangeable-view groups, then its truth table in counting order;
+distinct operations have distinct keys, and `and` and `not` come before every
+other), and a partition of its views into **interchangeable groups**, which
+need not be consecutive views: in `(a and b) or c` as one operation, a and b
+are one group and c is another. `and` has one group of both views. Which
 registered operations a value operation follows (a registered operation's
 own definition follows `and`, `not`, and the ones with smaller keys) only
 decides which fixes exist, which the proof never needs.
@@ -219,9 +220,13 @@ operation eventually stops changing:
   changes only finitely often.
 
 After all of them stop, no fix happens, but every fix changes something,
-so the sequence ends. The counting fact: a value operation with at most a
-given number of statements, over finitely many inputs and operations,
-every value an earlier one, has finitely many states.
+so the sequence ends. The counting fact: every compiled Define value
+operation is a static, finite DAG of boolean statements over finitely many
+inputs and operations (every statement reads only inputs or strictly earlier
+statements), so there are finitely many states within any statement bound.
+In [fixing_termination.lean](fixing_termination.lean), `dag_states_finite`
+proves this counting fact directly on `DagOp`, and `dag_prog_terminates`
+discharges `prog_terminates`'s finiteness hypothesis completely.
 
 **When it ends, the program compiles**, if every error has a fix. They all
 do except these, which the programmer has to fix: a literal given to a
@@ -406,7 +411,7 @@ a cycle. ∎
 `measure_check.py` runs the Python fix loop of `gen/fixpoint.py`, which
 handles one value operation at a time, with an earlier form of DLP 61's
 precedence (declared orders, and AIG nodes in place of the key), on all 144
-families of [precedence.md](../precedence.md), and computes the measure
+families of [studies/precedence.md](../studies/precedence.md), and computes the measure
 after every fix (statements, then statements that aren't a `not`, then the
 executions' negations and precedence, then terms). That loop also
 simplifies values that never change, which the fix loop here leaves to the

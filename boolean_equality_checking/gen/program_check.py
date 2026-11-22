@@ -59,6 +59,7 @@ class Program:
 
     registered: list[str]
     operations: dict[str, Operation]
+    std_registered: set[str] = field(default_factory=set)
 
 
 def parse_argument(token: str) -> int | str:
@@ -76,7 +77,9 @@ def parse(text: str) -> Program:
     program = Program(lines[0][1:], {})
     current: Operation | None = None
     for words in lines[1:]:
-        if words[0] == "op":
+        if words[0] == "std_registered":
+            program.std_registered.update(words[1:])
+        elif words[0] == "op":
             if words[2] == "bool":
                 current = Operation(words[1], "bool", int(words[3]), 0)
             else:
@@ -228,25 +231,42 @@ class Checker:
                 return value
         raise KeyError(index)
 
-    def key(self, name: str) -> tuple[int, int, int]:
-        """Return a registered operation's key (DLP 61).
+    def key(self, name: str) -> tuple[int, int, int, int, int]:
+        """Return a registered operation's key (DLP 61), ordered for readability.
 
-        The fewest `and`s computing its function, then its number of read
-        views, then its truth table as a number.
+        Fewest `and`s computing its function, then fewest read views, then
+        project-registered before standard-library-registered, then fewer
+        interchangeable-view groups (more symmetric first), then truth table
+        in counting order (view 1 changing least often, false < true).
         """
         views = self.arity(name)
         table = self.own_function(name)
+        is_stdlib = 1 if name in self.program.std_registered else 0
+        num_groups = len(self.groups(name))
         # Only operations of up to four read views can be registered.
-        return (fewest_ands(table, views) if views <= 4 else sys.maxsize, views, table)
+        return (
+            fewest_ands(table, views) if views <= 4 else sys.maxsize,
+            views,
+            is_stdlib,
+            num_groups,
+            counting_order_key(table, views),
+        )
 
     def follows(self, op: Operation) -> list[str]:
         """Return the registered operations an operation follows, in order.
 
         `and` and `not` come first, then the others by key; a registered
-        operation's own definition follows only the ones with smaller keys.
+        operation's own definition follows only the ones with smaller keys,
+        and standard-library operations only follow standard-library ones.
         """
+        op_is_std = op.name in self.program.std_registered
         # One in or executing a cycle has no function to match (DLP 9).
-        names = [n for n in self.program.registered if not self.reaches_cycle(n)]
+        names = [
+            n
+            for n in self.program.registered
+            if not self.reaches_cycle(n)
+            and (not op_is_std or n in self.program.std_registered)
+        ]
         names.sort(key=self.key)
         if op.name in names:
             names = names[: names.index(op.name)]
@@ -841,6 +861,18 @@ def npn_class(table: int) -> int:
     return best
 
 
+def counting_order_key(table: int, views: int) -> int:
+    """Return truth-table bits in counting order (view 1 changing least often)."""
+    key = 0
+    for c in range(1 << views):
+        m = 0
+        for i in range(views):
+            if (c >> (views - 1 - i)) & 1:
+                m |= 1 << i
+        key = (key << 1) | ((table >> m) & 1)
+    return key
+
+
 def fewest_ands(table: int, views: int) -> int:
     """Return the fewest `and`s computing a function of up to four views.
 
@@ -980,12 +1012,14 @@ SELF_TESTS: list[tuple[str, dict[str, dict[str, object]]]] = [
     ),
     (
         "registered or implies\n"
-        + IMPLIES
-        + "op or bool 2\nnot 1\ncall implies 3 2\nout 4\nend\n"
+        + OR
+        + "op implies bool 2\nnot 1\ncall or 2 3\nout 4\nend\n"
         + "op sp bool 2\nnot 2\ncall or 1 3\nout 4\nend\n",
         {
-            # `implies` has the smaller key (the same `and`s and views, a
-            # smaller truth table), so `or`'s definition follows it.
+            # `or` is symmetric (1 group) while `implies` is asymmetric (2
+            # groups), so `or` comes first and `implies`'s definition follows it.
+            # `sp` writes `or(1, not 2)` (1 negation), which is better spelled
+            # `implies(2, 1)` (0 negations).
             "or": {},
             "implies": {},
             "sp": {

@@ -1,5 +1,9 @@
 # Referring to Executed Value Operations Instead of Copying Them
 
+> **Historical study note:** This document records an earlier component study.
+> For the current combined reference algorithm, see
+> [../algorithm.md](../algorithm.md) and [../README.md](../README.md).
+
 The earlier workloads copied (inlined) every executed boolean value operation
 into the caller's graph. The design now refers to them instead: an execution
 is one node that names the executed value operation and the values it was

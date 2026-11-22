@@ -31,6 +31,7 @@ lean_axiom_test(
         "Define.BooleanEqualityChecking.Termination.progStep_lt",
         "Define.BooleanEqualityChecking.Termination.prog_no_cycle",
         "Define.BooleanEqualityChecking.Termination.prog_terminates",
+        "Define.BooleanEqualityChecking.Termination.dag_prog_terminates",
     ],
     deps = [":fixing_termination"],
 )

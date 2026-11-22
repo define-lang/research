@@ -2,7 +2,7 @@
 
 These are the parts of the conclusions that come from reasoning rather than
 from measurement. Each one says what it depends on. The measurements are in
-[experiments.md](experiments.md).
+[studies/experiments.md](studies/experiments.md) and [results/budget.md](results/budget.md).
 
 ## No Restriction Makes Exact Checking Polynomial
 
@@ -60,31 +60,58 @@ long chain, which is the case the draft had in mind, but the generated code
 reuses conditions the way real code plausibly does (a flag tested in several
 places). Real Define code would have to be measured to know for sure.
 
-## Why a Solver Budget Can't Be the Language Rule
+## Why a Heuristic Solver or Step Budget Can't Be the Language Rule—and Why a Canonical ROBDD Limit Can
 
-Run to completion, every exact method gives the same classes, so which engine
-the compiler uses only affects time. A budget changes that: with a conflict
-limit, the pairs left undecided depend on the solver's heuristics, its
-version, and the order of the queries. The measurements show the undecided
-pairs appearing and disappearing as the limit changes. A language rule has
-to give the same answer in every compiler, so a budget would have to name a
-specific solver, version, and query order, which is not something a
-specification can reasonably fix.
+Run to completion, every exact method gives the same functional equivalence
+classes, so which engine the compiler uses only affects compile time. A
+heuristic budget changes that: with a SAT conflict limit, the pairs left
+undecided depend on the solver's heuristics, its version, and the order of
+queries. Likewise, an operational step counter depends on the exact
+implementation of every data structure, cache, and search shortcut—any
+compiler optimization changes step counts, and raising or changing internal
+algorithms risks breaking Forward Compatibility or making compilation
+unpredictable to programmers.
 
-A budget is fine as a performance knob when something exact sits behind it.
-That's what the portfolio does: the OBDD rescue starts after 1,000 conflicts
-and SAT without a limit after that. Whether the rescue happens only changes
-the time.
+By contrast, a **canonical shared ROBDD node limit** under a fixed,
+deterministic variable order (first-reached DFS over the value operation's
+static, finite DAG) avoids every one of those problems:
 
-## Modular Checking Is Enough for the Rule
+1. **Uniqueness and cross-compiler determinism:** a Reduced Ordered Binary
+   Decision Diagram (with complement edges, uncomplemented `low` edge, and
+   `low ≠ high`) is a mathematically unique representation of a DAG of boolean
+   functions under a fixed variable order (Bryant 1986). Its reachable node
+   count depends solely on the operation's DAG and input order, never on how a
+   compiler builds, caches, or searches it.
+2. **Forward Compatibility:** raising the node limit in a future version of
+   Define is strictly monotone—every value operation that compiled before
+   still compiles.
+3. **Guaranteed syntactic envelope:** keeping a guaranteed envelope of at most
+   256 boolean statements and at most 20 boolean inputs ensures that small
+   operations with exponential ROBDDs (such as bit-level multipliers on up to
+   20 bits) still always compile via truth tables.
+4. **Communicability:** the limit is easy to explain ("operations up to 256
+   statements and 20 inputs always compile; larger operations compile as long
+   as their boolean logic stays within 4,000,000 decision-diagram nodes") and
+   covers 3,264 of 3,265 real-code units in our measurements without any step
+   counter ([results/budget.md](results/budget.md)).
 
-DLP 59's rules are about the statements of one value operation, and they
-treat an execution of another value operation as one statement. So the
-compiler checks each value operation once, with each executed boolean value
-operation replaced by what it computes. A program executing a library
-operation a million times doesn't make the operation's check any larger.
-The total work is the sum over value operation definitions, and each one is
-bounded by DLP 59's limit of 256 boolean statements.
+A solver conflict limit remains fine as an internal performance knob when an
+exact fallback sits behind it (as in the legacy whole-program SAT-sweeping
+ladder in [algorithm.md](algorithm.md)), because it changes only compile time
+and never whether a program compiles.
+
+## Modular Checking Over Define's Static Finite DAGs Is Enough for the Rule
+
+Every compiled component of Define produces a static, finite DAG with no
+execution cycles (DLP 9). DLP 59's rules are about the boolean statements of
+one value operation, and they treat an execution of another boolean value
+operation as a single statement whose function comes from its recorded
+summary. The compiler checks each value operation once in topological
+dependency order. A program executing a library operation a million times does
+not make the operation's check any larger, and the DAG property also directly
+guarantees that the refactoring fix loop visits only finitely many states per
+value operation within any statement bound (proved in Lean as
+`dag_prog_terminates` in [proof/fixing_termination.lean](proof/fixing_termination.lean)).
 
 What the 256-statement limit doesn't bound is the size of the logic, because
 an executed boolean value operation can compute any function of up to twelve

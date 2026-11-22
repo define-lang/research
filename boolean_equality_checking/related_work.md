@@ -59,10 +59,12 @@ What seems new is the combination:
 1. Treating exact functional redundancy and library matching as
    **well-formedness rules that decide which programs compile**, not as
    optimizations or warnings.
-2. Making those rules **decidable and solver-independent** by bounding the
-   domain (20 boolean inputs, 256 statements) so that a complete fallback
-   always exists. In EDA, the same methods run under resource limits whose
-   results depend on the budget, and that's acceptable there because they're
+2. Making those rules **decidable and compiler-independent** without any
+   heuristic solver or step budget: a guaranteed envelope of 20 boolean inputs
+   and 256 boolean statements (always decidable via truth tables) plus a
+   canonical 4,000,000-node shared ROBDD limit under a fixed DFS input order
+   beyond it. In EDA, the same methods run under resource limits whose results
+   depend on the budget, and that's acceptable there because they're
    optimizations.
 3. Matching **over every earlier value** instead of a window or a cut, with a
    **user-facing spelling precedence** and a **proof that the fix loop
@@ -82,14 +84,14 @@ To keep the comparisons specific, Define's system is split into these pieces:
 | P1  | A boolean value that's exactly constant, equal to an input, or equal to an earlier value is a compile error.                                                                                       | DLP 59                     |
 | P2  | No literal may be given to a boolean statement.                                                                                                                                                    | DLP 59                     |
 | P3  | A value equal to a registered operation, or its negation, over at most 4 earlier values is an error when replacing it removes at least 2 statements (3 for a negation). The largest match is reported. | DLP 61                     |
-| P4  | One spelling among single executions: fewest negated arguments, then fewest ANDs, then declared order, then rank order.                                                                            | DLP 61                     |
+| P4  | One spelling among single executions: fewest negated arguments, then canonical registered-operation order (`and`, `not`, fewest ANDs, fewest read views, project before stdlib, more symmetric first, counting-order truth table), then rank order.                                         | DLP 61                     |
 | P5  | Interchangeable views come from the function, and values go to them in a fixed rank order.                                                                                                        | DLP 60                     |
 | P6  | One statement order: inputs right before first use, depth-first from the consumers.                                                                                                                | DLP 60                     |
 | P7  | No wrappers. Exactly one standard wrapper for each of `and` and `not`.                                                                                                                             | DLP 61                     |
-| P8  | Exact, deterministic checking: AIG with structural hashing, then truth tables, simulation, SAT with a conflict limit, OBDDs, and whole-operation truth tables.                                    | draft                      |
-| P9  | One check per definition with executions referenced, not inlined. CEGAR refinement, truth-table hashes for incremental rechecks, and stored counterexample patterns.                             | draft                      |
-| P10 | The fix loop provably terminates (lexicographic order with Dershowitz–Manna multisets, in Lean). It isn't confluent.                                                                               | draft, `proof/`            |
-| P11 | Limits (20 inputs, 256 statements) that make P1 and P3 decidable within a bounded worst case.                                                                                                      | DLP 59                     |
+| P8  | Exact, deterministic checking per value operation: truth tables up to 16 inputs (or 20 with wide executions, and as fallback inside the guaranteed envelope) and complement-edge ROBDDs otherwise, with exact bucket verification and zero-allocation lockstep counterexamples.                 | `algorithm.md`             |
+| P9  | One check per definition with executions referenced, not inlined. Recorded tables/AIGs/diagrams, 128-bit fingerprints and symmetry groups for incremental rechecks, and BDD-guided collision-splitting samples.                                                                                | `algorithm.md`             |
+| P10 | The fix loop provably terminates (lexicographic order with Dershowitz–Manna multisets, in Lean; finiteness discharged directly from Define's static finite DAGs in `dag_prog_terminates`). It isn't confluent.                                                                                | `proof/`                   |
+| P11 | Compiler-independent limits with no step budget: guaranteed envelope of 20 boolean inputs and 256 boolean statements, plus a canonical 4,000,000-node shared ROBDD limit under a fixed DFS input order beyond it.                                                                              | DLP 59, `algorithm.md`     |
 
 ## 1. Languages and Standards That Reject Redundant Code
 

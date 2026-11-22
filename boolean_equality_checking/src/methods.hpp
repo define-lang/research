@@ -78,9 +78,9 @@ struct MethodGraph {
   }
 
   // Every node's value on one input assignment.
-  std::vector<char> evaluate(uint64_t minterm) const {
+  std::vector<char> evaluate(const Assignment& assign) const {
     std::vector<char> v(num_nodes(), 0);
-    for (uint32_t i = 1; i <= inputs; ++i) v[i] = static_cast<char>((minterm >> (i - 1)) & 1);
+    for (uint32_t i = 1; i <= inputs; ++i) v[i] = static_cast<char>(assign.get(i - 1));
     uint64_t a[64];
     std::vector<char> at;
     for (uint32_t n = inputs + 1; n < num_nodes(); ++n) {
@@ -165,65 +165,119 @@ class MethodBase : public MatchOracle {
 
   uint64_t function_id(Lit l) override {
     const uint64_t k = keys[node_of(l)];
-    return ((k >> 1) << 1 | ((k & 1) ^ static_cast<uint64_t>(is_compl(l)))) * 0x9E3779B97F4A7C15ULL;
+    return ((k >> 1) << 1 | ((k & 1) ^ static_cast<uint64_t>(is_compl(l)))) + 1;
   }
-  bool bit(Lit l, uint64_t minterm) override {
-    auto it = sampled_.find(minterm);
+  const std::vector<char>& eval_assignment(const Assignment& assign) {
+    auto it = sampled_.find(assign);
     if (it == sampled_.end()) {
       if (budget) budget->spend(g_.num_nodes(), StepBudget::kSample);
-      it = sampled_.emplace(minterm, g_.evaluate(minterm)).first;
+      it = sampled_.emplace(assign, g_.evaluate(assign)).first;
     }
-    return it->second[node_of(l)] ^ is_compl(l);
+    return it->second;
+  }
+  bool bit(Lit l, const Assignment& assign) override {
+    return eval_assignment(assign)[node_of(l)] ^ is_compl(l);
+  }
+
+  // Seed the symmetry filter with targeted assignments (e.g., 64 satisfying +
+  // 64 falsifying paths from a RecordedDiagram) so biased functions (like wide
+  // AND/OR trees) still reject non-symmetric pairs immediately.
+  void seed_symmetry_samples(const std::vector<Assignment>& samples) {
+    sym_seeded_ = samples;
+    sim_cone_.clear();
   }
 
   // Whether swapping read views i and j (from 0) can leave the written view
-  // the same: false when it changes it on one of 128 random assignments.
-  // Only the values that read i or j are simulated again for each pair.
+  // the same: false when it changes it on one of 128 assignments.
+  // Only the nodes in dep_nodes_[i] U dep_nodes_[j] are simulated again.
   bool may_be_interchangeable(uint32_t i, uint32_t j) {
     if (sim_cone_.empty()) {
       sim_cone_ = g_.cone({g_.out});
       sim_.assign(size_t{g_.num_nodes()} * kWords, 0);
-      reads_.assign(g_.num_nodes(), 0);
+      read_words_ = (static_cast<size_t>(g_.views) + 63) / 64;
+      if (read_words_ == 0) read_words_ = 1;
+      reads_.assign(size_t{g_.num_nodes()} * read_words_, 0);
+      dep_nodes_.assign(g_.views, {});
       Rng rng(9);
       uint64_t a[64];
       for (uint32_t x : sim_cone_) {
         if (x == 0) continue;
         if (x <= g_.inputs) {
-          for (size_t w = 0; w < kWords; ++w) sim_[x * kWords + w] = rng.next();
-          if (x - 1 < 64) reads_[x] = uint64_t{1} << (x - 1);
+          for (size_t w = 0; w < kWords; ++w) {
+            uint64_t bits = 0;
+            if (!sym_seeded_.empty()) {
+              for (int b = 0; b < 64; ++b) {
+                const size_t idx = w * 64 + static_cast<size_t>(b);
+                if (idx < sym_seeded_.size() && sym_seeded_[idx].get(x - 1)) bits |= 1ULL << b;
+              }
+            } else {
+              bits = rng.next();
+            }
+            sim_[size_t{x} * kWords + w] = bits;
+          }
+          if (x <= g_.views) reads_[size_t{x} * read_words_ + ((x - 1) >> 6)] = uint64_t{1} << ((x - 1) & 63);
           continue;
         }
         const MethodGraph::Node& node = g_.node(x);
-        for (Lit l : node.args) reads_[x] |= reads_[node_of(l)];
+        for (Lit l : node.args)
+          for (size_t rw = 0; rw < read_words_; ++rw)
+            reads_[size_t{x} * read_words_ + rw] |= reads_[size_t{node_of(l)} * read_words_ + rw];
+        for (size_t rw = 0; rw < read_words_; ++rw)
+          for (uint64_t bits = reads_[size_t{x} * read_words_ + rw]; bits; bits &= bits - 1) {
+            const uint32_t v = static_cast<uint32_t>(rw * 64 + static_cast<size_t>(__builtin_ctzll(bits)));
+            if (v < g_.views) dep_nodes_[v].push_back(x);
+          }
         for (size_t w = 0; w < kWords; ++w) {
           for (size_t k = 0; k < node.args.size(); ++k)
-            a[k] = sim_[node_of(node.args[k]) * kWords + static_cast<size_t>(w)] ^ (is_compl(node.args[k]) ? ~0ULL : 0);
-          sim_[x * kWords + w] = MethodGraph::word(node, a);
+            a[k] = sim_[size_t{node_of(node.args[k])} * kWords + w] ^ (is_compl(node.args[k]) ? ~0ULL : 0);
+          sim_[size_t{x} * kWords + w] = MethodGraph::word(node, a);
         }
       }
       swapped_.assign(sim_.size(), 0);
+      swapped_mark_.assign(g_.num_nodes(), 0);
+      swapped_gen_ = 0;
     }
-    if (i >= 64 || j >= 64) return true;
-    const uint64_t pair = (uint64_t{1} << i) | (uint64_t{1} << j);
+    ++swapped_gen_;
+    if (swapped_gen_ == 0) {
+      std::fill(swapped_mark_.begin(), swapped_mark_.end(), 0);
+      swapped_gen_ = 1;
+    }
+    const uint32_t ni = i + 1, nj = j + 1;
+    swapped_mark_[ni] = swapped_gen_;
+    swapped_mark_[nj] = swapped_gen_;
+    for (size_t w = 0; w < kWords; ++w) {
+      swapped_[size_t{ni} * kWords + w] = sim_[size_t{nj} * kWords + w];
+      swapped_[size_t{nj} * kWords + w] = sim_[size_t{ni} * kWords + w];
+    }
+    const auto& di = dep_nodes_[i];
+    const auto& dj = dep_nodes_[j];
+    size_t pi = 0, pj = 0;
     uint64_t a[64];
-    auto value = [&](uint32_t x, int w) {
-      return (reads_[x] & pair) ? swapped_[x * kWords + w] : sim_[x * kWords + w];
-    };
-    for (uint32_t x : sim_cone_) {
-      if (x == 0 || !(reads_[x] & pair)) continue;
-      for (size_t w = 0; w < kWords; ++w) {
-        if (x <= g_.inputs) {
-          swapped_[x * kWords + w] = sim_[(x == i + 1 ? j + 1 : i + 1) * kWords + static_cast<size_t>(w)];
-          continue;
-        }
-        const MethodGraph::Node& node = g_.node(x);
-        for (size_t k = 0; k < node.args.size(); ++k)
-          a[k] = value(node_of(node.args[k]), w) ^ (is_compl(node.args[k]) ? ~0ULL : 0);
-        swapped_[x * kWords + w] = MethodGraph::word(node, a);
+    while (pi < di.size() || pj < dj.size()) {
+      uint32_t x;
+      if (pj == dj.size() || (pi < di.size() && di[pi] < dj[pj]))
+        x = di[pi++];
+      else if (pi == di.size() || dj[pj] < di[pi])
+        x = dj[pj++];
+      else {
+        x = di[pi++];
+        ++pj;
       }
+      const MethodGraph::Node& node = g_.node(x);
+      for (size_t w = 0; w < kWords; ++w) {
+        for (size_t k = 0; k < node.args.size(); ++k) {
+          const uint32_t u = node_of(node.args[k]);
+          const uint64_t v = (swapped_mark_[u] == swapped_gen_ ? swapped_ : sim_)[size_t{u} * kWords + w];
+          a[k] = v ^ (is_compl(node.args[k]) ? ~0ULL : 0);
+        }
+        swapped_[size_t{x} * kWords + w] = MethodGraph::word(node, a);
+      }
+      swapped_mark_[x] = swapped_gen_;
     }
+    const uint32_t o = node_of(g_.out);
+    if (swapped_mark_[o] != swapped_gen_) return true;
     for (size_t w = 0; w < kWords; ++w)
-      if (value(node_of(g_.out), w) != sim_[node_of(g_.out) * kWords + static_cast<size_t>(w)]) return false;
+      if (swapped_[size_t{o} * kWords + w] != sim_[size_t{o} * kWords + w]) return false;
     return true;
   }
 
@@ -231,10 +285,15 @@ class MethodBase : public MatchOracle {
 
  protected:
   const MethodGraph& g_;
-  std::unordered_map<uint64_t, std::vector<char>> sampled_;
+  std::unordered_map<Assignment, std::vector<char>, AssignmentHash> sampled_;
   static constexpr size_t kWords = 2;
   std::vector<uint32_t> sim_cone_;
   std::vector<uint64_t> sim_, swapped_, reads_;
+  std::vector<std::vector<uint32_t>> dep_nodes_;
+  std::vector<uint32_t> swapped_mark_;
+  uint32_t swapped_gen_ = 0;
+  size_t read_words_ = 1;
+  std::vector<Assignment> sym_seeded_;
 };
 
 // Truth tables computed 2^C input assignments at a time, the inputs past C
@@ -252,8 +311,8 @@ class ChunkMethod : public MethodBase {
   // The read views come out of the same pass over the chunks.
   void run() override {
     const uint32_t n = g_.num_nodes();
-    std::vector<uint64_t> h(n, 0x77), phase(n, 0);
-    std::vector<uint64_t> out_hash(chunks_);
+    std::vector<uint64_t> h1(n, 0x77), h2(n, 0x9E3779B97F4A7C15ULL), phase(n, 0);
+    std::vector<uint64_t> out_h1(chunks_), out_h2(chunks_);
     std::vector<char>& matters = matters_;
     matters.assign(g_.views + 1, 0);
     std::vector<uint32_t> all(n);
@@ -265,16 +324,22 @@ class ChunkMethod : public MethodBase {
         const uint64_t* row = &t_[size_t{x} * words_];
         if (c == 0) phase[x] = row[0] & 1;
         const uint64_t f = phase[x] ? ~0ULL : 0;
-        for (size_t w = 0; w < words_; ++w) h[x] = mix64(h[x] ^ ((row[w] ^ f) & valid));
+        for (size_t w = 0; w < words_; ++w) {
+          const uint64_t v = (row[w] ^ f) & valid;
+          h1[x] = mix64(h1[x] ^ v);
+          h2[x] = mix64(h2[x] ^ (v * 0xBF58476D1CE4E5B9ULL + w));
+        }
       }
       const Lit o = g_.out;
-      uint64_t oh = 0x55;
+      uint64_t oh1 = 0x55, oh2 = 0x94D049BB133111EBULL;
       std::vector<uint64_t> orow(words_);
       for (size_t w = 0; w < words_; ++w) {
         orow[w] = (t_[size_t{node_of(o)} * words_ + w] ^ (is_compl(o) ? ~0ULL : 0)) & valid;
-        oh = mix64(oh ^ orow[w]);
+        oh1 = mix64(oh1 ^ orow[w]);
+        oh2 = mix64(oh2 ^ (orow[w] * 0xBF58476D1CE4E5B9ULL + w));
       }
-      out_hash[c] = oh;
+      out_h1[c] = oh1;
+      out_h2[c] = oh2;
       for (uint32_t i = 1; i <= std::min(g_.views, c_); ++i) {
         if (matters[i]) continue;
         const uint32_t bit = i - 1;
@@ -289,10 +354,54 @@ class ChunkMethod : public MethodBase {
     }
     for (uint32_t i = c_ + 1; i <= g_.views; ++i) {
       const uint64_t b = uint64_t{1} << (i - 1 - c_);
-      for (uint64_t c = 0; c < chunks_ && !matters[i]; ++c) matters[i] = !(c & b) && out_hash[c] != out_hash[c | b];
+      for (uint64_t c = 0; c < chunks_ && !matters[i]; ++c)
+        matters[i] = !(c & b) && (out_h1[c] != out_h1[c | b] || out_h2[c] != out_h2[c | b]);
     }
+    // Assign canonical class ids from 128-bit signatures (verifying collisions
+    // on chunks when two nodes share a 128-bit signature).
+    std::map<std::pair<uint64_t, uint64_t>, std::vector<uint32_t>> groups;
+    for (uint32_t x = 0; x < n; ++x) groups[{h1[x], h2[x]}].push_back(x);
     keys.assign(n, 0);
-    for (uint32_t x = 0; x < n; ++x) keys[x] = (h[x] & ~1ULL) | phase[x];
+    for (const auto& [sig, members] : groups) {
+      if (members.size() == 1) {
+        const uint32_t x = members[0];
+        keys[x] = (static_cast<uint64_t>(x) << 1) | phase[x];
+        continue;
+      }
+      // Verify exact equality over chunks for every pair in this group.
+      std::vector<uint32_t> rep_of(members.size(), UINT32_MAX);
+      const std::vector<uint32_t> cone = g_.cone([&]() {
+        std::vector<Lit> roots;
+        for (uint32_t x : members) roots.push_back(make_lit(x));
+        return roots;
+      }());
+      std::vector<std::vector<char>> diff(members.size(), std::vector<char>(members.size(), 0));
+      for (uint64_t c = 0; c < chunks_; ++c) {
+        evaluate_chunk(c, cone);
+        for (size_t a = 0; a < members.size(); ++a) {
+          const uint64_t fa = phase[members[a]] ? ~0ULL : 0;
+          const uint64_t* ra = &t_[size_t{members[a]} * words_];
+          for (size_t b = a + 1; b < members.size(); ++b) {
+            if (diff[a][b]) continue;
+            const uint64_t fb = phase[members[b]] ? ~0ULL : 0;
+            const uint64_t* rb = &t_[size_t{members[b]} * words_];
+            for (size_t w = 0; w < words_; ++w)
+              if (((ra[w] ^ fa) & valid) != ((rb[w] ^ fb) & valid)) {
+                diff[a][b] = 1;
+                break;
+              }
+          }
+        }
+      }
+      for (size_t a = 0; a < members.size(); ++a) {
+        if (rep_of[a] != UINT32_MAX) continue;
+        rep_of[a] = members[a];
+        for (size_t b = a + 1; b < members.size(); ++b)
+          if (!diff[a][b] && rep_of[b] == UINT32_MAX) rep_of[b] = members[a];
+      }
+      for (size_t a = 0; a < members.size(); ++a)
+        keys[members[a]] = (static_cast<uint64_t>(rep_of[a]) << 1) | phase[members[a]];
+    }
   }
 
   void find_unused() override {
@@ -301,7 +410,7 @@ class ChunkMethod : public MethodBase {
   }
 
   bool holds(Lit target, const Registered& r, const std::vector<Lit>& args, bool& differs,
-             uint64_t& difference) override {
+             Assignment& difference) override {
     std::vector<Lit> roots = args;
     roots.push_back(target);
     const std::vector<uint32_t> cone = g_.cone(roots);
@@ -315,7 +424,7 @@ class ChunkMethod : public MethodBase {
         const uint64_t diff = (registered_word(r, a) ^ word(target, w)) & valid;
         if (diff) {
           differs = true;
-          difference = (c << c_) | (w * 64 + static_cast<uint64_t>(__builtin_ctzll(diff)));
+          difference = Assignment::from_u64((c << c_) | (w * 64 + static_cast<uint64_t>(__builtin_ctzll(diff))), g_.inputs);
           return false;
         }
         for (uint32_t i = 0; i < r.arity; ++i)
@@ -369,15 +478,22 @@ class ChunkMethod : public MethodBase {
 class BddMethod : public MethodBase {
  public:
   // Inputs at the levels given (a level per input, from 1).
+  // `node_limit` is the canonical shared ROBDD reachable-node limit; construction
+  // uses a 2x safety cap so intermediate nodes don't prematurely reject an
+  // operation whose canonical shared ROBDD fits within `node_limit`.
   BddMethod(const MethodGraph& g, const std::vector<uint32_t>& level_of_input, size_t node_limit)
-      : MethodBase(g), bdd_(g.inputs, node_limit) {
+      : MethodBase(g),
+        bdd_(g.inputs, node_limit >= (size_t{1} << 30) ? node_limit : node_limit * 2),
+        canonical_limit_(node_limit) {
     level_ = level_of_input;
     input_at_.assign(g.inputs, 0);
     for (uint32_t i = 1; i <= g.inputs; ++i) input_at_[level_[i]] = i;
   }
 
   BddMethod(const MethodGraph& g, const std::string& order, size_t node_limit)
-      : MethodBase(g), bdd_(g.inputs, node_limit) {
+      : MethodBase(g),
+        bdd_(g.inputs, node_limit >= (size_t{1} << 30) ? node_limit : node_limit * 2),
+        canonical_limit_(node_limit) {
     level_.resize(g.inputs + 1);
     std::vector<uint32_t> inputs;
     if (order == "dfs") {
@@ -430,6 +546,9 @@ class BddMethod : public MethodBase {
       else
         edge_[x] = apply_table(node.table, a);
     }
+    // Enforce the canonical compiler-independent shared ROBDD node limit.
+    canonical_nodes_ = bdd_.reachable_node_count(edge_);
+    if (canonical_nodes_ > canonical_limit_) throw BddLimit();
     // Equal functions are the same edge, and opposite ones the same node.
     keys.assign(n, 0);
     for (uint32_t x = 0; x < n; ++x) keys[x] = edge_[x];
@@ -441,29 +560,82 @@ class BddMethod : public MethodBase {
       if (!in[level_[i]]) unused_views.push_back(static_cast<int>(i));
   }
 
+  uint64_t function_id(Lit l) override { return static_cast<uint64_t>(lit(l)) + 1; }
+
+  bool distinguish(Lit a, Lit b, Assignment& out) override {
+    const Bdd::Edge ea = lit(a), eb = lit(b);
+    if (ea == eb) return false;
+    out = Assignment::zeros(g_.inputs);
+    bdd_.distinguishing_path(ea, eb, [&](uint32_t level, bool value) {
+      if (value) out.set(input_at_[level] - 1);
+    });
+    return true;
+  }
+
   bool holds(Lit target, const Registered& r, const std::vector<Lit>& args, bool& differs,
-             uint64_t& difference) override {
+             Assignment& difference) override {
     std::vector<Bdd::Edge> a;
+    a.reserve(args.size());
     for (Lit l : args) a.push_back(lit(l));
     const Bdd::Edge rv = apply_table(r.table, a), t = lit(target);
     if (rv != t) {
       differs = true;
-      difference = 0;
-      bdd_.satisfying_path(lxor(rv, t), [&](uint32_t level, bool value) {
-        if (value) difference |= uint64_t{1} << (input_at_[level] - 1);
+      difference = Assignment::zeros(g_.inputs);
+      bdd_.distinguishing_path(rv, t, [&](uint32_t level, bool value) {
+        if (value) difference.set(input_at_[level] - 1);
       });
       return false;
     }
+    // Fast O(1) essential-argument checks for standard operations.
+    if (r.arity == 2) {
+      const uint64_t tb = r.table & 0xFULL;
+      if (tb == 0x6 || tb == 0x9) return true;  // xor, eq: both views always matter
+      if (tb == 0x8) return a[0] != Bdd::kFalse && a[1] != Bdd::kFalse;
+      if (tb == 0xE) return a[0] != Bdd::kTrue && a[1] != Bdd::kTrue;
+      if (tb == 0xD) return a[1] != Bdd::kTrue && a[0] != Bdd::kFalse;
+    } else if (r.arity == 3) {
+      const uint64_t tb = r.table & 0xFFULL;
+      if (tb == 0xD8) return a[1] != a[2] && a[0] != Bdd::kFalse && a[0] != Bdd::kTrue;
+      if (tb == 0xE8) return a[1] != a[2] && a[0] != a[2] && a[0] != a[1];
+    }
+    // General case: check each view's (arity - 1)-variable Boolean derivative.
+    const uint32_t sub_rows = 1u << (r.arity - 1);
+    const uint64_t sub_mask = sub_rows == 64 ? ~0ULL : ((uint64_t{1} << sub_rows) - 1);
+    std::vector<Bdd::Edge> other(r.arity - 1);
     for (uint32_t i = 0; i < r.arity; ++i) {
-      std::vector<Bdd::Edge> lo = a, hi = a;
-      lo[i] = Bdd::kFalse;
-      hi[i] = Bdd::kTrue;
-      if (apply_table(r.table, lo) == apply_table(r.table, hi)) return false;
+      uint64_t deriv = 0;
+      for (uint32_t sm = 0; sm < sub_rows; ++sm) {
+        const uint32_t lo_m = (sm & ((1u << i) - 1)) | ((sm & ~((1u << i) - 1)) << 1);
+        const uint32_t hi_m = lo_m | (1u << i);
+        if (((r.table >> lo_m) & 1) != ((r.table >> hi_m) & 1)) deriv |= uint64_t{1} << sm;
+      }
+      if (deriv == sub_mask) continue;  // always matters
+      size_t p = 0;
+      for (uint32_t h = 0; h < r.arity; ++h)
+        if (h != i) other[p++] = a[h];
+      if (apply_table(deriv, other) == Bdd::kFalse) return false;
     }
     return true;
   }
 
+  // Diagnostic helpers for compiler error messages (care sets and pairwise relations).
+  uint64_t care_set_mask(const std::vector<Lit>& args) {
+    if (args.size() > 4) return 0;
+    uint64_t mask = 0;
+    const uint32_t rows = 1u << args.size();
+    for (uint32_t m = 0; m < rows; ++m) {
+      Bdd::Edge conj = Bdd::kTrue;
+      for (size_t i = 0; i < args.size() && conj != Bdd::kFalse; ++i)
+        conj = bdd_.land(conj, ((m >> i) & 1) ? lit(args[i]) : (lit(args[i]) ^ 1));
+      if (conj != Bdd::kFalse) mask |= uint64_t{1} << m;
+    }
+    return mask;
+  }
+  bool implies(Lit a, Lit b) { return bdd_.land(lit(a), lit(b) ^ 1) == Bdd::kFalse; }
+  bool mutually_exclusive(Lit a, Lit b) { return bdd_.land(lit(a), lit(b)) == Bdd::kFalse; }
+
   size_t nodes() const { return bdd_.num_nodes(); }
+  size_t canonical_nodes() const { return canonical_nodes_; }
   size_t memory_bytes() const { return bdd_.memory_bytes(); }
   // The written view's OBDD nodes: what an execution of the operation refers to.
   // The written view's diagram alone, without complement edges, levels in
@@ -492,11 +664,11 @@ class BddMethod : public MethodBase {
     return std::accumulate(counts.begin(), counts.end(), size_t{0});
   }
   // The written view on one input assignment, walking its OBDD.
-  bool evaluate_out(uint64_t minterm) const {
+  bool evaluate_out(const Assignment& assign) const {
     Bdd::Edge e = edge_[node_of(g_.out)] ^ (is_compl(g_.out) ? 1u : 0u);
     while ((e >> 1) != 0) {
       const uint32_t n = e >> 1, c = e & 1;
-      const bool v = (minterm >> (input_at_[bdd_.level_of(n)] - 1)) & 1;
+      const bool v = assign.get(input_at_[bdd_.level_of(n)] - 1);
       e = (v ? bdd_.high(n) : bdd_.low(n)) ^ c;
     }
     return e == Bdd::kTrue;
@@ -504,23 +676,62 @@ class BddMethod : public MethodBase {
 
  private:
   Bdd bdd_;
+  size_t canonical_limit_ = size_t{1} << 26;
+  size_t canonical_nodes_ = 0;
   std::vector<uint32_t> level_, input_at_;
   std::vector<Bdd::Edge> edge_;
 
   Bdd::Edge lit(Lit l) const { return edge_[node_of(l)] ^ (is_compl(l) ? 1u : 0u); }
-  Bdd::Edge lor(Bdd::Edge a, Bdd::Edge b) { return bdd_.land(a ^ 1, b ^ 1) ^ 1; }
-  Bdd::Edge lxor(Bdd::Edge a, Bdd::Edge b) { return lor(bdd_.land(a, b ^ 1), bdd_.land(a ^ 1, b)); }
-  Bdd::Edge apply_table(uint64_t table, const std::vector<Bdd::Edge>& a) {
-    Bdd::Edge out = Bdd::kFalse;
-    for (uint32_t m = 0; m < (1u << a.size()); ++m) {
-      if (!((table >> m) & 1)) continue;
-      Bdd::Edge term = Bdd::kTrue;
-      for (size_t i = 0; i < a.size(); ++i) term = bdd_.land(term, ((m >> i) & 1) ? a[i] : a[i] ^ 1);
-      out = lor(out, term);
-    }
-    return out;
+
+  Bdd::Edge shannon(uint64_t table, uint32_t k, const Bdd::Edge* a) {
+    if (k == 0) return (table & 1) ? Bdd::kTrue : Bdd::kFalse;
+    const uint32_t half = 1u << (k - 1);
+    const uint64_t mask = half == 64 ? ~0ULL : ((uint64_t{1} << half) - 1);
+    const uint64_t lo = table & mask;
+    const uint64_t hi = (table >> half) & mask;
+    if (lo == hi) return shannon(lo, k - 1, a);
+    if (lo == (hi ^ mask)) return bdd_.lxor(a[k - 1], shannon(lo, k - 1, a));
+    return bdd_.ite(a[k - 1], shannon(hi, k - 1, a), shannon(lo, k - 1, a));
   }
-  Bdd::Edge ite(Bdd::Edge c, Bdd::Edge t, Bdd::Edge e) { return lor(bdd_.land(c, t), bdd_.land(c ^ 1, e)); }
+
+  Bdd::Edge apply_table(uint64_t table, const std::vector<Bdd::Edge>& a) {
+    const size_t k = a.size();
+    if (k == 0) return (table & 1) ? Bdd::kTrue : Bdd::kFalse;
+    if (k == 1) {
+      switch (table & 3u) {
+        case 0: return Bdd::kFalse;
+        case 1: return a[0] ^ 1;
+        case 2: return a[0];
+        default: return Bdd::kTrue;
+      }
+    }
+    if (k == 2) {
+      switch (table & 0xFu) {
+        case 0x0: return Bdd::kFalse;
+        case 0xF: return Bdd::kTrue;
+        case 0x8: return bdd_.land(a[0], a[1]);
+        case 0xE: return bdd_.lor(a[0], a[1]);
+        case 0x6: return bdd_.lxor(a[0], a[1]);
+        case 0x9: return bdd_.lxor(a[0], a[1]) ^ 1;
+        case 0xD: return bdd_.lor(a[0] ^ 1, a[1]);
+        case 0xB: return bdd_.lor(a[0], a[1] ^ 1);
+        case 0x2: return bdd_.land(a[0], a[1] ^ 1);
+        case 0x4: return bdd_.land(a[0] ^ 1, a[1]);
+        case 0x1: return bdd_.land(a[0] ^ 1, a[1] ^ 1);
+        case 0x7: return bdd_.land(a[0], a[1]) ^ 1;
+        default: break;
+      }
+    } else if (k == 3) {
+      switch (table & 0xFFu) {
+        case 0xD8: return bdd_.ite(a[0], a[1], a[2]);
+        case 0xE8: return bdd_.ite(a[0], bdd_.lor(a[1], a[2]), bdd_.land(a[1], a[2]));
+        case 0x96: return bdd_.lxor(a[0], bdd_.lxor(a[1], a[2]));
+        case 0x69: return bdd_.lxor(a[0], bdd_.lxor(a[1], a[2])) ^ 1;
+        default: break;
+      }
+    }
+    return shannon(table, static_cast<uint32_t>(k), a.data());
+  }
 
   // An execution of a recorded diagram: each of its nodes asks for an
   // argument.
@@ -529,7 +740,7 @@ class BddMethod : public MethodBase {
     std::function<Bdd::Edge(Diagram::Node)> go = [&](Diagram::Node n) {
       auto it = memo.find(n);
       if (it != memo.end()) return it->second;
-      const Bdd::Edge r = ite(by_view[rd.view_of_level[rd.dd.level(n)]], go(rd.dd.hi(n)), go(rd.dd.lo(n)));
+      const Bdd::Edge r = bdd_.ite(by_view[rd.view_of_level[rd.dd.level(n)]], go(rd.dd.hi(n)), go(rd.dd.lo(n)));
       memo.emplace(n, r);
       return r;
     };
@@ -560,7 +771,7 @@ class BddMethod : public MethodBase {
       auto it = memo.find(key);
       if (it != memo.end()) return it->second;
       const uint64_t half = uint64_t{1} << (i - 1);
-      const Bdd::Edge r = ite(a[i - 1], go(from + half, i - 1), go(from, i - 1));
+      const Bdd::Edge r = bdd_.ite(a[i - 1], go(from + half, i - 1), go(from, i - 1));
       memo.emplace(std::move(key), r);
       return r;
     };
@@ -597,7 +808,7 @@ class SatMethod : public MethodBase {
     solver_.add_clause({sat::neg(var_[0])});
     for (uint32_t x = g.inputs + 1; x < n; ++x) encode(var_[x], g.node(x).is_and ? 0x8 : g.node(x).table, g.node(x).args);
     Rng rng(5);
-    for (int k = 0; k < kRandomWords * 64; ++k) patterns_.push_back(rng.next() & mask());
+    for (int k = 0; k < kRandomWords * 64; ++k) patterns_.push_back(Assignment::random(g.inputs, rng));
   }
 
   void run() override {
@@ -610,7 +821,7 @@ class SatMethod : public MethodBase {
       const uint64_t phase = sim[x][0] & 1;
       uint64_t h = 0x91;
       for (uint64_t w : sim[x]) h = mix64(h ^ (w ^ (phase ? ~0ULL : 0)));
-      keys[x] = (mix64(x + 1) & ~1ULL) | phase;
+      keys[x] = (static_cast<uint64_t>(x) << 1) | phase;
       std::vector<uint32_t>& group = groups[h];
       for (uint32_t rep : group) {
         const bool flip = ((sim[x][0] ^ sim[rep][0]) & 1) != 0;
@@ -622,7 +833,7 @@ class SatMethod : public MethodBase {
           break;
         }
       }
-      if (keys[x] == ((mix64(x + 1) & ~1ULL) | phase)) group.push_back(x);
+      if (keys[x] == ((static_cast<uint64_t>(x) << 1) | phase)) group.push_back(x);
     }
   }
 
@@ -632,8 +843,8 @@ class SatMethod : public MethodBase {
     // assignment when flipped; the others need a proof.
     const Lit o = g_.out;
     for (uint32_t i = 1; i <= g_.views; ++i) {
-      std::vector<uint64_t> flipped = patterns_;
-      for (uint64_t& p : flipped) p ^= uint64_t{1} << (i - 1);
+      std::vector<Assignment> flipped = patterns_;
+      for (Assignment& p : flipped) p.flip(i - 1);
       const std::vector<std::vector<uint64_t>> s2 = simulate(flipped);
       bool matters = false;
       for (size_t w = 0; w < s2[0].size() && !matters; ++w) matters = s2[node_of(o)][w] != sim[node_of(o)][w];
@@ -643,7 +854,7 @@ class SatMethod : public MethodBase {
   }
 
   bool holds(Lit target, const Registered& r, const std::vector<Lit>& args, bool& differs,
-             uint64_t& difference) override {
+             Assignment& difference) override {
     std::vector<sat::Lit> a;
     for (Lit l : args) a.push_back(slit(l));
     const uint32_t rv = solver_.new_var();
@@ -672,12 +883,11 @@ class SatMethod : public MethodBase {
   static constexpr int kRandomWords = 16;
   sat::Solver solver_;
   std::vector<uint32_t> var_;
-  std::vector<uint64_t> patterns_;
+  std::vector<Assignment> patterns_;
   std::vector<std::vector<char>> fresh_;
   std::vector<std::vector<uint64_t>> sim_;
-  uint64_t last_model_ = 0;
+  Assignment last_model_;
 
-  uint64_t mask() const { return g_.inputs >= 64 ? ~0ULL : ((uint64_t{1} << g_.inputs) - 1); }
   sat::Lit slit(Lit l) const { return sat::pos(var_[node_of(l)]) ^ (is_compl(l) ? 1u : 0u); }
 
   void encode(uint32_t v, uint64_t table, const std::vector<Lit>& args) {
@@ -702,9 +912,9 @@ class SatMethod : public MethodBase {
       ++sat_calls;
       const std::vector<sat::Lit> assume = side == 0 ? std::vector<sat::Lit>{a, b ^ 1} : std::vector<sat::Lit>{a ^ 1, b};
       if (solver_.solve(assume, -1) == sat::Result::kSat) {
-        last_model_ = 0;
+        last_model_ = Assignment::zeros(g_.inputs);
         for (uint32_t i = 1; i <= g_.inputs; ++i)
-          if (solver_.model_value(var_[i])) last_model_ |= uint64_t{1} << (i - 1);
+          if (solver_.model_value(var_[i])) last_model_.set(i - 1);
         fresh_.push_back(g_.evaluate(last_model_));
         return false;
       }
@@ -730,13 +940,13 @@ class SatMethod : public MethodBase {
     return !equal(slit(g_.out), copy.at(node_of(g_.out)) ^ (is_compl(g_.out) ? 1u : 0u));
   }
 
-  std::vector<std::vector<uint64_t>> simulate(const std::vector<uint64_t>& patterns) const {
+  std::vector<std::vector<uint64_t>> simulate(const std::vector<Assignment>& patterns) const {
     const uint32_t n = g_.num_nodes();
     const size_t words = (patterns.size() + 63) / 64;
     std::vector<std::vector<uint64_t>> sim(n, std::vector<uint64_t>(words, 0));
     for (size_t k = 0; k < patterns.size(); ++k)
       for (uint32_t i = 1; i <= g_.inputs; ++i)
-        if ((patterns[k] >> (i - 1)) & 1) sim[i][k / 64] |= 1ULL << (k % 64);
+        if (patterns[k].get(i - 1)) sim[i][k / 64] |= 1ULL << (k % 64);
     uint64_t a[64];
     for (uint32_t x = g_.inputs + 1; x < n; ++x) {
       const MethodGraph::Node& node = g_.node(x);
@@ -767,7 +977,7 @@ class SplitMethod : public MethodBase {
   }
 
   bool holds(Lit target, const Registered& r, const std::vector<Lit>& args, bool& differs,
-             uint64_t& difference) override {
+             Assignment& difference) override {
     (void)difference;
     std::vector<uint32_t> tops{node_of(target)};
     for (Lit a : args)

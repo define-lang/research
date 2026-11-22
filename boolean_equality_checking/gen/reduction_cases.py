@@ -105,8 +105,8 @@ HEADER = """\
 # matter (DLP 59), so they're gone from the operation and from every
 # execution of it, which shows NAME's remaining views. Dead statements are
 # gone too. `error limits` instead means the fixes can't make the
-# program compile: it has more than 256 boolean statements or 20 boolean
-# inputs.
+# program compile: past 256 boolean statements or 20 boolean inputs,
+# the shared ROBDD exceeded the canonical 4,000,000-node limit.
 #
 # Every line was produced by the research repository's
 # boolean_equality_checking/gen/reduction_cases.py (the long ones from
@@ -114,8 +114,8 @@ HEADER = """\
 # and under the independent checker (gen/program_check.py), and fixing it
 # again changes nothing. The independent checker tries every tuple of
 # arguments, which is too slow past 12 inputs or about 150 statements, so
-# the one REDUCED program that large (255 statements at 20 inputs) is
-# checked by `beq` with truth tables and with SAT sweeping instead.
+# REDUCED programs that large are checked by `beq` with truth tables (when
+# within 20 inputs) and with the BDD backend instead.
 """
 
 
@@ -662,7 +662,7 @@ def verify(registered: list[str], reduced: str, work: Path) -> None:
             raise AssertionError(f"beq finds {row['errors']} in {reduced}")
     # The independent checker tries every tuple of arguments, which takes
     # too long past 12 inputs or about 150 statements; those programs are
-    # checked by beq's SAT sweeping as well as its truth tables instead.
+    # checked by beq's BDD backend as well as its truth tables instead.
     largest = max(len(b.splitlines()) for b in blocks)
     inputs = max(
         int(b.split()[3]) + (int(b.split()[4]) if b.split()[2] == "mixed" else 0)
@@ -674,7 +674,7 @@ def verify(registered: list[str], reduced: str, work: Path) -> None:
             row = json.loads(line)
             if row["op"] in names and row["errors"]:
                 raise AssertionError(
-                    f"beq's SAT check finds {row['errors']} in {reduced}"
+                    f"beq's BDD check finds {row['errors']} in {reduced}"
                 )
     else:
         for r in program_check.check_program(text):

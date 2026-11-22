@@ -196,13 +196,22 @@ class ProgramFixer {
         // together saves a check of the whole operation for each.
         Phase p{phase_s, "matches"};
         std::vector<const Report::Found*> chosen;
-        std::set<int> values, gone, read;
+        std::set<int> gone, read;
         const OpInfo info = c_.analyze(op);
+        // Group by value in O(|rep.matches|) to pick the best spelling among
+        // equal-sized matches for each value without an O(N^2) scan.
+        std::unordered_map<int, const Report::Found*> best_for_value;
+        std::vector<int> value_order;
         for (const Report::Found& f : rep.matches) {
-          if (!values.insert(f.value).second) continue;
-          const Report::Found* best = &f;
-          for (const Report::Found& g : rep.matches)
-            if (g.value == f.value && g.removed == f.removed && spelling_before(index, info, g, *best)) best = &g;
+          auto [it, inserted] = best_for_value.try_emplace(f.value, &f);
+          if (inserted) {
+            value_order.push_back(f.value);
+          } else if (f.removed == it->second->removed && spelling_before(index, info, f, *it->second)) {
+            it->second = &f;
+          }
+        }
+        for (int v : value_order) {
+          const Report::Found* best = best_for_value.at(v);
           bool overlaps = false;
           for (int x : best->removed_values) overlaps |= gone.count(x) > 0 || read.count(x) > 0;
           for (int a : best->args) overlaps |= gone.count(a) > 0;
@@ -489,23 +498,58 @@ class ProgramFixer {
 
   // DLP 59's refactoring step 6: read views that don't matter are removed.
   // The written view doesn't depend on them, so their reads can be given
-  // any value without changing it: the first read view the operation keeps
-  // that makes none of its values constant, which would be an error the
-  // fix loop doesn't fix. Then the views after them move down, and every
-  // caller stops giving them a value (`apply_replacements`). Returns false,
-  // changing nothing, when no kept view will do.
+  // any value without changing it. Replace each unused view one at a time
+  // with the first kept read view that makes none of the operation's values
+  // constant (avoiding collisions like xor(u1, u2) -> xor(y, y) = false).
+  // Then the views after them move down, and every caller stops giving them
+  // a value (`apply_replacements`). Returns false, changing nothing, when no
+  // assignment of kept views avoids creating a constant.
   bool drop_views(size_t index, const std::vector<int>& views) {
     const POp original_op = p_.ops[index];
+    std::vector<int> kept;
+    for (int y = 1; y <= original_op.nbool; ++y)
+      if (std::find(views.begin(), views.end(), y) == views.end()) kept.push_back(y);
+    // Replace unused views one at a time with kept views (first trying a uniform
+    // substitution for speed, then per-view greedy assignment if needed).
     bool found = false;
-    for (int y = 1; y <= original_op.nbool && !found; ++y) {
-      if (std::find(views.begin(), views.end(), y) != views.end()) continue;
+    for (int y : kept) {
       PArg with;
       with.id = y;
       for (int v : views) replace_reads(p_.ops[index], v, with);
-      // The values that read a dropped view now compute something else.
       c_.forget_values();
-      found = !c_.has_constant_value(index);
-      if (!found) p_.ops[index] = original_op;
+      if (!c_.has_constant_value(index)) {
+        found = true;
+        break;
+      }
+      p_.ops[index] = original_op;
+    }
+    if (!found && views.size() > 1 && !kept.empty()) {
+      // Drop one unused view at a time, picking a kept view that creates no constant.
+      bool all_ok = true;
+      for (int v : views) {
+        const POp before_v = p_.ops[index];
+        bool ok_v = false;
+        for (int y : kept) {
+          PArg with;
+          with.id = y;
+          replace_reads(p_.ops[index], v, with);
+          c_.forget_values();
+          if (!c_.has_constant_value(index)) {
+            ok_v = true;
+            break;
+          }
+          p_.ops[index] = before_v;
+        }
+        if (!ok_v) {
+          all_ok = false;
+          break;
+        }
+      }
+      if (all_ok) {
+        found = true;
+      } else {
+        p_.ops[index] = original_op;
+      }
     }
     c_.forget_values();
     if (!found) return false;

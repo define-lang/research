@@ -1,5 +1,9 @@
 # Exact Matching Over Earlier Values
 
+> **Historical study note:** This document records an earlier component study.
+> For the current combined reference algorithm, see
+> [../algorithm.md](../algorithm.md) and [../README.md](../README.md).
+
 [matching.md](matching.md) found that an exact definition of "writing out a
 registered operation" flags a large share of ordinary values, and called
 them coincidences. The goal of DLP 59 is that there's only one way to write a
