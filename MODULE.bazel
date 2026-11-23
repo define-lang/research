@@ -33,7 +33,7 @@ git_override(
 
 git_override(
     module_name = "re2",
-    commit = "3c948534d4029c372f8263570162ceecf010929e",
+    commit = "2e179791a30e4604913922beb16cac20b9df50b3",
     remote = "https://github.com/define-lang/define.git",
     strip_prefix = "vendored/re2",
 )
