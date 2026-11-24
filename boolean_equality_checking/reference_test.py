@@ -1,7 +1,7 @@
 """Regression and cross-check test suite for the boolean_equality_checking reference implementation.
 
 Verifies every correctness fix, edge case, and algorithmic optimization:
-1. DLP 61 human-readable registered-operation order (or before implies, xor
+1. DLP 62 human-readable registered-operation order (or before implies, xor
    before eq, project before stdlib, symmetry & counting-order tie-breaks).
 2. Arbitrary-width inputs (I = 64, 65, 91, 128, 200, 300) with no shift UB,
    cross-checking optimized Matcher against --plain 1.
@@ -90,8 +90,8 @@ def lib_header(
     return "\n".join(lines) + "\n"
 
 
-def test_dlp61_order(beq: Path) -> None:
-    """Verify human-readable DLP 61 order and project-before-stdlib rule."""
+def test_dlp62_order(beq: Path) -> None:
+    """Verify human-readable DLP 62 order and project-before-stdlib rule."""
     # Standard operations compile cleanly in their canonical definitions.
     prog = lib_header()
     py_res = {r["op"]: r["errors"] for r in program_check.check_program(prog)}
@@ -596,7 +596,7 @@ def test_random_crosscheck_and_fix(beq: Path) -> None:
 
 
 def test_dlp60_grouping_and_factoring(beq: Path) -> None:
-    """Verify DLP 60 associative grouping and distributive factoring + fixes."""
+    """Verify DLP 60 associative grouping and DLP 61 distributive factoring + fixes."""
     prog = (
         lib_header()
         # 1. Non-canonical associative grouping: a & (b & c) -> must fold (a, b) first.
@@ -852,7 +852,7 @@ def fix_expect_failure(beq: Path, prog_text: str, expected_status: str) -> dict:
 
 
 def test_full_autofix(beq: Path) -> None:
-    """Verify full DLP 64 automated refactoring: literals, constants, specialization, useless inputs, structural rewrites."""
+    """Verify full DLP 65 automated refactoring: literals, constants, specialization, useless inputs, structural rewrites."""
     # 1. Constant folding & literal propagation through `and`, `not`, `call` (specialization), and `run` (specialization).
     prog_lit = (
         lib_header()
@@ -959,7 +959,7 @@ def main() -> None:
     parser.add_argument("--beq", type=Path, default=HERE / "src" / "beq")
     args = parser.parse_args()
     tests = [
-        ("dlp61_order", test_dlp61_order),
+        ("dlp62_order", test_dlp62_order),
         ("dlp60_grouping_and_factoring", test_dlp60_grouping_and_factoring),
         ("dlp59_literals_and_mixed_outputs", test_dlp59_literals_and_mixed_outputs),
         ("full_autofix", test_full_autofix),

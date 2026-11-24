@@ -105,9 +105,9 @@ exact fallback sits behind it (as in the legacy whole-program SAT-sweeping
 ladder in [algorithm.md](algorithm.md)), because it changes only compile time
 and never whether a program compiles.
 
-## Why DLP 61 Uses a Fixed Standard Set Instead of Project Registration (`booleans.defcl`)
+## Why DLP 62 Uses a Fixed Standard Set Instead of Project Registration (`booleans.defcl`)
 
-Restricting DLP 61 to the five fixed standard boolean operations (`and`, `not`,
+Restricting DLP 62 to the five fixed standard boolean operations (`and`, `not`,
 `or`, `xor`, `equal`) instead of arbitrary user-registered operations in a
 project-level `booleans.defcl` has four structural advantages:
 
@@ -123,7 +123,7 @@ project-level `booleans.defcl` has four structural advantages:
    the exact same boolean vocabulary (`and`, `not`, `or`, `xor`, `equal`)
    without having to inspect a project's `booleans.defcl` or learn why one
    project forbids `or(not a, b)` in favor of `implies` while another doesn't.
-3. **No conflict with DLP 60 factoring:** factoring `(a and b) or (a and c)` to
+3. **No conflict with DLP 61 factoring:** factoring `(a and b) or (a and c)` to
    `a and (b or c)` is straightforward when `mux` is not enforced; with `mux`
    registered, expressions like `mux(b, a, a and c)` compete directly with
    factored forms.

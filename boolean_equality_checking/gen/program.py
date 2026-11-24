@@ -57,7 +57,7 @@ Semantics, per operation:
   `run` statements read. A statement nothing reads, directly or through
   other boolean statements, from an exit is dead.
 
-The rules (DLPs 59, 60, and 61), each reported at its first violation:
+The rules (DLPs 59-62), each reported at its first violation:
 
 - `limits`: more than 256 boolean statements, or more than 20 boolean inputs.
 - `cycle`: an execution that leads, through other value operations, back to
@@ -105,7 +105,7 @@ The rules (DLPs 59, 60, and 61), each reported at its first violation:
   then by key, the arguments' ranks in view order). `and` and `not`
   statements are spellings too.
 
-A registered operation's key (DLP 61) is the fewest `and`s in any
+A registered operation's key (DLP 62) is the fewest `and`s in any
 and-inverter graph computing its function (`src/min_ands.hpp`, found by
 `min_ands_experiment.py`), then its number of read views, then its truth
 table as a number, view 1 the lowest bit of the row. No two registered
@@ -128,7 +128,7 @@ import functools
 import random
 from dataclasses import dataclass, field
 
-# Standard boolean operations (DLP 61), in fixed order after `and` and `not`.
+# Standard boolean operations (DLP 62), in fixed order after `and` and `not`.
 REGISTERED = ["or", "xor", "equal"]
 # The standard boolean operations' definitions, each after the ones it executes:
 # (views, statements, written view). Each follows `and`, `not`, and the standard

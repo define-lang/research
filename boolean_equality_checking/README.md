@@ -14,12 +14,12 @@ and how many planted equalities each one finds.
   ROBDD dispatch, the budget-free conservative limits (`≤ 20` boolean input
   interface views, `≤ 256` boolean statements, `≤ 512` boolean inputs, and
   `≤ 65,536` canonical shared ROBDD nodes past 20 inputs), DLP 60 associative
-  grouping and factoring common terms, and DLP 61's fixed standard boolean
+  grouping, DLP 61 factoring of common terms, and DLP 62's fixed standard boolean
   operations (`and`, `not`, `or`, `xor`, `equal`).
 - [arguments.md](arguments.md): the conclusions that come from reasoning
   instead of measurement, including why a canonical ROBDD node limit is
   compiler-independent while heuristic solver or step budgets are not.
-- [full_algorithm.md](full_algorithm.md): every check of DLPs 59–61 at once on
+- [full_algorithm.md](full_algorithm.md): every check of DLPs 59–62 at once on
   whole generated programs, with the fix loop, incremental rechecking, and the
   fewest `and`s of every function of up to four views.
 - [results/budget.md](results/budget.md): budget-free measurements across all
@@ -27,12 +27,12 @@ and how many planted equalities each one finds.
 - [proof/termination.md](proof/termination.md): a proof, in English and in Lean
   ([proof/fixing_termination.lean](proof/fixing_termination.lean)), that
   automated refactoring of a program of static finite DAG value operations under
-  DLPs 59–64 always terminates (`dag_prog_terminates` discharges finiteness
+  DLPs 59–65 always terminates (`dag_prog_terminates` discharges finiteness
   directly from Define's acyclic computation graphs, and
   `full_autofix_terminates` covers structural rewrites, acyclic callee
   specialization, literal/constant folding, and useless-input elimination).
 - [related_work.md](related_work.md): a literature search on how close existing
-  systems and papers come to DLPs 59–61 and these algorithms.
+  systems and papers come to DLPs 59–62 and these algorithms.
 - Historical component studies (archived in `studies/`):
   - [studies/experiments.md](studies/experiments.md): earlier single-graph
     benchmarks and SAT-sweeping comparisons (Experiments 1–11).
@@ -51,7 +51,7 @@ and how many planted equalities each one finds.
 
 ### Within One Value Operation
 
-This is what DLP 59–61's rules need, and it is the case to optimize.
+This is what DLP 59–62's rules need, and it is the case to optimize.
 
 **Decide equality, symmetry, grouping, factoring, matches, and spellings
 exactly per value operation, using truth tables for small input counts and
@@ -75,13 +75,13 @@ canonical 65,536-node ROBDD limit past 20 inputs, and no step budget**
    DFS input order over the value operation's DAG. Accept if and only if the
    canonical shared ROBDD of all boolean statements has at most **65,536
    (`2^16`) reachable non-terminal nodes** (~5–10 MB per parallel worker).
-3. **DLP 60 grouping and factoring:** semantically detect commutative,
+3. **DLP 60 grouping and DLP 61 factoring:** semantically detect commutative,
    associative binary operations (`and`, `or`, `xor`, `equal`, and user-defined
    binary ops) and distributive pairs (`(and, or)`, `(or, and)`, `(and, xor)`,
    `(or, equal)`) from their 4-bit truth tables, requiring left-to-right rank
    folding of single-use associative chains and factoring of repeated common
-   terms before DLP 61 matching.
-4. **DLP 61 fixed standard boolean operations (`and`, `not`, `or`, `xor`,
+   terms before DLP 62 matching.
+4. **DLP 62 fixed standard boolean operations (`and`, `not`, `or`, `xor`,
    `equal`):** one fixed global vocabulary across all projects (no
    `booleans.defcl`). Because all five operations have arity ≤ 2 and are
    symmetric, unified `Matcher` search runs in strictly `O(S * (I + S))` with
@@ -388,9 +388,9 @@ Argued, not measured:
     checking (`beq program --method auto`, defaulting to Define's conservative
     limits `≤ 20` boolean input interface views, `≤ 256` boolean statements,
     `≤ 512` boolean inputs, `≤ 65,536` canonical ROBDD nodes past 20 inputs),
-    DLP 60 semantic associative grouping and factoring common terms,
+    DLP 60 semantic associative grouping, DLP 61 factoring of common terms,
     `8 × 8` bit-matrix-transpose wide table lookups, exact bucket-verified
-    `tt_keys`, 128-bit incremental fingerprints, and full DLP 64 automated
+    `tt_keys`, 128-bit incremental fingerprints, and full DLP 65 automated
     refactoring (stopping only at opaque non-boolean logical operations
     receiving a boolean literal/constant, limits, cycles, or 0-output bool ops).
   - `structural.hpp`, `functional.hpp`, `sweep.hpp`, `hier.hpp`, `split.hpp`:

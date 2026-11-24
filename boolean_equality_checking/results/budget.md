@@ -1,12 +1,12 @@
 # Acceptance Rule and Measurements (No Step Budget)
 
-`beq`'s default (`--method auto`) uses **no step budget** (`--step_budget 0` by default) and enforces Define's conservative, compiler-independent limits (DLPs 59–61):
+`beq`'s default (`--method auto`) uses **no step budget** (`--step_budget 0` by default) and enforces Define's conservative, compiler-independent limits (DLPs 59–62):
 
 - **Boolean input interface views (`--max_views 20`):** at most **20** boolean input interface views on any Value Operation (bounds every pure boolean Value Operation's contract to ≤ 128 KB truth table / ≤ 98,302 ROBDD nodes, and DLP 60 symmetry checking to ≤ 190 pairs).
 - **Boolean statements (`--statement_limit 1`):** at most **256** boolean statements per Value Operation or Action (guarantees every pure boolean Value Operation fits unconditionally inside the `(256 statements, 20 inputs)` truth-table floor).
 - **Boolean inputs (`--max_inputs 512`):** at most **512** boolean inputs per Value Operation or Action (`I ≤ 16`, or `I ≤ 20` with a wide execution of `> 6` views, via truth tables; `I ≤ 20` otherwise via ROBDDs with automatic truth-table fallback; `21 ≤ I ≤ 512` via ROBDDs).
 - **Canonical shared ROBDD reachable-node limit (`--bdd_nodes 65536`):** past 20 boolean inputs (`21 ≤ I ≤ 512`), a Value Operation or Action is accepted if and only if the canonical shared ROBDD of all its boolean statements, under the deterministic first-reached DFS input order (`input_order`), has at most **65,536 (`2^16`) reachable non-terminal nodes** (with a 2× construction cap of 131,072 nodes, ~5–10 MB per parallel worker).
-- **Fixed standard boolean operations (DLP 61):** `{and, not, or, xor, equal}` — all arity ≤ 2 and symmetric, reducing worst-case `Matcher` complexity to strictly `O(S * (I + S))` with zero backtracking.
+- **Fixed standard boolean operations (DLP 62):** `{and, not, or, xor, equal}` — all arity ≤ 2 and symmetric, reducing worst-case `Matcher` complexity to strictly `O(S * (I + S))` with zero backtracking.
 
 The acceptance boundary is a pure syntactic and mathematical property of the value operation's DAG and input order: it is deterministic across machines and compilers, Forward Compatible when raised, and easy to communicate to programmers.
 
@@ -43,7 +43,7 @@ All **276** generated workloads in `work/methods/*.prog` (`dense`, `xor_heavy`, 
 
 ## Whole programs
 
-Checked with `--method auto` (no step budget, `--bdd_nodes 65536`, DLP 60 associative grouping + factoring, and DLP 61 fixed standard set `{and, not, or, xor, equal}`) on freshly generated and fixed whole programs (`gen/program.py`):
+Checked with `--method auto` (no step budget, `--bdd_nodes 65536`, DLP 60 associative grouping, DLP 61 factoring, and DLP 62 fixed standard set `{and, not, or, xor, equal}`) on freshly generated and fixed whole programs (`gen/program.py`):
 
 | Program | Check wall time | `tables` | `order` (incl. grouping & factoring) | `matches` + `spellings` | Peak RSS |
 | --- | --- | --- | --- | --- | --- |
@@ -52,6 +52,6 @@ Checked with `--method auto` (no step budget, `--bdd_nodes 65536`, DLP 60 associ
 
 ## Verification
 
-- `reference_test.py` (11 test groups) verifies exact agreement across `--method tt`, `--method bdd`, `--method auto`, `--plain 1`, and the independent brute-force checker `gen/program_check.py`, plus DLP 60 associative grouping and factoring common terms, conservative limits (`max_views = 20`, `statement_limit = 256`, `max_inputs = 512`, `bdd_nodes = 65536`), `I = 64..300`, `I = 4,500` / `> 8,192` pool literals, `drop_views` on `I > 20` and `xor(u1, u2)`, wide `8 × 8` transpose lookups, BDD Chow/Walsh symmetry grouping, and `--mode fix --keep_searches 1 --check_search 1`.
+- `reference_test.py` (11 test groups) verifies exact agreement across `--method tt`, `--method bdd`, `--method auto`, `--plain 1`, and the independent brute-force checker `gen/program_check.py`, plus DLP 60 associative grouping, DLP 61 factoring of common terms, conservative limits (`max_views = 20`, `statement_limit = 256`, `max_inputs = 512`, `bdd_nodes = 65536`), `I = 64..300`, `I = 4,500` / `> 8,192` pool literals, `drop_views` on `I > 20` and `xor(u1, u2)`, wide `8 × 8` transpose lookups, BDD Chow/Walsh symmetry grouping, and `--mode fix --keep_searches 1 --check_search 1`.
 - `gen/reduction_cases.py` verifies all 87 canonical reduction cases (including associative grouping and distributive factoring) against both `beq` and `gen/program_check.py` plus fixpoint idempotence.
 - `bazelisk test //boolean_equality_checking/proof:all` verifies the Lean 4 termination proof (`proof/fixing_termination.lean`, theorem `dag_prog_terminates`, including `OpFix.factor`).

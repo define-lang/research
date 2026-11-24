@@ -20,7 +20,7 @@
 > `tables_lookups` 4.90 s vs. 10.0 s, `matches + spellings` 1.02 s vs. 4.78 s).
 > See [algorithm.md](algorithm.md) and [results/budget.md](results/budget.md).
 
-The earlier studies measured each rule of DLPs 59–61 on its own, on
+The earlier studies measured each rule of DLPs 59–62 on its own, on
 workloads that were simpler than Define programs in several ways. This study
 first makes the workloads and tools follow the rules as they now stand,
 then runs every check together on whole generated programs: order
@@ -279,7 +279,7 @@ under 1.2).
    compiling only had no redundant values before. Here a program is
    generated as a programmer might first write it, then fixed until it
    compiles (`beq program --mode fix`), and checked again as written. The
-   fixes are DLP 59's refactoring steps, DLP 60's order, and DLP 61's
+   fixes are DLP 59's refactoring steps, DLP 60's order, DLP 61's factoring, and DLP 62's
    matches (with the restriction that no fix grows the program), first
    spellings, and wrappers. An independent checker (`gen/program_check.py`),
    which shares no code with `beq`, confirms the result (Verification,
@@ -339,7 +339,7 @@ under 1.2).
     the others, so matches can be `and`s and `not`s and every `and` is a
     spelling (a `not` isn't respelled: a value that's the opposite of an
     earlier one has to be its `not`, DLP 59). The other registered
-    operations are ordered by **key** (DLP 61): the fewest `and`s in any
+    operations are ordered by **key** (DLP 62): the fewest `and`s in any
     and-inverter graph computing the function, then fewer read views, then
     the truth table as a number. A registered operation's own definition
     follows `and`, `not`, and the ones with smaller keys; spellings come
@@ -461,7 +461,7 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
    It's DLP 59's literal error, not a spelling, in both now.
 
 
-## What DLPs 59–61 Do Here That the Earlier Studies Didn't Show
+## What DLPs 59–62 Do Here That the Earlier Studies Didn't Show
 
 - **Registered operations' definitions are forced into each other.**
   Each definition follows only `and`, `not`, and the registered operations
@@ -517,7 +517,7 @@ Comparing them found these bugs in `beq`, all fixed before any result here:
 - **The table of fewest `and`s stops at four views**: five views have
   616,126 NPN classes, and the hardest four-view classes already take
   minutes of exact synthesis, so registered operations stay at four views
-  (DLP 61).
+  (DLP 62).
 - **An edit to booleans.defcl is linear in the whole project**, not in what
   the edit touches: the registered operations apply to every value
   operation, so each one's tables are computed again and searched for the

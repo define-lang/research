@@ -1,7 +1,7 @@
 # Test Cases for the Compiler's Boolean Checks
 
 A complete covering set of test cases for the boolean checks of DLPs 56 and
-59–61: what each case tests and what the compiler must report. Each case is
+59–62: what each case tests and what the compiler must report. Each case is
 small enough to write by hand unless it says otherwise. The executable
 end-to-end reduction suite lives in
 `~/projects/define/drafts/boolean-reduction-cases.txt` (generated and verified
@@ -9,7 +9,7 @@ by `gen/reduction_cases.py`). "Error R at v" means rule R is reported with v as
 the value it names; "no error" means the value operation compiles.
 
 Every case runs under Define's fixed global standard boolean operations
-(DLP 61), in fixed order: `and`, `not`, `or`, `xor`, `equal`, where
+(DLP 62), in fixed order: `and`, `not`, `or`, `xor`, `equal`, where
 `or(a, b) = not (not a and not b)`, `xor(a, b) = or(a and not b, b and not a)`,
 and `equal(a, b) = not xor(a, b)`, and Define's conservative limits (DLP 59):
 at most **20** boolean input interface views per value operation, **256**
@@ -32,7 +32,7 @@ ROBDD reachable nodes past 20 inputs.
 ## 2. Redundant Values (DLP 59)
 
 The first redundant value, by statement order, is the one reported, with the
-value it's the same as or the opposite of. DLP 59 runs before DLP 61.
+value it's the same as or the opposite of. DLP 59 runs before DLP 62.
 
 | id | case | tests | expected |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ value it's the same as or the opposite of. DLP 59 runs before DLP 61.
 | L5 | a mixed operation executed with a literal for a boolean view | executions that aren't boolean statements | no error |
 | L6 | an action giving a literal to a boolean value operation | actions | no error |
 
-## 4. Order, Associative Grouping, and Factoring (DLP 60)
+## 4. Order and Associative Grouping (DLP 60), and Factoring (DLP 61)
 
 ### Argument order
 
@@ -124,7 +124,7 @@ left-to-right in monotonic DLP 60 rank order: `op(v_1, v_2)`, `op(v_3, t_1)`,
 ### Factoring common terms
 
 Detected semantically from 4-bit binary truth tables (covers `(and, or)`,
-`(or, and)`, `(and, xor)`, `(or, equal)`). Checked and fixed before DLP 61
+`(or, and)`, `(and, xor)`, `(or, equal)`). Checked and fixed before DLP 62
 matches.
 
 | id | case | tests | expected |
@@ -142,10 +142,10 @@ matches.
 | T11 | `or(or(a and c, a and d), or(b and c, b and d))` | cascading factoring | reduces to `or(a, b) and or(c, d)` |
 | T12 | `let t = a and b; xor(or(t, a and c), t and d)` | shared inner term (`readers[t] == 2`) | no factoring error (`t` stays intact) |
 
-## 5. Standard Boolean Operations: Matches, Spellings, and Wrappers (DLP 61)
+## 5. Standard Boolean Operations: Matches, Spellings, and Wrappers (DLP 62)
 
-DLP 61 checks run only when the operation has no DLP 59 redundant values and no
-DLP 60 unfactored common terms. The fixed global standard set is
+DLP 62 checks run only when the operation has no DLP 59 redundant values and no
+DLP 61 unfactored common terms. The fixed global standard set is
 `and`, `not`, `or`, `xor`, `equal` (in that exact precedence order).
 
 ### Matches
@@ -165,8 +165,8 @@ DLP 60 unfactored common terms. The fixed global standard set is
 | M11 | `let x = a and b; let y = c and not a; (not x and not y) and d` | match over correlated earlier values (`equal` beats `not or`) | error match: `equal(x, y)` |
 | M12 | `xor(a, b)` own definition written with `and`/`not` | standard op definition uses only earlier standard ops | reduces to `or(a and not b, b and not a)` |
 | M13 | `equal(a, b)` own definition written out | `equal` follows `and`, `not`, `or`, `xor` | reduces to `not xor(a, b)` |
-| M14 | redundant value and match in one operation | DLP 59 before DLP 61 | only the redundant value is reported |
-| M15 | unfactored common term and match in one operation | DLP 60 factoring before DLP 61 | factoring is reported/applied first |
+| M14 | redundant value and match in one operation | DLP 59 before DLP 62 | only the redundant value is reported |
+| M15 | unfactored common term and match in one operation | DLP 61 factoring before DLP 62 | factoring is reported/applied first |
 
 ### Spellings
 

@@ -1,4 +1,4 @@
-// Whole Define programs (gen/program.py's format): every rule of DLPs 59-61
+// Whole Define programs (gen/program.py's format): every rule of DLPs 59-62
 // checked per value operation with executions as references, the fixes a
 // refactoring tool applies, and incremental rechecking.
 #pragma once
@@ -910,7 +910,7 @@ class ProgramChecker {
     }
     const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
     // Matches and spellings need every value's function; DLP 59 (redundant
-    // values) and DLP 60 (factoring common terms) take precedence over DLP 61.
+    // values) and DLP 61 (factoring common terms) take precedence over DLP 62.
     if (rep.redundant_kind.empty() && !rep.has_factor && !fixed_first && full && search_matches) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
       find_matches(op, info, std::move(t), dead, rep, nullptr, budgeted ? &budget : nullptr,
@@ -1768,7 +1768,7 @@ class ProgramChecker {
 
   // Semantic checks on binary boolean operations' 4-bit truth tables
   // (bit (a | (b << 1)) is f(a, b)): commutativity, associativity, and
-  // distributivity (DLP 60).
+  // distributivity (DLPs 60 and 61).
   static bool is_assoc_comm_tt(uint8_t tt) {
     if (tt == 0x0 || tt == 0xF) return false;
     auto eval = [&](int a, int b) { return (tt >> (a | (b << 1))) & 1; };
@@ -1876,7 +1876,7 @@ class ProgramChecker {
       return !(binary_op_info(op.stmts[static_cast<size_t>(sit->second)], pk, ptt) && pk == op_key);
     };
 
-    // DLP 60: Factoring common terms in distributive single-use chains.
+    // DLP 61: Factoring common terms in distributive single-use chains.
     for (size_t k = 0; k < op.stmts.size() && !rep.has_factor; ++k) {
       const PStmt& s = op.stmts[k];
       std::string outer_key;
@@ -2167,7 +2167,7 @@ class ProgramChecker {
     return key;
   }
 
-  // A registered operation's key (DLP 61), ordered for human readability:
+  // A registered operation's key (DLP 62), ordered for human readability:
   // 1. fewest `and`s computing its function,
   // 2. fewest read views,
   // 3. project-registered before standard-library-registered,
@@ -2188,7 +2188,7 @@ class ProgramChecker {
   // The registered operations an operation follows, in their order: `and`
   // and `not`, then the others by key; a registered operation's own
   // definition follows only the ones with smaller keys, and standard-library
-  // registered operations only follow earlier standard-library ones (DLP 61).
+  // registered operations only follow earlier standard-library ones (DLP 62).
   std::vector<std::string> follows(const POp& op) const {
     const bool op_is_std = p_.std_registered.count(op.name) > 0;
     std::vector<std::pair<std::tuple<int, int, int, int, uint64_t>, std::string>> keyed;
@@ -2469,7 +2469,7 @@ class ProgramChecker {
     return o.str();
   }
 
-  // Configuration rules for booleans.defcl (DLP 61): at most four read
+  // Configuration rules for booleans.defcl (DLP 62): at most four read
   // views and one written view, and no two that compute the same thing.
   std::vector<std::string> check_registry() const {
     std::vector<std::string> out;

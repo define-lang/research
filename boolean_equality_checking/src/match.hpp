@@ -2276,7 +2276,7 @@ class Matcher {
   // Each registered operation's number of different `and`s, for the
   // precedence between spellings.
   void set_nodes(std::map<std::string, int> nodes) { nodes_ = std::move(nodes); }
-  // DLP 61's restriction that an opposite result removes at least three
+  // DLP 62's restriction that an opposite result removes at least three
   // statements.
   void set_min_opposite_removed(size_t n) { min_opposite_removed_ = n; }
   // Whether to search for matches; off, only spellings are listed.

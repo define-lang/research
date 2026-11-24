@@ -7,8 +7,8 @@
 > a search summary, a citing paper, or a third-party page. I didn't verify
 > anything marked secondary or abstract-only beyond that level.
 
-This surveys prior work related to DLP 59 (No Redundant Boolean Values), DLP
-60 (One Order for Boolean Logic), DLP 61 (Registered Boolean Operations), and
+This surveys prior work related to DLP 59 (No Redundant Boolean Logic), DLP
+60 (One Order for Boolean Logic), DLP 62 (Registered Boolean Operations), and
 the algorithms in `drafts/boolean-logic-in-the-compiler.md` in the Define
 repository. The question is whether any existing system or paper does
 something like them, and how close each one comes.
@@ -35,9 +35,9 @@ verification:
   as a data-structure property. The difference is that a FRAIG merges the
   duplicates instead of rejecting them, and FRAIG construction allows resource
   limits that leave some duplicates unmerged.
-- **DLP 61's matches are k-resubstitution against a gate library,** with
+- **DLP 62's matches are k-resubstitution against a gate library,** with
   ABC's own acceptance rule: replacing a node with k new nodes is accepted
-  only if its maximum fanout-free cone (MFFC) has at least k+1 nodes. DLP 61's
+  only if its maximum fanout-free cone (MFFC) has at least k+1 nodes. DLP 62's
   "removes at least two statements" (one new execution) and "at least three"
   (an execution and a `not`) are that rule with k = 1 and k = 2.
 - **The checking stack** (structural hashing, random simulation, SAT sweeping,
@@ -72,7 +72,7 @@ What seems new is the combination:
 
 The closest prior work overall is the FRAIG paper for DLP 59, and
 Mishchenko–Brayton resubstitution plus Boolean-matching library binding for
-DLP 61. For the language-design side ("redundancy is an error, not a
+DLP 62. For the language-design side ("redundancy is an error, not a
 warning"), the closest are Go's no-warnings policy and MISRA C Rule 2.2.
 
 ## The Pieces Being Compared
@@ -83,11 +83,11 @@ To keep the comparisons specific, Define's system is split into these pieces:
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | P1  | A boolean value that's exactly constant, equal to an input, or equal to an earlier value is a compile error.                                                                                       | DLP 59                     |
 | P2  | No literal may be given to a boolean statement.                                                                                                                                                    | DLP 59                     |
-| P3  | A value equal to a registered operation, or its negation, over at most 4 earlier values is an error when replacing it removes at least 2 statements (3 for a negation). The largest match is reported. | DLP 61                     |
-| P4  | One spelling among single executions: fewest negated arguments, then canonical registered-operation order (`and`, `not`, fewest ANDs, fewest read views, project before stdlib, more symmetric first, counting-order truth table), then rank order.                                         | DLP 61                     |
+| P3  | A value equal to a registered operation, or its negation, over at most 4 earlier values is an error when replacing it removes at least 2 statements (3 for a negation). The largest match is reported. | DLP 62                     |
+| P4  | One spelling among single executions: fewest negated arguments, then canonical registered-operation order (`and`, `not`, fewest ANDs, fewest read views, project before stdlib, more symmetric first, counting-order truth table), then rank order.                                         | DLP 62                     |
 | P5  | Interchangeable views come from the function, and values go to them in a fixed rank order.                                                                                                        | DLP 60                     |
 | P6  | One statement order: inputs right before first use, depth-first from the consumers.                                                                                                                | DLP 60                     |
-| P7  | No wrappers. Exactly one standard wrapper for each of `and` and `not`.                                                                                                                             | DLP 61                     |
+| P7  | No wrappers. Exactly one standard wrapper for each of `and` and `not`.                                                                                                                             | DLP 62                     |
 | P8  | Exact, deterministic checking per value operation: truth tables up to 16 inputs (or 20 with wide executions, and as fallback inside the guaranteed envelope) and complement-edge ROBDDs otherwise, with exact bucket verification and zero-allocation lockstep counterexamples.                 | `algorithm.md`             |
 | P9  | One check per definition with executions referenced, not inlined. Recorded tables/AIGs/diagrams, 128-bit fingerprints and symmetry groups for incremental rechecks, and BDD-guided collision-splitting samples.                                                                                | `algorithm.md`             |
 | P10 | The fix loop provably terminates (lexicographic order with Dershowitz–Manna multisets, in Lean; finiteness discharged directly from Define's static finite DAGs in `dag_prog_terminates`). It isn't confluent.                                                                                | `proof/`                   |
@@ -170,7 +170,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
   --obvious way to do it." gofmt gives Go one canonical layout.
 - **Citations:** Tim Peters, PEP 20, <https://peps.python.org/pep-0020/>.
   "go fmt your code," <https://go.dev/blog/gofmt>.
-- **Matches:** The goal behind all of DLPs 59–61.
+- **Matches:** The goal behind all of DLPs 59–62.
 - **Differs:** PEP 20 is an aspiration and isn't enforced. gofmt is a
   formatter whose use is a convention, enforced by hooks and not by the
   compiler (according to the blog post), and it only covers layout.
@@ -389,7 +389,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
     Transforms" (2024), which reviews resubstitution variants,
     <https://people.eecs.berkeley.edu/~alanmi/publications/2024/tech24_resub.pdf>.
 - **Matches:** P3 is resubstitution:
-  - DLP 61's "statements of a match" are the MFFC.
+  - DLP 62's "statements of a match" are the MFFC.
   - Its arguments are divisors.
   - "Removes at least two statements, or three for an opposite result" is the
     k+1 rule with k = 1 and k = 2.
@@ -418,7 +418,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
   replacements that don't increase size are accepted too.
 - **Citation:** Mishchenko, Chatterjee, and Brayton, DAC 2006,
   [10.1145/1146909.1147048](https://doi.org/10.1145/1146909.1147048).
-- **Matches:** DLP 61's bound of four read views and its "largest match"
+- **Matches:** DLP 62's bound of four read views and its "largest match"
   choice. Rewriting picks "the one that leads to the largest improvement at a
   node" (IWLS 2006 description).
 - **Differs:** It's cut-based. The draft measured cut-based matches and
@@ -454,7 +454,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
     results).
   - P5's interchangeable views are symmetry sets, computed from the function,
     as in matching.
-  - DLP 61's reason for reporting one match at a time instead of choosing the
+  - DLP 62's reason for reporting one match at a time instead of choosing the
     best set ("which is NP-hard") is the same hardness as cover selection in
     mapping.
 - **Differs:**
@@ -500,7 +500,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
   <https://arxiv.org/abs/1711.04422>.
 - **Matches:** A zero-cost RHS is DLP 59's redundant value: the value is
   constant or equal to an existing value. A cost-one RHS that is one
-  instruction over existing values is DLP 61's match against a single
+  instruction over existing values is DLP 62's match against a single
   registered operation.
 - **Differs:**
   - It's an optimizer with timeouts, so its results depend on the solver
@@ -576,7 +576,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
     saturation or a timeout. P1 needs functional equality, decided
     semantically.
   - Extraction rewrites; it doesn't reject.
-  - Extraction can choose a **whole** program per class. DLP 61 doesn't try:
+  - Extraction can choose a **whole** program per class. DLP 62 doesn't try:
     it reports one match at a time, and the draft records that equivalent
     programs don't converge.
 - **Verified:** Read egg's Section 6 and the extraction overview. Read the
@@ -651,7 +651,7 @@ To keep the comparisons specific, Define's system is split into these pieces:
 - **Matches:** P10's non-confluence. A fix system for and/not programs that
   keeps their structure, instead of rewriting to a normal form like a
   polynomial over a Boolean ring or an OBDD, shouldn't be expected to be
-  confluent. DLPs 59 and 61 already say that canonical forms that would make
+  confluent. DLPs 59 and 62 already say that canonical forms that would make
   it confluent can be exponentially large.
 - **Differs:** These results are about rewriting terms to normal forms modulo
   equations. Define's fixes are driven by semantic checks and a cost order. So
@@ -738,8 +738,8 @@ All four found only warnings, optimizers, or internal canonicalization.
 - **For DLP 59 (P1, P2, P8):** Mishchenko, Jiang, Chatterjee, and Brayton,
   "FRAIGs," which defines and builds exactly the invariant DLP 59 enforces,
   as a data structure and not a rule.
-- **For DLP 61 (P3, P4):** Mishchenko and Brayton's k-resubstitution (IWLS
-  2006), whose gain rule DLP 61 reproduces, and Boolean-matching library
+- **For DLP 62 (P3, P4):** Mishchenko and Brayton's k-resubstitution (IWLS
+  2006), whose gain rule DLP 62 reproduces, and Boolean-matching library
   binding (Benini and De Micheli's survey).
 - **For DLP 60 (P5, P6):** symmetry detection in Boolean matching, and the
   operand ordering in FRAIG construction, AIGER, and LLVM's Reassociate.
@@ -760,10 +760,10 @@ All four found only warnings, optimizers, or internal canonicalization.
     signature.
   - **Example.** With `u = a and b` computed, a value written out as
     `or(not a, not b)` is always `not u`. As far as I can tell, it's not a
-    redundant value, and not a DLP 61 match either, since `not u` isn't an
+    redundant value, and not a DLP 62 match either, since `not u` isn't an
     execution of a registered operation. So it would compile, even though
     `not u` is one statement against three.
-  - **Possibly intended.** DLP 61 handles opposites only for registered
+  - **Possibly intended.** DLP 62 handles opposites only for registered
     operations, so this may be on purpose. I'm reporting it because every
     prior system treats it the other way.
 - **The termination proof could use Mathlib's Dershowitz–Manna order.**

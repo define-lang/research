@@ -1,6 +1,6 @@
 # Reference Algorithm for Boolean Logic Checking
 
-This document specifies the reference algorithm implemented in `src/` (`beq program --method auto`) for checking and fixing Define's boolean logic rules (DLPs 59, 60, and 61). Every compiled component of Define produces a static, finite directed acyclic graph (DAG) with no execution cycles (DLP 9). Checking runs once per value operation (and action boolean block) in dependency order.
+This document specifies the reference algorithm implemented in `src/` (`beq program --method auto`) for checking and fixing Define's boolean logic rules (DLPs 59–62). Every compiled component of Define produces a static, finite directed acyclic graph (DAG) with no execution cycles (DLP 9). Checking runs once per value operation (and action boolean block) in dependency order.
 
 ## 1. Input, Representation, and Output
 
@@ -17,12 +17,12 @@ For each value operation, the checker deterministically decides:
 
 1. **Structural errors and limits:** boolean input view limit (`≤ 20`), boolean statement limit (`≤ 256`), boolean input limit (`≤ 512`), canonical shared ROBDD node limit (`≤ 65,536` past 20 inputs), boolean literals passed to any Abstract Operation (DLP 59), single output view on Boolean Value Operations, independent non-boolean-only boolean output views on non-Boolean Value Operations (DLP 59 Problem 7: no boolean output view's Boolean Sources may include a boolean input view, and no two boolean output views may share a Boolean Source), single-statement wrappers of standard boolean operations, execution cycles, dead Boolean Statements, and useless boolean inputs (every boolean input must appear in the Boolean Sources of at least one boolean output view or non-boolean argument, and for every such boolean output view or non-boolean argument, changing any view in its Boolean Sources must be able to change its value).
 2. **Exact functional redundancy (DLP 59):** the first boolean statement whose function is constant (`true` or `false`), equal to a boolean input or earlier boolean statement, or the exact opposite of one (unless the statement is already `not` of that value).
-3. **Canonical ordering, associative grouping, and factoring (DLP 60):**
+3. **Canonical ordering and associative grouping (DLP 60), and factoring (DLP 61):**
    - Argument order within each group of interchangeable input views (by rank).
    - Depth-first statement order.
    - **Associative grouping (`order_grouping`):** every maximal single-use chain of any commutative, associative binary boolean operation (detected semantically from its 4-bit truth table, covering `and`, `or`, `xor`, `equal`, and user-defined associative commutative operations) must be folded left-to-right in monotonic DLP 60 rank order (`op(v_1, v_2)`, `op(v_3, t_1)`, ..., `op(v_m, t_{m-2})`), with no balanced sub-pairs.
    - **Factoring common terms (`order_factor`):** for any two distinct commutative, associative binary boolean operations where `inner` distributes over `outer` (detected semantically from their 4-bit truth tables, covering `(and, or)`, `(or, and)`, `(and, xor)`, `(or, equal)`), no value `x` may appear in two or more single-use `inner`-chain terms of the same single-use `outer`-chain. The value `x` to factor is chosen by most terms removed, then lowest DLP 60 rank.
-4. **Standard boolean operation matches and spellings (DLP 61):** checked only after the operation has no DLP 59 redundant values and no DLP 60 unfactored common terms.
+4. **Standard boolean operation matches and spellings (DLP 62):** checked only after the operation has no DLP 59 redundant values and no DLP 61 unfactored common terms.
 
 ## 2. Acceptance Rule and Method Dispatch (No Step Budget)
 
@@ -65,7 +65,7 @@ Every node gets a bit vector of `words = max(1, 2^I / 64)` 64-bit words (at most
   2. Within each signature bucket of size ≥ 2, filtering pairs with 128 targeted assignments (64 satisfying + 64 falsifying paths sampled from the diagram, re-evaluating only `dep_nodes_[i] ∪ dep_nodes_[j]`).
   3. Confirming surviving pairs with a zero-allocation, fail-fast lockstep symmetry check (`Diagram::are_symmetric`), which checks nodes at level `la` first and aborts in `O(depth)` on the first mismatch without allocating any diagram nodes.
 
-## 5. Standard Boolean Operations (DLP 61)
+## 5. Standard Boolean Operations (DLP 62)
 
 Define enforces a single fixed, global set of five standard boolean operations across all projects (there is no project-level registration config):
 
@@ -82,7 +82,7 @@ Every standard operation has arity ≤ 2 and is completely symmetric across its 
 
 ## 6. Unified Match and Spelling Search (`src/match.hpp`)
 
-When a value operation has no DLP 59 redundant values and no DLP 60 unfactored common terms, a single `Matcher` instance finds both the reported match and the reported spelling without copying truth tables:
+When a value operation has no DLP 59 redundant values and no DLP 61 unfactored common terms, a single `Matcher` instance finds both the reported match and the reported spelling without copying truth tables:
 
 - **Strictly `O(S * (I + S))` complexity for Define's standard set:** because all five standard operations (`and`, `not`, `or`, `xor`, `equal`) have arity ≤ 2 and are symmetric, match search never backtracks over 3- or 4-argument tuples:
   - `xor` and `equal` run a flat `O(1)` direct hash-lookup loop over `signatures_` (`target_word ^ arg0_word`).
@@ -98,7 +98,7 @@ When a value operation has no DLP 59 redundant values and no DLP 60 unfactored c
 ## 7. Incremental Rechecking and Complete Automated Refactoring (`src/program_fix.hpp`)
 
 - **Incremental rechecking:** each compiled value operation stores a 128-bit fingerprint `(hash, hash2)` of its recorded summary and its interchangeable input-view groups. When an operation is edited, callers are rechecked only while a callee's fingerprint or symmetry groups change. Because the standard boolean operation set is fixed globally across all projects, there is no project-wide registration-config invalidation pass.
-- **Complete automated refactoring (DLP 64):** the refactoring tool (`beq program --mode fix`) automatically resolves every semantically fixable rule violation across whole programs, stopping **only** at opaque non-Boolean Logical Operations (`num.*` / `cmp.*` receiving a boolean literal or constant expression), 0-output boolean value operations (`outputs`), DLP 62 structural/ROBDD limits (`limits`), execution cycles (`cycle`), or registered wrappers/constants. Signature changes (dropped views, multi-output splits, mixed-output extractions, constant/wrapper/view replacements) are tracked compositionally per operation via versioned signature-change histories and replayed onto every caller (`call` and `run`). Fixes apply in strict priority order:
+- **Complete automated refactoring (DLP 65):** the refactoring tool (`beq program --mode fix`) automatically resolves every semantically fixable rule violation across whole programs, stopping **only** at opaque non-Boolean Logical Operations (`num.*` / `cmp.*` receiving a boolean literal or constant expression), 0-output boolean value operations (`outputs`), DLP 63 structural/ROBDD limits (`limits`), execution cycles (`cycle`), or registered wrappers/constants. Signature changes (dropped views, multi-output splits, mixed-output extractions, constant/wrapper/view replacements) are tracked compositionally per operation via versioned signature-change histories and replayed onto every caller (`call` and `run`). Fixes apply in strict priority order:
   1. **Multi-output `bool` op splitting (DLP 59 Problem 6):** any boolean value operation with `k > 1` output views is split into `k` single-output boolean value operations (keeping live statements for each output) and callers are updated.
   2. **Dead statements and canonical argument/statement order (DLP 59/60).**
   3. **Literal propagation, constant folding, and acyclic callee specialization (DLP 59):**
@@ -108,16 +108,16 @@ When a value operation has no DLP 59 redundant values and no DLP 60 unfactored c
      - Boolean value operations simplifying to a constant output (`true`/`false`) are removed and propagate the constant literal into callers; constant boolean output views of mixed value operations are similarly removed and substituted in callers.
      - If a boolean literal or constant reaches an opaque non-Boolean Logical Operation (`num.*` / `cmp.*`), fixing stops cleanly with `literal`.
   4. **Redundant and opposite values, and unused input views on `bool` ops (DLP 59):** `drop_views` tries kept-view substitution (uniform, then per-view, with `has_constant_value` dispatching to ROBDDs past the truth-table envelope). If every kept-view substitution creates a constant (e.g., `xor(xor(x, z), xor(y, z)) and x`), it substitutes `false` for the unused view and lets literal propagation and callee specialization eliminate it cleanly.
-  5. **Wrappers of standard boolean operations (DLP 61):** non-registered single-statement wrappers (and identity-view ops) are removed and inlined at call sites.
-  6. **Factoring common terms (DLP 60):** `apply_factor` factors the chosen value `x` out of `k ≥ 2` single-use `inner`-chain terms of an `outer`-chain, strictly reducing the operation's statement count (`P.length`).
-  7. **Non-overlapping largest standard-operation matches, then first better spelling (DLP 61).**
+  5. **Wrappers of standard boolean operations (DLP 62):** non-registered single-statement wrappers (and identity-view ops) are removed and inlined at call sites.
+  6. **Factoring common terms (DLP 61):** `apply_factor` factors the chosen value `x` out of `k ≥ 2` single-use `inner`-chain terms of an `outer`-chain, strictly reducing the operation's statement count (`P.length`).
+  7. **Non-overlapping largest standard-operation matches, then first better spelling (DLP 62).**
   8. **Associative regrouping (DLP 60):** `regroup_associative` folds the first non-canonical single-use associative chain into canonical left-to-right rank order, preserving statement count and inserting rebuilt statements immediately before the chain root to maintain topological order. Running regrouping after DLP 59/factor/match ensures it never introduces spurious constant pairs on unfixed operations.
   9. **Useless boolean inputs on `mixed` ops (DLP 59):**
      - If a boolean input `d` is in a target exit `t`'s Boolean Sources yet cannot change `t` (e.g., `xor(xor_and(d, a, b), xor_and(d, c, e))` passed to `num.sel`, while `d` is still read elsewhere), `t`'s boolean sub-DAG is cloned with `d` substituted by `false` (leaving all other reads of `d` untouched), and literal propagation + callee specialization simplify it away.
      - If a boolean input is absent from every exit's Boolean Sources: boolean input interface views are dropped from the mixed op and its `run` callers; pure `cmp` statements are deleted; and unused boolean outputs of a `run` are dropped via deduplicated callee specialization (or the `run` is deleted if all its outputs are unused).
   10. **Mixed-output extraction (DLP 59 Problem 7):** if a non-Boolean Value Operation violates `mixed_bool_view` or `mixed_shared_input`, the boolean logic on top of the non-boolean Boolean Sources is extracted into single-output boolean helper ops (or inlined wrappers in callers), the mixed op returns each distinct needed non-boolean Boolean Source directly at most once, and all `run` callers are updated.
 
-Termination of both the core single-operation/program normalization loop and all DLP 64 automated refactoring phases for every finite DAG-backed program is formally verified in Lean 4 (`proof/fixing_termination.lean`: `dag_prog_terminates`, `structural_terminates`, `specialization_terminates`, `fold_loop_terminates`, `useless_elim_terminates`, and `full_autofix_terminates`, with zero `sorry` and zero custom axioms).
+Termination of both the core single-operation/program normalization loop and all DLP 65 automated refactoring phases for every finite DAG-backed program is formally verified in Lean 4 (`proof/fixing_termination.lean`: `dag_prog_terminates`, `structural_terminates`, `specialization_terminates`, `fold_loop_terminates`, `useless_elim_terminates`, and `full_autofix_terminates`, with zero `sorry` and zero custom axioms).
 
 ## Appendix: Whole-Program / Legacy SAT-Sweeping Ladder
 

@@ -1,6 +1,6 @@
 # Fixing a Value Operation Always Terminates
 
-DLP 61 adopts a precedence rule between spellings of a value, with the
+DLP 62 adopts a precedence rule between spellings of a value, with the
 restriction from [studies/precedence.md](../studies/precedence.md) that no fix grows the
 program, and orders registered operations by a key computed from what they
 compute. DLP 59 makes a value that's always the opposite of an earlier one
@@ -15,7 +15,7 @@ proves that fixing a program, one reported error at a time, always ends.
 
 Fix a finite set of **inputs** (the value operation's boolean inputs), the
 primitive operations `and` (two views) and `not` (one view), and a finite
-set of **registered operations**. DLP 61 makes `and` and `not` registered
+set of **registered operations**. DLP 62 makes `and` and `not` registered
 for every value operation, before the others, so an `and` is an execution
 of a registered operation like any other (it has a pair, below, and can be
 respelled), and a match can be written with an `and` or a `not`; `not`
@@ -79,7 +79,7 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
    turns `(not a) or (not b)` into `not u`, removing three statements and
    adding one, and a registered `nand` of a and b into `not u`, one
    statement for one.
-3. **Factoring common terms (DLP 60).** Pulling a shared factor out of `k ≥ 2`
+3. **Factoring common terms (DLP 61).** Pulling a shared factor out of `k ≥ 2`
    single-use inner-chain terms inside a single-use distributive outer chain
    (such as `(a and b) or (a and c)` → `a and (b or c)`) removes `k - 1 ≥ 1`
    statements (`OpFix.factor` in Lean), strictly lowering the primary statement
@@ -235,7 +235,7 @@ proves this counting fact directly on `DagOp`, and `dag_prog_terminates`
 discharges `prog_terminates`'s finiteness hypothesis completely.
 
 **When it ends, the program compiles**, if every error has a fix. Under the
-full DLP 64 automated refactoring algorithm (described in the section below),
+full DLP 65 automated refactoring algorithm (described in the section below),
 the refactoring tool also automatically fixes multi-output boolean value
 operations, mixed-output Problem 7 violations (`mixed_bool_view` and
 `mixed_shared_input`), boolean literals and constant expressions (via constant
@@ -246,15 +246,15 @@ inputs in non-boolean value operations (via sub-DAG cloning with
 output specialization). The only errors left for the programmer are: a boolean
 literal or constant expression that reaches an opaque non-boolean logical
 operation (`num.*` / `cmp.*`), a 0-output boolean value operation, an operation
-past DLP 62's limits as written, an execution cycle in the program as written
+past DLP 63's limits as written, an execution cycle in the program as written
 (DLP 9; the fixes never make one), a registered operation whose definition is a
 wrapper or constant, and a fix 7 whose execution leading back is of a mixed
 operation (`run`).
 
-## Full Automated Refactoring Phases (DLP 64)
+## Full Automated Refactoring Phases (DLP 65)
 
 Beyond the core single-operation normalization loop (`OpFix` / `ProgFix`
-above), the full DLP 64 auto-fixer adds three outer refactoring phases, each
+above), the full DLP 65 auto-fixer adds three outer refactoring phases, each
 proved terminating in [fixing_termination.lean](fixing_termination.lean):
 
 1. **Structural rewrites (`structural_terminates`).**
@@ -464,7 +464,7 @@ a cycle. ∎
 - **Other values' keys changing.** A spelling fix can change other values'
   terms, and so their rank order, but only downward (Lemma 7), and it never
   changes another value's pair (Lemma 4), because a spelling fix never
-  turns a value into a `not` or out of one. That's why DLP 61's rule that
+  turns a value into a `not` or out of one. That's why DLP 62's rule that
   only single executions are respelled matters: respelling a `not` of an
   execution as an execution would turn a `not` into an execution, adding a
   pair, and could make other values' negation counts go down while their
@@ -493,7 +493,7 @@ a cycle. ∎
 ## Checked Against the Fix Loop
 
 `measure_check.py` runs the Python fix loop of `gen/fixpoint.py`, which
-handles one value operation at a time, with an earlier form of DLP 61's
+handles one value operation at a time, with an earlier form of DLP 62's
 precedence (declared orders, and AIG nodes in place of the key), on all 144
 families of [studies/precedence.md](../studies/precedence.md), and computes the measure
 after every fix (statements, then statements that aren't a `not`, then the
@@ -511,7 +511,7 @@ them keep the number of statements, and in 40 of those, the negations
 and precedence go up.
 
 The Python loop also respelled a `not` of an execution as an execution
-until this check; that isn't part of DLP 61, and it was removed.
+until this check; that isn't part of DLP 62, and it was removed.
 
 ## The Lean Proof
 
@@ -543,7 +543,7 @@ and the axiom test checks that its theorems use only `propext`,
   hypothesis directly from Define's finite DAG computation graphs (`DagOp`).
 - **`structural_terminates`**, **`specialization_terminates`**,
   **`fold_loop_terminates`**, **`useless_elim_terminates`**, and
-  **`full_autofix_terminates`**: formalize termination of all DLP 64 automated
+  **`full_autofix_terminates`**: formalize termination of all DLP 65 automated
   refactoring phases (multi-output boolean splitting, mixed-output extraction,
   acyclic callee specialization, constant/literal folding, and mixed-op
   useless-input elimination) and their composition with `dag_prog_terminates`.

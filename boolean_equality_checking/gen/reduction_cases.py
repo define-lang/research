@@ -30,7 +30,7 @@ HERE = Path(__file__).resolve().parent.parent
 BEQ = HERE / "src" / "beq"
 LIMIT = ["timeout", "-s", "KILL", "60", "prlimit", f"--as={4 << 30}"]
 
-# The fixed global standard boolean operations (DLP 61):
+# The fixed global standard boolean operations (DLP 62):
 # and, not, or, xor, equal.
 ALL = ["or", "xor", "equal"]
 LIBRARY = [
@@ -41,12 +41,12 @@ LIBRARY_NAMES = list(program.DEFINITIONS)
 
 HEADER = """\
 # Boolean reduction cases: a complete covering test suite of programs and what
-# each reduces to once every automated refactoring fix of DLPs 56 and 59-64 is
+# each reduces to once every automated refactoring fix of DLPs 56 and 59-65 is
 # applied (DLP 59's redundancy, constant folding, literal propagation, callee
 # specialization, dead-statement, unused-view, useless-input, multi-output
 # bool-op splitting, and mixed-output extraction rules; DLP 60's argument
-# order, statement order, associative grouping, and distributive factoring;
-# DLP 61's standard boolean operations, spellings, and wrappers; DLP 62's
+# order, statement order, and associative grouping; DLP 61's distributive factoring;
+# DLP 62's standard boolean operations, spellings, and wrappers; DLP 63's
 # limits).
 #
 # One case per line:
@@ -54,9 +54,9 @@ HEADER = """\
 #     PROGRAM => REDUCED
 #
 # Every case runs under Define's fixed global standard boolean operations
-# (DLP 61), in fixed order: `and`, `not`, `or`, `xor`, `equal`, where
+# (DLP 62), in fixed order: `and`, `not`, `or`, `xor`, `equal`, where
 # `or(a, b) = not (not a and not b)`, `xor(a, b) = or(a and not b, b and not a)`,
-# and `equal(a, b) = not xor(a, b)`, and Define's conservative limits (DLP 62):
+# and `equal(a, b) = not xor(a, b)`, and Define's conservative limits (DLP 63):
 #   - <= 20 boolean input interface views per value operation
 #   - <= 256 boolean statements per value operation
 #   - <= 512 boolean inputs per value operation (21-512 via ROBDDs)
@@ -94,10 +94,10 @@ HEADER = """\
 # it (DLP 55).
 #
 # REDUCED is the program after every fix, in the same form, in DLP 60's
-# statement, argument, grouping, and factoring order.
+# statement, argument, and grouping order, with DLP 61's factoring.
 # `removed NAME = EXPR` means a fix removed the operation, and its callers
 # compute EXPR (over its original views) instead: a constant (`true`/`false`),
-# a wrapper (EXPR is the statement it wraps, DLP 61), or an operation whose
+# a wrapper (EXPR is the statement it wraps, DLP 62), or an operation whose
 # output view is one of its views (DLP 59). `removed NAME view K = EXPR` is
 # the same for one output view of a mixed operation (where `outJ` refers to
 # the J-th output view of the reduced mixed operation). `dropped NAME VIEW, ...`
@@ -750,7 +750,7 @@ CASES: list[str] = [
     "f(a, b, c, d) = let t = b and c; or(a and t, d and not t)",
     # Complementary leaves in unfixed associative chain (DLP 59 before regrouping).
     "f(a, b, c) = equal(a, equal(b, not a)) and c",
-    # --- 7. DLP 60: Factoring common terms (all 4 distributive pairs + ties + shared) ---
+    # --- 7. DLP 61: Factoring common terms (all 4 distributive pairs + ties + shared) ---
     "f(a, b, c) = or(a and b, a and c)",
     "f(a, b, c) = or(a, b) and or(a, c)",
     "f(a, b, c) = xor(a and b, a and c)",
@@ -767,7 +767,7 @@ CASES: list[str] = [
     "f(a, b, c, d) = or(or(a and c, a and d), or(b and c, b and d))",
     # Shared inner term must NOT be factored.
     "f(a, b, c, d) = let t = a and b; xor(or(t, a and c), t and d)",
-    # --- 8. DLP 61: Standard boolean operation matches, opposites, spellings, wrappers ---
+    # --- 8. DLP 62: Standard boolean operation matches, opposites, spellings, wrappers ---
     "f(a, b) = not (not a and not b)",
     "f(a, b) = not (not (a and not b) and not (not a and b))",
     "f(a, b) = not (a and not b) and not (not a and b)",

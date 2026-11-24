@@ -473,7 +473,7 @@ def precedence_match(
     The value is an execution of a registered operation, or a `not` of one,
     and another execution (or a `not` of one) over earlier values computes
     it with higher precedence. Returns the highest-precedence spelling.
-    With `strict`, as DLP 61 adopted it, only single executions are
+    With `strict`, as DLP 62 adopted it, only single executions are
     respelled, and only by single executions.
     """
     keys = rank_keys(p)
@@ -490,7 +490,7 @@ def precedence_match(
     for v in sorted(by_value):
         op, args = p.statements[v - p.inputs]
         opposite = op == "not"
-        # DLP 61 respells only single executions, never a `not` of one.
+        # DLP 62 respells only single executions, never a `not` of one.
         if opposite and strict:
             continue
         if opposite:

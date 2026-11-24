@@ -102,7 +102,7 @@ structure Signature where
   /-- The operation is a registered boolean operation (`and` and `not` are, for
   every value operation). -/
   registered : ℕ → Bool
-  /-- A registered operation's place in the order of keys (DLP 61): fewest
+  /-- A registered operation's place in the order of keys (DLP 62): fewest
   `and`s computing its function, then fewest read views, then project-registered
   before standard-library-registered, then fewer interchangeable-view groups,
   then its truth table in counting order. -/
@@ -584,7 +584,7 @@ def argCodes : Term → List (List ℕ)
   | .node o args => arrange sig o (args.map (ser sig))
 
 variable (sig) in
-/-- DLP 61's precedence between spellings: negations, key, then the values
+/-- DLP 62's precedence between spellings: negations, key, then the values
 in rank order. -/
 def KeyLt (v' v : Term) : Prop :=
   pairL sig v' < pairL sig v ∨ (pairL sig v' = pairL sig v ∧ argCodes sig v' < argCodes sig v)
@@ -843,7 +843,7 @@ inductive OpFix : List Term → List Term → Prop
       (rw : Term → Term) (hQ : List.Perm Q (added ++ survivors))
       (hs : List.Subperm survivors ((P.erase v).map rw))
       (hrestrict : survivors.length + added.length + 1 ≤ P.length) : OpFix P Q
-  /-- DLP 60 factoring common terms: pulls a shared factor out of `k ≥ 2`
+  /-- DLP 61 factoring common terms: pulls a shared factor out of `k ≥ 2`
   single-use inner-chain terms inside an outer distributive chain, strictly
   reducing the number of statements (`Q.length < P.length`). -/
   | factor {P Q : List Term} (hshrink : Q.length < P.length) : OpFix P Q
@@ -1474,7 +1474,7 @@ theorem dag_prog_terminates {n : ℕ} (rank : Fin n → ℕ) (I O A : ℕ) (f : 
     rintro st ⟨⟨k, rfl⟩, hsize⟩
     refine ⟨hdag k a, hsize, fun cur hcur => (hvr_all k).1 init cur h0 hcur⟩
 
-/-! ### Full automated refactoring (DLP 64): structural rewrites, specialization,
+/-! ### Full automated refactoring (DLP 65): structural rewrites, specialization,
 literal/constant folding, and useless-input elimination -/
 
 /-- No infinite descending chain exists in a lexicographic pair of `ℕ`s. -/
@@ -1600,7 +1600,7 @@ theorem useless_elim_terminates (f : ℕ → ℕ × ℕ)
   | cloneSubstFalse hu => exact Or.inl hu
   | dropUnusedInput hu hd => exact Or.inr ⟨hu, hd⟩
 
-/-- Combined state for the full DLP 64 automated refactoring loop:
+/-- Combined state for the full DLP 65 automated refactoring loop:
 outer refactoring phases tracked by `(structural, useless, fold)` alongside
 the DAG-backed program state `prog : Program n`. -/
 structure FullAutoFixState (n : ℕ) where
@@ -1610,7 +1610,7 @@ structure FullAutoFixState (n : ℕ) where
   prog : Program n
 
 variable (sig) in
-/-- One step of the full DLP 64 auto-fixer:
+/-- One step of the full DLP 65 auto-fixer:
 1. A structural rewrite (strictly lowers `structuralMeasure`).
 2. A useless-input elimination step on a mixed op (preserves `structuralMeasure`,
    strictly lowers `useless` lexicographically).
@@ -1637,7 +1637,7 @@ inductive FullAutoFixStep {n : ℕ} (rank : Fin n → ℕ) :
 
 /-- Full automated refactoring (structural rewrites, useless-input elimination,
 constant folding / literal propagation / acyclic callee specialization, and
-DLP 59–61 DAG normalization) always terminates on every finite DAG-backed
+DLP 59–62 DAG normalization) always terminates on every finite DAG-backed
 program. -/
 theorem full_autofix_terminates {n : ℕ} (rank : Fin n → ℕ) (I O A : ℕ)
     (f : ℕ → FullAutoFixState n)

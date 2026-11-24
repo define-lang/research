@@ -1,7 +1,7 @@
 // The fixes a refactoring tool applies to a whole program until it
 // compiles (DLP 59's refactoring steps, structural rewrites, literal
 // propagation / constant folding / callee specialization, useless-input
-// elimination, DLP 60's order, grouping, and factoring, and DLP 61's matches,
+// elimination, DLP 60's order and grouping, DLP 61's factoring, and DLP 62's matches,
 // spellings, and wrappers), with every operation fixed after the ones it
 // executes.
 #pragma once
@@ -460,7 +460,7 @@ class ProgramFixer {
         }
       }
       if (rep.has_match) {
-        // Every match in the order DLP 61 reports them, largest first, each
+        // Every match in the order DLP 62 reports them, largest first, each
         // with the highest-precedence spelling among the matches of the
         // same value and size, as long as its statements and arguments
         // don't overlap a match already chosen: each is then still a match
@@ -1438,7 +1438,7 @@ class ProgramFixer {
     return false;
   }
 
-  // DLP 60: Factors common factor `f.factor_id` out of all matching single-use
+  // DLP 61: Factors common factor `f.factor_id` out of all matching single-use
   // `inner`-chain terms inside `f.root_id`'s single-use `outer`-chain.
   bool apply_factor(POp& op, const Report::Factor& f) {
     const OpInfo info = c_.analyze(op);
@@ -1631,7 +1631,7 @@ class ProgramFixer {
   }
 
   // After a boolean operation compiles: if it evaluates to a constant literal,
-  // names one of its views, or wraps one statement (DLP 61's wrapper), it's
+  // names one of its views, or wraps one statement (DLP 62's wrapper), it's
   // removed and its callers compute that instead.
   void settle(size_t index) {
     POp& op = p_.ops[index];

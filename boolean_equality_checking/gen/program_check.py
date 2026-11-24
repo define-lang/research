@@ -232,7 +232,7 @@ class Checker:
         raise KeyError(index)
 
     def key(self, name: str) -> tuple[int, int, int, int, int]:
-        """Return a registered operation's key (DLP 61), ordered for readability.
+        """Return a registered operation's key (DLP 62), ordered for readability.
 
         Fewest `and`s computing its function, then fewest read views, then
         project-registered before standard-library-registered, then fewer
@@ -939,7 +939,7 @@ class Checker:
     def spelling_compare(
         self, op: Operation, follows: list[str], a: tuple, b: tuple
     ) -> int:
-        """Compare two spellings by DLP 61's precedence."""
+        """Compare two spellings by DLP 62's precedence."""
         ka = (self.negations(op, a[1]), follows.index(a[0]))
         kb = (self.negations(op, b[1]), follows.index(b[0]))
         if ka != kb:
@@ -1380,7 +1380,7 @@ SELF_TESTS: list[tuple[str, dict[str, dict[str, object]]]] = [
         {"or": {}, "g3": {"order_grouping": 5}},
     ),
     (
-        # DLP 60 factoring common terms: `(a and b) or (a and c)` must factor `a`.
+        # DLP 61 factoring common terms: `(a and b) or (a and c)` must factor `a`.
         "registered or\n"
         + OR
         + "op fac bool 3\nand 1 2\nand 1 3\ncall or 4 5\nout 6\nend\n",
