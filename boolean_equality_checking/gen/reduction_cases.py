@@ -1,12 +1,14 @@
-"""Reduction cases: value operations and what fixing them reduces them to.
+"""Reduction cases: complete covering set of value operations and what fixing reduces them to.
 
 Writes `~/projects/define/drafts/boolean-reduction-cases.txt` (its header
 explains the line format) from the cases below, each reduced by `beq
-program --mode fix`, and checks every line: the expected program compiles
-under `beq` and under the independent checker (`program_check.py`), fixing
+program --mode fix --method auto`, and checks every line: the expected program
+compiles under `beq` (`auto`, plus `tt` when `I <= 20`) and under the
+independent checker (`program_check.py`, when `I <= 12` and `S <= 150`), fixing
 it again changes nothing, and reading the line back gives the same case.
 
-Run with `uv run --frozen --python 3.14 python gen/reduction_cases.py OUT`
+Run with `uv run --frozen --python 3.14 python gen/reduction_cases.py OUT 0 200`
+and `uv run --frozen --python 3.14 python gen/reduction_cases.py OUT merge`
 from the study's directory.
 """
 
@@ -28,9 +30,9 @@ HERE = Path(__file__).resolve().parent.parent
 BEQ = HERE / "src" / "beq"
 LIMIT = ["timeout", "-s", "KILL", "60", "prlimit", f"--as={4 << 30}"]
 
-# The library every case starts from: the registered operations'
-# definitions (gen/program.py), which every case has whether or not its
-# booleans.defcl registers them.
+# The fixed global standard boolean operations (DLP 61):
+# and, not, or, xor, equal.
+ALL = ["or", "xor", "equal"]
 LIBRARY = [
     "\n".join([f"op {name} bool {views}", *statements, f"out {out}", "end"])
     for name, (views, statements, out) in program.DEFINITIONS.items()
@@ -38,38 +40,40 @@ LIBRARY = [
 LIBRARY_NAMES = list(program.DEFINITIONS)
 
 HEADER = """\
-# Boolean reduction cases: a program, and the program it reduces to once
-# every fix of DLPs 59-61 is applied (DLP 59's refactoring steps, DLP 60's
-# order, DLP 61's matches, spellings, and wrappers), as the research
-# repository's fix loop applies them: one reported error at a time, the
-# first redundant value before the largest match, each match with its first
-# spelling, until the program compiles.
+# Boolean reduction cases: a complete covering test suite of programs and what
+# each reduces to once every automated refactoring fix of DLPs 56 and 59-64 is
+# applied (DLP 59's redundancy, constant folding, literal propagation, callee
+# specialization, dead-statement, unused-view, useless-input, multi-output
+# bool-op splitting, and mixed-output extraction rules; DLP 60's argument
+# order, statement order, associative grouping, and distributive factoring;
+# DLP 61's standard boolean operations, spellings, and wrappers; DLP 62's
+# limits).
 #
 # One case per line:
 #
-#     [REGISTERED] PROGRAM => REDUCED
+#     PROGRAM => REDUCED
 #
-# REGISTERED is booleans.defcl, in order. `and` and `not` are registered
-# for every value operation without being listed, and come first (DLP 61).
-# Every case also has the library of `or`, `implies`, `xor`, `eq`, `mux`,
-# and `maj`, defined as the fixes leave them when they're registered in
-# that order, each following `and`, `not`, and the ones before it: `or` is
-# `not (not a and not b)`, `implies` is `not (a and not b)`, `xor` is
-# `or(a and not b, not a and b)`, `eq` is `not xor(a, b)`, `mux` is
-# `or(s and a, b and not s)`, and `maj` is `mux(c, or(a, b), a and b)`.
-# They're in every case whether or not they're registered; an unregistered
-# one is executed like any value operation.
+# Every case runs under Define's fixed global standard boolean operations
+# (DLP 61), in fixed order: `and`, `not`, `or`, `xor`, `equal`, where
+# `or(a, b) = not (not a and not b)`, `xor(a, b) = or(a and not b, b and not a)`,
+# and `equal(a, b) = not xor(a, b)`, and Define's conservative limits (DLP 62):
+#   - <= 20 boolean input interface views per value operation
+#   - <= 256 boolean statements per value operation
+#   - <= 512 boolean inputs per value operation (21-512 via ROBDDs)
+#   - <= 65,536 canonical shared ROBDD reachable nodes past 20 inputs
+#     (pure boolean value operations <= 20 views always compile via the
+#     guaranteed truth-table floor).
 #
 # PROGRAM is one or more value operations separated by ` ;; `, each after
 # the ones it executes:
 #
 #     NAME(VIEW, ...) = BODY
 #
-# The names in parentheses are the read views: the boolean inputs. A view
+# The names in parentheses are the input views: the boolean inputs. A view
 # written `x: number` is numeric (numeric views come after boolean ones),
 # which makes the operation mixed. BODY is `let NAME = EXPR;` statements,
-# then the written view's EXPR, or `(EXPR, EXPR, ...)` for a mixed
-# operation's written views. In EXPR:
+# then the output view's EXPR, or `(EXPR, EXPR, ...)` for a mixed
+# operation's output views. In EXPR:
 #
 # - `a and b`, `not a`: the logical operations (`not` binds tighter);
 # - `R(a, ...)`: an execution of the value operation R;
@@ -77,45 +81,38 @@ HEADER = """\
 # - `cmp.NAME(...)`: a comparison, a statement that isn't boolean and
 #   gives a boolean input; `num.NAME(...)`: a numeric statement;
 # - `let (p, q) = M(...)`: an execution of a mixed operation M, one name
-#   per written view.
+#   per output view.
 #
 # Every operator and execution is one statement. A value used more than
 # once is a `let`; a value used once is written where it's used. A boolean
 # `let`'s statements come right before its first use, so the statement
 # order is DLP 60's: each boolean statement right before the statement that
-# first reads it, in view order, and the written views' last. A `let` of a
+# first reads it, in view order, and the output views' last. A `let` of a
 # statement that isn't boolean stays where it is. A `let` nothing reads is
-# still a statement: a dead one, written after the written views'. A name
+# still a statement: a dead one, written after the output views'. A name
 # given to two views of one execution stands for the value and a copy of
 # it (DLP 55).
 #
 # REDUCED is the program after every fix, in the same form, in DLP 60's
-# statement and argument order. It also shows each registered library
-# operation whose definition the fixes changed: another order in
-# booleans.defcl changes what it has to be, and when a match's fix would
-# make an execution cycle (DLP 9), because the registered operation's
-# definition executes the value operation the match is in, the executions
-# that lead back are written out in that definition first.
-# `removed NAME = EXPR` means a fix removed
-# the operation, and its callers compute EXPR (over its views) instead: a
-# wrapper (EXPR is the statement it wraps, DLP 61), or an operation whose
-# written view is a constant or one of its views (DLP 59's refactoring step
-# 4). `removed NAME view K = EXPR` is the same for one written view of a
-# mixed operation. `dropped NAME VIEW, ...` means those read views didn't
-# matter (DLP 59), so they're gone from the operation and from every
-# execution of it, which shows NAME's remaining views. Dead statements are
-# gone too. `error limits` instead means the fixes can't make the
-# program compile: past 256 boolean statements or 20 boolean inputs,
-# the shared ROBDD exceeded the canonical 4,000,000-node limit.
+# statement, argument, grouping, and factoring order.
+# `removed NAME = EXPR` means a fix removed the operation, and its callers
+# compute EXPR (over its original views) instead: a constant (`true`/`false`),
+# a wrapper (EXPR is the statement it wraps, DLP 61), or an operation whose
+# output view is one of its views (DLP 59). `removed NAME view K = EXPR` is
+# the same for one output view of a mixed operation (where `outJ` refers to
+# the J-th output view of the reduced mixed operation). `dropped NAME VIEW, ...`
+# means those input views didn't matter (DLP 59), so they're gone from the
+# operation and from every execution of it, which shows NAME's remaining views.
+# Dead statements are gone too. `error <reason>` (`literal` when a boolean
+# literal or constant expression reaches an opaque non-boolean logical
+# operation such as `num.*`, `limits`, `outputs`, `cycle`) means the fixes
+# stop and leave the error for the programmer.
 #
 # Every line was produced by the research repository's
-# boolean_equality_checking/gen/reduction_cases.py (the long ones from
-# gen/program.py's generator) and checked: REDUCED compiles under `beq`
-# and under the independent checker (gen/program_check.py), and fixing it
-# again changes nothing. The independent checker tries every tuple of
-# arguments, which is too slow past 12 inputs or about 150 statements, so
-# REDUCED programs that large are checked by `beq` with truth tables (when
-# within 20 inputs) and with the BDD backend instead.
+# boolean_equality_checking/gen/reduction_cases.py and checked: REDUCED
+# compiles under `beq --method auto` (and `tt` when <= 20 inputs) and under
+# the independent checker (`gen/program_check.py`, when <= 12 inputs and
+# <= 150 statements), and fixing it again changes nothing.
 """
 
 
@@ -410,7 +407,6 @@ def render_op(op: dict, ops: dict[str, dict], names: list[str] | None = None) ->
     nbool, nnum = op["nbool"], op["nnum"]
     letters = "abcdefghijklmnopqrstuvwxyz"
     view_names = names or [view_name(i, letters) for i in range(nbool + nnum)]
-    # Value numbers: views, then each statement's values.
     source: dict[int, int] = {}
     v = nbool + nnum + 1
     for s in op["stmts"]:
@@ -439,7 +435,6 @@ def render_op(op: dict, ops: dict[str, dict], names: list[str] | None = None) ->
         if o.isdigit():
             reads[int(o)] = reads.get(int(o), 0) + 1
     text_of: dict[int, str] = {}
-    # An `and` written in place needs parentheses as an operand.
     operand_of: dict[int, str] = {}
     lets: list[str] = []
     let_count = 0
@@ -466,7 +461,6 @@ def render_op(op: dict, ops: dict[str, dict], names: list[str] | None = None) ->
             prefix = {"call": "", "cmp": "cmp.", "num": "num."}[s[0]]
             args = ", ".join(arg_text(resolve(a), text_of, view_names) for a in s[2:])
             e = f"{prefix}{s[1]}({args})"
-        # Statements that aren't boolean keep their place: always a let.
         if reads.get(v, 0) == 1 and s[0] not in ("cmp", "num"):
             text_of[v] = e
             if s[0] == "and":
@@ -525,8 +519,8 @@ def run_beq(path: Path, *args: str) -> dict:
 def case_text(registered: list[str], blocks: list[str]) -> str:
     """Return a whole program file for a case.
 
-    A case can define one of the library's operations itself, which then
-    replaces the library's. Every operation comes after the ones it
+    A case can define one of the standard library's operations itself, which
+    then replaces the library's. Every operation comes after the ones it
     executes, otherwise in library-then-case order.
     """
     own = {b.split()[1]: b for b in blocks}
@@ -549,20 +543,20 @@ def case_text(registered: list[str], blocks: list[str]) -> str:
     return "\n".join(["registered " + " ".join(registered), *text]) + "\n"
 
 
-def reduce(
-    registered: list[str], program_text: str, work: Path
-) -> tuple[str, list[str]]:
+def reduce(program_text: str, work: Path) -> tuple[str, list[str]]:
     """Return (REDUCED, the case's own operation names), or ('error ...', [])."""
     blocks, _ = parse_program(program_text)
     raw = work / "case.prog"
     fixed = work / "fixed.prog"
-    raw.write_text(case_text(registered, blocks))
+    raw.write_text(case_text(ALL, blocks))
     fails = work / "fails.txt"
     replaced = work / "replaced.txt"
     run_beq(
         raw,
         "--mode",
         "fix",
+        "--method",
+        "auto",
         "--out",
         str(fixed),
         "--failures",
@@ -578,9 +572,6 @@ def reduce(
         w[1] for w in (line.split() for line in text.splitlines()) if w and w[0] == "op"
     ]
     case_names = [b.split()[1] for b in blocks]
-    # A registered library operation the fixes changed is shown too: other
-    # orders in booleans.defcl change what its definition has to be, and
-    # a match whose fix would make a cycle writes out executions in it.
     library = dict(zip(LIBRARY_NAMES, LIBRARY, strict=True))
     fixed_blocks: dict[str, list[str]] = {}
     for line in text.splitlines():
@@ -592,13 +583,12 @@ def reduce(
     own = []
     for n in out_names:
         changed = (
-            n in registered
-            and n in library
-            and fixed_blocks[n] != library[n].splitlines()
+            n in ALL and n in library and fixed_blocks[n] != library[n].splitlines()
         )
         if n in case_names or n not in library or changed:
             own.append(n)
     views = view_names_of(program_text)
+    orig_views = {name: list(vs) for name, vs in views.items()}
     replacements = replaced.read_text().splitlines()
     dropped_parts = []
     for line in replacements:
@@ -616,7 +606,7 @@ def reduce(
         name, view, kind, *rest = line.split()
         if name not in case_names or kind == "dropped":
             continue
-        what = replacement_text(kind, rest, views[name])
+        what = replacement_text(kind, rest, orig_views[name])
         if name in out_names:
             parts.append(f"removed {name} view {int(view) + 1} = {what}")
         else:
@@ -625,17 +615,21 @@ def reduce(
 
 
 def replacement_text(kind: str, rest: list[str], views: list[str]) -> str:
-    """Return what a removed operation's callers compute, over its views."""
+    """Return what a removed operation's callers compute, over its original views."""
 
     def arg(a: str) -> str:
         if a in ("T", "F"):
             return "true" if a == "T" else "false"
+        if a.startswith("@"):
+            return f"out{a[1:]}"
         return views[int(a) - 1]
 
     if kind == "literal":
         return arg(rest[0])
     if kind == "view":
         return views[int(rest[0]) - 1]
+    if kind == "out":
+        return arg(rest[0])
     if rest[0] == "and":
         return f"{arg(rest[1])} and {arg(rest[2])}"
     if rest[0] == "not":
@@ -643,44 +637,37 @@ def replacement_text(kind: str, rest: list[str], views: list[str]) -> str:
     return f"{rest[1]}({', '.join(arg(a) for a in rest[2:])})"
 
 
-def verify(registered: list[str], reduced: str, work: Path) -> None:
-    """Check a reduced program: it compiles under both checkers, and is fixed."""
+def verify(reduced: str, work: Path) -> None:
+    """Check a reduced program: it compiles under `auto`, `tt` (when <= 20), and `program_check`."""
     blocks, _ = parse_program(reduced)
     if not blocks:
         return
     path = work / "expected.prog"
-    text = case_text(registered, blocks)
+    text = case_text(ALL, blocks)
     path.write_text(text)
-    # Only the case's own operations: an unregistered library operation is
-    # a value operation like any other, which the case doesn't show.
     names = {b.split()[1] for b in blocks}
     details = work / "details.jsonl"
-    run_beq(path, "--mode", "check", "--how", "tt", "--details", str(details))
+    run_beq(path, "--mode", "check", "--method", "auto", "--details", str(details))
+    max_inputs = 0
+    max_stmts = 0
     for line in details.read_text().splitlines():
         row = json.loads(line)
-        if row["op"] in names and row["errors"]:
-            raise AssertionError(f"beq finds {row['errors']} in {reduced}")
-    # The independent checker tries every tuple of arguments, which takes
-    # too long past 12 inputs or about 150 statements; those programs are
-    # checked by beq's BDD backend as well as its truth tables instead.
-    largest = max(len(b.splitlines()) for b in blocks)
-    inputs = max(
-        int(b.split()[3]) + (int(b.split()[4]) if b.split()[2] == "mixed" else 0)
-        for b in blocks
-    )
-    if inputs > 12 or largest > 150:
-        run_beq(path, "--mode", "check", "--how", "auto", "--details", str(details))
+        if row["op"] in names:
+            if row["errors"]:
+                raise AssertionError(f"beq auto finds {row['errors']} in {reduced}")
+            max_inputs = max(max_inputs, row["inputs"])
+            max_stmts = max(max_stmts, row["statements"])
+    if max_inputs <= 20:
+        run_beq(path, "--mode", "check", "--method", "tt", "--details", str(details))
         for line in details.read_text().splitlines():
             row = json.loads(line)
             if row["op"] in names and row["errors"]:
-                raise AssertionError(
-                    f"beq's BDD check finds {row['errors']} in {reduced}"
-                )
-    else:
+                raise AssertionError(f"beq tt finds {row['errors']} in {reduced}")
+    if max_inputs <= 12 and max_stmts <= 150:
         for r in program_check.check_program(text):
             if r["errors"] and r["op"] in names:
                 raise AssertionError(f"independent checker: {r} in {reduced}")
-    again, _ = reduce(registered, reduced, work)
+    again, _ = reduce(reduced, work)
     kept = " ;; ".join(
         part
         for part in reduced.split(" ;; ")
@@ -690,196 +677,250 @@ def verify(registered: list[str], reduced: str, work: Path) -> None:
         raise AssertionError(f"not a fixed point: {reduced} => {again}")
 
 
-# The cases: (registered operations, program).
+# Complete covering test cases under Define's fixed standard boolean operations
+# (`and`, `not`, `or`, `xor`, `equal`) and conservative limits.
 
-ALL = ["or", "implies", "xor", "eq", "mux", "maj"]
-CASES: list[tuple[list[str], str]] = [
-    # Redundant values: constants, the same value, the opposite. Each case
-    # reads more views than it needs, so what it reduces to is still a value
-    # operation and not a wrapper.
-    ([], "f(a, b, c) = (a and not a) and b and c"),
-    ([], "f(a, b, c) = not (a and not a) and b and c"),
-    ([], "f(a, b, c) = let x = a and b; x and (b and a) and c"),
-    ([], "f(a, b, c) = let x = a and b; (x and b) and c"),
-    ([], "f(a, b, c) = let x = a and b; not (not (a and b)) and x and c"),
-    ([], "f(a, b, c, d) = let x = a and b; (x and not x and c) and d"),
-    ([], "f(a, b, c) = let y = not a; not y and b and c"),
-    ([], "f(a, b, c) = let y = not a; let z = not a; y and z and b and c"),
-    (["or"], "f(a, b, c) = let u = a and b; or(not a, not b) and c and u"),
-    (["or"], "f(a, b, c) = let u = a and b; or(not a, not b) and c"),
-    ([], "f(a, b, c) = let u = a and b; not (not a and not b) and not u and c"),
-    (
-        ALL,
-        "g(a, b) = (a and b) and not (not a and b) ;; f(a, b, c) = let x = g(a, b); let y = g(a, b); x and y and c",
-    ),
-    (ALL, "f(a, b, c) = a and (a and b) and c"),
-    (ALL, "f(a, b, c) = (a and b) and (a and c)"),
-    (ALL, "f(a, b, c) = let n = not a; mux(a, b, c) and not mux(n, c, b)"),
-    # Literals.
-    ([], "f(a, b, c) = a and true and b and c"),
-    ([], "f(a, b, c) = ((a and false) and b) and c"),
-    ([], "f(a, b, c) = not false and a and b and c"),
-    (["or"], "g(a, b) = not (not a and not b) ;; f(a, b, c) = g(a, false) and b and c"),
-    (ALL, "g(a, b, c) = (a and b) and not c ;; f(a, b, d) = g(a, b, false) and d"),
-    # Matches.
-    (["or"], "f(a, b) = not (not a and not b)"),
-    (["implies"], "f(a, b) = not (a and not b)"),
-    (["or", "implies"], "f(a, b) = not (not a and not b)"),
-    (["xor"], "f(a, b) = not (not (a and not b) and not (not a and b))"),
-    (["eq"], "f(a, b) = not (a and not b) and not (not a and b)"),
-    (["mux"], "f(s, a, b) = not (not (s and a) and not (not s and b))"),
-    (["maj"], "f(a, b, c) = not (not (a and b) and not (c and not (not a and not b)))"),
-    (
-        ALL,
-        "f(a, b, c, d) = let x = a and b; let y = c and d; not (not x and not y) and x",
-    ),
-    (["or"], "f(a, b, c) = not (not (a and b) and not c)"),
-    (["or"], "f(a, b, c) = not a and not b and c"),
-    (["or"], "f(a, b, c) = (a and b) and not (not a and not c)"),
-    (
-        ["or", "implies"],
-        "g(a, b) = not (not a and not b) and not (a and b) ;; f(a, b, c) = g(a, b) and c",
-    ),
-    (ALL, "g(a, b) = a and not b ;; f(a, b, c) = not (not g(a, b) and not c) and b"),
-    # Opposite results: three statements, and the two-statement exception.
-    (["implies"], "f(a, b, c) = (a and not b) and c"),
-    (["implies"], "f(a, b, c) = let n = not b; (a and n) and c and n"),
-    (["or"], "f(a, b, c) = not or(a, b) and c"),
-    (["or", "nor"], "nor(a, b) = not or(a, b) ;; f(a, b, c) = not or(a, b) and c"),
-    (["xor", "eq"], "f(a, b, c) = (not (a and not b) and not (not a and b)) and c"),
-    (["eq"], "f(a, b, c) = not xor(a, b) and c"),
-    # Spellings.
-    (["or", "implies"], "f(a, b, c) = let n = not b; or(a, n) and c and n"),
-    (["implies", "or"], "f(a, b, c) = let n = not b; or(a, n) and c and n"),
-    (["or", "mux"], "f(a, b, c) = let n = not a; mux(a, c, b) and n"),
-    (["mux", "or"], "f(a, b, c) = mux(a, a, b) and c"),
-    (ALL, "f(a, b, c) = let n = not a; let m = not b; or(n, m) and c and n and m"),
-    (ALL, "f(a, b, c) = let n = not c; implies(c, a) and or(a, n) and b"),
-    # Wrappers.
-    (["or"], "w(a, b) = or(a, b) ;; f(a, b, c) = w(a, b) and c and a"),
-    (["or"], "w(a, b) = or(b, a) ;; f(a, b, c) = w(c, a) and b and c"),
-    ([], "w(a, b) = a and b ;; f(a, b, c) = w(a, b) and not c"),
-    ([], "w(a) = not a ;; f(a, b, c) = w(a) and b and c"),
-    ([], "w(a, b) = a ;; f(a, b, c) = w(a, b) and c and b"),
-    (["or"], "g(a, b) = a and b ;; f(a, b, c) = g(a, b) and not c"),
-    (["or"], "g(a, b, c) = (a and b) and c ;; f(a, b, c, d) = g(a, b, c) and not d"),
-    # Argument order and statement order (DLP 60).
-    ([], "f(a, b, c) = (b and a) and c"),
-    ([], "f(a, b, c) = let x = a and b; c and x"),
-    ([], "f(a, b, c) = let x = b and c; let y = a and c; x and y"),
-    ([], "f(a, b, c) = let n = not c; let x = a and b; n and x"),
-    (ALL, "g(x, y, z) = or(x and y, z) ;; f(a, b, c) = g(c, a, b) and g(a, c, b)"),
-    (ALL, "g(x, y, z) = or(x and z, y) ;; f(a, b, c, d) = g(c, a, b) and d"),
-    (
-        ALL,
-        "g(x, y, z, w) = (x and y) and not (z and w) ;; f(a, b, c, d) = g(b, a, d, c) and a",
-    ),
-    (ALL, "f(a, b, c) = maj(c, b, a) and not a"),
-    # Copies: one value given to two views.
-    (ALL, "g(x, y, z) = (x and y) and not z ;; f(a, b, c) = g(a, a, b) and c"),
-    (ALL, "g(x, y, z) = (x and not y) and z ;; f(a, b, c) = g(a, b, b) and c"),
-    ([], "f(a, b, c) = a and a and b and c"),
-    # Mixed operations: comparisons, numeric statements, mixed executions.
-    (
-        ALL,
-        "f(a, x: number) = let c = cmp.lt(x, 3); (num.sel(not (not a and not c), x, 1))",
-    ),
-    (
-        ALL,
-        "f(a, x: number, y: number) = (num.add(x, y), not (not a and not cmp.eq(x, y)) and cmp.lt(x, y))",
-    ),
-    (
-        ALL,
-        "m(a, x: number) = (num.add(x, 1), (a and cmp.lt(x, 2)) and not cmp.eq(x, 0)) ;; f(b, y: number) = let (p, q) = m(b, y); (num.sel(q and b, p, y))",
-    ),
-    # Constants across value operations (DLP 59's step 4).
-    (
-        ALL,
-        "g(a, b) = (a and b) and not (a and b) ;; f(a, b, c, d) = (not g(a, b) and c) and d",
-    ),
-    (
-        ALL,
-        "g(a, b) = (a and b) and not (a and b) ;; h(a, b, c, d) = not (not g(a, b) and not c) and d ;; f(a, b, c, d) = h(a, b, c, d) and not a",
-    ),
-    (
-        ALL,
-        "m(a, x: number) = (num.add(x, 1), a and not a) ;; f(b, c, y: number) = let (p, q) = m(b, y); (num.sel(q, p, y), (b and not q) and c)",
-    ),
-    (
-        ALL,
-        "g(s, a, b) = (s and not a) and not b ;; f(s, b, c, d) = g(s, s and not s, b) and c and d",
-    ),
-    (
-        ALL,
-        "g(a, b, c, d) = maj(a, b, c) and not d ;; f(a, b, c) = g(a, b, c, false) and not a",
-    ),
-]
-
-# The rules DLPs 59 and 61 added: a registered operation's own definition
-# follows only `and`, `not`, and the ones listed before it; `and` and `not`
-# are registered everywhere and come first; read views that don't matter;
-# dead statements; and, for the fix loop, writing out the executions that
-# would make a match's fix an execution cycle.
-NEW_RULES: list[tuple[list[str], str]] = [
-    (["xor", "eq"], "eq(a, b) = not (a and not b) and not (not a and b)"),
-    (["eq", "xor"], "xor(a, b) = not (not (a and not b) and not (not a and b))"),
-    (
-        ["or", "implies"],
-        "or(a, b) = not (not a and not b) ;; f(a, b, c) = or(a, b) and c",
-    ),
-    (
-        ["implies", "or"],
-        "or(a, b) = not (not a and not b) ;; f(a, b, c) = or(a, b) and c",
-    ),
-    (ALL, "f(a, b, c) = mux(not c, c, b) and a"),
-    (["or"], "f(a, b, c) = or(not a, not b) and c"),
-    (["implies"], "f(a, b, c) = let i = implies(a, b); (a and i) and c"),
-    ([], "f(a, b, c) = let n = not a; let m = not b; not (n and m) and c"),
-    (ALL, "g(x, y, z, w) = x and not y ;; f(a, b, c, d) = g(a, b, d, c) and c"),
-    (ALL, "g(x, y, z) = x and not y ;; f(a, b, c) = g(a, b, not c) and c"),
-    (
-        ALL,
-        "g(x, y, z) = xor(xor(x, z), xor(y, z)) and x ;; f(a, b, c) = g(a, b, c) and not c",
-    ),
-    ([], "f(a, b, c) = let d = a and c; (a and b) and c"),
-    ([], "f(a, b, c) = let d = a and c; let e = not d; (a and b) and c"),
-    # A read view that doesn't matter, given to executions: its reads get
-    # another read view the operation keeps, so the executions stay.
-    (ALL, "h(p, q) = p and not q ;; f(a, b, c) = or(h(a, c), h(a, not c)) and b"),
-    (
-        ["or"],
-        "h(p, q, r) = (p and q) and not r ;; g(x, y, z) = or(h(x, y, z), h(x, y, not z)) ;; f(a, b, c, d) = g(a, b, c) and d",
-    ),
-    # With no read view left to give its reads, the written view is a
-    # constant.
-    ([], "g(x) = x and not x ;; f(a, b) = g(a) and b"),
-    # A match whose fix would make an execution cycle (DLP 9): the
-    # executions that lead back are written out first.
-    (
-        ["maj"],
-        "U(a, b, c, t) = not (not (a and b) and not (c and not (not a and not b))) and t ;; maj(a, b, c) = U(a, b, c, or(a, b))",
-    ),
-    (
-        ["eq", "xor"],
-        "xor(a, b) = not (not (a and not b) and not (not a and b)) ;; eq(a, b) = not xor(a, b) ;; f(a, b, c) = eq(a, b) and c",
-    ),
+CASES: list[str] = [
+    # --- 1. DLP 59: Redundant values (constants, equal, opposite) ---
+    "f(a, b, c) = (a and not a) and b and c",
+    "f(a, b, c) = not (a and not a) and b and c",
+    "f(a, b, c) = let x = a and b; x and (b and a) and c",
+    "f(a, b, c) = let x = a and b; (x and b) and c",
+    "f(a, b, c) = let x = a and b; not (not (a and b)) and x and c",
+    "f(a, b, c, d) = let x = a and b; (x and not x and c) and d",
+    "f(a, b, c) = let y = not a; not y and b and c",
+    "f(a, b, c) = let y = not a; let z = not a; y and z and b and c",
+    "f(a, b, c) = let u = a and b; or(not a, not b) and c and u",
+    "f(a, b, c) = let u = a and b; or(not a, not b) and c",
+    "f(a, b, c) = let u = a and b; not (not a and not b) and not u and c",
+    "g(a, b) = (a and b) and not (not a and b) ;; f(a, b, c) = let x = g(a, b); let y = g(a, b); x and y and c",
+    "g(a, b) = a and not b ;; h(a, b) = not or(not a, b) ;; f(a, b, c) = (g(a, b) and h(a, b)) and c",
+    "f(a, b, c) = a and (a and b) and c",
+    "f(a, b, c) = (a and b) and (a and c)",
+    "f(a, b, c) = (a and or(a, b)) and c",
+    "f(a, b, c) = xor(a, equal(a, b)) and c",
+    "f(a, b, c) = let n = not a; let x = a and or(a, b); xor(x, c) and n",
+    # --- 2. DLP 56 & 59: Literals ---
+    "f(a, b, c) = a and true and b and c",
+    "f(a, b, c) = ((a and false) and b) and c",
+    "f(a, b, c) = not false and a and b and c",
+    "f(a, b, c) = or(a, false) and b and c",
+    "g(a, b, c) = (a and b) and not c ;; f(a, b, d) = g(a, b, false) and d",
+    # --- 3. DLP 59: Dead statements and unused read views ---
+    "f(a, b, c) = let d = a and c; (a and b) and c",
+    "f(a, b, c) = let d = a and c; let e = not d; (a and b) and c",
+    "g(x, y, z, w) = x and not y ;; f(a, b, c, d) = g(a, b, d, c) and c",
+    "g(x, y, z) = x and not y ;; f(a, b, c) = g(a, b, not c) and c",
+    "h(p, q) = p and not q ;; f(a, b, c) = or(h(a, c), h(a, not c)) and b",
+    # Interacting unused views: uniform substitution fails, per-view succeeds.
+    "g(a, b, c, u1, u2) = let p = xor(u1, u2); xor(xor(a, p), xor(b, p)) and c",
+    # Interacting unused views where every kept-view substitution creates a constant
+    # (auto-fixed via false-substitution + literal propagation + callee specialization).
+    "g(x, y, z) = xor(xor(x, z), xor(y, z)) and x ;; f(a, b, c) = g(a, b, c) and not c",
+    "h(p, q, r) = (p and q) and not r ;; g(x, y, z) = or(h(x, y, z), h(x, y, not z)) ;; f(a, b, c, d) = g(a, b, c) and d",
+    # --- 4. DLP 59: Constants across value operations ---
+    "g(x) = x and not x ;; f(a, b) = g(a) and b",
+    "g(a, b) = (a and b) and not (a and b) ;; f(a, b, c, d) = (not g(a, b) and c) and d",
+    "g(a, b) = (a and b) and not (a and b) ;; h(a, b, c, d) = not (not g(a, b) and not c) and d ;; f(a, b, c, d) = h(a, b, c, d) and not a",
+    "m(a, x: number) = (num.add(x, 1), a and not a) ;; f(b, c, y: number) = let (p, q) = m(b, y); (num.sel(q, p, y), (b and not q) and c)",
+    "g(s, a, b) = (s and not a) and not b ;; f(s, b, c, d) = g(s, s and not s, b) and c and d",
+    "g(a, b, c, d) = equal(a, b) and c and not d ;; f(a, b, c) = g(a, b, c, false) and not a",
+    # --- 5. DLP 60: Argument order, symmetry groups, and statement order ---
+    "f(a, b, c) = (b and a) and c",
+    "f(a, b, c) = let x = a and b; c and x",
+    "f(a, b, c) = let x = b and c; let y = a and c; x and y",
+    "f(a, b, c) = let n = not c; let x = a and b; n and x",
+    "f(a, b, c) = let n = not b; let m = not a; (m and n) and c",
+    "g(a, b, c) = or(a, b and c) ;; h(a, b, c) = or(b, a and c) ;; f(a, b, c) = h(a, b, c) and g(a, b, c)",
+    "m(x: number) = (cmp.lt(x, 1), cmp.gt(x, 2)) ;; f(y: number) = let (p, q) = m(y); (q and p)",
+    "g(x, y, z) = or(x and y, z) ;; f(a, b, c) = g(c, a, b) and g(a, c, b)",
+    "g(x, y, z) = or(x and z, y) ;; f(a, b, c, d) = g(c, a, b) and d",
+    "g(x, y, z, w) = (x and y) and not (z and w) ;; f(a, b, c, d) = g(b, a, d, c) and a",
+    "g(x, y, z) = or(x and y, z and or(x, y)) ;; f(a, b, c, d) = g(c, b, a) and d",
+    # --- 6. DLP 60: Associative grouping (all 4 ops + shared/edge cases) ---
+    "f(a, b, c) = a and (b and c)",
+    "f(a, b, c) = (a and c) and b",
+    "f(a, b, c, d) = (a and b) and (c and d)",
+    "f(a, b, c) = or(a, or(b, c))",
+    "f(a, b, c, d) = or(or(a, b), or(c, d))",
+    "f(a, b, c, d) = xor(xor(a, b), xor(c, d))",
+    "f(a, b, c) = equal(a, equal(b, c))",
+    "f(a, b, c, d) = equal(equal(a, b), equal(c, d))",
+    # Shared intermediate node must NOT be flattened.
+    "f(a, b, c, d) = let t = b and c; or(a and t, d and not t)",
+    # Complementary leaves in unfixed associative chain (DLP 59 before regrouping).
+    "f(a, b, c) = equal(a, equal(b, not a)) and c",
+    # --- 7. DLP 60: Factoring common terms (all 4 distributive pairs + ties + shared) ---
+    "f(a, b, c) = or(a and b, a and c)",
+    "f(a, b, c) = or(a, b) and or(a, c)",
+    "f(a, b, c) = xor(a and b, a and c)",
+    "f(a, b, c) = equal(or(a, b), or(a, c))",
+    "f(a, b, c, d) = or(or(a and b, a and c), a and d)",
+    "f(a, b, c, d) = or(or(a and b, a and c), d)",
+    "f(a, b, c, d, e) = or((a and b) and c, (a and d) and e)",
+    "f(a, b, c) = or(not a and b, not a and c)",
+    # Tie-break 1: most terms removed (b: 3) beats lower rank (a: 2).
+    "f(a, b, c, d, e) = or(or(a and b, a and c), or(b and d, b and e))",
+    # Tie-break 2: equal term count (a: 2, b: 2) broken by lowest rank (a).
+    "f(a, b, c, d) = or(or(a and b, a and c), b and d)",
+    # Cascading double factoring.
+    "f(a, b, c, d) = or(or(a and c, a and d), or(b and c, b and d))",
+    # Shared inner term must NOT be factored.
+    "f(a, b, c, d) = let t = a and b; xor(or(t, a and c), t and d)",
+    # --- 8. DLP 61: Standard boolean operation matches, opposites, spellings, wrappers ---
+    "f(a, b) = not (not a and not b)",
+    "f(a, b) = not (not (a and not b) and not (not a and b))",
+    "f(a, b) = not (a and not b) and not (not a and b)",
+    "f(a, b, c) = xor(a, a and not b) and c",
+    "f(a, b, c, d) = let x = a and b; let y = c and d; not (not x and not y) and x",
+    "f(a, b, c) = not (not (a and b) and not c)",
+    "f(a, b, c) = not a and not b and c",
+    "f(a, b, c) = or(not a, not b) and c",
+    "f(a, b, c) = (a and b) and not (not a and not c)",
+    "g(a, b) = a and not b ;; f(a, b, c) = not (not g(a, b) and not c) and b",
+    # Opposite match 3-statement threshold (only 2 statements would be removed -> stays).
+    "f(a, b, c) = let n = not a; xor(or(n, not b), c and n)",
+    # `not` of standard op stays; direct `equal` beats `not xor`.
+    "f(a, b, c) = not or(a, b) and c",
+    "f(a, b, c) = (not (a and not b) and not (not a and b)) and c",
+    "f(a, b, c) = not xor(a, b) and c",
+    # Spellings: fewest negations and fixed order (`and < not < or < xor < equal`).
+    "f(a, b, c) = let n = not a; xor(n, b) and c and n",
+    "f(a, b, c) = let n = not a; equal(n, b) and c and n",
+    "f(a, b, c, d) = let n = not a; let m = not b; xor(xor(n, m), or(c and n, d and m))",
+    "f(a, b, c, d) = let n = not a; let m = not b; xor(equal(n, m), or(c and n, d and m))",
+    "f(a, b, c) = let n = not a; let m = not b; or(n, m) and c and n and m",
+    "f(a, b, c, d) = let x = a and b; let y = c and not a; xor(x, y) and d",
+    "f(a, b, c, d) = let x = or(a, b); let y = or(c, not a); equal(x, y) and d",
+    "f(a, b, c, d) = let x = a and b; let y = c and not a; (not x and not y) and d",
+    # Standard library definitions (fixed order: and, not, or, xor, equal).
+    "xor(a, b) = not (not (a and not b) and not (not a and b))",
+    "equal(a, b) = not (a and not b) and not (not a and b)",
+    # Wrappers (and non-wrappers).
+    "w(a, b) = or(a, b) ;; f(a, b, c) = w(a, b) and c and a",
+    "w(a, b) = or(b, a) ;; f(a, b, c) = w(c, a) and b and c",
+    "w(a, b) = xor(a, b) ;; f(a, b, c) = w(a, b) and c",
+    "w(a, b) = equal(a, b) ;; f(a, b, c) = w(a, b) and c",
+    "w(a, b) = a and b ;; f(a, b, c) = w(a, b) and not c",
+    "w(a) = not a ;; f(a, b, c) = w(a) and b and c",
+    "w(a, b) = a ;; f(a, b, c) = w(a, b) and c and b",
+    "g(a, b, c) = (a and b) and c ;; f(a, b, c, d) = g(a, b, c) and not d",
+    "g(a, b) = a and not b ;; w(a, b) = g(a, b) ;; f(a, b, c) = w(a, b) and c",
+    # --- 9. DLP 55: Copies (one value given to two views) ---
+    "g(x, y, z) = (x and y) and not z ;; f(a, b, c) = g(a, a, b) and c",
+    "g(x, y, z) = (x and not y) and z ;; f(a, b, c) = g(a, b, b) and c",
+    "f(a, b, c) = a and a and b and c",
+    # --- 10. Mixed operations: comparisons, numeric statements, mixed executions ---
+    "f(a, x: number) = let c = cmp.lt(x, 3); (num.sel(not (not a and not c), x, 1))",
+    "f(a, x: number) = let c = cmp.lt(x, 3); (num.sel(or(c, a and c), x, 1))",
+    "f(x: number) = let c1 = cmp.lt(x, 3); let c2 = cmp.lt(x, 3); (c1 and c2)",
+    "f(x: number, y: number) = (num.add(x, y), not (not cmp.eq(x, y) and not cmp.lt(x, y)) and cmp.gt(x, 0))",
+    "m(x: number) = (num.add(x, 1), cmp.lt(x, 2) and not cmp.eq(x, 0)) ;; f(b, y: number) = let (p, q) = m(y); (num.sel(q and b, p, y))",
+    # DLP 59: boolean literals/constants reaching opaque non-boolean logical ops (`num.*`) stop cleanly;
+    # literals reaching a mixed op that simplifies them away specialize cleanly.
+    "f(x: number) = (num.sel(true, x, 1))",
+    "f(a, x: number) = (num.sel(a and not a, x, 1))",
+    "m(a, x: number) = (num.sel(a, x, 1)) ;; f(y: number) = let (p) = m(false, y); (p)",
+    "m(a, b, x: number) = (num.sel(a and b, x, 1)) ;; f(b, y: number) = let (p) = m(true, b, y); (p)",
+    # DLP 59 Problem 7: written boolean views in non-boolean Value Operations (auto-extracted).
+    "f(a, x: number) = (num.add(x, 1), not a)",
+    "f(a, x: number, y: number) = (num.add(x, y), a and cmp.lt(x, y))",
+    "m(a, x: number, y: number) = (num.add(x, y), a and cmp.lt(x, y)) ;; f(b, u: number, v: number) = let (s, ok) = m(b, u, v); (num.sel(ok, s, u))",
+    "f(a, b, x: number) = (num.sel(a and b, x, 1))",
+    "f(x: number, y: number) = let c = cmp.lt(x, y); (c, not c)",
+    "f(x: number, y: number) = let c = cmp.lt(x, y); let d = cmp.eq(x, y); (c, or(c, d))",
+    "f(x: number, y: number) = (cmp.lt(x, y), cmp.gt(x, y))",
+    "m(x: number) = (num.add(x, 1), cmp.lt(x, 2)) ;; f(y: number) = let (p, q) = m(y); (p)",
+    # DLP 59 Problem 7: useless boolean input in one expression of a mixed operation.
+    # Both the simple example and the `xor_and` example auto-fix cleanly.
+    "f(a, b, c, x: number, y: number) = let first = num.sel(equal(equal(a, b), equal(b, c)), x, y); (num.sel(b, first, 0))",
+    "xor_and(d, p, q) = xor(d, p and q) ;; f(a, b, c, d, e, x: number, y: number) = let first = num.sel(xor(xor_and(d, a, b), xor_and(d, c, e)), x, y); (num.sel(d, first, 0))",
 ]
 
 
-def generated_cases(rng: random.Random) -> list[tuple[list[str], str]]:
-    """Long cases: near and past 256 boolean statements and 20 inputs."""
-    out = []
+def _make_nlfsr(rounds: int, n_views: int = 20) -> str:
+    """Return an irreducible 20-view op with `37 + 2 * rounds` statements.
+
+    At `rounds = 109` (255 input statements), its shared ROBDD exceeds 65,536
+    nodes and triggers the guaranteed truth-table floor fallback; at
+    `rounds = 110` (257 statements) it exceeds the 256-statement limit.
+    """
+    names = [view_name(i, "abcdefghijklmnopqrstuvwxyz") for i in range(n_views)]
+    vals: list[str] = []
+    lets: list[str] = []
+
+    def add_let(expr: str) -> None:
+        nm = f"u{len(vals)}"
+        lets.append(f"let {nm} = {expr};")
+        vals.append(nm)
+
+    add_let(f"{names[0]} and {names[1]}")
+    for i in range(2, n_views):
+        add_let(f"xor({vals[-1]}, {names[i]} and {names[(i + 5) % n_views]})")
+    for r in range(rounds):
+        add_let(f"xor({vals[-1]}, {vals[-4]} and {names[(r * 7 + 3) % n_views]})")
+    body = " ".join(lets[:-1]) + " " + lets[-1].split(" = ", 1)[1][:-1]
+    return f"f({', '.join(names)}) = {body}"
+
+
+def _make_bdd_inner_product(pairs: int) -> str:
+    """Return a mixed op with `2 * pairs` boolean inputs whose ROBDD has ~2^(pairs+1) nodes.
+
+    At `pairs = 14` (28 inputs, 40 statements, 32,806 ROBDD nodes) it compiles;
+    at `pairs = 15` (30 inputs, 43 statements, > 65,536 ROBDD nodes) it hits
+    the canonical shared ROBDD node limit.
+    """
+    lets = [f"let x{i} = cmp.gt(n, {i});" for i in range(pairs)] + [
+        f"let y{i} = cmp.lt(n, {i});" for i in range(pairs)
+    ]
+    chain_x = "x0"
+    for i in range(1, pairs):
+        chain_x = f"({chain_x} and x{i})"
+    lets.append(f"let s = num.use({chain_x}, n);")
+    ip = "x0 and y0"
+    for i in range(1, pairs):
+        ip = f"xor({ip}, x{i} and y{i})"
+    return f"f(n: number) = {' '.join(lets)} (s, {ip})"
+
+
+def _make_wide_mixed_inputs(n_inputs: int) -> str:
+    """Return a mixed op reading `n_inputs` boolean inputs via a 20-view helper.
+
+    At `n_inputs = 512` it compiles via ROBDDs; at `513` it hits `error limits`.
+    """
+    hviews = [view_name(i, "abcdefghijklmnopqrstuvwxyz") for i in range(20)]
+    hbody = hviews[0]
+    for v in hviews[1:]:
+        hbody = f"xor({hbody}, {v})"
+    h_op = f"h20({', '.join(hviews)}) = {hbody}"
+    lets = [f"let c{i} = cmp.lt(n, {i});" for i in range(n_inputs)]
+    terms = []
+    idx = 0
+    while idx + 20 <= n_inputs:
+        terms.append(f"h20({', '.join(f'c{j}' for j in range(idx, idx + 20))})")
+        idx += 20
+    while idx < n_inputs:
+        terms.append(f"c{idx}")
+        idx += 1
+    body = terms[0]
+    for t in terms[1:]:
+        body = f"xor({body}, {t})"
+    return f"{h_op} ;; f(n: number) = {' '.join(lets)} ({body})"
+
+
+def generated_cases(rng: random.Random) -> list[str]:
+    """Long and boundary cases: all 4 limits plus ROBDD and TT-fallback paths."""
+    out: list[str] = []
+    # Random dense ops near/past 256 statements and 20 views.
     for target, views in ((240, 8), (250, 12), (257, 8), (100, 21)):
         s = program.Settings(
             statements=(target, target), views=(views, views), tracked=views <= 12
         )
         s.wrapper_rate = 0.0
         text, _ = program.boolean_operation("f", rng, s, [], {})
-        out.append((ALL, render_program(text + "\n", ["f"])))
-    # Programs that already compile at the limits: an `xor` chain of `and`s
-    # of pairs of inputs has no redundant value, match, or spelling, so it
-    # reduces to itself in DLP 60's order. 128 pairs over 20 inputs is 255
-    # statements; 129 is 257, and 21 inputs is one too many.
+        out.append(render_program(text + "\n", ["f"]))
+    # Factorable 255-stmt quadratic XOR over 20 views (factors down to 30 stmts),
+    # 257-stmt version (`error limits`), and 21-view version (`error limits`).
     for pairs, inputs in ((128, 20), (129, 20), (20, 21)):
         names = [view_name(i, "abcdefghijklmnopqrstuvwxyz") for i in range(inputs)]
         chosen = [(i, j) for i in range(inputs) for j in range(i + 1, inputs)][:pairs]
@@ -887,21 +928,35 @@ def generated_cases(rng: random.Random) -> list[tuple[list[str], str]]:
         body = terms[0]
         for t in terms[1:]:
             body = f"xor({body}, {t})"
-        # Every input is read.
         used = {k for pair in chosen for k in pair}
-        rest = [names[k] for k in range(inputs) if k not in used]
-        for r in rest:
-            body = f"xor({body}, {r})"
-        out.append((ALL, f"f({', '.join(names)}) = {body}"))
+        for k in range(inputs):
+            if k not in used:
+                body = f"xor({body}, {names[k]})"
+        out.append(f"f({', '.join(names)}) = {body}")
+    # Irreducible 20-view op: 255 stmts triggers ROBDD -> TT floor fallback (compiles);
+    # 257 stmts hits the statement limit (`error limits`).
+    out.append(_make_nlfsr(109, 20))
+    out.append(_make_nlfsr(110, 20))
+    # Mixed op past 20 inputs (ROBDD backend) with redundancy, factoring, grouping, match.
+    lets24 = [f"let c{i} = cmp.lt(n, {i});" for i in range(24)]
+    chain24 = "or(c0 and c1, c0 and c2)"
+    for i in range(3, 24):
+        chain24 = f"xor({chain24}, c{i})"
+    out.append(f"f(n: number) = {' '.join(lets24)} (not (not ({chain24}) and not c0))")
+    # Canonical shared ROBDD reachable-node limit (<= 65,536 vs > 65,536).
+    out.append(_make_bdd_inner_product(14))
+    out.append(_make_bdd_inner_product(15))
+    # Boolean input limit on mixed ops (512 compiles via ROBDD vs 513 `error limits`).
+    out.append(_make_wide_mixed_inputs(512))
+    out.append(_make_wide_mixed_inputs(513))
     return out
 
 
 def main() -> None:
-    """Write the lines of cases START to END (`all`, or `merge` the parts).
+    """Write the lines of cases START to END, or `merge` the parts.
 
     `reduction_cases.py OUT START END` writes OUT.START; `reduction_cases.py
-    OUT merge` writes OUT from the parts, in order. Each part runs under its
-    own time limit.
+    OUT merge` writes OUT from the parts, in order.
     """
     target = Path(sys.argv[1])
     if sys.argv[2] == "merge":
@@ -914,15 +969,15 @@ def main() -> None:
             part.unlink()
         return
     start, end = int(sys.argv[2]), int(sys.argv[3])
-    cases = (CASES + NEW_RULES + generated_cases(random.Random(5)))[start:end]  # noqa: S311 - Reproducible cases.
+    cases = (CASES + generated_cases(random.Random(5)))[start:end]  # noqa: S311 - Reproducible cases.
     lines = []
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp)
-        for registered, text in cases:
-            reduced, _ = reduce(registered, text, work)
+        for text in cases:
+            reduced, _ = reduce(text, work)
             if not reduced.startswith("error"):
-                verify(registered, reduced, work)
-            lines.append(f"[{', '.join(registered)}] {text} => {reduced}")
+                verify(reduced, work)
+            lines.append(f"{text} => {reduced}")
             print(lines[-1][:160], flush=True)
     Path(f"{target}.{start}").write_text("\n".join(lines) + "\n")
 

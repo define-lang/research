@@ -11,9 +11,11 @@ and how many planted equalities each one finds.
 
 - [algorithm.md](algorithm.md): the authoritative specification of the current
   reference algorithm (`beq program --method auto`), including truth-table and
-  ROBDD dispatch, the budget-free canonical 4,000,000-node ROBDD limit, exact
-  match and spelling search, and the human-readable DLP 61 registered-operation
-  order.
+  ROBDD dispatch, the budget-free conservative limits (`≤ 20` boolean input
+  interface views, `≤ 256` boolean statements, `≤ 512` boolean inputs, and
+  `≤ 65,536` canonical shared ROBDD nodes past 20 inputs), DLP 60 associative
+  grouping and factoring common terms, and DLP 61's fixed standard boolean
+  operations (`and`, `not`, `or`, `xor`, `equal`).
 - [arguments.md](arguments.md): the conclusions that come from reasoning
   instead of measurement, including why a canonical ROBDD node limit is
   compiler-independent while heuristic solver or step budgets are not.
@@ -23,10 +25,12 @@ and how many planted equalities each one finds.
 - [results/budget.md](results/budget.md): budget-free measurements across all
   3,265 real-code units (11 codebases) and 277 generated adversarial workloads.
 - [proof/termination.md](proof/termination.md): a proof, in English and in Lean
-  ([proof/fixing_termination.lean](proof/fixing_termination.lean)), that fixing
-  a program of static finite DAG value operations under DLPs 59–61 always
-  terminates (`dag_prog_terminates` discharges finiteness directly from
-  Define's acyclic computation graphs).
+  ([proof/fixing_termination.lean](proof/fixing_termination.lean)), that
+  automated refactoring of a program of static finite DAG value operations under
+  DLPs 59–64 always terminates (`dag_prog_terminates` discharges finiteness
+  directly from Define's acyclic computation graphs, and
+  `full_autofix_terminates` covers structural rewrites, acyclic callee
+  specialization, literal/constant folding, and useless-input elimination).
 - [related_work.md](related_work.md): a literature search on how close existing
   systems and papers come to DLPs 59–61 and these algorithms.
 - Historical component studies (archived in `studies/`):
@@ -49,44 +53,53 @@ and how many planted equalities each one finds.
 
 This is what DLP 59–61's rules need, and it is the case to optimize.
 
-**Decide equality, symmetry, matches, and spellings exactly per value
-operation, using truth tables for small input counts and complement-edge ROBDDs
-past them, with a canonical 4,000,000-node ROBDD limit and no step budget**
+**Decide equality, symmetry, grouping, factoring, matches, and spellings
+exactly per value operation, using truth tables for small input counts and
+complement-edge ROBDDs past them, with conservative structural limits, a
+canonical 65,536-node ROBDD limit past 20 inputs, and no step budget**
 ([algorithm.md](algorithm.md)):
 
-1. **Guaranteed envelope (`≤ 256` boolean statements and `≤ 20` boolean
-   inputs):** always compiles. Truth tables run directly when `I ≤ 16` (or
-   `I ≤ 20` when executing an operation of more than 6 read views), and serve
-   as a complete fallback if an operation inside the envelope hits the ROBDD
+1. **Guaranteed truth-table floor (`≤ 20` boolean input interface views on
+   Value Operations, `≤ 256` boolean statements):** every pure boolean Value
+   Operation always compiles (bounded contract ≤ 128 KB truth table / ≤ 98,302
+   ROBDD nodes, ≤ 190 symmetry pairs). Truth tables run directly when `I ≤ 16`
+   (or `I ≤ 20` when executing an operation of more than 6 input views), and
+   serve as a complete fallback if an operation inside `I ≤ 20` hits the ROBDD
    node limit. Executions refer to the executed operation's recorded summary
    (compact AIG, mux-tree or `8 × 8` bit-matrix-transpose table lookup, or
    recorded `Diagram`).
-2. **Beyond the guaranteed envelope (`S > 256` or `I > 20`):** evaluate with
+2. **Beyond 20 inputs (`21 ≤ I ≤ 512`, `S ≤ 256`):** evaluate with
    complement-edge ROBDDs (native `land`/`lor`/`lxor`/`ite`, zero-allocation
    `O(I)` lockstep `distinguishing_path`, `O(|Diagram|)` Chow/Walsh symmetry
    pre-partitioning + lockstep `are_symmetric`) in deterministic first-reached
    DFS input order over the value operation's DAG. Accept if and only if the
-   canonical shared ROBDD of all boolean statements has at most **4,000,000
-   reachable non-terminal nodes**.
-3. **Unified single-pass match and spelling search:** one `Matcher` handles
-   both matches and spellings over exact canonical class IDs, arbitrary-width
-   varied-density + BDD collision-splitting samples, MFFC-size pruning,
-   `mux` two-case data-first search, direct `xor`/`eq` hash lookup, and
-   descending-MFFC best-match search.
-4. **Human-readable DLP 61 registered-operation order:** `and`, `not`, then
-   `(fewest_ands, read_views, project_before_stdlib, fewer_interchangeable_groups, counting_order_truth_table)`,
-   giving `and`, `not`, `or`, `implies`, `xor`, `eq`, `mux`, `maj`.
+   canonical shared ROBDD of all boolean statements has at most **65,536
+   (`2^16`) reachable non-terminal nodes** (~5–10 MB per parallel worker).
+3. **DLP 60 grouping and factoring:** semantically detect commutative,
+   associative binary operations (`and`, `or`, `xor`, `equal`, and user-defined
+   binary ops) and distributive pairs (`(and, or)`, `(or, and)`, `(and, xor)`,
+   `(or, equal)`) from their 4-bit truth tables, requiring left-to-right rank
+   folding of single-use associative chains and factoring of repeated common
+   terms before DLP 61 matching.
+4. **DLP 61 fixed standard boolean operations (`and`, `not`, `or`, `xor`,
+   `equal`):** one fixed global vocabulary across all projects (no
+   `booleans.defcl`). Because all five operations have arity ≤ 2 and are
+   symmetric, unified `Matcher` search runs in strictly `O(S * (I + S))` with
+   zero backtracking (`and`/`or` via bitset intersection, `xor`/`equal` via
+   `O(1)` flat hash lookup).
 
-On all **3,265 real-code units** past the old limits across 11 codebases
-([results/budget.md](results/budget.md)), **3,264 / 3,265 (99.97%)** compile
-cleanly with **0 timeouts and no step budget** (median **0.35 ms**, p99
-**21.86 ms**, max **1.19 s**); only `mypy`'s `visit_comparison_expr` (2,078
-inputs, 2,011 statements, 44.4M ROBDD nodes) exceeds the 4,000,000-node limit.
-All **277** generated adversarial workloads (`dense`, `xor_heavy`, `parity`,
-`read_once`, `long` up to 1,024 statements, `real`, and multipliers up to
-28×28) finish in **≤ 2.15 s** with **0 timeouts**. On whole generated programs,
-14,897 operations check in **1.34 s** (84 MB RSS) and 1,995 wide 16–20-input
-operations check in **12.26 s** (188 MB RSS).
+On all **3,265 real-code units** across 11 codebases
+([results/budget.md](results/budget.md)), **100% (376 / 376)** of standalone
+`scope=1` functions pass all conservative limits (max `S = 184`, max `I + S =
+358`, max **3,500** ROBDD nodes), and **3,256 / 3,265 (99.72%)** including
+`scope=2` inlining stay within **65,536** ROBDD nodes (median **0.35 ms**).
+All **276** generated adversarial workloads in `work/methods/*.prog` finish in
+**≤ 1.20 s** and **≤ 33.7 MB RSS** with **0 timeouts**. On adversarial
+non-matching chains (`u3`, `S = 256, I = 513`), `Matcher` takes **0.030 s**
+(`11 ms` in `matches`, **16 MB RSS**). On freshly generated whole programs with
+the standard set, 14,926 operations check in **1.08 s** (94 MB RSS, `matches +
+spellings` 240 ms) and 1,998 wide 16–20-input operations check in **12.01 s**
+(194 MB RSS, `matches + spellings` 330 ms).
 
 What the earlier single-graph studies ([studies/experiments.md](studies/experiments.md))
 measured for whole programs checked as one flattened AIG: SAT sweeping, with a
@@ -168,20 +181,23 @@ The task allowed restrictions on how programs are written:
   with exclusive or too. Majority or if-then-else don't change any measured
   cost. This is argued from the measurements, not measured with another gate
   set.
-- **Keep matches of registered operations exact over earlier values**
-  (see the historical progression in [studies/matching.md](studies/matching.md),
+- **Keep matches of standard boolean operations exact over earlier values,
+  fixed globally to `{and, not, or, xor, equal}`** (see the historical
+  progression in [studies/matching.md](studies/matching.md),
   [studies/earlier_values.md](studies/earlier_values.md), and
   [studies/precedence.md](studies/precedence.md), plus the final unified search
-  in [algorithm.md](algorithm.md)). The four-view limit is justified by cost
-  (each added view multiplies search cost by 7–18×), and replacing a match is
-  restricted to groups removing at least 2 statements (3 for an opposite
-  result) so refactoring provably terminates.
+  in [algorithm.md](algorithm.md)). Fixing the set to arity ≤ 2 symmetric
+  standard operations eliminates the `O(S * N^3)` arity-4 cliff and `O(S *
+  N^2)` arity-3 scaling, avoids per-project dialects, and avoids `mux` vs.
+  distributive-factoring conflicts.
 - **No heuristic solver or step budget as a language rule**
-  ([arguments.md](arguments.md)). Instead, past the guaranteed `(256 statements,
-  20 inputs)` envelope, compilation uses a canonical **4,000,000-node shared
-  ROBDD limit** under a fixed deterministic DFS variable order. Because the
-  shared ROBDD is mathematically unique, every compiler gives the exact same
-  answer, and raising the limit is strictly Forward Compatible.
+  ([arguments.md](arguments.md)). Instead, Value Operations are capped at `≤
+  20` boolean input interface views, Value Operations and Actions at `≤ 256`
+  boolean statements and `≤ 512` boolean inputs, and operations with `21–512`
+  inputs use a canonical **65,536-node shared ROBDD limit** under a fixed
+  deterministic DFS variable order. Because the shared ROBDD is mathematically
+  unique, every compiler gives the exact same answer, and raising any limit is
+  strictly Forward Compatible.
 
 No restriction can make exact checking polynomial without making some
 functions need exponentially more code, unless P = coNP: any two AIGs can be
@@ -211,9 +227,9 @@ operation costs the same at any depth:
   then expanding it, handled every library in milliseconds (14 ms for the
   one where expansion took 4.6 s).
 - **What the executed operation's own check saves.** It has already passed
-  every check, but over its own independent read views. So the caller never
+  every check, but over its own independent input views. So the caller never
   needs to look at its other values, and when its arguments are distinct
-  read views of the caller, its results can't be constant, equal to each
+  input views of the caller, its results can't be constant, equal to each
   other, or equal to an argument (none in 7,240 such executions). With
   related arguments, though, 26–44% of random executions had a result that
   was redundant in the caller, so results are still checked like the
@@ -233,7 +249,7 @@ be shown distinct and nothing can stop early ([studies/steady_state.md](studies/
   check, an unchanged operation that compiles needs no solver call, and
   after edits the solver makes 8–17% of the calls it would otherwise.
 - **Check again only what an edit can affect**: the edited operation, and its
-  callers while the function of a written view changes. Over 1,200 random
+  callers while the function of an output view changes. Over 1,200 random
   edits, a median of one operation was checked again (at most 14), in
   12–21 µs.
 - Stopping at the first redundant value saves nothing on operations that
@@ -291,23 +307,27 @@ needs it.
    59's limits. The rejected alternative kept the current definition over cuts
    of at most four values, which misses 42% of planted redundancies and took
    1–3 ms.
-2. **Bounding the worst case without a step budget.** Decided: every value
-   operation with at most **256 boolean statements and 20 boolean inputs**
-   always compiles (guaranteed by truth tables). Past that envelope, a value
-   operation compiles if and only if its canonical shared ROBDD (under the
-   deterministic first-reached DFS input order over its DAG) has at most
-   **4,000,000 reachable non-terminal nodes**.
+2. **Bounding the worst case without a step budget.** Decided: cap Value
+   Operations at **≤ 20 boolean input interface views**, cap Value Operations
+   and Actions at **≤ 256 boolean statements** and **≤ 512 boolean inputs**,
+   and accept operations with `21–512` boolean inputs if and only if their
+   canonical shared ROBDD (under the deterministic first-reached DFS input
+   order over the DAG) has at most **65,536 (`2^16`) reachable non-terminal
+   nodes**. Every pure boolean Value Operation (`≤ 20` views, `≤ 256`
+   statements) fits unconditionally inside the guaranteed truth-table floor.
    - **Why this rule.** Unlike a heuristic SAT conflict limit or operational
-     step counter, the canonical ROBDD node count is a pure mathematical
-     property of the value operation's DAG—identical across compilers and
+     step counter, the structural counts and canonical ROBDD node count are
+     pure mathematical properties of the DAG—identical across compilers and
      machines, Forward Compatible when raised, and simple to explain. Across
-     all 3,265 real-code units past the old limits, 3,264 (99.97%) compile
-     cleanly in ≤ 1.19 s (median 0.35 ms) with zero timeouts
+     all 3,265 real-code units, 100% of standalone `scope=1` functions (376 /
+     376) pass all conservative limits and 99.72% (3,256 / 3,265) including
+     `scope=2` inlining stay within 65,536 nodes
      ([results/budget.md](results/budget.md)).
    - **Rejected alternatives:** no limit (exponential bit-level arithmetic can
-     take minutes or OOM), a hard 20-input cutoff (rejects large real-world
-     condition chains with tiny BDDs), and an operational step budget
-     (unpredictable, compiler-dependent, and hard to communicate).
+     take minutes or OOM), a hard 20-input cutoff on Actions/mixed ops
+     (rejects large real-world condition chains with tiny BDDs), and an
+     operational step budget (unpredictable, compiler-dependent, and hard to
+     communicate).
 3. **The width limit.** Decided: dropped from the compiler design, keeping
    first-use input order for OBDDs. Measured widths were 17–74 at 256
    statements, so any limit small enough to matter would reject nearly every
@@ -365,11 +385,14 @@ Argued, not measured:
     search, direct `xor`/`eq` hash lookup, and best-match modes (`kBestOverall`,
     `kBestPerValue`, `kAll`).
   - `program.hpp`, `program_fix.hpp`, `program_main.hpp`: whole-program
-    checking (`beq program --method auto`, defaulting to the budget-free
-    canonical 4,000,000-node ROBDD limit past `(256 statements, 20 inputs)`),
-    `8 × 8` bit-matrix-transpose wide table lookups, human-readable DLP 61
-    ordering, exact bucket-verified `tt_keys`, 128-bit incremental fingerprints,
-    and deterministic fixing.
+    checking (`beq program --method auto`, defaulting to Define's conservative
+    limits `≤ 20` boolean input interface views, `≤ 256` boolean statements,
+    `≤ 512` boolean inputs, `≤ 65,536` canonical ROBDD nodes past 20 inputs),
+    DLP 60 semantic associative grouping and factoring common terms,
+    `8 × 8` bit-matrix-transpose wide table lookups, exact bucket-verified
+    `tt_keys`, 128-bit incremental fingerprints, and full DLP 64 automated
+    refactoring (stopping only at opaque non-boolean logical operations
+    receiving a boolean literal/constant, limits, cycles, or 0-output bool ops).
   - `structural.hpp`, `functional.hpp`, `sweep.hpp`, `hier.hpp`, `split.hpp`:
     earlier single-graph, hierarchical, and split-check engines.
   - `main.cpp`: the `beq` command.

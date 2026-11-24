@@ -560,6 +560,72 @@ class BddMethod : public MethodBase {
       if (!in[level_[i]]) unused_views.push_back(static_cast<int>(i));
   }
 
+  // Precomputed semantic support bitsets for every ROBDD node reachable from
+  // `edge_`, computed in one bottom-up O(|BDD| * ceil(inputs / 64)) pass.
+  struct SupportTable {
+    size_t words = 0;
+    std::vector<uint32_t> index;  // BDD node -> dense row index (0 for terminal)
+    std::vector<uint64_t> bits;   // row * words + (input_idx >> 6)
+    const std::vector<Bdd::Edge>* edge = nullptr;
+    bool has(Lit l, uint32_t input_idx) const {
+      const uint32_t n = (*edge)[node_of(l)] >> 1;
+      if (n == 0) return false;
+      const uint32_t row = index[n];
+      return ((bits[size_t{row} * words + (input_idx >> 6)] >> (input_idx & 63)) & 1ULL) != 0;
+    }
+  };
+
+  SupportTable all_supports() const {
+    SupportTable st;
+    st.words = (static_cast<size_t>(g_.inputs) + 63) / 64;
+    st.edge = &edge_;
+    if (st.words == 0) return st;
+    const size_t total = bdd_.num_nodes();
+    std::vector<char> seen(total, 0);
+    std::vector<uint32_t> stack;
+    for (Bdd::Edge e : edge_) {
+      const uint32_t n = e >> 1;
+      if (n != 0 && !seen[n]) {
+        seen[n] = 1;
+        stack.push_back(n);
+      }
+    }
+    while (!stack.empty()) {
+      const uint32_t n = stack.back();
+      stack.pop_back();
+      const uint32_t lo = bdd_.low(n) >> 1, hi = bdd_.high(n) >> 1;
+      if (lo != 0 && !seen[lo]) {
+        seen[lo] = 1;
+        stack.push_back(lo);
+      }
+      if (hi != 0 && !seen[hi]) {
+        seen[hi] = 1;
+        stack.push_back(hi);
+      }
+    }
+    st.index.assign(total, 0);
+    uint32_t rows = 1;  // row 0 = terminal (empty support)
+    for (uint32_t n = 1; n < total; ++n)
+      if (seen[n]) st.index[n] = rows++;
+    st.bits.assign(size_t{rows} * st.words, 0);
+    for (uint32_t n = 1; n < total; ++n) {
+      if (!seen[n]) continue;
+      uint64_t* dst = &st.bits[size_t{st.index[n]} * st.words];
+      const uint32_t inp = input_at_[bdd_.level_of(n)] - 1;
+      dst[inp >> 6] |= uint64_t{1} << (inp & 63);
+      const uint32_t lo = bdd_.low(n) >> 1, hi = bdd_.high(n) >> 1;
+      if (lo != 0) {
+        const uint64_t* src = &st.bits[size_t{st.index[lo]} * st.words];
+        for (size_t w = 0; w < st.words; ++w) dst[w] |= src[w];
+      }
+      if (hi != 0) {
+        const uint64_t* src = &st.bits[size_t{st.index[hi]} * st.words];
+        for (size_t w = 0; w < st.words; ++w) dst[w] |= src[w];
+      }
+    }
+    return st;
+  }
+
   uint64_t function_id(Lit l) override { return static_cast<uint64_t>(lit(l)) + 1; }
 
   bool distinguish(Lit a, Lit b, Assignment& out) override {

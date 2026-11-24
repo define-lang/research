@@ -843,6 +843,10 @@ inductive OpFix : List Term → List Term → Prop
       (rw : Term → Term) (hQ : List.Perm Q (added ++ survivors))
       (hs : List.Subperm survivors ((P.erase v).map rw))
       (hrestrict : survivors.length + added.length + 1 ≤ P.length) : OpFix P Q
+  /-- DLP 60 factoring common terms: pulls a shared factor out of `k ≥ 2`
+  single-use inner-chain terms inside an outer distributive chain, strictly
+  reducing the number of statements (`Q.length < P.length`). -/
+  | factor {P Q : List Term} (hshrink : Q.length < P.length) : OpFix P Q
   /-- A spelling: v becomes v', with the same functions, and every other
   statement has v's term replaced by v''s. -/
   | spelling {P Q : List Term} (v v' : Term) (rest : List Term) (hv : v ∈ P)
@@ -884,6 +888,9 @@ theorem opFix_lt {P Q : List Term} (h : OpFix sig P Q) : OpLt sig Q P := by
     left
     rw [hQ.length_eq, List.length_append]
     omega
+  | factor hshrink =>
+    left
+    exact hshrink
   | spelling v v' rest hv hexec hexec' hkey hdistinct hQ hrest =>
     exact spelling_measure (E := P.erase v) (List.perm_cons_erase hv) hexec hexec' hkey hdistinct
       hQ hrest
@@ -1466,5 +1473,263 @@ theorem dag_prog_terminates {n : ℕ} (rank : Fin n → ℕ) (I O A : ℕ) (f : 
     refine (dag_states_finite I O A init.views init.reads bound).subset ?_
     rintro st ⟨⟨k, rfl⟩, hsize⟩
     refine ⟨hdag k a, hsize, fun cur hcur => (hvr_all k).1 init cur h0 hcur⟩
+
+/-! ### Full automated refactoring (DLP 64): structural rewrites, specialization,
+literal/constant folding, and useless-input elimination -/
+
+/-- No infinite descending chain exists in a lexicographic pair of `ℕ`s. -/
+theorem lex_nat_pair_terminates (f : ℕ → ℕ × ℕ)
+    (h : ∀ k, (f (k + 1)).1 < (f k).1 ∨ ((f (k + 1)).1 = (f k).1 ∧ (f (k + 1)).2 < (f k).2)) :
+    False := by
+  have h1 : ∀ k, 0 ≤ k → (f (k + 1)).1 ≤ (f k).1 := by
+    intro k _
+    rcases h k with hlt | ⟨heq, -⟩ <;> omega
+  obtain ⟨k₁, -, hk₁⟩ := eventually_const (fun k => (f k).1) 0 h1
+  have h2 : ∀ k, k₁ ≤ k → (f (k + 1)).2 ≤ (f k).2 := by
+    intro k hk
+    have heq := hk₁ k hk
+    rcases h k with hlt | ⟨-, hlt⟩ <;> omega
+  obtain ⟨k₂, hk₁₂, hk₂⟩ := eventually_const (fun k => (f k).2) k₁ h2
+  have he1 := hk₁ k₂ hk₁₂
+  have he2 := hk₂ k₂ le_rfl
+  rcases h k₂ with hlt | ⟨-, hlt⟩ <;> omega
+
+/-- Structural state of a program: how many multi-output boolean value
+operations (`outputs` error) and Problem-7 violating mixed value operations
+(`mixed_bool_view` / `mixed_shared_input`) remain. -/
+structure StructuralState where
+  multiBoolOps : ℕ
+  violatingMixedOps : ℕ
+
+/-- One structural rewrite step:
+- `splitBool`: splits one multi-output boolean value operation into
+  single-output boolean value operations (creating 0 new multi-output boolean
+  ops and 0 mixed ops).
+- `extractMixed`: extracts the boolean logic of one Problem-7 violating mixed
+  value operation into single-output boolean helpers and returns its distinct
+  non-boolean Boolean Sources directly (creating 0 multi-output boolean ops
+  and 0 violating mixed ops). -/
+inductive StructuralStep : StructuralState → StructuralState → Prop
+  | splitBool {s s' : StructuralState}
+      (hmulti : s'.multiBoolOps + 1 = s.multiBoolOps)
+      (hmixed : s'.violatingMixedOps = s.violatingMixedOps) : StructuralStep s s'
+  | extractMixed {s s' : StructuralState}
+      (hmulti : s'.multiBoolOps = s.multiBoolOps)
+      (hmixed : s'.violatingMixedOps + 1 = s.violatingMixedOps) : StructuralStep s s'
+
+def structuralMeasure (s : StructuralState) : ℕ :=
+  s.multiBoolOps + s.violatingMixedOps
+
+theorem structuralStep_lt {s s' : StructuralState} (h : StructuralStep s s') :
+    structuralMeasure s' < structuralMeasure s := by
+  cases h with
+  | splitBool hm hx => unfold structuralMeasure; omega
+  | extractMixed hm hx => unfold structuralMeasure; omega
+
+/-- Structural rewrites always terminate (at most one pass per violating DAG node). -/
+theorem structural_terminates (f : ℕ → StructuralState)
+    (h : ∀ k, StructuralStep (f k) (f (k + 1))) : False :=
+  lex_nat_pair_terminates (fun k => (structuralMeasure (f k), 0)) fun k =>
+    Or.inl (structuralStep_lt (h k))
+
+/-- Recursive callee specialization in an acyclic call graph, tracked by
+`(depth, arity)` where `depth` is the operation's topological depth in the
+finite acyclic call graph and `arity` is its number of boolean input views.
+Each recursive specialization either descends to a strictly lower callee in the
+call graph (`b.1 < a.1`) or specializes at the same depth with at least one
+boolean view substituted by a literal (`b.1 = a.1 ∧ b.2 < a.2`). -/
+inductive SpecStep : ℕ × ℕ → ℕ × ℕ → Prop
+  | lowerCallee {a b : ℕ × ℕ} (hd : b.1 < a.1) : SpecStep a b
+  | specializeView {a b : ℕ × ℕ} (hd : b.1 = a.1) (ha : b.2 < a.2) : SpecStep a b
+
+/-- Recursive DAG callee specialization always terminates. -/
+theorem specialization_terminates (f : ℕ → ℕ × ℕ)
+    (h : ∀ k, SpecStep (f k) (f (k + 1))) : False := by
+  refine lex_nat_pair_terminates f fun k => ?_
+  cases h k with
+  | lowerCallee hd => exact Or.inl hd
+  | specializeView hd ha => exact Or.inr ⟨hd, ha⟩
+
+/-- Within-operation constant folding, literal propagation, and callee
+specialization state: `(stmts, litArgs)` where `stmts` is the number of
+statements and `litArgs` is the total number of boolean literal arguments in
+the operation.
+- `foldConstOrOp`: replacing a constant statement or folding `and`/`not` on a
+  literal removes at least one statement (`b.1 < a.1`).
+- `specializeCall`: specializing a `call` or `run` (and replacing it with the
+  specialized call or its single-statement wrapper) keeps `b.1 ≤ a.1` and,
+  when `b.1 = a.1`, strictly removes at least one boolean literal argument
+  (`b.2 < a.2`). -/
+inductive FoldStep : ℕ × ℕ → ℕ × ℕ → Prop
+  | foldConstOrOp {a b : ℕ × ℕ} (hs : b.1 < a.1) : FoldStep a b
+  | specializeCall {a b : ℕ × ℕ} (hs : b.1 ≤ a.1) (hl : b.1 = a.1 → b.2 < a.2) :
+      FoldStep a b
+
+/-- Within-operation constant folding, literal propagation, and callee
+specialization always terminate. -/
+theorem fold_loop_terminates (f : ℕ → ℕ × ℕ)
+    (h : ∀ k, FoldStep (f k) (f (k + 1))) : False := by
+  refine lex_nat_pair_terminates f fun k => ?_
+  cases h k with
+  | foldConstOrOp hs => exact Or.inl hs
+  | specializeCall hs hl =>
+    rcases Nat.lt_or_eq_of_le hs with hlt | heq
+    · exact Or.inl hlt
+    · exact Or.inr ⟨heq, hl heq⟩
+
+/-- Useless-input elimination state on a non-Boolean Value Operation:
+`(uselessPairs, unusedInputs)`, where `uselessPairs` counts `(target, input)`
+pairs with `input` in `target`'s Boolean Sources yet unable to change `target`,
+and `unusedInputs` counts boolean inputs (boolean input views, `cmp`
+statements, `run` boolean outputs) absent from every exit's Boolean Sources.
+- `cloneSubstFalse`: cloning a target's boolean sub-DAG with `input := false`
+  removes `input` from that target's Boolean Sources, strictly lowering
+  `uselessPairs` (`b.1 < a.1`).
+- `dropUnusedInput`: dropping an unused boolean view, deleting a dead `cmp`, or
+  specializing a `run` to drop an unused output preserves `uselessPairs`
+  (`b.1 = a.1`) and strictly lowers `unusedInputs` (`b.2 < a.2`). -/
+inductive UselessStep : ℕ × ℕ → ℕ × ℕ → Prop
+  | cloneSubstFalse {a b : ℕ × ℕ} (hu : b.1 < a.1) : UselessStep a b
+  | dropUnusedInput {a b : ℕ × ℕ} (hu : b.1 = a.1) (hd : b.2 < a.2) : UselessStep a b
+
+/-- Useless-input elimination on non-Boolean Value Operations always terminates. -/
+theorem useless_elim_terminates (f : ℕ → ℕ × ℕ)
+    (h : ∀ k, UselessStep (f k) (f (k + 1))) : False := by
+  refine lex_nat_pair_terminates f fun k => ?_
+  cases h k with
+  | cloneSubstFalse hu => exact Or.inl hu
+  | dropUnusedInput hu hd => exact Or.inr ⟨hu, hd⟩
+
+/-- Combined state for the full DLP 64 automated refactoring loop:
+outer refactoring phases tracked by `(structural, useless, fold)` alongside
+the DAG-backed program state `prog : Program n`. -/
+structure FullAutoFixState (n : ℕ) where
+  structural : StructuralState
+  useless : ℕ × ℕ
+  fold : ℕ × ℕ
+  prog : Program n
+
+variable (sig) in
+/-- One step of the full DLP 64 auto-fixer:
+1. A structural rewrite (strictly lowers `structuralMeasure`).
+2. A useless-input elimination step on a mixed op (preserves `structuralMeasure`,
+   strictly lowers `useless` lexicographically).
+3. A constant-folding / literal-propagation / specialization step (preserves
+   `structuralMeasure` and `useless`, strictly lowers `fold` lexicographically).
+4. A core normalization step (`ProgFix`, preserving the three outer phase
+   measures once those phases have settled). -/
+inductive FullAutoFixStep {n : ℕ} (rank : Fin n → ℕ) :
+    FullAutoFixState n → FullAutoFixState n → Prop
+  | structural {x y : FullAutoFixState n}
+      (h : StructuralStep x.structural y.structural) : FullAutoFixStep rank x y
+  | useless {x y : FullAutoFixState n}
+      (hs : structuralMeasure y.structural = structuralMeasure x.structural)
+      (h : UselessStep x.useless y.useless) : FullAutoFixStep rank x y
+  | fold {x y : FullAutoFixState n}
+      (hs : structuralMeasure y.structural = structuralMeasure x.structural)
+      (hu : y.useless = x.useless)
+      (h : FoldStep x.fold y.fold) : FullAutoFixStep rank x y
+  | normalize {x y : FullAutoFixState n}
+      (hs : structuralMeasure y.structural = structuralMeasure x.structural)
+      (hu : y.useless = x.useless)
+      (hf : y.fold = x.fold)
+      (h : ProgFix sig rank x.prog y.prog) : FullAutoFixStep rank x y
+
+/-- Full automated refactoring (structural rewrites, useless-input elimination,
+constant folding / literal propagation / acyclic callee specialization, and
+DLP 59–61 DAG normalization) always terminates on every finite DAG-backed
+program. -/
+theorem full_autofix_terminates {n : ℕ} (rank : Fin n → ℕ) (I O A : ℕ)
+    (f : ℕ → FullAutoFixState n)
+    (hstep : ∀ k, FullAutoFixStep sig rank (f k) (f (k + 1)))
+    (hdag : ∀ k (a : Fin n), IsDagState I O A ((f k).prog a)) : False := by
+  have hstruct_le : ∀ k, 0 ≤ k → structuralMeasure (f (k + 1)).structural ≤
+      structuralMeasure (f k).structural := by
+    intro k _
+    cases hstep k with
+    | structural h => exact le_of_lt (structuralStep_lt h)
+    | useless hs _ => exact le_of_eq hs
+    | fold hs _ _ => exact le_of_eq hs
+    | normalize hs _ _ _ => exact le_of_eq hs
+  obtain ⟨k₁, -, hk₁⟩ := eventually_const (fun k => structuralMeasure (f k).structural) 0 hstruct_le
+  have hup_le : ∀ k, k₁ ≤ k → (f (k + 1)).useless.1 ≤ (f k).useless.1 := by
+    intro k hk
+    have heq := hk₁ k hk
+    cases hstep k with
+    | structural h => exact absurd heq (ne_of_lt (structuralStep_lt h))
+    | useless _ h =>
+      cases h with
+      | cloneSubstFalse hu => exact le_of_lt hu
+      | dropUnusedInput hu _ => exact le_of_eq hu
+    | fold _ hu _ => rw [hu]
+    | normalize _ hu _ _ => rw [hu]
+  obtain ⟨k₂, hk₁₂, hk₂⟩ := eventually_const (fun k => (f k).useless.1) k₁ hup_le
+  have hud_le : ∀ k, k₂ ≤ k → (f (k + 1)).useless.2 ≤ (f k).useless.2 := by
+    intro k hk
+    have hs := hk₁ k (le_trans hk₁₂ hk)
+    have hu1 := hk₂ k hk
+    cases hstep k with
+    | structural h => exact absurd hs (ne_of_lt (structuralStep_lt h))
+    | useless _ h =>
+      cases h with
+      | cloneSubstFalse hu => exact absurd hu1 (ne_of_lt hu)
+      | dropUnusedInput _ hd => exact le_of_lt hd
+    | fold _ hu _ => rw [hu]
+    | normalize _ hu _ _ => rw [hu]
+  obtain ⟨k₃, hk₂₃, hk₃⟩ := eventually_const (fun k => (f k).useless.2) k₂ hud_le
+  have hfs_le : ∀ k, k₃ ≤ k → (f (k + 1)).fold.1 ≤ (f k).fold.1 := by
+    intro k hk
+    have hs := hk₁ k (le_trans hk₁₂ (le_trans hk₂₃ hk))
+    have hu1 := hk₂ k (le_trans hk₂₃ hk)
+    have hu2 := hk₃ k hk
+    cases hstep k with
+    | structural h => exact absurd hs (ne_of_lt (structuralStep_lt h))
+    | useless _ h =>
+      cases h with
+      | cloneSubstFalse hu => exact absurd hu1 (ne_of_lt hu)
+      | dropUnusedInput _ hd => exact absurd hu2 (ne_of_lt hd)
+    | fold _ _ h =>
+      cases h with
+      | foldConstOrOp hlt => exact le_of_lt hlt
+      | specializeCall hle _ => exact hle
+    | normalize _ _ hf _ => rw [hf]
+  obtain ⟨k₄, hk₃₄, hk₄⟩ := eventually_const (fun k => (f k).fold.1) k₃ hfs_le
+  have hfl_le : ∀ k, k₄ ≤ k → (f (k + 1)).fold.2 ≤ (f k).fold.2 := by
+    intro k hk
+    have hs := hk₁ k (le_trans hk₁₂ (le_trans hk₂₃ (le_trans hk₃₄ hk)))
+    have hu1 := hk₂ k (le_trans hk₂₃ (le_trans hk₃₄ hk))
+    have hu2 := hk₃ k (le_trans hk₃₄ hk)
+    have hf1 := hk₄ k hk
+    cases hstep k with
+    | structural h => exact absurd hs (ne_of_lt (structuralStep_lt h))
+    | useless _ h =>
+      cases h with
+      | cloneSubstFalse hu => exact absurd hu1 (ne_of_lt hu)
+      | dropUnusedInput _ hd => exact absurd hu2 (ne_of_lt hd)
+    | fold _ _ h =>
+      cases h with
+      | foldConstOrOp hlt => exact absurd hf1 (ne_of_lt hlt)
+      | specializeCall _ hl => exact le_of_lt (hl hf1)
+    | normalize _ _ hf _ => rw [hf]
+  obtain ⟨k₅, hk₄₅, hk₅⟩ := eventually_const (fun k => (f k).fold.2) k₄ hfl_le
+  refine dag_prog_terminates (sig := sig) rank I O A (fun k => (f (k₅ + k)).prog) (fun k => ?_)
+    (fun k a => hdag (k₅ + k) a)
+  have hge5 : k₅ ≤ k₅ + k := by omega
+  have hs := hk₁ (k₅ + k) (le_trans hk₁₂ (le_trans hk₂₃ (le_trans hk₃₄ (le_trans hk₄₅ hge5))))
+  have hu1 := hk₂ (k₅ + k) (le_trans hk₂₃ (le_trans hk₃₄ (le_trans hk₄₅ hge5)))
+  have hu2 := hk₃ (k₅ + k) (le_trans hk₃₄ (le_trans hk₄₅ hge5))
+  have hf1 := hk₄ (k₅ + k) (le_trans hk₄₅ hge5)
+  have hf2 := hk₅ (k₅ + k) hge5
+  cases h : hstep (k₅ + k) with
+  | structural hst => exact absurd hs (ne_of_lt (structuralStep_lt hst))
+  | useless _ hus =>
+    cases hus with
+    | cloneSubstFalse hu => exact absurd hu1 (ne_of_lt hu)
+    | dropUnusedInput _ hd => exact absurd hu2 (ne_of_lt hd)
+  | fold _ _ hfd =>
+    cases hfd with
+    | foldConstOrOp hlt => exact absurd hf1 (ne_of_lt hlt)
+    | specializeCall _ hl => exact absurd hf2 (ne_of_lt (hl hf1))
+  | normalize _ _ _ hpf => exact hpf
 
 end Define.BooleanEqualityChecking.Termination

@@ -60,7 +60,7 @@ long chain, which is the case the draft had in mind, but the generated code
 reuses conditions the way real code plausibly does (a flag tested in several
 places). Real Define code would have to be measured to know for sure.
 
-## Why a Heuristic Solver or Step Budget Can't Be the Language Rule—and Why a Canonical ROBDD Limit Can
+## Why a Heuristic Solver or Step Budget Can't Be the Language Rule—and Why Conservative Structural Limits Plus a Canonical ROBDD Limit Can
 
 Run to completion, every exact method gives the same functional equivalence
 classes, so which engine the compiler uses only affects compile time. A
@@ -72,9 +72,7 @@ compiler optimization changes step counts, and raising or changing internal
 algorithms risks breaking Forward Compatibility or making compilation
 unpredictable to programmers.
 
-By contrast, a **canonical shared ROBDD node limit** under a fixed,
-deterministic variable order (first-reached DFS over the value operation's
-static, finite DAG) avoids every one of those problems:
+By contrast, four conservative structural limits paired with a **canonical shared ROBDD node limit** under a fixed, deterministic variable order (first-reached DFS over the value operation's static, finite DAG) avoid every one of those problems:
 
 1. **Uniqueness and cross-compiler determinism:** a Reduced Ordered Binary
    Decision Diagram (with complement edges, uncomplemented `low` edge, and
@@ -82,23 +80,57 @@ static, finite DAG) avoids every one of those problems:
    functions under a fixed variable order (Bryant 1986). Its reachable node
    count depends solely on the operation's DAG and input order, never on how a
    compiler builds, caches, or searches it.
-2. **Forward Compatibility:** raising the node limit in a future version of
-   Define is strictly monotone—every value operation that compiled before
-   still compiles.
-3. **Guaranteed syntactic envelope:** keeping a guaranteed envelope of at most
-   256 boolean statements and at most 20 boolean inputs ensures that small
-   operations with exponential ROBDDs (such as bit-level multipliers on up to
-   20 bits) still always compile via truth tables.
-4. **Communicability:** the limit is easy to explain ("operations up to 256
-   statements and 20 inputs always compile; larger operations compile as long
-   as their boolean logic stays within 4,000,000 decision-diagram nodes") and
-   covers 3,264 of 3,265 real-code units in our measurements without any step
-   counter ([results/budget.md](results/budget.md)).
+2. **Forward Compatibility:** raising any of the four limits (`≤ 20` boolean
+   input interface views, `≤ 256` boolean statements, `≤ 512` boolean inputs,
+   `≤ 65,536` canonical shared ROBDD reachable nodes) in a future version of
+   Define is strictly monotone—every program that compiled before still
+   compiles.
+3. **Guaranteed syntactic floor and bounded contracts:** capping Value
+   Operations at **≤ 20 boolean input interface views** mathematically bounds
+   every pure boolean Value Operation's exported contract to **≤ 128 KB**
+   (truth table) and **≤ 98,302** ROBDD nodes, and bounds DLP 60 symmetry
+   checking to at most 190 view pairs. Together with **≤ 256 boolean
+   statements**, every pure boolean Value Operation fits unconditionally inside
+   the truth-table floor and can never fail an ROBDD complexity check.
+4. **Parallel-build memory and communicability:** capping mixed Value
+   Operations and Actions with `21–512` boolean inputs at **65,536 (`2^16`)**
+   reachable ROBDD nodes (with a 2× construction cap) bounds each parallel
+   compiler worker to **~5–10 MB** of RAM while still covering **100% of
+   standalone real-world functions** (376 / 376, max 3,500 nodes) and
+   **99.72% of all 3,265 real-code units** even with `scope=2` inlining
+   ([results/budget.md](results/budget.md)).
 
 A solver conflict limit remains fine as an internal performance knob when an
 exact fallback sits behind it (as in the legacy whole-program SAT-sweeping
 ladder in [algorithm.md](algorithm.md)), because it changes only compile time
 and never whether a program compiles.
+
+## Why DLP 61 Uses a Fixed Standard Set Instead of Project Registration (`booleans.defcl`)
+
+Restricting DLP 61 to the five fixed standard boolean operations (`and`, `not`,
+`or`, `xor`, `equal`) instead of arbitrary user-registered operations in a
+project-level `booleans.defcl` has four structural advantages:
+
+1. **Strictly `O(S * (I + S))` match search with zero backtracking:** adversarial
+   non-matching chains showed that arity-4 XOR-like operations (`par4`) time
+   out (`> 15 s`) even at `S = 256, I = 513` (`O(S * N^3)`), and arity-3
+   operations (`mux`, `maj`) scale as `O(S * N^2)` (`0.11 s` at `S = 256`,
+   `4.72 s` at `S = 1,024`, timeout at `S = 2,048`). Because all five standard
+   operations have arity ≤ 2 and are symmetric, match search drops to `O(S * N)`
+   — **0.030 s** total (`11 ms` in `matches`) at `S = 256, I = 513`, and only
+   `1.11 s` even at `S = 2,048, I = 4,097`.
+2. **One global dialect across all Define projects:** every Define reader sees
+   the exact same boolean vocabulary (`and`, `not`, `or`, `xor`, `equal`)
+   without having to inspect a project's `booleans.defcl` or learn why one
+   project forbids `or(not a, b)` in favor of `implies` while another doesn't.
+3. **No conflict with DLP 60 factoring:** factoring `(a and b) or (a and c)` to
+   `a and (b or c)` is straightforward when `mux` is not enforced; with `mux`
+   registered, expressions like `mux(b, a, a and c)` compete directly with
+   factored forms.
+4. **Simpler compiler and incremental builds:** eliminating `booleans.defcl`
+   removes NPN exact-synthesis tables, `booleans.defcl` validation/ordering,
+   cycle-breaking between registered operations and user operations, and
+   project-wide recheck invalidation when registration configs change.
 
 ## Modular Checking Over Define's Static Finite DAGs Is Enough for the Rule
 
@@ -114,15 +146,12 @@ value operation within any statement bound (proved in Lean as
 `dag_prog_terminates` in [proof/fixing_termination.lean](proof/fixing_termination.lean)).
 
 What the 256-statement limit doesn't bound is the size of the logic, because
-an executed boolean value operation can compute any function of up to twelve
-views. A value operation that executes 6-by-6 multiplier blocks (twelve
-inputs each) and small adders needs on the order of a hundred statements per
-24-bit multiplication, so it can write two of them, with operands swapped,
-within 256 statements. Their results are equal, and nothing measured here
-decides that in reasonable time (this construction wasn't built; the 12-bit
-multipliers already don't finish). So, within DLP
-59's limits, exact checking of one value operation still has an exponential
-worst case. The measured multipliers show where it starts.
+an executed boolean value operation can compute any function of up to twenty
+views. A value operation that executes multiplier blocks and small adders
+within 256 statements over more than 20 inputs can still construct an
+exponentially large ROBDD, which is why the 65,536-node canonical ROBDD
+limit is needed past 20 inputs (while pure boolean value operations, capped at
+20 boolean input interface views, always finish via truth tables).
 
 ## When the Hard Cases Arise
 
@@ -140,15 +169,14 @@ easy case for every exact method.
 Exclusive or as a primitive (an XOR-AND graph) would let structural
 normalization treat a parity written in different orders as the same set of
 values, so the parity workloads would need no solver at all. But the
-portfolio already decides 128-input parity in 21 ms through the OBDD rescue,
-because parity has a linear-size OBDD in every order. The cases that stay
-hard, multipliers, are hard with exclusive or too: their difficulty comes
-from the arithmetic, and the practical answer to them in the literature is
-algebraic reasoning about the arithmetic (Kaufmann, Biere, and Kauers,
-"Verifying Large Multipliers by Combining SAT and Computer Algebra," FMCAD
-2019, from memory), not a different gate set. Majority or if-then-else
-primitives don't change any of the costs measured here either: SAT sweeping,
-simulation, and OBDDs work the same way on any gate set. So the measurements
-give no reason to change DLP 56's choice of `and` and `not`. This part is
-argued from the parity and multiplier measurements, not measured with an
-XOR-AND graph implementation.
+ROBDD engine already decides 128-input parity in milliseconds, because parity
+has a linear-size ROBDD in every order. The cases that stay hard, multipliers,
+are hard with exclusive or too: their difficulty comes from the arithmetic,
+and the practical answer to them in the literature is algebraic reasoning about
+the arithmetic (Kaufmann, Biere, and Kauers, "Verifying Large Multipliers by
+Combining SAT and Computer Algebra," FMCAD 2019, from memory), not a different
+gate set. Majority or if-then-else primitives don't change any of the costs
+measured here either: SAT sweeping, simulation, and OBDDs work the same way on
+any gate set. So the measurements give no reason to change DLP 56's choice of
+`and` and `not`. This part is argued from the parity and multiplier
+measurements, not measured with an XOR-AND graph implementation.

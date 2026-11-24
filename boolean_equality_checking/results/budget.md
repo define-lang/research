@@ -1,54 +1,57 @@
 # Acceptance Rule and Measurements (No Step Budget)
 
-`beq`'s default (`--method auto`) uses **no step budget** (`--step_budget 0` by default):
+`beq`'s default (`--method auto`) uses **no step budget** (`--step_budget 0` by default) and enforces Define's conservative, compiler-independent limits (DLPs 59–61):
 
-- **Guaranteed envelope:** every value operation with at most **256 boolean statements** and at most **20 boolean inputs** always compiles (checked with truth tables when `I ≤ 16`, or `I ≤ 20` with a wide execution of more than 6 views, or via fallback to truth tables if ROBDDs exceed the node limit).
-- **Canonical shared ROBDD node limit past the guaranteed envelope:** past 256 boolean statements or 20 boolean inputs, a value operation is checked with complement-edge ROBDDs in deterministic first-reached DFS input order (`input_order`) and is accepted if and only if the canonical shared ROBDD of all its boolean statements has at most **4,000,000 reachable non-terminal nodes** (`--bdd_nodes 4000000`).
+- **Boolean input interface views (`--max_views 20`):** at most **20** boolean input interface views on any Value Operation (bounds every pure boolean Value Operation's contract to ≤ 128 KB truth table / ≤ 98,302 ROBDD nodes, and DLP 60 symmetry checking to ≤ 190 pairs).
+- **Boolean statements (`--statement_limit 1`):** at most **256** boolean statements per Value Operation or Action (guarantees every pure boolean Value Operation fits unconditionally inside the `(256 statements, 20 inputs)` truth-table floor).
+- **Boolean inputs (`--max_inputs 512`):** at most **512** boolean inputs per Value Operation or Action (`I ≤ 16`, or `I ≤ 20` with a wide execution of `> 6` views, via truth tables; `I ≤ 20` otherwise via ROBDDs with automatic truth-table fallback; `21 ≤ I ≤ 512` via ROBDDs).
+- **Canonical shared ROBDD reachable-node limit (`--bdd_nodes 65536`):** past 20 boolean inputs (`21 ≤ I ≤ 512`), a Value Operation or Action is accepted if and only if the canonical shared ROBDD of all its boolean statements, under the deterministic first-reached DFS input order (`input_order`), has at most **65,536 (`2^16`) reachable non-terminal nodes** (with a 2× construction cap of 131,072 nodes, ~5–10 MB per parallel worker).
+- **Fixed standard boolean operations (DLP 61):** `{and, not, or, xor, equal}` — all arity ≤ 2 and symmetric, reducing worst-case `Matcher` complexity to strictly `O(S * (I + S))` with zero backtracking.
 
-The acceptance boundary is a pure mathematical property of the value operation's DAG and input order: it is deterministic across machines and compilers, Forward Compatible when raised, and easy to communicate to programmers.
+The acceptance boundary is a pure syntactic and mathematical property of the value operation's DAG and input order: it is deterministic across machines and compilers, Forward Compatible when raised, and easy to communicate to programmers.
 
 Raw data: `budget_real_steps.jsonl` (all 3,265 real-code units past the old limits, checked with `--method auto` and no step budget). The superseded preliminary step-budget runs (taken before fixing `I ≥ 64` shift UB, ROBDD operations, and `Matcher` search blowups) are archived in `preliminary/budget_real_steps_before_fixes.jsonl` and `preliminary/budget_runs_before_fixes.jsonl.gz`.
 
 ## Real programs (all 11 codebases)
 
-Every unit of the real-code study past the old limits (`S > 256` or `I > 20`), checked with `--method auto`, no step budget, 4,000,000 canonical shared ROBDD node limit, and a 10 s / 4 GB safety cap:
+Every unit of the real-code study past the old limits (`S > 256` or `I > 20`), checked with `--method auto`, no step budget, and a 10 s / 4 GB safety cap (`budget_real_steps.jsonl`):
 
-- **Total units checked:** 3,265 (376 scope 1 + 2,889 scope 2). All 3,265 ran in 2.5 s total wall time across cores.
-- **Completed cleanly:** **3,264 / 3,265 (99.97%)** — **0 timeouts, 0 OOMs**.
-  - Median time: **0.35 ms** | 95th percentile: **4.26 ms** | 99th percentile: **21.86 ms** | max: **1.19 s**.
-  - Median canonical ROBDD nodes: **124** | 95th percentile: **1,788** | 99th percentile: **20,335** | max passing: **3,893,860**.
-- **Hit the 4,000,000 canonical ROBDD node limit:** **1 / 3,265 (0.03%)**:
-  - `mypy` scope 2 `mypy/checkexpr.py:3754 visit_comparison_expr` (`I = 2,078`, `S = 2,011`; uncapped ROBDD size 44,412,700 nodes, 9.2 s).
-- **All 16 other units that previously exceeded the 1-billion step budget now pass cleanly** (their earlier blowup was caused by `uint64_t` shift UB for `I ≥ 64` collapsing all samples):
-  - `go` `buildModeInit` (`I = 286`, `S = 206`): **71 ms**, 3,872 BDD nodes (was > 1e9 steps / 1.6 s).
-  - `go` `mem2reg` (`I = 512`, `S = 301`): **162 ms**, 1,116 BDD nodes (was 9.96e8 steps).
-  - `go` `serveConn` (`I = 554–558`, `S = 278–279`): **317–323 ms**, 831–836 BDD nodes.
-  - `tidb` `scalarExprSupportedByTiDB` (`I = 808`, `S = 415`): **905–912 ms**, 1,566 BDD nodes.
-  - `go` `buildDefUses` (`I = 910`, `S = 454`): **1.19 s**, 1,708 BDD nodes.
-  - `mypy` `narrow_declared_type` (`I = 1,290`, `S = 1,270`): **749 ms**, 3,893,860 BDD nodes.
-  - Largest real-code unit (`go` `loadStoreClass`, `I = 6,851`, `S = 5,315`): **10 ms**, 86,527 BDD nodes.
+- **Standalone functions (`scope=1`, 376 units):** **376 / 376 (100%)** pass _all_ conservative limits (`S ≤ 256`, `I ≤ 512`, `ROBDD ≤ 65,536`), with max `S = 184`, max `I + S = 358`, max ROBDD nodes **3,500**, and latency `< 1 ms`.
+- **All units including `scope=2` inlining (3,265 units):**
+  - **Under `ROBDD ≤ 65,536`:** **3,256 / 3,265 (99.72%)** have at most 65,536 canonical ROBDD nodes (only 9 large `scope=2` inlined units exceed 65,536 nodes; max passing under 65,536 is `go` `loadStorePairClass` with 36,919 nodes, 4.5 ms).
+  - **Under `ROBDD ≤ 4,000,000` (historical uncapped ceiling check):** **3,264 / 3,265 (99.97%)** completed cleanly — **0 timeouts, 0 OOMs** — median **0.35 ms**, p95 **4.26 ms**, p99 **21.86 ms**, max **1.19 s** (median canonical ROBDD nodes **124**, p95 **1,788**, p99 **20,335**). Only `mypy` `scope=2` `visit_comparison_expr` (`I = 2,078`, `S = 2,011`, 44.4M nodes; 54 nodes as standalone `scope=1`) exceeded 4,000,000 nodes.
 
-## Generated and adversarial workloads
+## Adversarial `Matcher` scaling (fixed standard set vs. arity-3 / arity-4)
 
-All **277** generated workloads in `work/methods/*.prog` (`dense`, `xor_heavy`, `parity`, `read_once`, `long` up to 1,024 statements, `real`, and multipliers up to 28×28) were checked with `--method auto`, no step budget, and the 4,000,000 canonical ROBDD node limit:
+Stress-testing `Matcher` on adversarial linear-BDD chains of `S` calls to an unregistered 3-input operation `u3(a, b, c) = (a and b) xor c` (`I = 2S + 1`, where nothing matches, so `Matcher` must prove no match exists across all `N = I + S` earlier values):
 
-- **277 / 277 finished with 0 timeouts and 0 OOMs** (slowest file: `xor_heavy_56_256.prog`, 2.15 s, 319 MB RSS).
-- Worst-case `Matcher` benchmarks that previously timed out or used > 500 MB RAM:
-  - `dense_8_256.prog`: **1.34 s / 538 MB** → **0.077 s / 17.2 MB**.
-  - `dense_48_256.prog`: **> 10 s timeout** → **0.078 s / 42.9 MB**.
-  - `xor_heavy_22_256.prog`: **> 10 s timeout** → **0.047 s / 27.0 MB**.
-  - `long_62_1024.prog` (3 ops × 1,024 statements): **1.79 s / 89.0 MB**.
-- Exponential-BDD workloads (`multiplier_30` through `multiplier_56`, and 5 of 9 `xor_heavy_48..62_256` ops) hit the 4,000,000 canonical ROBDD node limit cleanly in **≤ 0.92 s** and **≤ 320 MB RSS**.
+| Statements (`S`) | Inputs (`I`) | Fixed standard set (`and, not, or, xor, equal`) | Old arity-3 set (`+ implies, mux, maj`) | With arity-4 XOR-like op (`par4`) |
+| --- | --- | --- | --- | --- |
+| **256** | **513** | **0.030 s** (`matches` 11.0 ms, 16 MB RSS) | 0.11 s | Timeout (> 15 s) |
+| 512 | 1,025 | **0.078 s** (`matches` 34.6 ms, 16 MB RSS) | 0.64 s | — |
+| 1,024 | 2,049 | **0.28 s** (`matches` 135 ms, 17 MB RSS) | 4.72 s | — |
+| 2,048 | 4,097 | **1.11 s** (`matches` 560 ms, 28 MB RSS) | Timeout (> 15 s) | — |
+| 4,096 | 8,193 | **4.56 s** (`matches` 2.38 s, 56 MB RSS) | — | — |
+
+With the fixed standard set `{and, not, or, xor, equal}`, match search scales strictly as `O(S * (I + S))` (4× time per 2× growth in `S` and `I`), eliminating both the `O(S * N^3)` arity-4 cliff and the `O(S * N^2)` arity-3 scaling.
+
+## Generated and adversarial workloads (`work/methods/`)
+
+All **276** generated workloads in `work/methods/*.prog` (`dense`, `xor_heavy`, `parity`, `read_once`, `long` up to 1,024 statements, `real`, and multipliers up to 28×28) checked with `--method auto`, no step budget, and the **65,536** canonical ROBDD node limit (`--bdd_nodes 65536`):
+
+- **276 / 276 finished in 22.64 s total with 0 timeouts and 0 errors** (slowest file: `long_22_1024.prog`, 3 ops × 1,024 statements, **1.20 s**; peak RSS across all 276 files: **33.7 MB**, down from 319 MB at the 4,000,000-node limit).
 
 ## Whole programs
 
-Checked with `--method auto` (no step budget) on the generated whole programs from `full_algorithm_experiment.py`:
+Checked with `--method auto` (no step budget, `--bdd_nodes 65536`, DLP 60 associative grouping + factoring, and DLP 61 fixed standard set `{and, not, or, xor, equal}`) on freshly generated and fixed whole programs (`gen/program.py`):
 
-| Program | Check wall time | `tables` | `matches` + `spellings` | Peak RSS |
-| --- | --- | --- | --- | --- |
-| `ops_15k` (14,897 ops) | **1.34 s** (was 1.89–2.00 s) | 54 ms | 627 ms (was 1.45 s) | 84 MB |
-| `ops_2k_wide` (1,995 ops, 16–20 inputs) | **12.26 s** (was 19.6–22.2 s) | 9.17 s (lookups 4.90 s, was 10.0 s) | 1.02 s (was 4.78 s) | 188 MB |
+| Program | Check wall time | `tables` | `order` (incl. grouping & factoring) | `matches` + `spellings` | Peak RSS |
+| --- | --- | --- | --- | --- | --- |
+| `ops_15k_std` (14,926 ops) | **1.08 s** (was 1.34 s with 6 ops) | 50 ms | 110 ms | **240 ms** (was 627 ms) | 94 MB |
+| `ops_2k_wide_std` (1,998 ops, 16–20 inputs) | **12.01 s** (was 12.26 s with 6 ops) | 9.54 s (`lookups` 4.98 s) | 95 ms | **330 ms** (was 1.02 s) | 194 MB |
 
 ## Verification
 
-- `reference_test.py` verifies exact agreement across `--method tt`, `--method bdd`, `--method auto`, `--plain 1`, and the independent brute-force checker `gen/program_check.py`, plus `I = 64..300`, `I = 4,500` / `> 8,192` pool literals, `drop_views` on `I > 20` and `xor(u1, u2)`, `--mode registry` on `I > 16`, wide `8 × 8` transpose lookups, BDD Chow/Walsh symmetry grouping, and `--mode fix --keep_searches 1 --check_search 1`.
+- `reference_test.py` (11 test groups) verifies exact agreement across `--method tt`, `--method bdd`, `--method auto`, `--plain 1`, and the independent brute-force checker `gen/program_check.py`, plus DLP 60 associative grouping and factoring common terms, conservative limits (`max_views = 20`, `statement_limit = 256`, `max_inputs = 512`, `bdd_nodes = 65536`), `I = 64..300`, `I = 4,500` / `> 8,192` pool literals, `drop_views` on `I > 20` and `xor(u1, u2)`, wide `8 × 8` transpose lookups, BDD Chow/Walsh symmetry grouping, and `--mode fix --keep_searches 1 --check_search 1`.
+- `gen/reduction_cases.py` verifies all 87 canonical reduction cases (including associative grouping and distributive factoring) against both `beq` and `gen/program_check.py` plus fixpoint idempotence.
+- `bazelisk test //boolean_equality_checking/proof:all` verifies the Lean 4 termination proof (`proof/fixing_termination.lean`, theorem `dag_prog_terminates`, including `OpFix.factor`).

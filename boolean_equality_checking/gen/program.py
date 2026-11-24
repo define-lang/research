@@ -128,31 +128,21 @@ import functools
 import random
 from dataclasses import dataclass, field
 
-# booleans.defcl, a set: the order is by key (DLP 61).
-REGISTERED = ["or", "implies", "xor", "eq", "mux", "maj"]
-# The registered operations' definitions, each after the ones it executes:
-# (views, statements, written view). These are the forms the fix loop
-# reaches from definitions written with `and` and `not` only: each one
-# follows `and`, `not`, and the registered operations with smaller keys
-# (or, implies, xor, eq, mux, maj: fewest `and`s, then views, then project
-# before stdlib, then more symmetric first, then truth table in counting
-# order), so `or` is written with `and`/`not`, `implies` with `or`, `xor`
-# with `or`, `eq` is the `not` of `xor`, and `maj` is a `mux`.
+# Standard boolean operations (DLP 61), in fixed order after `and` and `not`.
+REGISTERED = ["or", "xor", "equal"]
+# The standard boolean operations' definitions, each after the ones it executes:
+# (views, statements, written view). Each follows `and`, `not`, and the standard
+# operations before it (`or`, `xor`, `equal`): `or` is `not (not a and not b)`,
+# `xor` is `or(a and not b, b and not a)`, and `equal` is `not xor(a, b)`.
 DEFINITIONS = {
     "or": (2, ["not 1", "not 2", "and 3 4", "not 5"], 6),
-    "implies": (2, ["not 1", "call or 2 3"], 4),
     "xor": (2, ["not 2", "and 1 3", "not 1", "and 2 5", "call or 4 6"], 7),
-    "eq": (2, ["call xor 1 2", "not 3"], 4),
-    "mux": (3, ["and 1 2", "not 1", "and 3 5", "call or 4 6"], 7),
-    "maj": (3, ["call or 1 2", "and 1 2", "call mux 3 4 5"], 6),
+    "equal": (2, ["call xor 1 2", "not 3"], 4),
 }
 FUNCTIONS = {
     "or": lambda a, b: a | b,
-    "implies": lambda a, b: ~a | b,
     "xor": lambda a, b: a ^ b,
-    "eq": lambda a, b: ~(a ^ b),
-    "mux": lambda s, a, b: (s & a) | (~s & b),
-    "maj": lambda a, b, c: (a & b) | (c & (a | b)),
+    "equal": lambda a, b: ~(a ^ b),
 }
 
 
@@ -454,7 +444,7 @@ def _close(b: Builder) -> int:
     """Combine the values nothing reads into one, which the operation writes."""
     while len(b.unused) > 1:
         x, y = b.unused[-2], b.unused[-1]
-        names = ["and", "or", "xor", "implies", "eq"]
+        names = ["and", "or", "xor", "equal"]
         tables = {}
         for name in names:
             if not b.tracked:
@@ -494,7 +484,7 @@ def boolean_operation(
         b.view(boolean=True)
     b.unused = list(b.boolean)
     if rng.random() < s.wrapper_rate:
-        reg = rng.choice(["or", "implies", "xor", "eq"])
+        reg = rng.choice(["or", "xor", "equal"])
         v = b.emit(
             f"call {reg} 1 2",
             FUNCTIONS[reg](b.tables[1], b.tables[2]) if b.tracked else 0,
@@ -552,10 +542,19 @@ def mixed_operation(
     """
     nbool = rng.randint(0, 3)
     nnum = rng.randint(1, 4)
-    runs = [rng.choice(mixed)] if mixed and rng.random() < 0.5 else []
+    eligible = [
+        m
+        for m in mixed
+        if (m.nbool == 0 or nbool > 0 or s.comparisons[0] > 0)
+        and nbool + sum(m.outs) + (1 if m.nbool > 0 and nbool == 0 else 0) <= 20
+    ]
+    runs = [rng.choice(eligible)] if eligible and rng.random() < 0.5 else []
     run_inputs = sum(sum(m.outs) for m in runs)
     # DLP 59's limit of twenty boolean inputs.
-    comparisons = min(rng.randint(*s.comparisons), 20 - nbool - run_inputs)
+    min_cmps = 1 if any(m.nbool > 0 for m in runs) and nbool == 0 else 0
+    comparisons = max(
+        min_cmps, min(rng.randint(*s.comparisons), 20 - nbool - run_inputs)
+    )
     inputs = nbool + comparisons + run_inputs
     b = Builder(name, f"op {name} mixed {nbool} {nnum}", inputs, tracked=s.tracked)
     b.users = known
@@ -575,9 +574,11 @@ def mixed_operation(
         b.seen.add(b.tables[v])
         b.boolean.append(v)
     for m in runs:
+        if m.nbool > 0 and not b.boolean:
+            continue
         args = []
         for _ in range(m.nbool):
-            args.append(str(rng.choice(b.boolean)) if b.boolean else "T")
+            args.append(str(rng.choice(b.boolean)))
         for _ in range(m.nnum):
             args.append(str(rng.choice(numeric)))
         b.lines.append(f"run {m.name} " + " ".join(args))
@@ -605,15 +606,106 @@ def mixed_operation(
             b.lines.append(f"num sel {x} {rng.choice(numeric)} {rng.choice(numeric)}")
             numeric.append(b.value())
     bool_outs = rng.randint(0, 2)
-    for _ in range(bool_outs):
-        if b.unused:
-            v = b.unused.pop()
-            outs.append(str(v))
-            out_kinds.append(True)
+    used_out_inputs: set[int] = set()
+    chosen_bool_outs: list[int] = []
+    exit_bool_vals: list[int] = []
+    for line in b.lines:
+        parts = line.split()
+        if parts[0] == "num":
+            exit_bool_vals.append(int(parts[2]))
+        elif parts[0] == "run":
+            callee = next(m for m in mixed if m.name == parts[1])
+            for a in parts[2 : 2 + callee.nbool]:
+                exit_bool_vals.append(int(a))
+    if b.tracked:
+        # Pick boolean output views that obey DLP 59 Problem 7 (Boolean Sources
+        # include no boolean input views and no shared Boolean Sources).
+        n_inp = b.inputs
+        full = (1 << (1 << n_inp)) - 1
+        # Map each boolean input value ID to its 0-based input index.
+        input_ids = list(range(1, nbool + 1))
+        val_id = nbool + nnum
+        stmt_sources: dict[int, set[int]] = {v: {i} for i, v in enumerate(input_ids)}
+        for line in b.lines:
+            parts = line.split()
+            kind = parts[0]
+            if kind == "cmp":
+                val_id += 1
+                idx = len(input_ids)
+                input_ids.append(val_id)
+                stmt_sources[val_id] = {idx}
+            elif kind == "num":
+                val_id += 1
+            elif kind == "run":
+                callee = next(m for m in mixed if m.name == parts[1])
+                for is_b in callee.outs:
+                    val_id += 1
+                    if is_b:
+                        idx = len(input_ids)
+                        input_ids.append(val_id)
+                        stmt_sources[val_id] = {idx}
+            elif kind in ("and", "not", "call"):
+                val_id += 1
+                arg_start = 2 if kind == "call" else 1
+                srcs: set[int] = set()
+                for a in parts[arg_start:]:
+                    if a not in ("T", "F"):
+                        srcs |= stmt_sources.get(int(a), set())
+                stmt_sources[val_id] = srcs
+            elif kind == "copy":
+                val_id += 1
+                stmt_sources[val_id] = set(stmt_sources.get(int(parts[1]), set()))
+        for v in reversed(b.unused):
+            if len(chosen_bool_outs) >= bool_outs:
+                break
+            srcs = stmt_sources.get(v, set())
+            if not srcs or any(i < nbool for i in srcs) or (srcs & used_out_inputs):
+                continue
+            used_out_inputs |= srcs
+            chosen_bool_outs.append(v)
+    elif nbool == 0 and bool_outs > 0 and b.unused:
+        chosen_bool_outs.append(b.unused[-1])
+    for v in chosen_bool_outs:
+        b.unused.remove(v)
+        outs.append(str(v))
+        out_kinds.append(True)
+        exit_bool_vals.append(v)
     while b.unused:
         x = b.unused.pop()
         b.lines.append(f"num sel {x} {rng.choice(numeric)} {rng.choice(numeric)}")
         numeric.append(b.value())
+        exit_bool_vals.append(x)
+    if b.tracked and b.inputs > 0:
+        # Ensure every boolean input semantically affects at least one boolean
+        # exit (matching DLP 59 Useless Boolean Inputs).
+        n_inp = b.inputs
+        full = (1 << (1 << n_inp)) - 1
+        input_ids = list(range(1, nbool + 1))
+        val_id = nbool + nnum
+        for line in b.lines:
+            parts = line.split()
+            kind = parts[0]
+            if kind == "cmp":
+                val_id += 1
+                input_ids.append(val_id)
+            elif kind == "run":
+                callee = next(m for m in mixed if m.name == parts[1])
+                for is_b in callee.outs:
+                    val_id += 1
+                    if is_b:
+                        input_ids.append(val_id)
+            else:
+                val_id += 1
+        exit_tables = [b.tables[v] & full for v in exit_bool_vals]
+        for i, v_id in enumerate(input_ids):
+            p = projection(n_inp, i)
+            if not any(
+                ((tv & p) >> (1 << i)) != (tv & ~p & full) for tv in exit_tables
+            ):
+                b.lines.append(
+                    f"num sel {v_id} {rng.choice(numeric)} {rng.choice(numeric)}"
+                )
+                numeric.append(b.value())
     outs.append(str(numeric[-1]))
     out_kinds.append(False)
     return b.text(outs), MixedOp(name, nbool, nnum, out_kinds)

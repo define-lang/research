@@ -79,7 +79,13 @@ Let P be canonical. "Earlier than v" means before v in P's statement order.
    turns `(not a) or (not b)` into `not u`, removing three statements and
    adding one, and a registered `nand` of a and b into `not u`, one
    statement for one.
-3. **Ordinary match.** A statement v, a registered operation R, and values
+3. **Factoring common terms (DLP 60).** Pulling a shared factor out of `k ≥ 2`
+   single-use inner-chain terms inside a single-use distributive outer chain
+   (such as `(a and b) or (a and c)` → `a and (b or c)`) removes `k - 1 ≥ 1`
+   statements (`OpFix.factor` in Lean), strictly lowering the primary statement
+   count before canonicalizing (associative grouping, argument order, and
+   statement order).
+4. **Ordinary match.** A statement v, a standard/registered operation R, and values
    a₁ … aₖ earlier than v, distinct, with v's function equal to R of
    theirs (**ordinary result**) or its `not` (**opposite result**). The fix
    replaces v's statement with an execution of R on a₁ … aₖ (and, for an
@@ -228,17 +234,95 @@ In [fixing_termination.lean](fixing_termination.lean), `dag_states_finite`
 proves this counting fact directly on `DagOp`, and `dag_prog_terminates`
 discharges `prog_terminates`'s finiteness hypothesis completely.
 
-**When it ends, the program compiles**, if every error has a fix. They all
-do except these, which the programmer has to fix: a literal given to a
-boolean statement, a value or written view that never changes, a read view
-that doesn't matter whose removal would make a value that never changes
-(fix 6), an operation past DLP 59's limits as written (the fixes may pass
-the statement limit on the way to a smaller operation, and the fix loop
-checks past it), an execution cycle in the program as written (DLP 9; the
-fixes never make one), a registered operation whose definition is a
-wrapper (it can't be removed like another wrapper), and a fix 7 whose
-execution leading back is of a mixed operation (`run`), which the fix loop
-doesn't write out.
+**When it ends, the program compiles**, if every error has a fix. Under the
+full DLP 64 automated refactoring algorithm (described in the section below),
+the refactoring tool also automatically fixes multi-output boolean value
+operations, mixed-output Problem 7 violations (`mixed_bool_view` and
+`mixed_shared_input`), boolean literals and constant expressions (via constant
+folding, literal propagation, and acyclic callee specialization), interacting
+unused boolean views (via `false`-substitution fallback), and useless boolean
+inputs in non-boolean value operations (via sub-DAG cloning with
+`false`-substitution, unused-view dropping, dead `cmp` deletion, and `run`
+output specialization). The only errors left for the programmer are: a boolean
+literal or constant expression that reaches an opaque non-boolean logical
+operation (`num.*` / `cmp.*`), a 0-output boolean value operation, an operation
+past DLP 62's limits as written, an execution cycle in the program as written
+(DLP 9; the fixes never make one), a registered operation whose definition is a
+wrapper or constant, and a fix 7 whose execution leading back is of a mixed
+operation (`run`).
+
+## Full Automated Refactoring Phases (DLP 64)
+
+Beyond the core single-operation normalization loop (`OpFix` / `ProgFix`
+above), the full DLP 64 auto-fixer adds three outer refactoring phases, each
+proved terminating in [fixing_termination.lean](fixing_termination.lean):
+
+1. **Structural rewrites (`structural_terminates`).**
+   - **Splitting multi-output boolean value operations (`StructuralStep.splitBool`):**
+     a boolean value operation with $k > 1$ output views is split into $k$
+     single-output boolean value operations and its callers are updated. This
+     decreases `multiBoolOps` by 1 and creates no multi-output boolean ops or
+     mixed ops.
+   - **Extracting mixed-output boolean logic (`StructuralStep.extractMixed`):**
+     a non-boolean value operation violating DLP 59 Problem 7
+     (`mixed_bool_view` or `mixed_shared_input`) has the boolean logic on top
+     of its non-boolean Boolean Sources extracted into single-output boolean
+     helpers (or inlined wrappers), returns each distinct needed non-boolean
+     Boolean Source directly at most once, and updates its callers. This
+     decreases `violatingMixedOps` by 1 and creates only single-output boolean
+     helpers.
+   - Both steps strictly decrease `multiBoolOps + violatingMixedOps`, so
+     structural rewrites terminate in at most one pass per violating DAG node.
+
+2. **Literal propagation, constant folding, and acyclic callee specialization
+   (`specialization_terminates`, `fold_loop_terminates`).**
+   - **Recursive callee specialization (`SpecStep`):** when a `call` or `run`
+     receives one or more boolean literals (`true`/`false`), the callee is
+     specialized into a deduplicated helper op with those boolean input views
+     replaced by literals and immediately simplified. Because the call graph is
+     a finite acyclic DAG (DLP 9), every recursive specialization either
+     descends to a strictly lower topological depth (`depth' < depth`) or
+     specializes at the same depth with strictly fewer boolean input views
+     (`arity' < arity`). Thus `(depth, arity)` strictly decreases in the
+     well-founded lexicographic order on $\mathbb{N} \times \mathbb{N}$.
+   - **Within-operation folding (`FoldStep`):** replacing a constant boolean
+     statement with `true`/`false` or folding `and`/`not` on a literal removes
+     at least one statement (`stmts' < stmts`), while specializing a `call` or
+     `run` keeps `stmts' ≤ stmts` and, when `stmts' = stmts`, removes at least
+     one boolean literal argument (`litArgs' < litArgs`). Thus
+     `(stmts, litArgs)` strictly decreases in the lexicographic order on
+     $\mathbb{N} \times \mathbb{N}$.
+   - On boolean value operations, if an unused input view cannot be substituted
+     with any kept view without creating a constant, substituting `false`
+     lowers $V$ (`vsum`) and hands off to literal folding and callee
+     specialization.
+
+3. **Useless-input elimination on non-boolean value operations
+   (`useless_elim_terminates`).**
+   - Track `(uselessPairs, unusedInputs)`, where `uselessPairs` is the number
+     of `(target, input)` pairs with `input` in `target`'s Boolean Sources yet
+     unable to change `target`, and `unusedInputs` is the number of boolean
+     inputs (boolean input views, `cmp` statements, `run` boolean outputs)
+     absent from every exit's Boolean Sources.
+   - **Sub-DAG cloning with `false`-substitution (`UselessStep.cloneSubstFalse`):**
+     cloning `target`'s boolean sub-DAG and substituting `false` for `input`
+     removes `input` from `target`'s Boolean Sources while preserving `target`'s
+     function and all other reads of `input`, strictly lowering `uselessPairs`
+     (followed by literal folding and callee specialization).
+   - **Removing globally unused inputs (`UselessStep.dropUnusedInput`):**
+     dropping an unused boolean input view, deleting a dead `cmp`, or
+     specializing a `run` to drop an unused boolean output keeps `uselessPairs`
+     unchanged and strictly lowers `unusedInputs`.
+   - Thus `(uselessPairs, unusedInputs)` strictly decreases in the well-founded
+     lexicographic order on $\mathbb{N} \times \mathbb{N}$.
+
+4. **Combined termination (`full_autofix_terminates`).**
+   Because each outer measure (`structuralMeasure`, `uselessPairs`,
+   `unusedInputs`, and `(foldStmts, litArgs)`) is a non-negative integer that
+   never increases once higher-priority phases settle, all outer measures
+   eventually stabilize (`eventually_const`), after which every remaining step
+   is a `ProgFix` step on the finite DAG-backed program, which terminates by
+   `dag_prog_terminates`.
 
 ## Proof
 
@@ -455,6 +539,14 @@ and the axiom test checks that its theorems use only `propext`,
 - **`prog_no_cycle`**: no sequence of one or more fixes leads back to the
   program it started from, derived from `prog_terminates` by going round
   the cycle forever.
+- **`dag_prog_terminates`**: discharges `prog_terminates`'s finiteness
+  hypothesis directly from Define's finite DAG computation graphs (`DagOp`).
+- **`structural_terminates`**, **`specialization_terminates`**,
+  **`fold_loop_terminates`**, **`useless_elim_terminates`**, and
+  **`full_autofix_terminates`**: formalize termination of all DLP 64 automated
+  refactoring phases (multi-output boolean splitting, mixed-output extraction,
+  acyclic callee specialization, constant/literal folding, and mixed-op
+  useless-input elimination) and their composition with `dag_prog_terminates`.
 
 The lemmas match the English proof: `pairOf_subst` is Lemma 4's claim that
 other statements keep their pairs, `dm_single` is Lemma 5, `dm_pointwise`

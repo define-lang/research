@@ -391,14 +391,26 @@ class Checker:
             i for i, s in enumerate(op.statements) if s.kind in BOOLEAN_STATEMENTS
         ]
         inputs = self.boolean_inputs(op)
-        if len(boolean) > 256:
+        if op.boolean_views > 20:
+            errors["limits"] = "views"
+        elif len(boolean) > 256:
             errors["limits"] = "statements"
         elif len(inputs) > 20:
             errors["limits"] = "inputs"
-        for i in boolean:
-            if any(isinstance(self.resolve(op, a), str) for a in op.statements[i].args):
-                errors["literal"] = i
+        for i, s in enumerate(op.statements):
+            if s.kind == "copy":
+                continue
+            for a in s.args:
+                r = self.resolve(op, a)
+                if isinstance(r, str) and (
+                    s.kind in BOOLEAN_STATEMENTS or r in ("T", "F")
+                ):
+                    errors["literal"] = i
+                    break
+            if "literal" in errors:
                 break
+        if op.kind == "bool" and len(op.outputs) != 1:
+            errors["outputs"] = len(op.outputs)
         if op.kind == "bool" and len(boolean) == 1:
             only = op.statements[boolean[0]]
             if only.kind in ("and", "not") or only.name in self.program.registered:
@@ -410,6 +422,12 @@ class Checker:
         # executions reach a cycle (DLP 9), which has no function.
         if "limits" in errors or self.reaches_cycle(op.name):
             return errors
+        found_factor = self.order_factor(op)
+        if found_factor is not None:
+            errors["order_factor"] = found_factor
+        found_group = self.order_grouping(op)
+        if found_group is not None:
+            errors["order_grouping"] = found_group
         found = self.order_arguments(op, boolean)
         if found is not None:
             errors["order_arguments"] = found
@@ -425,8 +443,19 @@ class Checker:
             unused = self.unused_views(op)
             if unused:
                 errors["unused_view"] = unused
+        else:
+            bad_views, shared_inputs = self.check_mixed_outputs(op, inputs)
+            if bad_views:
+                errors["mixed_bool_view"] = bad_views
+            if shared_inputs:
+                errors["mixed_shared_input"] = shared_inputs
+            useless = self.useless_inputs(op, inputs, tables, mask)
+            if useless:
+                errors["useless_input"] = useless
         if redundant is not None:
             errors["redundant"] = redundant
+            return errors
+        if "order_factor" in errors:
             return errors
         context = Context(op, tables, mask, count, self.available(op, boolean, inputs))
         found = self.match(context, boolean)
@@ -502,6 +531,242 @@ class Checker:
             if self.call(op.name, flipped, mask) == function:
                 out.append(i + 1)
         return out
+
+    def boolean_sources(
+        self, op: Operation, inputs: list[int], root: int
+    ) -> list[bool]:
+        """Return which `inputs` are in `root`'s Boolean Sources (DLP 59)."""
+        input_index = {v: i for i, v in enumerate(inputs)}
+        reached = [False] * len(inputs)
+        seen: set[int] = set()
+        stack: list[int | str] = [self.resolve(op, root)]
+        while stack:
+            v = self.resolve(op, stack.pop())
+            if not isinstance(v, int) or v in seen:
+                continue
+            seen.add(v)
+            if v in input_index:
+                reached[input_index[v]] = True
+                continue
+            origin = op.origins[v]
+            if origin[0] != "statement":
+                continue
+            stmt = op.statements[origin[1]]
+            if stmt.kind not in BOOLEAN_STATEMENTS:
+                continue
+            for arg in stmt.args:
+                if isinstance(arg, int):
+                    stack.append(self.resolve(op, arg))
+        return reached
+
+    def useless_inputs(
+        self, op: Operation, inputs: list[int], tables: dict[int, int], mask: int
+    ) -> list[int]:
+        """Check DLP 59 Useless Boolean Inputs per boolean output view and non-boolean argument."""
+        targets: list[int] = []
+        for out in op.outputs:
+            if output_type(op, out) == "bool" and isinstance(out, int):
+                targets.append(out)
+        for stmt in op.statements:
+            if stmt.kind not in BOOLEAN_STATEMENTS and stmt.kind != "copy":
+                for arg in stmt.args:
+                    if isinstance(arg, int) and output_type(op, arg) == "bool":
+                        targets.append(arg)
+        n = len(inputs)
+        projs = projections(n)
+        in_any_source = [False] * n
+        useless_flag = [False] * n
+        for target in targets:
+            srcs = self.boolean_sources(op, inputs, target)
+            tv = self.table_of(op, tables, target, mask)
+            for i in range(n):
+                if not srcs[i]:
+                    continue
+                in_any_source[i] = True
+                p = projs[i]
+                if ((tv & p) >> (1 << i)) == (tv & ~p & mask):
+                    useless_flag[i] = True
+        return [inputs[i] for i in range(n) if not in_any_source[i] or useless_flag[i]]
+
+    def check_mixed_outputs(
+        self,
+        op: Operation,
+        inputs: list[int],
+    ) -> tuple[list[int], list[int]]:
+        """Check DLP 59 Problem 7 on boolean output views of a mixed operation."""
+        bad_views: list[int] = []
+        non_bool_uses = [0] * len(inputs)
+        for idx, out in enumerate(op.outputs):
+            if output_type(op, out) != "bool" or not isinstance(out, int):
+                continue
+            reached = self.boolean_sources(op, inputs, out)
+            if any(reached[: op.boolean_views]):
+                bad_views.append(idx + 1)
+            for i in range(op.boolean_views, len(inputs)):
+                if reached[i]:
+                    non_bool_uses[i] += 1
+        shared = [
+            inputs[i]
+            for i in range(op.boolean_views, len(inputs))
+            if non_bool_uses[i] >= 2
+        ]
+        return bad_views, shared
+
+    def binary_op_info(self, stmt: Statement) -> tuple[str, int] | None:
+        """Return (op_key, 4-bit table) for a binary boolean operation, else None."""
+        if stmt.kind == "and":
+            return ("and", 0x8)
+        if (
+            stmt.kind == "call"
+            and len(stmt.args) == 2
+            and stmt.name is not None
+            and not self.reaches_cycle(stmt.name)
+        ):
+            return ("call:" + stmt.name, self.own_function(stmt.name) & 0xF)
+        return None
+
+    def reader_counts(self, op: Operation) -> dict[int, int]:
+        """Return copy-resolved reader counts for every value in `op`."""
+        readers: dict[int, int] = {}
+        for s in op.statements:
+            if s.kind == "copy":
+                continue
+            for a in s.args:
+                r = self.resolve(op, a)
+                if isinstance(r, int):
+                    readers[r] = readers.get(r, 0) + 1
+        for o in op.outputs:
+            r = self.resolve(op, o)
+            if isinstance(r, int):
+                readers[r] = readers.get(r, 0) + 1
+        return readers
+
+    def collect_assoc_chain(
+        self,
+        op: Operation,
+        readers: dict[int, int],
+        root_stmt: int,
+        op_key: str,
+    ) -> list[int | str]:
+        """Return leaves of a single-use `op_key`-chain rooted at `root_stmt`."""
+        leaves: list[int | str] = []
+        for a in op.statements[root_stmt].args:
+            r = self.resolve(op, a)
+            if isinstance(r, int) and readers.get(r, 0) == 1:
+                origin = op.origins[r]
+                if origin[0] == "statement":
+                    info = self.binary_op_info(op.statements[origin[1]])
+                    if info is not None and info[0] == op_key:
+                        leaves.extend(
+                            self.collect_assoc_chain(op, readers, origin[1], op_key)
+                        )
+                        continue
+            leaves.append(a)
+        return leaves
+
+    def order_factor(self, op: Operation) -> list[int] | None:
+        """Return [root_value, factor_value] for the first unfactored distributive chain."""
+        readers = self.reader_counts(op)
+        sole_reader: dict[int, int] = {}
+        for k, s in enumerate(op.statements):
+            if s.kind == "copy":
+                continue
+            for a in s.args:
+                r = self.resolve(op, a)
+                if isinstance(r, int):
+                    sole_reader[r] = k
+        out_ids = {r for o in op.outputs if isinstance(r := self.resolve(op, o), int)}
+        for k, s in enumerate(op.statements):
+            info = self.binary_op_info(s)
+            if info is None or not is_assoc_comm_tt(info[1]):
+                continue
+            outer_key, outer_tt = info
+            root_val = self.first_value(op, k)
+            # Only check maximal single-use roots.
+            if (
+                readers.get(root_val, 0) == 1
+                and root_val not in out_ids
+                and root_val in sole_reader
+            ):
+                pinfo = self.binary_op_info(op.statements[sole_reader[root_val]])
+                if pinfo is not None and pinfo[0] == outer_key:
+                    continue
+            outer_leaves = self.collect_assoc_chain(op, readers, k, outer_key)
+            if len(outer_leaves) < 2:
+                continue
+            by_inner: dict[str, dict[int, int]] = {}
+            for leaf in outer_leaves:
+                lid = self.resolve(op, leaf)
+                if not isinstance(lid, int) or readers.get(lid, 0) != 1:
+                    continue
+                origin = op.origins[lid]
+                if origin[0] != "statement":
+                    continue
+                linfo = self.binary_op_info(op.statements[origin[1]])
+                if linfo is None or not distributes_over_tt(linfo[1], outer_tt):
+                    continue
+                inner_key = linfo[0]
+                inner_leaves = self.collect_assoc_chain(
+                    op, readers, origin[1], inner_key
+                )
+                if any(isinstance(self.resolve(op, f), str) for f in inner_leaves):
+                    continue
+                term_factors = {
+                    int(self.resolve(op, f))  # type: ignore[arg-type]
+                    for f in inner_leaves
+                }
+                counts = by_inner.setdefault(inner_key, {})
+                for fid in term_factors:
+                    counts[fid] = counts.get(fid, 0) + 1
+            best: tuple[int, int] | None = None
+            for counts in by_inner.values():
+                for fid, cnt in counts.items():
+                    if cnt < 2:
+                        continue
+                    if (
+                        best is None
+                        or cnt > best[0]
+                        or (cnt == best[0] and self.rank_compare(op, fid, best[1]) < 0)
+                    ):
+                        best = (cnt, fid)
+            if best is not None:
+                return [root_val, best[1]]
+        return None
+
+    def order_grouping(self, op: Operation) -> int | None:
+        """Return the first statement violating DLP 60 associative grouping."""
+        readers = self.reader_counts(op)
+
+        def same_single(arg: int | str, key: str) -> int | None:
+            r = self.resolve(op, arg)
+            if not isinstance(r, int) or readers.get(r, 0) != 1:
+                return None
+            origin = op.origins[r]
+            if origin[0] != "statement":
+                return None
+            cinfo = self.binary_op_info(op.statements[origin[1]])
+            if cinfo is None or cinfo[0] != key:
+                return None
+            return origin[1]
+
+        for k, s in enumerate(op.statements):
+            info = self.binary_op_info(s)
+            if info is None or not is_assoc_comm_tt(info[1]):
+                continue
+            op_key = info[0]
+
+            c0 = same_single(s.args[0], op_key)
+            c1 = same_single(s.args[1], op_key)
+            if c0 is not None and c1 is not None:
+                return self.first_value(op, k)
+            if c0 is not None or c1 is not None:
+                child = c0 if c0 is not None else c1
+                assert child is not None  # noqa: S101 - One of c0, c1 is not None.
+                leaf_arg = s.args[1] if c0 is not None else s.args[0]
+                for cl in self.collect_assoc_chain(op, readers, child, op_key):
+                    if self.rank_compare(op, leaf_arg, cl) < 0:
+                        return self.first_value(op, k)
+        return None
 
     def order_arguments(self, op: Operation, boolean: list[int]) -> int | None:
         """Return the first boolean statement whose groups aren't in rank order."""
@@ -861,6 +1126,43 @@ def npn_class(table: int) -> int:
     return best
 
 
+def is_assoc_comm_tt(tt: int) -> bool:
+    """Return whether a 4-bit binary truth table is commutative and associative."""
+    if tt in (0x0, 0xF):
+        return False
+
+    def ev(a: int, b: int) -> int:
+        return (tt >> (a | (b << 1))) & 1
+
+    if ev(0, 1) != ev(1, 0):
+        return False
+    for x in (0, 1):
+        for y in (0, 1):
+            for z in (0, 1):
+                if ev(ev(x, y), z) != ev(x, ev(y, z)):
+                    return False
+    return True
+
+
+def distributes_over_tt(inner: int, outer: int) -> bool:
+    """Return whether binary table `inner` distributes over distinct `outer`."""
+    if inner == outer or not is_assoc_comm_tt(inner) or not is_assoc_comm_tt(outer):
+        return False
+
+    def fi(a: int, b: int) -> int:
+        return (inner >> (a | (b << 1))) & 1
+
+    def fo(a: int, b: int) -> int:
+        return (outer >> (a | (b << 1))) & 1
+
+    for x in (0, 1):
+        for y in (0, 1):
+            for z in (0, 1):
+                if fi(x, fo(y, z)) != fo(fi(x, y), fi(x, z)):
+                    return False
+    return True
+
+
 def counting_order_key(table: int, views: int) -> int:
     """Return truth-table bits in counting order (view 1 changing least often)."""
     key = 0
@@ -1070,7 +1372,19 @@ SELF_TESTS: list[tuple[str, dict[str, dict[str, object]]]] = [
     ),
     (
         "registered or\n" + OR + "op x bool 21\nand 1 2\nout 22\nend\n",
-        {"or": {}, "x": {"limits": "inputs", "wrapper": True}},
+        {"or": {}, "x": {"limits": "views", "wrapper": True}},
+    ),
+    (
+        # DLP 60 associative grouping: `and(a, and(b, c))` must fold (a, b) first.
+        "registered or\n" + OR + "op g3 bool 3\nand 2 3\nand 1 4\nout 5\nend\n",
+        {"or": {}, "g3": {"order_grouping": 5}},
+    ),
+    (
+        # DLP 60 factoring common terms: `(a and b) or (a and c)` must factor `a`.
+        "registered or\n"
+        + OR
+        + "op fac bool 3\nand 1 2\nand 1 3\ncall or 4 5\nout 6\nend\n",
+        {"or": {}, "fac": {"order_factor": [6, 1]}},
     ),
 ]
 

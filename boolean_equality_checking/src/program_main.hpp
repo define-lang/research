@@ -128,7 +128,9 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
   if (opt.count("bdd_order")) c.bdd_order = opt["bdd_order"];
   c.input_limit = static_cast<uint32_t>(get("input_limit", 20));
   c.chunk_inputs = static_cast<uint32_t>(get("chunk_inputs", 16));
-  c.bdd_node_limit = static_cast<size_t>(get("bdd_nodes", 4'000'000.0));
+  c.max_views = static_cast<uint32_t>(get("max_views", 20));
+  c.max_inputs = static_cast<uint32_t>(get("max_inputs", 512));
+  c.bdd_node_limit = static_cast<size_t>(get("bdd_nodes", 65'536.0));
   c.measure_executions = get("measure_executions", 0) != 0;
   c.search_matches = get("matches", 1) != 0;
   c.plain_matcher = get("plain", 0) != 0;
@@ -252,6 +254,10 @@ inline int run_program(const std::string& path, std::map<std::string, std::strin
       const double ta = ProgramChecker::now();
       Program q = read_program(opt["out"]);
       ProgramChecker qc(q);
+      qc.max_views = c.max_views;
+      qc.max_inputs = c.max_inputs;
+      qc.bdd_node_limit = c.bdd_node_limit;
+      qc.statement_limit = get("statement_limit", 1) != 0;
       qc.record_registered();
       remaining = 0;
       for (size_t i = 0; i < q.ops.size(); ++i) remaining += !qc.check(i, true, "tt").errors.empty();

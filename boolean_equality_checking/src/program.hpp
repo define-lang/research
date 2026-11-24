@@ -38,6 +38,7 @@ struct PStmt {
   std::string name;  // the operation of call, run, cmp, num
   std::vector<PArg> args;
   std::vector<int> ids;  // the values it defines
+  int applied_version = 0;  // signature-change steps of `name` already applied
 };
 
 struct POp {
@@ -244,8 +245,23 @@ struct Report {
   };
   Found match, spelling;
   std::vector<Found> matches;  // every match, for the spelling a fix uses
+  struct Factor {
+    int root_id = 0;
+    std::string outer_kind, outer_name;
+    std::string inner_kind, inner_name;
+    int factor_id = 0;
+    size_t count = 0;
+  };
+  Factor factor;
+  bool has_factor = false;
   std::vector<int> dead;          // dead boolean statements' values
   std::vector<int> unused_views;  // read views that don't matter, from 1
+  std::vector<int> unused_mixed_inputs;  // mixed-op boolean inputs absent from every exit's Boolean Sources
+  struct UselessTarget {
+    int target_id = 0;  // resolved boolean exit value
+    int input_id = 0;   // boolean input in target's Boolean Sources that cannot change target
+  };
+  std::vector<UselessTarget> useless_targets;
   bool has_match = false, has_spelling = false;
   std::string how;
   uint32_t inputs = 0;
@@ -289,9 +305,12 @@ class ProgramChecker {
   // execution of it refers to and what evaluating that costs.
   std::string method = "auto", bdd_order = "dfs";
   uint32_t input_limit = 20, chunk_inputs = 16;
-  // Canonical shared ROBDD reachable-node limit past the guaranteed
-  // (256 statements, 20 inputs) envelope. Compiler-independent and deterministic.
-  size_t bdd_node_limit = 4'000'000;
+  // DLP 59 conservative structural limits (0 disables a cap for experiments).
+  uint32_t max_views = 20;
+  uint32_t max_inputs = 512;
+  // Canonical shared ROBDD reachable-node limit (2^16 = 65,536) past the
+  // guaranteed (256 statements, 20 inputs) floor. Compiler-independent and deterministic.
+  size_t bdd_node_limit = 65'536;
   bool measure_executions = false;
   // Without search_matches (`--matches 0`), no matches or spellings are
   // searched: the other parts of a method that can't search in time.
@@ -730,21 +749,26 @@ class ProgramChecker {
     rep.inputs = I;
     if (split) {
       // The split check finds the limits below.
-    } else if (info.boolean_statements > 256 && statement_limit && method != "auto") {
+    } else if (max_views > 0 && static_cast<uint32_t>(op.nbool) > max_views) {
+      rep.errors["limits"] = "\"views\"";
+    } else if (info.boolean_statements > 256 && statement_limit) {
       rep.errors["limits"] = "\"statements\"";
-    } else if (I > input_limit && method != "auto") {
+    } else if (method != "auto" && I > input_limit) {
+      rep.errors["limits"] = "\"inputs\"";
+    } else if (method == "auto" && max_inputs > 0 && I > max_inputs) {
       rep.errors["limits"] = "\"inputs\"";
     }
     for (size_t k = 0; k < op.stmts.size() && rep.literal_stmt < 0; ++k) {
       const PStmt& s = op.stmts[k];
-      if (!is_boolean_statement(s.kind)) continue;
+      if (s.kind == "copy") continue;
       for (const PArg& a : s.args)
-        if (a.is_literal()) {
+        if (a.is_literal() && (is_boolean_statement(s.kind) || a.literal == "T" || a.literal == "F")) {
           rep.literal_stmt = static_cast<int>(k);
           rep.errors["literal"] = std::to_string(k);
           break;
         }
     }
+    if (op.boolean && op.outs.size() != 1) rep.errors["outputs"] = std::to_string(op.outs.size());
     if (op.boolean && info.boolean_statements == 1) {
       for (const PStmt& s : op.stmts)
         if (is_boolean_statement(s.kind) && (s.kind != "call" || is_registered(s.name))) rep.errors["wrapper"] = "true";
@@ -824,13 +848,13 @@ class ProgramChecker {
       double td = now();
       rep.dead = dead_statements(op, info);
       if (!rep.dead.empty()) rep.errors["dead"] = list_json(rep.dead);
-      if (op.boolean && full) {
+      if (op.boolean && full && !op.outs.empty()) {
         std::vector<uint64_t> written;
         const Lit o = arg_lit(info, op.outs[0]);
         for (size_t w = 0; w < words; ++w) written.push_back(t[size_t{node_of(o)} * words + w] ^ (is_compl(o) ? ~0ULL : 0));
         table_unused = unused_views(written, op.nbool);
       }
-      if (op.boolean && !registry_only) {
+      if (op.boolean && !registry_only && !op.outs.empty()) {
         if (split) {
           const Lit o = arg_lit(info, op.outs[0]);
           for (int v = 1; v <= op.nbool; ++v)
@@ -842,6 +866,11 @@ class ProgramChecker {
           rep.unused_views = table_unused;
         }
         if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
+      }
+      if (!op.boolean && !registry_only && full) {
+        check_mixed_outputs(op, info, rep);
+        const std::vector<int> useless = useless_inputs_tt(op, info, t, words, I, rep);
+        if (!useless.empty()) rep.errors["useless_input"] = list_json(useless);
       }
       rep.times.structure += now() - td;
     }
@@ -880,8 +909,9 @@ class ProgramChecker {
       rep.errors.erase("redundant");
     }
     const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
-    // Matches and spellings need every value's function.
-    if (rep.redundant_kind.empty() && !fixed_first && full && search_matches) {
+    // Matches and spellings need every value's function; DLP 59 (redundant
+    // values) and DLP 60 (factoring common terms) take precedence over DLP 61.
+    if (rep.redundant_kind.empty() && !rep.has_factor && !fixed_first && full && search_matches) {
       const std::set<int> dead(rep.dead.begin(), rep.dead.end());
       find_matches(op, info, std::move(t), dead, rep, nullptr, budgeted ? &budget : nullptr,
                    tt_class_ids.empty() ? nullptr : &tt_class_ids);
@@ -1006,7 +1036,7 @@ class ProgramChecker {
       }
       g.nodes.push_back(std::move(n));
     }
-    g.out = op.boolean ? arg_lit(info, op.outs[0]) : 0;
+    g.out = (op.boolean && !op.outs.empty()) ? arg_lit(info, op.outs[0]) : 0;
     return g;
   }
 
@@ -1249,6 +1279,15 @@ class ProgramChecker {
         if (op.boolean) m->find_unused();
         rep.unused_views = m->unused_views;
         if (!rep.unused_views.empty()) rep.errors["unused_view"] = list_json(rep.unused_views);
+        if (!op.boolean) {
+          check_mixed_outputs(op, info, rep);
+          if (auto* bm = dynamic_cast<BddMethod*>(m.get())) {
+            const BddMethod::SupportTable st = bm->all_supports();
+            const std::vector<int> useless =
+                useless_inputs_mixed(op, info, [&](Lit l, uint32_t i) { return st.has(l, i); }, rep);
+            if (!useless.empty()) rep.errors["useless_input"] = list_json(useless);
+          }
+        }
       }
       rep.times.structure += now() - tu;
       if (!registry_only) {
@@ -1263,7 +1302,7 @@ class ProgramChecker {
         rep.errors.erase("redundant");
       }
       const bool fixed_first = first_fix_only && (rep.literal_stmt >= 0 || !rep.unused_views.empty());
-      if (rep.redundant_kind.empty() && !fixed_first && search_matches) {
+      if (rep.redundant_kind.empty() && !rep.has_factor && !fixed_first && search_matches) {
         const std::set<int> dead(rep.dead.begin(), rep.dead.end());
         find_matches(op, info, {}, dead, rep, m.get(), rule ? &budget : nullptr);
       }
@@ -1491,6 +1530,132 @@ class ProgramChecker {
     return out;
   }
 
+  // Boolean Sources of a resolved view ID `root` (DLP 59): walk backward
+  // through every argument of each Boolean Statement and the source of each
+  // View Setting Statement, stopping at any non-boolean statement or input view.
+  static std::vector<char> boolean_sources(const POp& op, const OpInfo& info, int root) {
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    std::vector<char> reached(I, 0);
+    std::set<int> seen;
+    std::vector<int> stack{info.resolve(root)};
+    while (!stack.empty()) {
+      const int v = info.resolve(stack.back());
+      stack.pop_back();
+      if (!seen.insert(v).second) continue;
+      const auto it = info.input_number.find(v);
+      if (it != info.input_number.end()) {
+        reached[static_cast<size_t>(it->second - 1)] = 1;
+        continue;
+      }
+      const int si = info.values.at(v).stmt;
+      if (si < 0) continue;
+      const PStmt& s = op.stmts[static_cast<size_t>(si)];
+      if (!is_boolean_statement(s.kind)) continue;
+      for (const PArg& arg : s.args)
+        if (!arg.is_literal()) stack.push_back(info.resolve(arg.id));
+    }
+    return reached;
+  }
+
+  // Every non-literal boolean output view and every non-literal boolean
+  // argument given to a non-boolean statement in a non-Boolean Value Operation.
+  static std::vector<int> boolean_targets(const POp& op, const OpInfo& info) {
+    std::vector<int> targets;
+    auto push = [&](const PArg& a) {
+      if (a.is_literal()) return;
+      const int v = info.resolve(a.id);
+      if (info.values.at(v).kind == 'b') targets.push_back(v);
+    };
+    for (const PArg& a : op.outs) push(a);
+    for (const PStmt& s : op.stmts)
+      if (!is_boolean_statement(s.kind) && s.kind != "copy")
+        for (const PArg& a : s.args) push(a);
+    return targets;
+  }
+
+  // DLP 59 (Useless Boolean Inputs) on non-Boolean Value Operations:
+  // every view in each boolean output view's or non-boolean argument's Boolean
+  // Sources must be able to change that view, and every boolean input must
+  // appear in at least one such Boolean Sources set.
+  template <typename HasSupportFn>
+  std::vector<int> useless_inputs_mixed(const POp& op, const OpInfo& info, HasSupportFn has_support,
+                                        Report& rep) const {
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    if (I == 0) return {};
+    std::vector<char> in_any_source(I, 0);
+    std::vector<char> useless_flag(I, 0);
+    std::set<std::pair<int, int>> seen_pairs;
+    for (int v : boolean_targets(op, info)) {
+      const std::vector<char> srcs = boolean_sources(op, info, v);
+      const Lit l = info.lit.at(v);
+      for (uint32_t i = 0; i < I; ++i) {
+        if (!srcs[i]) continue;
+        in_any_source[i] = 1;
+        if (!has_support(l, i)) {
+          useless_flag[i] = 1;
+          if (seen_pairs.insert({v, info.inputs[i]}).second)
+            rep.useless_targets.push_back({v, info.inputs[i]});
+        }
+      }
+    }
+    std::vector<int> useless;
+    for (uint32_t i = 0; i < I; ++i) {
+      if (!in_any_source[i]) rep.unused_mixed_inputs.push_back(info.inputs[i]);
+      if (!in_any_source[i] || useless_flag[i]) useless.push_back(info.inputs[i]);
+    }
+    return useless;
+  }
+
+  // DLP 59 (Useless Boolean Inputs) on non-Boolean Value Operations (TT path).
+  std::vector<int> useless_inputs_tt(const POp& op, const OpInfo& info, const std::vector<uint64_t>& t, size_t words,
+                                     uint32_t I, Report& rep) const {
+    static const uint64_t kVar[6] = {0xAAAAAAAAAAAAAAAAULL, 0xCCCCCCCCCCCCCCCCULL, 0xF0F0F0F0F0F0F0F0ULL,
+                                     0xFF00FF00FF00FF00ULL, 0xFFFF0000FFFF0000ULL, 0xFFFFFFFF00000000ULL};
+    const uint64_t valid = I >= 6 ? ~0ULL : ((1ULL << (1u << I)) - 1);
+    return useless_inputs_mixed(
+        op, info,
+        [&](Lit l, uint32_t i) {
+          const uint64_t* row = &t[size_t{node_of(l)} * words];
+          for (size_t w = 0; w < words; ++w) {
+            if (i < 6) {
+              if (((row[w] ^ (row[w] >> (1u << i))) & ~kVar[i] & valid) != 0) return true;
+            } else {
+              const size_t b = size_t{1} << (i - 6);
+              if (!(w & b) && row[w] != row[w | b]) return true;
+            }
+          }
+          return false;
+        },
+        rep);
+  }
+
+  // DLP 59 (Problem 7): in a non-Boolean Value Operation, no boolean output
+  // view's Boolean Sources may include a boolean input view, and no two boolean
+  // output views may share a Boolean Source.
+  static void check_mixed_outputs(const POp& op, const OpInfo& info, Report& rep) {
+    const uint32_t I = static_cast<uint32_t>(info.inputs.size());
+    std::vector<int> bad_views;
+    std::vector<int> non_bool_uses(I, 0);
+    for (size_t o = 0; o < op.outs.size(); ++o) {
+      const PArg& a = op.outs[o];
+      const bool is_bool = a.is_literal() ? (a.literal == "T" || a.literal == "F")
+                                          : (info.values.at(info.resolve(a.id)).kind == 'b');
+      if (!is_bool || a.is_literal()) continue;
+      const std::vector<char> reached = boolean_sources(op, info, a.id);
+      bool uses_iface = false;
+      for (uint32_t i = 0; i < static_cast<uint32_t>(op.nbool) && i < I; ++i)
+        if (reached[i]) uses_iface = true;
+      if (uses_iface) bad_views.push_back(static_cast<int>(o) + 1);
+      for (uint32_t i = static_cast<uint32_t>(op.nbool); i < I; ++i)
+        if (reached[i]) ++non_bool_uses[i];
+    }
+    if (!bad_views.empty()) rep.errors["mixed_bool_view"] = list_json(bad_views);
+    std::vector<int> shared;
+    for (uint32_t i = static_cast<uint32_t>(op.nbool); i < I; ++i)
+      if (non_bool_uses[i] >= 2) shared.push_back(info.inputs[i]);
+    if (!shared.empty()) rep.errors["mixed_shared_input"] = list_json(shared);
+  }
+
   static std::string list_json(const std::vector<int>& values) {
     std::string out = "[";
     for (size_t i = 0; i < values.size(); ++i) out += (i ? "," : "") + std::to_string(values[i]);
@@ -1571,6 +1736,8 @@ class ProgramChecker {
     r.table_diagram.reset();
     r.diagram.reset();
     if (op.boolean) {
+      r.out_boolean.assign(op.outs.size(), 1);
+      if (op.outs.empty()) return;
       const uint32_t I = static_cast<uint32_t>(info.inputs.size());
       const size_t rwords = I <= 6 ? 1 : (size_t{1} << (I - 6));
       r.table.assign(rwords, 0);
@@ -1599,8 +1766,233 @@ class ProgramChecker {
     }
   }
 
+  // Semantic checks on binary boolean operations' 4-bit truth tables
+  // (bit (a | (b << 1)) is f(a, b)): commutativity, associativity, and
+  // distributivity (DLP 60).
+  static bool is_assoc_comm_tt(uint8_t tt) {
+    if (tt == 0x0 || tt == 0xF) return false;
+    auto eval = [&](int a, int b) { return (tt >> (a | (b << 1))) & 1; };
+    if (eval(0, 1) != eval(1, 0)) return false;
+    for (int x = 0; x < 2; ++x)
+      for (int y = 0; y < 2; ++y)
+        for (int z = 0; z < 2; ++z)
+          if (eval(eval(x, y), z) != eval(x, eval(y, z))) return false;
+    return true;
+  }
+
+  static bool distributes_over_tt(uint8_t inner, uint8_t outer) {
+    if (inner == outer || !is_assoc_comm_tt(inner) || !is_assoc_comm_tt(outer)) return false;
+    auto fi = [&](int a, int b) { return (inner >> (a | (b << 1))) & 1; };
+    auto fo = [&](int a, int b) { return (outer >> (a | (b << 1))) & 1; };
+    for (int x = 0; x < 2; ++x)
+      for (int y = 0; y < 2; ++y)
+        for (int z = 0; z < 2; ++z)
+          if (fi(x, fo(y, z)) != fo(fi(x, y), fi(x, z))) return false;
+    return true;
+  }
+
+  // If `s` is a binary boolean operation with a known 4-bit truth table,
+  // returns true and writes its table into `tt` and its operation key into `op_key`.
+  bool binary_op_info(const PStmt& s, std::string& op_key, uint8_t& tt) const {
+    if (s.kind == "and") {
+      op_key = "and";
+      tt = 0x8;
+      return true;
+    }
+    if (s.kind == "call" && s.args.size() == 2) {
+      auto it = recorded_.find(s.name);
+      if (it != recorded_.end() && !it->second.table.empty()) {
+        op_key = "call:" + s.name;
+        tt = static_cast<uint8_t>(it->second.table[0] & 0xFu);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool is_assoc_comm_stmt(const PStmt& s, std::string& op_key, uint8_t& tt) const {
+    return binary_op_info(s, op_key, tt) && is_assoc_comm_tt(tt);
+  }
+
+  static std::unordered_map<int, int> reader_counts(const POp& op, const OpInfo& info) {
+    std::unordered_map<int, int> readers;
+    for (const PStmt& s : op.stmts) {
+      if (s.kind == "copy") continue;
+      for (const PArg& a : s.args)
+        if (!a.is_literal()) ++readers[info.resolve(a.id)];
+    }
+    for (const PArg& o : op.outs)
+      if (!o.is_literal()) ++readers[info.resolve(o.id)];
+    return readers;
+  }
+
+  // Collects leaves and internal statement indices of a single-use chain of `op_key`
+  // rooted at statement index `root_stmt`.
+  void collect_assoc_chain(const POp& op, const OpInfo& info, const std::unordered_map<int, int>& readers,
+                           int root_stmt, const std::string& op_key, std::vector<PArg>& leaves,
+                           std::vector<int>& internal_stmts) const {
+    const PStmt& s = op.stmts[static_cast<size_t>(root_stmt)];
+    for (const PArg& a : s.args) {
+      if (!a.is_literal()) {
+        const int rid = info.resolve(a.id);
+        const OpInfo::Value& v = info.values.at(rid);
+        auto rit = readers.find(rid);
+        if (v.stmt >= 0 && rit != readers.end() && rit->second == 1) {
+          std::string ck;
+          uint8_t ctt = 0;
+          if (binary_op_info(op.stmts[static_cast<size_t>(v.stmt)], ck, ctt) && ck == op_key) {
+            collect_assoc_chain(op, info, readers, v.stmt, op_key, leaves, internal_stmts);
+            continue;
+          }
+        }
+      }
+      leaves.push_back(a);
+    }
+    internal_stmts.push_back(root_stmt);
+  }
+
   void check_order(const POp& op, const OpInfo& info, Report& rep) const {
     Ranker ranker{op, info, {}};
+    const std::unordered_map<int, int> readers = reader_counts(op, info);
+    // Map each value id to the statement index that reads it (when readers == 1).
+    std::unordered_map<int, int> sole_reader_stmt;
+    for (size_t k = 0; k < op.stmts.size(); ++k) {
+      const PStmt& s = op.stmts[k];
+      if (s.kind == "copy") continue;
+      for (const PArg& a : s.args)
+        if (!a.is_literal()) sole_reader_stmt[info.resolve(a.id)] = static_cast<int>(k);
+    }
+    auto is_chain_root = [&](size_t k, const std::string& op_key) -> bool {
+      const int id = op.stmts[k].ids[0];
+      auto rit = readers.find(id);
+      if (rit == readers.end() || rit->second != 1) return true;
+      auto sit = sole_reader_stmt.find(id);
+      if (sit == sole_reader_stmt.end()) return true;
+      // Also check whether `id` is directly an output (then sole_reader_stmt might be stale).
+      for (const PArg& o : op.outs)
+        if (!o.is_literal() && info.resolve(o.id) == id) return true;
+      std::string pk;
+      uint8_t ptt = 0;
+      return !(binary_op_info(op.stmts[static_cast<size_t>(sit->second)], pk, ptt) && pk == op_key);
+    };
+
+    // DLP 60: Factoring common terms in distributive single-use chains.
+    for (size_t k = 0; k < op.stmts.size() && !rep.has_factor; ++k) {
+      const PStmt& s = op.stmts[k];
+      std::string outer_key;
+      uint8_t outer_tt = 0;
+      if (!is_assoc_comm_stmt(s, outer_key, outer_tt)) continue;
+      if (!is_chain_root(k, outer_key)) continue;
+      std::vector<PArg> outer_leaves;
+      std::vector<int> outer_stmts;
+      collect_assoc_chain(op, info, readers, static_cast<int>(k), outer_key, outer_leaves, outer_stmts);
+      if (outer_leaves.size() < 2) continue;
+      // Group inner-chain terms by inner op key and count shared factors.
+      struct InnerCount {
+        std::string kind, name;
+        std::map<int, size_t> factor_terms;
+      };
+      std::map<std::string, InnerCount> by_inner;
+      for (const PArg& leaf : outer_leaves) {
+        if (leaf.is_literal()) continue;
+        const int lid = info.resolve(leaf.id);
+        const OpInfo::Value& lv = info.values.at(lid);
+        auto rit = readers.find(lid);
+        if (lv.stmt < 0 || rit == readers.end() || rit->second != 1) continue;
+        const PStmt& ls = op.stmts[static_cast<size_t>(lv.stmt)];
+        std::string inner_key;
+        uint8_t inner_tt = 0;
+        if (!is_assoc_comm_stmt(ls, inner_key, inner_tt)) continue;
+        if (!distributes_over_tt(inner_tt, outer_tt)) continue;
+        std::vector<PArg> inner_leaves;
+        std::vector<int> inner_stmts;
+        collect_assoc_chain(op, info, readers, lv.stmt, inner_key, inner_leaves, inner_stmts);
+        std::set<int> term_factors;
+        bool has_lit = false;
+        for (const PArg& f : inner_leaves) {
+          if (f.is_literal()) {
+            has_lit = true;
+            break;
+          }
+          term_factors.insert(info.resolve(f.id));
+        }
+        if (has_lit) continue;
+        auto& entry = by_inner[inner_key];
+        entry.kind = ls.kind;
+        entry.name = ls.name;
+        for (int fid : term_factors) ++entry.factor_terms[fid];
+      }
+      Report::Factor best;
+      bool found = false;
+      for (const auto& [ik, entry] : by_inner) {
+        (void)ik;
+        for (const auto& [fid, cnt] : entry.factor_terms) {
+          if (cnt < 2) continue;
+          PArg fa, ba;
+          fa.id = fid;
+          ba.id = best.factor_id;
+          if (!found || cnt > best.count || (cnt == best.count && ranker.compare(fa, ba) < 0)) {
+            found = true;
+            best.root_id = s.ids[0];
+            best.outer_kind = s.kind;
+            best.outer_name = s.name;
+            best.inner_kind = entry.kind;
+            best.inner_name = entry.name;
+            best.factor_id = fid;
+            best.count = cnt;
+          }
+        }
+      }
+      if (found) {
+        rep.has_factor = true;
+        rep.factor = best;
+        rep.errors["order_factor"] = "[" + std::to_string(best.root_id) + "," + std::to_string(best.factor_id) + "]";
+      }
+    }
+
+    // DLP 60: Grouping associative, commutative binary chains (canonical left-fold in rank order).
+    for (size_t k = 0; k < op.stmts.size(); ++k) {
+      const PStmt& s = op.stmts[k];
+      std::string op_key;
+      uint8_t tt = 0;
+      if (!is_assoc_comm_stmt(s, op_key, tt)) continue;
+      auto is_same_single = [&](const PArg& a, int& child_stmt) -> bool {
+        if (a.is_literal()) return false;
+        const int rid = info.resolve(a.id);
+        const OpInfo::Value& v = info.values.at(rid);
+        auto rit = readers.find(rid);
+        if (v.stmt < 0 || rit == readers.end() || rit->second != 1) return false;
+        std::string ck;
+        uint8_t ctt = 0;
+        if (!binary_op_info(op.stmts[static_cast<size_t>(v.stmt)], ck, ctt) || ck != op_key) return false;
+        child_stmt = v.stmt;
+        return true;
+      };
+      int c0 = -1, c1 = -1;
+      const bool s0 = is_same_single(s.args[0], c0);
+      const bool s1 = is_same_single(s.args[1], c1);
+      bool bad_group = false;
+      if (s0 && s1) {
+        bad_group = true;
+      } else if (s0 || s1) {
+        const int child_stmt = s0 ? c0 : c1;
+        const PArg& leaf_arg = s0 ? s.args[1] : s.args[0];
+        std::vector<PArg> child_leaves;
+        std::vector<int> child_stmts;
+        collect_assoc_chain(op, info, readers, child_stmt, op_key, child_leaves, child_stmts);
+        for (const PArg& cl : child_leaves) {
+          if (ranker.compare(leaf_arg, cl) < 0) {
+            bad_group = true;
+            break;
+          }
+        }
+      }
+      if (bad_group) {
+        rep.errors["order_grouping"] = std::to_string(s.ids[0]);
+        break;
+      }
+    }
+
     for (const PStmt& s : op.stmts) {
       if (s.kind != "and" && s.kind != "call") continue;
       const std::vector<int> group = statement_groups(s);
